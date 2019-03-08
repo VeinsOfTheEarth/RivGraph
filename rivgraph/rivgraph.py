@@ -12,11 +12,13 @@ import rivgraph.io_utils as io
 import rivgraph.geo_utils as gu
 import rivgraph.mask_to_graph as m2g
 import rivgraph.ln_utils as lnu
-from rivgraph.deltas import delta_utils as du
-from rivgraph.deltas import delta_directionality as dd
-from rivgraph.deltas import delta_metrics as dm
-from rivgraph.rivers import river_utils as ru
-from rivgraph.rivers import river_directionality as rd
+
+import rivgraph.deltas.delta_utils as du
+import rivgraph.deltas.delta_directionality as dd
+import rivgraph.deltas.delta_metrics as dm
+import rivgraph.rivers.river_directionality as rd
+import rivgraph.river.river_utils as ru
+
 from scipy.ndimage.morphology import distance_transform_edt
 
 ## TODO: TEST this implementation! -- create synthetic georeferencing when non-georeferenced image provided
