@@ -33,6 +33,7 @@ import rivgraph.ln_utils as lnu
 #links['weights'] = weights
 #cvil.links=links
 #cvil.to_geovectors()
+
     
     
 def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):

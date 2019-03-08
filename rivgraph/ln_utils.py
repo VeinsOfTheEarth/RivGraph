@@ -7,7 +7,7 @@ Created on Mon Sep 10 09:59:52 2018
 import numpy as np
 from rivgraph import geo_utils as gu
 from scipy.stats import mode
-from ordered_set import OrderedSet
+from rivgraph.ordered_set import OrderedSet
 import geopandas as gpd
 import networkx as nx
 from copy import deepcopy
