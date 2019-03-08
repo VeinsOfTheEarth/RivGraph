@@ -10,7 +10,6 @@ from rivgraph import walk
 from rivgraph import ln_utils as lnu
 from rivgraph import im_utils as iu
 from skimage import morphology, measure
-
 from rivgraph.ordered_set import OrderedSet
 import numpy as np
 import cv2
