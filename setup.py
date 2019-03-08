@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="rivgraph",
-    packages=['rivgraph'],
+    packages=['rivgraph', 'rivgraph/deltas', 'rivgraph/rivers'],
     version="0.2",
     description="Tools for topological analysis of fluvial networks from binary masks",
     author='Jon Schwenk',
@@ -11,4 +11,5 @@ setup(
     keywords=['deltas', 'mask', 'topology', 'networks'],
 #    install_requires=['pyinstrument_cext>=0.2.0'],
     include_package_data=True,
-    zip_safe=False)
+    zip_safe=False
+)
