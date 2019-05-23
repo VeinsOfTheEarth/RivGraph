@@ -107,13 +107,10 @@ def mask_to_centerline(Imask, es):
         1) There should be only one "blob" (connected component)
         2) Where the blob intersects the image edges, there should be only
            one channel. This avoids ambiguity in identifying inlet/outlet links
-        3) The edges of the inlet and outlet channels should be approximately
-           parallel to the edges of the image.
-        4) The mask MUST be georeferenced.
     
     INPUTS:
-        maskpath: path to the geotiff containing mask
-        es: two-character string comprinsed of "N", "E", "S", or "W". Exit sides
+        Imask: the mask image (numpy array)
+        es: two-character string comprinsed of "n", "e", "s", or "w". Exit sides
             correspond to the sides of the image that the river intersects. 
             Upstream should be first, followed by downstream.
     OUTPUTS:
