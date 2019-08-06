@@ -331,6 +331,30 @@ def fix_delta_cycle(links, nodes, cyc_links, imshape):
     return links, nodes, fixed
 
 
+def hull_coords(xy):
+    
+    from scipy.spatial import ConvexHull
+    
+    # Find the convex hull of a set of coordinates, then order them clockwisely
+    # and remove the longest edge
+    hull_verts = ConvexHull(np.transpose(np.vstack((xy[0], xy[1])))).vertices
+    hull_coords = np.transpose(np.vstack((xy[0][hull_verts], xy[1][hull_verts])))
+    hull_coords = np.reshape(np.append(hull_coords, [hull_coords[0,:]]), (int((hull_coords.size+2)/2), 2))
+    # Find the biggest gap between hull points
+    dists = np.sqrt((np.diff(hull_coords[:,0]))**2 + np.diff(hull_coords[:,1])**2)
+    maxdist = np.argmax(dists) + 1
+    first_part = hull_coords[maxdist:,:]
+    second_part = hull_coords[0:maxdist,:]
+    if first_part.size == 0:
+        hull_coords = second_part
+    elif second_part.size == 0:
+        hull_coords = first_part
+    else:
+        hull_coords = np.concatenate((first_part, second_part))
+        
+    return hull_coords
+
+
 def dir_synthetic_DEM(links, nodes, dims):
     """
     Set directionality by first building a "DEM surface" where inlets are "hills"
@@ -338,28 +362,7 @@ def dir_synthetic_DEM(links, nodes, dims):
     downhill.
     """
     from scipy.stats import linregress
-    from scipy.spatial import ConvexHull
     from scipy.interpolate import interp1d
-
-    def hull_coords(xy):
-        # Find the convex hull of a set of coordinates, then order them clockwisely
-        # and remove the longest edge
-        hull_verts = ConvexHull(np.transpose(np.vstack((xy[0], xy[1])))).vertices
-        hull_coords = np.transpose(np.vstack((xy[0][hull_verts], xy[1][hull_verts])))
-        hull_coords = np.reshape(np.append(hull_coords, [hull_coords[0,:]]), (int((hull_coords.size+2)/2), 2))
-        # Find the biggest gap between hull points
-        dists = np.sqrt((np.diff(hull_coords[:,0]))**2 + np.diff(hull_coords[:,1])**2)
-        maxdist = np.argmax(dists) + 1
-        first_part = hull_coords[maxdist:,:]
-        second_part = hull_coords[0:maxdist,:]
-        if first_part.size == 0:
-            hull_coords = second_part
-        elif second_part.size == 0:
-            hull_coords = first_part
-        else:
-            hull_coords = np.concatenate((first_part, second_part))
-            
-        return hull_coords
     
     alg = 10
 

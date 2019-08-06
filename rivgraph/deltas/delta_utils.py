@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Sep 14 12:08:40 2018
+delta_utils
+===========
 
-@author: Jon
+A collection of functions for pruning a delta channel network.
+
 """
 import geopandas as gpd
 import numpy as np
@@ -11,14 +13,33 @@ import rivgraph.geo_utils as gu
 import rivgraph.ln_utils as lnu
 import rivgraph.im_utils as iu
 
-#blah = cvil
-#links = blah.links
-#nodes = blah.nodes
-#shoreline_shp = blah.paths['shoreline']
-#inlets_shp = blah.paths['inlet_nodes']
-#gdobj = blah.gdobj
 
 def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
+    """
+    Clips a delta channel network given an inlet and shoreline shapefile and
+    removes spurious links.
+    
+    Parameters
+    ----------
+    links : dict
+        stores the network's links and their properties
+    nodes : dict
+        stores the network's nodes and their properties
+    shoreline_shp : str
+        path to the shoreline shapefile (polyline)
+    inlets_shp : str
+        path to the shapefile of inlet locations (point shapefile)
+    gdobj : osgeo.gdal.Dataset
+        gdal object corresponding to the georeferenced input binary channel mask
+        
+    Returns
+    -------
+    links : dict
+        updated links dictionary
+    nodes : dict
+        updated nodes dictionary
+
+    """
                         
     # Get inlet nodes
     nodes = find_inlet_nodes(nodes, inlets_shp, gdobj)    
@@ -42,9 +63,25 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
     
 
 def find_inlet_nodes(nodes, inlets_shp, gdobj):
+    """
+    Loads the user-defined inlet nodes point shapefile and uses it to identify
+    the inlet nodes within the network.
     
-    # Load the user-define inlet nodes point shapefile and use it to identify
-    # the nodes that are considered input nodes
+    Parameters
+    ----------
+    links : dict
+        stores the network's links and their properties
+    inlets_shp : str
+        path to the shapefile of inlet locations (point shapefile)
+    gdobj : osgeo.gdal.Dataset
+        gdal object corresponding to the georeferenced input binary channel mask
+
+    Returns
+    -------
+    nodes : dict
+        nodes dictionary with 'inlets' key containing list of inlet node ids
+  
+    """    
             
     # Check that CRSs match; reproject inlet points if not
     inlets_gpd = gpd.read_file(inlets_shp)
@@ -74,6 +111,27 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     Clips links by a provided shoreline shapefile. The largest network is 
     presumed to be the delta network and is thus retained. The network should
     have been de-spurred before running this function.
+ 
+    Parameters
+    ----------
+    links : dict
+        stores the network's links and their properties
+    nodes : dict
+        stores the network's nodes and their properties
+    shoreline_shp : str
+        path to the shapefile of shoreline polyline 
+    gdobj : osgeo.gdal.Dataset
+        gdal object corresponding to the georeferenced input binary channel mask
+
+    Returns
+    -------
+    links : dict
+        links dictionary representing network clipped by the shoreline
+    nodes : dict
+        nodes dictionary representing network clipped by the shoreline. 'outlets'
+        has been added to the dictionary to store a list of outlet node ids
+    
+    
     """        
     
     # Get links as geopandas dataframe

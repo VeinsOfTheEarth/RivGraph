@@ -216,6 +216,16 @@ def delta_subN_F(A, epsilon = 10**-10):
     Computes the steady state flux distribution in the delta nodes when the
     system is fed with a constant unity influx from the Apex. Also defines the
     subnetworks apex-to-outlet.
+    
+    The SubN is an NxM matrix, where N is number of nodes and M is the number
+    of outlets. For each mth outlet, its contributing subnetwork is given by
+    the nonzero entries in SubN. The values in SubN are the degree of 
+    "belongingness" of each node to its subnetwork. If SubN(m,n) = 0, the m'th 
+    node does not belong to the n'th subnetwork; but if SubN(m,n) = 1, the m'th
+    node belongs *only* to the n'th subnetwork. The values in SubN may be 
+    interpreted as the percentage of tracers that pass through node m that 
+    eventually make their way to the outlet of subnetwork n.
+    
     """   
     
     ApexID, OutletsID = find_inlet_outlet_nodes(A)
