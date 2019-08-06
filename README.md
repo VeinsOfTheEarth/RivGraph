@@ -6,7 +6,7 @@ Use RivGraph by creating either a delta or a river class, then applying the asso
 
 8/6/2019 - RivGraph is being prepared for "official release." The code is up-to-date, but has not been cleaned, commented, or sufficiently documented. There are currently no examples, but they are being prepared. 
 
-For examples of what RivGraph does, see this AGU poster: https://www.researchgate.net/publication/333322026_Determining_flow_directions_in_river_channel_networks_using_planform_morphology_and_topology
+For examples of what RivGraph does, see this AGU poster: https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph
 
 For description of part of the algorithm, see this paper: https://www.earth-surf-dynam-discuss.net/esurf-2019-19/ [under review].
 
