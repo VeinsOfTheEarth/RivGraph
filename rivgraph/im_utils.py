@@ -576,7 +576,7 @@ def im_connectivity(im):
                        [1,  1, 1]])
         
     src_depth = -1
-    filtered = cv2.filter2D(im,src_depth,kernel)
+    filtered = cv2.filter2D(im, src_depth, kernel)
     Iret = np.zeros(np.shape(filtered), dtype ='uint8')
     Iret[filtered>10] = filtered[filtered>10]-10
     return Iret

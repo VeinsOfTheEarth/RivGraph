@@ -16,12 +16,17 @@ from shapely.geometry import Point, LineString, Polygon
 import fiona
 
 
-def prepare_paths(resultsfolder, name, basetiff):
+def prepare_paths(resultsfolder, name, basetiff, ftype='GeoJSON'):
     """
-    Given a results folder and a delta or river name, generates paths for 
-    saving results or intermediate files.
+    Given a results folder, a delta or river name, and a filetype, generates 
+    paths for saving results or intermediate files.
     """   
     basepath = os.path.join(os.path.normpath(resultsfolder), name)
+    
+    if ftype == 'GeoJSON':
+        ext = 'json'
+    elif ftype == 'shapefile':
+        ext = 'shp'
     
     # Create results folder if it doesn't exist
     if os.path.isdir(basepath) is False:
@@ -30,22 +35,24 @@ def prepare_paths(resultsfolder, name, basetiff):
     # Create dictionary of directories
     paths = dict()
 
-    paths['maskpath'] = basetiff                                             # geotiff binary mask; must be input by user
-    paths['Iskel'] = os.path.join(basepath, name + "_skel.tif")              # geotiff of skeletonized mask 
-    paths['Idist'] = os.path.join(basepath, name + "_dist.tif")              # geotiff of distance transform of mask
-    paths['network_pickle'] = os.path.join(basepath, name + "_network.pkl")  # links and nodes dictionaries, pickled
-    paths['links'] = os.path.join(basepath, name + "_links.shp")             # links shapefile
-    paths['nodes'] = os.path.join(basepath, name + "_nodes.shp")             # nodes shapefile
+    paths['maskpath'] = basetiff                                                     # geotiff binary mask; must be input by user
+    paths['Iskel'] = os.path.join(basepath, name + "_skel.tif")                      # geotiff of skeletonized mask 
+    paths['Idist'] = os.path.join(basepath, name + "_dist.tif")                      # geotiff of distance transform of mask
+    paths['network_pickle'] = os.path.join(basepath, name + "_network.pkl")          # links and nodes dictionaries, pickled
+    paths['links'] = os.path.join(basepath, name + "_links." + ext)                  # links geovectors
+    paths['nodes'] = os.path.join(basepath, name + "_nodes."  + ext)                 # nodes geovectors
+    paths['fixlinks_csv'] = os.path.join(basepath, name + "_fixlinks.csv")           # csv file to manually fix link directionality, must be created by user
+    paths['linkdirs'] = os.path.join(basepath, name + "_link_directions.tif")        # tif file that shows link directionality
+    paths['metrics'] = os.path.join(basepath, name + "_metrics.pkl")                 # metrics dictionary
+    paths['meshlines'] = os.path.join(basepath, name + "_meshlines."  + ext)         # meshlines geovectors
+    paths['meshpolys'] = os.path.join(basepath, name + "_meshpolys." + ext)          # meshpolys geovectors
+    paths['centerline'] = os.path.join(basepath, name + "_centerline." + ext)        # centerline geovector
+    paths['centerline_smooth'] = os.path.join(basepath, name + "_centerline_smooth."  + ext)     # smooth centerline geovector
+    
+    # The following paths a    
     paths['shoreline'] = os.path.join(basepath, name + "_shoreline.shp")     # shoreline shapefile, must be created by user
     paths['inlet_nodes'] = os.path.join(basepath, name + "_inlet_nodes.shp") # inlet nodes shapefile, must be created by user
-    paths['fixlinks_csv'] = os.path.join(basepath, name + "_fixlinks.csv")   # csv file to manually fix link directionality, must be created by user
-    paths['linkdirs'] = os.path.join(basepath, name + "_link_directions.tif")# tif file that shows link directionality
-    paths['metrics'] = os.path.join(basepath, name + "_metrics.pkl")         # metrics dictionary
-    paths['meshlines'] = os.path.join(basepath, name + "_meshlines.shp")     # meshlines shapefile
-    paths['meshpolys'] = os.path.join(basepath, name + "_meshpolys.shp")     # meshopolys shapefile
-    paths['centerline'] = os.path.join(basepath, name + "_centerline.shp")     # centerline shapefile
-    paths['centerline_smooth'] = os.path.join(basepath, name + "_centerline_smooth.shp")     # smooth centerline shapefile
-    
+
     return paths
 
 
@@ -61,6 +68,18 @@ def unpickle_links_and_nodes(lnpath):
         links, nodes = pickle.load(f)
         
     return links, nodes
+
+
+def get_driver(filename):
+    
+    # Write geodataframe to file
+    ext = filename.split('.')[-1]
+    if ext == 'json':
+        driver = 'GeoJSON'
+    elif ext == 'shp':
+        driver = 'shapefile'
+        
+    return driver
 
 
 def nodes_to_geofile(nodes, dims, gt, epsg, outpath):
@@ -84,9 +103,8 @@ def nodes_to_geofile(nodes, dims, gt, epsg, outpath):
             gdf[k] = [str(c).replace('[','').replace(']','') for c in nodes[k]]
     
     # Write geodataframe to file
-    gdf.to_file(outpath)
+    gdf.to_file(outpath, driver=get_driver(outpath))
 
-    
 
 def links_to_geofile(links, dims, gt, epsg, outpath):
        
@@ -112,10 +130,10 @@ def links_to_geofile(links, dims, gt, epsg, outpath):
         else:
             gdf[k] = [str(c).replace('[','').replace(']','') for c in links[k]]
                         
-    # Write geodataframe to file
-    gdf.to_file(outpath)
+    # Write geodataframe to file        
+    gdf.to_file(outpath, driver=get_driver(outpath))
     
-    
+        
 def centerline_to_geovector(cl, epsg, outpath):
     
     """
@@ -129,14 +147,18 @@ def centerline_to_geovector(cl, epsg, outpath):
     cl_df.crs = fiona.crs.from_epsg(epsg)
     
     # Save
-    cl_df.to_file(outpath)
+    cl_df.to_file(outpath, driver=get_driver(outpath))
+
     
-    
-def write_geotiff(raster, gt, wkt, outputpath, dtype=gdal.GDT_UInt16, options=['COMPRESS=LZW'], color_table=0, nbands=1, nodata=False):
+def write_geotiff(raster, gt, wkt, outputpath, dtype=gdal.GDT_UInt16, options=['COMPRESS=LZW'], nbands=1, nodata=None, color_table=None):
     
     width = np.shape(raster)[1]
     height = np.shape(raster)[0]
       
+    # Add empty dimension for single-band images
+    if len(raster.shape) == 2:
+        raster = np.expand_dims(raster, -1)
+    
     # Prepare destination file
     driver = gdal.GetDriverByName("GTiff")
     if options != 0:
@@ -144,14 +166,15 @@ def write_geotiff(raster, gt, wkt, outputpath, dtype=gdal.GDT_UInt16, options=['
     else:
         dest = driver.Create(outputpath, width, height, nbands, dtype)
           
-    # Write output raster
-    if color_table != 0:
-        dest.GetRasterBand(1).SetColorTable(color_table)
-   
-    dest.GetRasterBand(1).WriteArray(raster)
+    # Write output raster   
+    for b in range(nbands):
+        dest.GetRasterBand(b+1).WriteArray(raster[:,:,b])
  
-    if nodata is not False:
-        dest.GetRasterBand(1).SetNoDataValue(nodata)
+        if nodata is not None:
+            dest.GetRasterBand(b+1).SetNoDataValue(nodata)
+
+        if color_table != None:
+            dest.GetRasterBand(1).SetColorTable(color_table)
         
     # Set transform and projection
     dest.SetGeoTransform(gt)
@@ -161,6 +184,7 @@ def write_geotiff(raster, gt, wkt, outputpath, dtype=gdal.GDT_UInt16, options=['
 
     # Close output raster dataset 
     dest = None   
+
 
 
 def colortable(ctype):
@@ -244,7 +268,6 @@ def coords_to_shapefile(coords, epsg, outpath):
     datasource = layer = feat = geom = None
     
     
-## TODO: convert meshlines_to_shapefile to use geopandas for multiple output formats
 def meshlines_to_shapefile(lines, EPSG, outpath, nameid=None):
     """
     Given meshlines (output by RivMesh), ouput a shapefile.
@@ -331,7 +354,7 @@ def create_manual_dir_csv(csvpath):
     df.to_csv(csvpath, index=False)
     
 
-def meshpolys_to_geovectors(meshpolys, epsg, outfile):
+def meshpolys_to_geovectors(meshpolys, epsg, outpath):
     """
     Exports the meshopolys returned by centerline_mesh as a shapefile.
     """
@@ -342,7 +365,7 @@ def meshpolys_to_geovectors(meshpolys, epsg, outfile):
     
     gdf = gpd.GeoDataFrame(geometry=pgons)
     gdf.crs = fiona.crs.from_epsg(epsg)
-    gdf.to_file(outfile)
+    gdf.to_file(outpath, driver=get_driver(outpath))
 
 
 

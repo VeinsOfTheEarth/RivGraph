@@ -276,8 +276,12 @@ def skeletonize_river_mask(I, es, padscale=2):
     
     # Fill single pixel holes
     Iskel = iu.fill_holes(Iskel, maxholesize=1)
-
     
+    # The handling of edges can leave pieces of the skeleton stranded (i.e. 
+    # disconnected from the main skeleton). Remove those here by keeping the
+    # largest blob.
+    Iskel = iu.largest_blobs(Iskel, nlargest=1, action='keep')
+
     return Iskel
 
 

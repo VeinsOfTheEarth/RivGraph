@@ -476,6 +476,13 @@ def remove_disconnected_bridge_links(links, nodes):
     
     bridges = list(nx.bridges(G))
     
+    inletsoutlets = []
+    inletsoutlets.extend(nodes['inlets'])
+    inletsoutlets.extend(nodes['outlets'])
+    
+    # Links containining endpoints cannot be bridge links
+    bridges = [b for b in bridges if b[0] not in inletsoutlets and b[1] not in inletsoutlets]
+    
     all_remove_links = set()
     for b in bridges:
     
@@ -484,10 +491,7 @@ def remove_disconnected_bridge_links(links, nodes):
     
         # Remove the bridge link
         Gtemp.remove_edge(b[0], b[1])
-        
-        if b[0] in nodes['inlets'] or b[0] in nodes['outlets']:
-            continue
-    
+            
         # Check that each side of the bridge can reach either the inlets or outlets
         b0_in, b0_out, b1_in, b1_out = False, False, False, False
         for inl in nodes['inlets']:
