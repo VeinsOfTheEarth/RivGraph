@@ -8,6 +8,6 @@ Use RivGraph by creating either a delta or a river class, then applying the asso
 
 For examples of what RivGraph does, see this AGU poster: https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph
 
-For description of part of the algorithm, see this paper: https://www.earth-surf-dynam-discuss.net/esurf-2019-19/ [under review].
+For description of part of the algorithm, see this paper: https://www.earth-surf-dynam-discuss.net/esurf-2019-19/ [accepted].
 
 If you have questions, contact me at j.....k@gmail.com
