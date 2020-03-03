@@ -11,7 +11,7 @@ import gdal
 import numpy as np
 import geopandas as gpd
 import pandas as pd
-import rivgraph.geo_utils as gu
+import geo_utils as gu
 from shapely.geometry import Point, LineString, Polygon
 import fiona
 
@@ -22,11 +22,6 @@ def prepare_paths(resultsfolder, name, basetiff, ftype='GeoJSON'):
     paths for saving results or intermediate files.
     """   
     basepath = os.path.join(os.path.normpath(resultsfolder), name)
-    
-    if ftype == 'GeoJSON':
-        ext = 'json'
-    elif ftype == 'shapefile':
-        ext = 'shp'
     
     # Create results folder if it doesn't exist
     if os.path.isdir(basepath) is False:
@@ -39,17 +34,17 @@ def prepare_paths(resultsfolder, name, basetiff, ftype='GeoJSON'):
     paths['Iskel'] = os.path.join(basepath, name + "_skel.tif")                      # geotiff of skeletonized mask 
     paths['Idist'] = os.path.join(basepath, name + "_dist.tif")                      # geotiff of distance transform of mask
     paths['network_pickle'] = os.path.join(basepath, name + "_network.pkl")          # links and nodes dictionaries, pickled
-    paths['links'] = os.path.join(basepath, name + "_links." + ext)                  # links geovectors
-    paths['nodes'] = os.path.join(basepath, name + "_nodes."  + ext)                 # nodes geovectors
+    paths['links'] = os.path.join(basepath, name + "_links.")                  # links geovectors
+    paths['nodes'] = os.path.join(basepath, name + "_nodes.")                 # nodes geovectors
     paths['fixlinks_csv'] = os.path.join(basepath, name + "_fixlinks.csv")           # csv file to manually fix link directionality, must be created by user
     paths['linkdirs'] = os.path.join(basepath, name + "_link_directions.tif")        # tif file that shows link directionality
     paths['metrics'] = os.path.join(basepath, name + "_metrics.pkl")                 # metrics dictionary
-    paths['meshlines'] = os.path.join(basepath, name + "_meshlines."  + ext)         # meshlines geovectors
-    paths['meshpolys'] = os.path.join(basepath, name + "_meshpolys." + ext)          # meshpolys geovectors
-    paths['centerline'] = os.path.join(basepath, name + "_centerline." + ext)        # centerline geovector
-    paths['centerline_smooth'] = os.path.join(basepath, name + "_centerline_smooth."  + ext)     # smooth centerline geovector
+    paths['meshlines'] = os.path.join(basepath, name + "_meshlines.")         # meshlines geovectors
+    paths['meshpolys'] = os.path.join(basepath, name + "_meshpolys.")          # meshpolys geovectors
+    paths['centerline'] = os.path.join(basepath, name + "_centerline.")        # centerline geovector
+    paths['centerline_smooth'] = os.path.join(basepath, name + "_centerline_smooth.")     # smooth centerline geovector
     
-    # The following paths a    
+    # The files at the following paths are not created by RivGraph, but by the user.   
     paths['shoreline'] = os.path.join(basepath, name + "_shoreline.shp")     # shoreline shapefile, must be created by user
     paths['inlet_nodes'] = os.path.join(basepath, name + "_inlet_nodes.shp") # inlet nodes shapefile, must be created by user
 
@@ -77,7 +72,7 @@ def get_driver(filename):
     if ext == 'json':
         driver = 'GeoJSON'
     elif ext == 'shp':
-        driver = 'shapefile'
+        driver = 'ESRI Shapefile'
         
     return driver
 
@@ -127,6 +122,8 @@ def links_to_geofile(links, dims, gt, epsg, outpath):
     for k in storekeys:
         if k in store_as_num:            
             gdf[k] = [c for c in links[k]]
+        elif k == 'wid_pix':
+            gdf[k] = [str(c.tolist()).replace('[','').replace(']','') for c in links[k]]
         else:
             gdf[k] = [str(c).replace('[','').replace(']','') for c in links[k]]
                         
@@ -135,7 +132,6 @@ def links_to_geofile(links, dims, gt, epsg, outpath):
     
         
 def centerline_to_geovector(cl, epsg, outpath):
-    
     """
     Centerline is already-projected Nx2 numpy array.
     """    
@@ -161,7 +157,7 @@ def write_geotiff(raster, gt, wkt, outputpath, dtype=gdal.GDT_UInt16, options=['
     
     # Prepare destination file
     driver = gdal.GetDriverByName("GTiff")
-    if options != 0:
+    if options != None:
         dest = driver.Create(outputpath, width, height, nbands, dtype, options)
     else:
         dest = driver.Create(outputpath, width, height, nbands, dtype)
@@ -174,8 +170,8 @@ def write_geotiff(raster, gt, wkt, outputpath, dtype=gdal.GDT_UInt16, options=['
             dest.GetRasterBand(b+1).SetNoDataValue(nodata)
 
         if color_table != None:
-            dest.GetRasterBand(1).SetColorTable(color_table)
-        
+            dest.GetRasterBand(1).SetRasterColorTable(color_table)
+
     # Set transform and projection
     dest.SetGeoTransform(gt)
     srs = osr.SpatialReference()
@@ -268,57 +264,28 @@ def coords_to_shapefile(coords, epsg, outpath):
     datasource = layer = feat = geom = None
     
     
-def meshlines_to_shapefile(lines, EPSG, outpath, nameid=None):
-    """
-    Given meshlines (output by RivMesh), ouput a shapefile.
-    """
-    
-    # Create line objects to write to shapefile
-    all_lines = []
+def meshlines_to_shapefile(lines, epsg, outpath):
+
+    line_geoms = []
     for l in lines:
-        line = ogr.Geometry(type=ogr.wkbLineString)
-        line.AddPoint_2D(l[0][0], l[0][1])
-        line.AddPoint_2D(l[1][0], l[1][1])
-        all_lines.append(line)
-
-    # Write the shapefile
-    driver = ogr.GetDriverByName('ESRI Shapefile')
-    datasource = driver.CreateDataSource(outpath)
-    
-    srs = osr.SpatialReference()
-    srs.ImportFromEPSG(EPSG)
-    
-    layer = datasource.CreateLayer("meshlines", srs, ogr.wkbLineString)
-    defn = layer.GetLayerDefn()
-
-    idField = ogr.FieldDefn('id', ogr.OFTInteger)
-    layer.CreateField(idField)
-    if nameid is not None:
-        nameField = ogr.FieldDefn('River_Name', ogr.OFTString)
-        layer.CreateField(nameField)
-    
-
-    for i, p in enumerate(all_lines):
-            
-        # Create a new feature (attribute and geometry)
-        feat = ogr.Feature(defn)
-        feat.SetField('id', int(i))
+        line_geoms.append(LineString((l[0], l[1])))
         
-        # Set upstream and downstream node attributes
-        if nameid is not None:
-            fieldstr = str(nameid)
-            feat.SetField('River_Name', fieldstr)
+    gdf = gpd.GeoDataFrame(geometry=line_geoms)
+    gdf.crs = fiona.crs.from_epsg(epsg)
+    gdf.to_file(outpath, driver=get_driver(outpath))
     
-        # Make a geometry
-        geom = ogr.CreateGeometryFromWkb(p.ExportToWkb())
-        feat.SetGeometry(geom)
     
-        layer.CreateFeature(feat)
-        
-        feat = geom = None  # destroy these
+def meshpolys_to_geovectors(meshpolys, epsg, outpath):
+    """
+    Exports the meshpolys returned by centerline_mesh as a shapefile.
+    """
+    pgons = []
+    for mp in meshpolys:
+        pgons.append(Polygon(mp))
     
-    # Save and close everything
-    datasource = layer = feat = geom = None
+    gdf = gpd.GeoDataFrame(geometry=pgons)
+    gdf.crs = fiona.crs.from_epsg(epsg)
+    gdf.to_file(outpath, driver=get_driver(outpath))
 
 
 def write_linkdirs_geotiff(links, gd_obj, writepath):
@@ -353,22 +320,8 @@ def create_manual_dir_csv(csvpath):
     df = pd.DataFrame(columns=['link_id','usnode'])
     df.to_csv(csvpath, index=False)
     
-
-def meshpolys_to_geovectors(meshpolys, epsg, outpath):
-    """
-    Exports the meshopolys returned by centerline_mesh as a shapefile.
-    """
-        
-    pgons = []
-    for mp in meshpolys:
-        pgons.append(Polygon(mp))
     
-    gdf = gpd.GeoDataFrame(geometry=pgons)
-    gdf.crs = fiona.crs.from_epsg(epsg)
-    gdf.to_file(outpath, driver=get_driver(outpath))
-
-
-
+    
 """ Replaced or outdated functions """
 
 #def nodes_to_shapefile(nodes, dims, gt, epsg, outpath):
@@ -513,3 +466,55 @@ def meshpolys_to_geovectors(meshpolys, epsg, outpath):
 #    # Save and close everything
 #    datasource = layer = feat = geom = None
 
+#def meshlines_to_shapefile_old(lines, EPSG, outpath, nameid=None):
+#    """
+#    Given meshlines (output by RivMesh), ouput a shapefile.
+#    """
+#    
+#    # Create line objects to write to shapefile
+#    all_lines = []
+#    for l in lines:
+#        line = ogr.Geometry(type=ogr.wkbLineString)
+#        line.AddPoint_2D(l[0][0], l[0][1])
+#        line.AddPoint_2D(l[1][0], l[1][1])
+#        all_lines.append(line)
+#
+#    # Write the shapefile
+#    driver = ogr.GetDriverByName('ESRI Shapefile')
+#    datasource = driver.CreateDataSource(outpath)
+#    
+#    srs = osr.SpatialReference()
+#    srs.ImportFromEPSG(EPSG)
+#    
+#    layer = datasource.CreateLayer("meshlines", srs, ogr.wkbLineString)
+#    defn = layer.GetLayerDefn()
+#
+#    idField = ogr.FieldDefn('id', ogr.OFTInteger)
+#    layer.CreateField(idField)
+#    if nameid is not None:
+#        nameField = ogr.FieldDefn('River_Name', ogr.OFTString)
+#        layer.CreateField(nameField)
+#    
+#
+#    for i, p in enumerate(all_lines):
+#            
+#        # Create a new feature (attribute and geometry)
+#        feat = ogr.Feature(defn)
+#        feat.SetField('id', int(i))
+#        
+#        # Set upstream and downstream node attributes
+#        if nameid is not None:
+#            fieldstr = str(nameid)
+#            feat.SetField('River_Name', fieldstr)
+#    
+#        # Make a geometry
+#        geom = ogr.CreateGeometryFromWkb(p.ExportToWkb())
+#        feat.SetGeometry(geom)
+#    
+#        layer.CreateFeature(feat)
+#        
+#        feat = geom = None  # destroy these
+#    
+#    # Save and close everything
+#    datasource = layer = feat = geom = None
+#
