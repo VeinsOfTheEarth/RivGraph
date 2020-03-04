@@ -528,11 +528,11 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
         mesh_dist: how wide should the mesh be, in same units of coords
         mesh_spacing: how far apart should mesh cells be, in same units of coords
     """
-    coords = ken.centerline
-    width_chan = ken.width_chans
-    meshwidth = ken.max_valley_width_pixels * ken.pixlen * 1.1
-    grid_spacing = meshwidth/10
-    smoothing_param = 1
+#    coords = ken.centerline
+#    width_chan = ken.width_chans
+#    meshwidth = ken.max_valley_width_pixels * ken.pixlen * 1.1
+#    grid_spacing = meshwidth/10
+#    smoothing_param = 1
 
     
     if np.shape(coords)[0] == 2 and np.size(coords) != 4:
