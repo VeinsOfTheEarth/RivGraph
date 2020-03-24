@@ -4,7 +4,7 @@ RivGraph is a python package that assists with converting a binary mask of a cha
 
 Use RivGraph by creating either a delta or a river class, then applying the associated methods. As there is no documentation as of now, you will have to play with it and dig through the code a bit to understand how to use it. The rivgraph.py file contains these classes, as well as their methods, and should be a great starting place.
 
-8/6/2019 - RivGraph is being prepared for "official release." The code is up-to-date, but has not been cleaned, commented, or sufficiently documented. There are currently no examples, but they are being prepared. 
+8/6/2019 - RivGraph is being prepared for "official release." The code is up-to-date, but has not been cleaned, commented, or sufficiently documented. There is currently [one example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb) that should get you started; more are underway. 
 
 For examples of what RivGraph does, see this AGU poster: https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph
 
