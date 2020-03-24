@@ -6,27 +6,20 @@ Created on Tue Nov  6 14:29:10 2018
 """
 import numpy as np
 import networkx as nx
-from ordered_set import OrderedSet
 from scipy.ndimage.morphology import distance_transform_edt
 import shapely
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString
 import scipy.interpolate as si
 from scipy import signal
 from scipy.spatial.distance import cdist
 from matplotlib import pyplot as plt
 import geopandas as gpd
 
-
+from rivgraph.ordered_set import OrderedSet
 import rivgraph.im_utils as iu
 import rivgraph.mask_to_graph as m2g
 import rivgraph.ln_utils as lnu
 
-#rg_obj = rg
-#links = rg_obj.links
-#nodes = rg_obj.nodes
-#exit_sides= rg_obj.exit_sides
-#Iskel = rg_obj.Iskel
-#gdobj = rg_obj.gdobj
 
 def prune_river(links, nodes, exit_sides, Iskel, gdobj):
                         
