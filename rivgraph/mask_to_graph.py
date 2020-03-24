@@ -14,6 +14,8 @@ from rivgraph.ordered_set import OrderedSet
 import numpy as np
 import cv2
 
+#Iskel = rg.Iskel
+
 def skel_to_graph(Iskel):
     """
     Breaks a skeletonized image into links and nodes; exports if desired.
@@ -60,7 +62,7 @@ def skel_to_graph(Iskel):
     
     # Pad the skeleton image to avoid edge problems when walking along skeleton
     initial_dims = Iskel.shape
-    npad = 10
+    npad = 20
     Iskel = np.pad(Iskel, npad, mode='constant', constant_values=0)
 
     dims = Iskel.shape

@@ -457,6 +457,8 @@ def erode(I, n=1, strel='square'):
         selem = morphology.square(3)
     elif strel == 'plus':
         selem = morphology.diamond(1)
+    elif strel == 'disk':
+        selem = morphology.disk(3)
     
     for i in np.arange(0,n):
         I = morphology.erosion(I, selem)
@@ -473,6 +475,8 @@ def dilate(I, n=1, strel='square'):
         selem = morphology.square(3)
     elif strel == 'plus':
         selem = morphology.diamond(1)
+    elif strel == 'disk':
+        selem = morphology.disk(3)
 
     for i in np.arange(0,n):
         

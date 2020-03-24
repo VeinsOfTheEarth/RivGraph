@@ -10,6 +10,14 @@ import numpy as np
 from skimage import measure
 from scipy import stats
 
+
+#linkid = linkid
+#bpnode = poss_steps[isbp.index(1)] 
+#nodes = nodes
+#links = links
+#links2do = links 
+#Iskel = Iskel
+
 def handle_bp(linkid, bpnode, nodes, links, links2do, Iskel):
     """
     When walking along a skeleton and encountering a branchpoint, we want to 

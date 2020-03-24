@@ -208,6 +208,7 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
     elminating the ends of the each link from computing widths and lengths, 
     where the distance along each end is equal to the half-width of the endmost 
     pixels.    
+    ##TODO: add median width OR just change wid_adj to be median?
     """
     
     # Compute and append link widths
@@ -476,11 +477,10 @@ def remove_disconnected_bridge_links(links, nodes):
     
     bridges = list(nx.bridges(G))
     
+    # Links containining inlets or outlets cannot be bridge links
     inletsoutlets = []
     inletsoutlets.extend(nodes['inlets'])
-    inletsoutlets.extend(nodes['outlets'])
-    
-    # Links containining endpoints cannot be bridge links
+    inletsoutlets.extend(nodes['outlets'])    
     bridges = [b for b in bridges if b[0] not in inletsoutlets and b[1] not in inletsoutlets]
     
     all_remove_links = set()
@@ -547,6 +547,7 @@ def remove_disconnected_bridge_links(links, nodes):
         dontremove = nodes['arts']
     else:
         dontremove = []
+    dontremove.extend(inletsoutlets)
         
     links, nodes = remove_two_link_nodes(links, nodes, dontremove)
 
@@ -697,7 +698,7 @@ def append_link_lengths(links, gd_obj, coordproj=4087):
     for idcs in links['idx']:
         link_coords = gu.idx_to_coords(idcs, gd_obj)
         if epsg == 4326:
-            link_coords = gu.transform_coords(epsg, coordproj, link_coords[0], link_coords[1])
+            link_coords = gu.transform_coords(link_coords[0], link_coords[1], epsg, coordproj)
         dists = np.sqrt(np.diff(link_coords[0])**2 + np.diff(link_coords[1])**2)
         links['len'].append(np.sum(dists))
         
@@ -926,17 +927,19 @@ def plot_dirlinks(links, dims):
             minx = np.min([minx, np.min(rc[0])])
 
     
-    plt.show()
     ax.set_xlim(minx, maxx)
     ax.set_ylim(miny, maxy)
     ax.set_facecolor("black")   
     plt.axis('equal')
+    plt.show()
     
     return
 
                     
     
-def plot_network(links, nodes, Imask, name):
+def plot_network(links, nodes, Imask, name, axis=None):
+    
+    ## TODO: add legend for link and node ids
     
     imshape = Imask.shape
     
@@ -944,10 +947,11 @@ def plot_network(links, nodes, Imask, name):
     cmap = colors.ListedColormap(['white', 'lightblue'])
     
     # Create figure
-    f = plt.figure()
+    if axis == None:
+        f, axis = plt.subplots()
     
     # Plot binary image
-    plt.imshow(Imask, cmap=cmap)
+    axis.imshow(Imask, cmap=cmap)
         
     # Plot and label links
     for lid, lidcs in zip(links['id'], links['idx']):
@@ -955,26 +959,20 @@ def plot_network(links, nodes, Imask, name):
         mididx = round(len(lidcs)/2)
         
         rc = np.unravel_index(lidcs, imshape)
-        plt.plot(rc[1],rc[0], 'darkgrey')
-        plt.text(rc[1][mididx], rc[0][mididx], lid, color='black')
+        axis.plot(rc[1],rc[0], 'darkgrey')
+        axis.text(rc[1][mididx], rc[0][mididx], lid, color='black')
     
     # Plot and label nodes
     for nid, nidx in zip(nodes['id'], nodes['idx']):
         
         rc = np.unravel_index(nidx, imshape)
-        plt.plot(rc[1],rc[0],'.', color='r')
-        plt.text(rc[1], rc[0], nid, color='r')
+        axis.plot(rc[1],rc[0],'.', color='r')
+        axis.text(rc[1], rc[0], nid, color='r')
         
-    # Set axes to be equal
     plt.axis('equal')
-
-    # Title    
-    plt.title(name)
-
-    # Save space
-    f.tight_layout()
+    axis.set_title(name)
     
-    return
+    return 
 
 
              
@@ -988,7 +986,7 @@ def plot_network(links, nodes, Imask, name):
     
     
     
-    
+
     
     
     

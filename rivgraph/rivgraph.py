@@ -29,7 +29,7 @@ class rivnetwork:
     attributes. This class thus represents the common elements of river and delta 
     channel networks.
     """    
-    def __init__(self, name, path_to_mask, results_folder=None, filetypes=None, exit_sides=None, verbose=False):
+    def __init__(self, name, path_to_mask, results_folder=None, exit_sides=None, verbose=False):
         """
         Initializes a channelnetwork class.
         
@@ -42,8 +42,6 @@ class rivnetwork:
            Points to the channel network mask file path
         results_folder : str
             Specifies a directory where results should be stored
-        filetypes: str
-            Sets the filetypes for writing results. Choose from 'GeoJSON' or 'shapefile' right now. Fiona's Geopackage driver does not work.
         exit_sides : str
             Only required for river channel netowrks. A two-character string (from N, E, S, or W) that denotes which sides of the image the river intersects (upstream first) -- e.g. 'NS', 'EW', 'NW', etc.
             
@@ -109,29 +107,14 @@ class rivnetwork:
             self.epsg = gu.get_EPSG(self.gdobj)
             self.unit = gu.get_unit(self.epsg)
                 
-#        if self.unit == 'degree':
-#            self.pixarea = 1
-#            self.pixlen = 1
-#        elif self.unit in ['metre', 'meter', 'foot', 'feet']:
-#            self.pixarea = abs(self.gt[1] * self.gt[5])
-#            self.pixlen = abs(self.gt[1])
         self.pixarea = abs(self.gt[1] * self.gt[5])
         self.pixlen = abs(self.gt[1])
-            
-        if filetypes is None:
-            self.ftype = 'GeoJSON' # default
-        else:
-            self.ftype = filetypes
-        
-        valid_ftypes = ['GeoJSON', 'shapefile']
-        if self.ftype not in valid_ftypes:
-            raise ValueError('filetyes muse be one of {}.'.format(valid_ftypes))
-        
+                
         # Prepare paths for saving 
         if results_folder is not None:
-            self.paths = io.prepare_paths(results_folder, name, path_to_mask, self.ftype)
+            self.paths = io.prepare_paths(results_folder, name, path_to_mask)
         else:
-            self.paths = io.prepare_paths(os.path.dirname(os.path.abspath(path_to_mask)) , name, path_to_mask, filetypes)
+            self.paths = io.prepare_paths(os.path.dirname(os.path.abspath(path_to_mask)) , name, path_to_mask)
                 
         # Save exit sides
         if exit_sides is not None:
@@ -379,30 +362,36 @@ class rivnetwork:
         for te in to_export:
             if te == 'links':
                 if hasattr(self, 'links') is True:
-                    io.links_to_geofile(self.links, self.imshape, self.gt, self.epsg, self.paths['links'] + ext)
+                    self.paths['links'] = os.path.join(self.paths['basepath'], self.name + '_links.' + ext)
+                    io.links_to_geofile(self.links, self.imshape, self.gt, self.epsg, self.paths['links'])
                 else:
                     print('Links have not been computed and thus cannot be exported.')
             if te == 'nodes':
                 if hasattr(self, 'nodes') is True:
-                    io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.epsg, self.paths['nodes'] + ext)
+                    self.paths['nodes'] = os.path.join(self.paths['basepath'], self.name + '_nodes.' + ext)
+                    io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.epsg, self.paths['nodes'])
                 else:
                     print('Nodes have not been computed and thus cannot be exported.')
             if te == 'mesh':
                 if hasattr(self, 'meshlines') is True and type(self) is river:
-                    io.meshlines_to_shapefile(self.meshlines, self.epsg, self.paths['meshlines'] + ext)
-                    io.meshpolys_to_geovectors(self.meshpolys, self.epsg, self.paths['meshpolys'] + ext)
+                    self.paths['meshlines'] = os.path.join(self.paths['basepath'], self.name + '_meshlines.' + ext)
+                    self.paths['meshpolys'] = os.path.join(self.paths['basepath'], self.name + '_meshpolys.' + ext)
+                    io.meshlines_to_shapefile(self.meshlines, self.epsg, self.paths['meshlines'])
+                    io.meshpolys_to_geovectors(self.meshpolys, self.epsg, self.paths['meshpolys'])
                 else:
                     print('Mesh has not been computed and thus cannot be exported.')
             if te == 'centerline':
                 if hasattr(self, 'centerline') is True and type(self) is river:
-                    io.centerline_to_geovector(self.centerline, self.epsg, self.paths['centerline'] + ext)
+                    self.paths['centerline'] = os.path.join(self.paths['basepath'], self.name + '_centerline.' + ext)
+                    io.centerline_to_geovector(self.centerline, self.epsg, self.paths['centerline'])
                 else:
                     print('Centerlines has not been computed and thus cannot be exported.')
             if te == 'centerline_smooth':
                 if hasattr(self, 'centerline_smooth') is True and type(self) is river:
-                    io.centerline_to_geovector(self.centerline_smooth, self.epsg, self.paths['centerline_smooth'] + ext)
+                    self.paths['centerline_smooth'] = os.path.join(self.paths['basepath'], self.name + '_centerline_smooth.' + ext)
+                    io.centerline_to_geovector(self.centerline_smooth, self.epsg, self.paths['centerline_smooth'])
                 else:
-                    print('Smoothed centerline has not beend computed and thus cannot be exported.')
+                    print('Smoothed centerline has not been computed and thus cannot be exported.')
 
                     
     def to_geotiff(self, export):
@@ -413,39 +402,38 @@ class rivnetwork:
         ----------
         export : str
             Select a raster to write to geotiff. Choose from:
-                links (network burned into a raster with link directions from 0 (upstream) to 1 (downstream))
+                directions (network burned into a raster with link directions from 0 (upstream) to 1 (downstream))
                 skeleton (skeletonized mask)
                 distance (distance-transformed mask)
         """
-        valid_exports = ['links', 'distance', 'skeleton']
+        valid_exports = ['directions', 'distance', 'skeleton']
         if export not in valid_exports:
             print('Cannot write {}. Choose from {}.'.format(export, valid_exports))
             return
         
-        if export == 'links':
-            io.write_linkdirs_geotiff(self.links, self.gdobj, self.paths['linkdirs'])
-            return
+        if export == 'directions':
+            outpath = self.paths['linkdirs']
+            io.write_linkdirs_geotiff(self.links, self.gdobj, outpath)
+        else:
+            if export == 'distance':
+                raster = self.Idist
+                outpath = self.paths['Idist']
+                dtype = gdal.GDT_Float32
+                color_table = None
+                options = None
+                nbands = 1
+            elif export == 'skeleton':
+                raster = self.Iskel
+                outpath = self.paths['Iskel']
+                dtype = gdal.GDT_Byte
+                color_table = io.colortable('skel')
+                options=['COMPRESS=LZW']
+                nbands = 1
         
-        if export == 'distance':
-            raster = self.Idist
-            outpath = self.paths['Idist']
-            dtype = gdal.GDT_Float32
-            color_table = None
-            options = None
-            nbands = 1
-        elif export == 'skeleton':
-            raster = self.Iskel
-            outpath = self.paths['Iskel']
-            dtype = gdal.GDT_Byte
-            color_table = io.colortable('skel')
-            options=['COMPRESS=LZW']
-            nbands = 1
-        
-        io.write_geotiff(raster, self.gt, self.wkt, outpath, dtype=dtype, options=options, color_table=color_table, nbands=nbands)
+            io.write_geotiff(raster, self.gt, self.wkt, outpath, dtype=dtype, options=options, color_table=color_table, nbands=nbands)
         
         print('Geotiff written to {}.'.format(outpath))
 
-            
 
 class delta(rivnetwork):
     """
@@ -462,7 +450,7 @@ class delta(rivnetwork):
         
     """   
 
-    def __init__(self, name, path_to_mask, results_folder=None, filetypes=None, verbose=False):
+    def __init__(self, name, path_to_mask, results_folder=None, verbose=False):
         """
         
         Parameters
@@ -475,7 +463,7 @@ class delta(rivnetwork):
             Specifies a directory where results should be stored
         verbose : str, optional
             RivGraph will output processing progress if 'True'. Default is 'False'.            
-        
+            
         """
         
         rivnetwork.__init__(self, name, path_to_mask, results_folder, verbose=verbose)
@@ -484,6 +472,7 @@ class delta(rivnetwork):
     def skeletonize(self):
         """
         Skeletonizes the delta binary mask.
+        
         """
 
         if hasattr(self, 'Imask') is False:
@@ -602,12 +591,12 @@ class river(rivnetwork):
         Reads a user-created .csv file found at paths['fixlinks_csv'] to set flow directions of specified liks.
     """   
 
-    def __init__(self, name, path_to_mask, results_folder=None, filetypes=None, exit_sides=None, verbose=False):
+    def __init__(self, name, path_to_mask, results_folder=None, exit_sides=None, verbose=False):
         
         if exit_sides is None:
             raise Warning('Must provide exit_sides for river class.') 
         
-        rivnetwork.__init__(self, name, path_to_mask, results_folder, filetypes, exit_sides, verbose=verbose)
+        rivnetwork.__init__(self, name, path_to_mask, results_folder, exit_sides, verbose=verbose)
             
         
     def skeletonize(self):

@@ -11,12 +11,12 @@ import gdal
 import numpy as np
 import geopandas as gpd
 import pandas as pd
-import geo_utils as gu
+import rivgraph.geo_utils as gu
 from shapely.geometry import Point, LineString, Polygon
 import fiona
 
 
-def prepare_paths(resultsfolder, name, basetiff, ftype='GeoJSON'):
+def prepare_paths(resultsfolder, name, basetiff):
     """
     Given a results folder, a delta or river name, and a filetype, generates 
     paths for saving results or intermediate files.
@@ -30,19 +30,14 @@ def prepare_paths(resultsfolder, name, basetiff, ftype='GeoJSON'):
     # Create dictionary of directories
     paths = dict()
 
+    paths['basepath'] = basepath
     paths['maskpath'] = basetiff                                                     # geotiff binary mask; must be input by user
     paths['Iskel'] = os.path.join(basepath, name + "_skel.tif")                      # geotiff of skeletonized mask 
     paths['Idist'] = os.path.join(basepath, name + "_dist.tif")                      # geotiff of distance transform of mask
     paths['network_pickle'] = os.path.join(basepath, name + "_network.pkl")          # links and nodes dictionaries, pickled
-    paths['links'] = os.path.join(basepath, name + "_links.")                  # links geovectors
-    paths['nodes'] = os.path.join(basepath, name + "_nodes.")                 # nodes geovectors
     paths['fixlinks_csv'] = os.path.join(basepath, name + "_fixlinks.csv")           # csv file to manually fix link directionality, must be created by user
     paths['linkdirs'] = os.path.join(basepath, name + "_link_directions.tif")        # tif file that shows link directionality
     paths['metrics'] = os.path.join(basepath, name + "_metrics.pkl")                 # metrics dictionary
-    paths['meshlines'] = os.path.join(basepath, name + "_meshlines.")         # meshlines geovectors
-    paths['meshpolys'] = os.path.join(basepath, name + "_meshpolys.")          # meshpolys geovectors
-    paths['centerline'] = os.path.join(basepath, name + "_centerline.")        # centerline geovector
-    paths['centerline_smooth'] = os.path.join(basepath, name + "_centerline_smooth.")     # smooth centerline geovector
     
     # The files at the following paths are not created by RivGraph, but by the user.   
     paths['shoreline'] = os.path.join(basepath, name + "_shoreline.shp")     # shoreline shapefile, must be created by user

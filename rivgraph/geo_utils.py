@@ -10,9 +10,9 @@ geographic data including tiffs, vrts, shapefiles, etc.
 """
 import osr, ogr, gdal
 import numpy as np
-import rivgraph.im_utils as iu
 import geopandas as gpd
 from pyproj import Proj, transform
+import io_utils as io
 
 
 
@@ -21,7 +21,21 @@ def get_EPSG(file_or_obj, returndict=False):
     Returns the EPSG code from a path to a geotiff (or vrt) or shapefile/GeoJSON/etc.
     EPSG can be returned as a dict (e.g. geopandas/fiona format) if desired.
     
-    file_or_obj can be either a path to a file or an opened gdal object
+    Parameters
+    ----------
+    file_or_obj : str or gdal object
+        Either the path to a georeferenced datafile (geotiff, shapefile, etc.),
+        or an object created by gdal.Open().
+    returndict : bool
+        True or [False] to return the epsg code in a diciionary form for easy
+        passing to fiona/geopandas.
+    
+    Returns
+    ----------
+    epsg : int or dict
+        If returndict is False, returns the epsg code. If returndict is True,
+        returns epsg code in dictionary format for easy passing to fiona/
+        geopandas.        
     """
     
     if type(file_or_obj) is str:
@@ -45,6 +59,21 @@ def get_EPSG(file_or_obj, returndict=False):
 
 
 def get_unit(epsg):
+    """
+    Returns the units for a projection defined by an EPSG code.
+    
+    Parameters
+    ----------
+    epsg : int, float, or str
+        The epsg code.    
+    
+    Returns
+    ----------
+    unit : str
+        The unit of the provided epsg code.   
+
+    """
+
 
     # Units of projection
     srs = osr.SpatialReference()
@@ -56,18 +85,19 @@ def get_unit(epsg):
 
     
 def wkt2epsg(wkt):
-    
     """
-    From https://gis.stackexchange.com/questions/20298/is-it-possible-to-get-the-epsg-value-from-an-osr-spatialreference-class-using-th
-    Transform a WKT string to an EPSG code
+    Determines the epsg code for a provided WKT definition. Code was mostly
+    taken from https://gis.stackexchange.com/questions/20298/is-it-possible-to-get-the-epsg-value-from-an-osr-spatialreference-class-using-th
 
     Arguments
     ---------
+    wkt : str
+        WKT definition
     
-    wkt: WKT definition
-    
-    Returns: EPSG code
-
+    Returns
+    ----------
+    epsg : int
+        The epsg code.
     """
     
     p_in = osr.SpatialReference()
@@ -89,41 +119,74 @@ def wkt2epsg(wkt):
         return int(p_in.GetAuthorityCode(cstype))
     
     
-def geotiff_vals_from_idcs(idcs, I_orig, I_pull):
-    """
-    Uses the get_array function to pull individual indices from
-    a vrt or tiff. 
-    I_orig is the image corresponding to the input indices
-    I_pull is the image that you want to pull values from
-    """
-    if I_orig == I_pull:
-        vals = []
-        for i in idcs:
-            val = iu.get_array(i, I_pull, (1,1))[0][0][0]
-            vals.append(val)
-            
-#    else:
-#        ll = idx_to_coords(idcs, idx_gdobj)
-#        vals = geotiff_vals_from_coords(ll, val_gdobj)
-        
-    return vals
+#def geotiff_vals_from_idcs(idcs, I_orig, I_pull):
+#    ## TODO: change the name of this function as geotiffs are no longer handled here
+#    """
+#    Pulls pixel values from an image
+#    Uses the get_array function to pull individual indices from
+#    a vrt or tiff. 
+#    I_orig is the image corresponding to the input indices
+#    I_pull is the image that you want to pull values from
+#    """
+#    if I_orig == I_pull:
+#        vals = []
+#        for i in idcs:
+#            val = iu.get_array(i, I_pull, (1,1))[0][0][0]
+#            vals.append(val)
+#                    
+#    return vals
 
 
-def geotiff_vals_from_coords(coords, gt_obj):
+def geotiff_vals_from_coords(coords, gd_obj):
+    """
+    Returns pixel values at specific coordinates from a geotiff object.
+    
+    Arguments
+    ---------
+    coords : np.array()
+        An Nx2 numpy array, where each row is a (lat, lon) pair.
+    gd_obj : osgeo.gdal.Dataset
+        Geotiff object created with gdal.Open().
+    
+    Returns
+    ----------
+    vals : list
+        The value of the pixels of the geotiff for each coordinate.
+    """
+
     
     # Lat/lon to row/col
-    rowcol = coords_to_xy(coords[:,0], coords[:,1], gt_obj.GetGeoTransform())
+    rowcol = coords_to_xy(coords[:,0], coords[:,1], gd_obj.GetGeoTransform())
     
     # Pull value from vrt at row/col
     vals = []
     for rc in rowcol:
-           vals.append(gt_obj.ReadAsArray(int(rc[0]), int(rc[1]), int(1), int(1))[0,0])
+           vals.append(gd_obj.ReadAsArray(int(rc[0]), int(rc[1]), int(1), int(1))[0,0])
            
     return vals
 
 
 def coords_to_xy(xs, ys, gt):
-            
+    """
+    Transforms a set of xs, ys in projected coordinates to rows, columns within
+    a geotiff.
+    
+    Arguments
+    ---------
+    xs : list or np.array()
+        Specifies the E-W coordinates (longitude).
+    ys : list or np.array()
+        Specifies the N-S coordinates (latitude).
+    gt : tuple
+        6-element tuple gdal GeoTransform. (uL_x, x_res, rotation, ul_y, rotation, y_res).
+        Automatically created by gdal's GetGeoTransform() method.
+        
+    Returns
+    ----------
+    rowcols : np.array()
+        Nx2 array of (row, col) indices corresponding to the inpute coordinates. N = len(xs).
+    """
+           
     xs = np.array(xs) 
     ys = np.array(ys) 
 
@@ -133,8 +196,24 @@ def coords_to_xy(xs, ys, gt):
     return np.column_stack((xs, ys))
 
 
-def idx_to_coords(idx, gd_obj, printout=False):
+def idx_to_coords(idx, gd_obj):
+    """
+    Transforms a set of indices from a geotiff image to their corresponding
+    coordinates.
     
+    Arguments
+    ---------
+    idx : np.array()
+        Specifies the indices to transform. See np.ravel_index for more info.
+    gd_obj : osego.gdal.Dataset
+        gdal object of the geotiff from which indices were computed.
+        
+    Returns
+    ----------
+    cx, cy : tuple
+        x and y coordinates of the provided indices.
+    """
+
     yx = np.unravel_index(idx, (gd_obj.RasterYSize, gd_obj.RasterXSize))
     cx, cy = xy_to_coords(yx[1], yx[0], gd_obj.GetGeoTransform())
     
@@ -143,7 +222,21 @@ def idx_to_coords(idx, gd_obj, printout=False):
 
 def xy_to_coords(xs, ys, gt):
     """
-    xs and ys should be numpy arrays of same length.
+    Transforms a set of x and y coordinates to their corresponding coordinates
+    within a geotiff image.
+    
+    Arguments
+    ---------
+    (xs, ys) : (np.array(), np.array())
+        Specifies the coordinates to transform.
+    gt : tuple
+        6-element tuple gdal GeoTransform. (uL_x, x_res, rotation, ul_y, rotation, y_res).
+        Automatically created by gdal's GetGeoTransform() method.
+        
+    Returns
+    ----------
+    cx, cy : tuple
+        Column and row indices of the provided coordinates.
     """
                 
     cx = gt[0] + (xs + 0.5) * gt[1]
@@ -153,6 +246,23 @@ def xy_to_coords(xs, ys, gt):
 
 
 def transform_coordinates(xs, ys, inputEPSG, outputEPSG):
+    """
+    Transforms a set of coordinates from one epsg to another.
+    
+    Arguments
+    ---------
+    (xs, ys) : (np.array(), np.array())
+        Specifies the coordinates to transform.
+    inputEPSG : int
+        epsg code corresponding to xs, ys
+    outputEPSG : int
+        epsg code corresponding to desired CRS.
+        
+    Returns
+    ----------
+    xyout : (np.array(), np.array())
+        N-element arrays of transformed (x, y) coordinates.
+    """
     
     if inputEPSG == outputEPSG:
         return xs, ys
@@ -185,23 +295,58 @@ def transform_coordinates(xs, ys, inputEPSG, outputEPSG):
     return xyout[:,0], xyout[:,1]
 
 
-def transform_coords(in_epsg, out_epsg, xs, ys):
+def transform_coords(xs, ys, inputEPSG, outputEPSG):
     """
-    Another way of transforming coordinates using pyproj.
+    Transforms a set of coordinates from one epsg to another.
+    This implementation differs from above by using pyproj.
+    
+    Arguments
+    ---------
+    (xs, ys) : (np.array(), np.array())
+        Specifies the coordinates to transform.
+    inputEPSG : int
+        epsg code corresponding to xs, ys
+    outputEPSG : int
+        epsg code corresponding to desired CRS.
+        
+    Returns
+    ----------
+    xy : np.array()
+        N-element array of transformed (x, y) coordinates.
     """
         
-    in_proj = Proj(init='epsg:'+str(in_epsg))
-    out_proj = Proj(init='epsg:'+str(out_epsg))
+    in_proj = Proj(init='epsg:'+str(inputEPSG))
+    out_proj = Proj(init='epsg:'+str(outputEPSG))
     xy = transform(in_proj, out_proj, xs, ys)
     
     return xy
 
 
-
-""" Utilities below here are not explicitly called by RivGraph functions """
-
 def crop_geotif(tif, cropto='first_nonzero', npad=0, outpath=None):
- 
+    """
+    Crops a geotiff to the minimum bounding box as defined by the first
+    nonzero pixels along each direction. The cropped image is written to
+    disk.
+    
+    Arguments
+    ---------
+    tif : str
+        Path to geotiff to crop.
+    cropto : str
+        [first_nonzero] is currently the only choice.
+    npad : int
+        Number of pixels to add to each direction of the cropped image.
+    outpath : str
+        Defines the path where the cropped image will be written to disk. If
+        [None], the file will be written to the same directory as the input
+        geotiff.
+        
+    Returns
+    ----------
+    output_file : str
+        Path to the saved, cropped geotiff.
+    """
+
     # Prepare output file path
     if outpath is None:
         output_file = tif.split('.')[-2] + '_cropped.tif'
@@ -222,7 +367,7 @@ def crop_geotif(tif, cropto='first_nonzero', npad=0, outpath=None):
     tifcropped = tiffull[t:b,l:r]
     
     # Pad the tiff (if necessary)
-    if npad is not 0:
+    if npad != 0:
         tifcropped = np.pad(tifcropped, npad, mode='constant', constant_values=False)
 
     # Create a new geotransform by adjusting the origin (upper-left-most point)
@@ -242,6 +387,6 @@ def crop_geotif(tif, cropto='first_nonzero', npad=0, outpath=None):
     if datatype in [1, 2, 3, 4, 5]: # Int types: see the list at the end of this file 
         options.append('COMPRESS=LZW')
         
-    write_geotiff(tifcropped, crop_gt, tif_obj.GetProjection(), output_file, dtype=datatype, options=options)
+    io.write_geotiff(tifcropped, crop_gt, tif_obj.GetProjection(), output_file, dtype=datatype, options=options)
     
     return output_file
