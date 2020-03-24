@@ -13,6 +13,12 @@ import rivgraph.geo_utils as gu
 import rivgraph.ln_utils as lnu
 import rivgraph.im_utils as iu
 
+#ir.load_network()
+#links = ir.links.copy()
+#nodes = ir.nodes.copy()
+#shoreline_shp = ir.paths['shoreline']
+#inlets_shp = ir.paths['inlet_nodes']
+#gdobj = ir.gdobj
 
 def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
     """
@@ -38,12 +44,11 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
         updated links dictionary
     nodes : dict
         updated nodes dictionary
-
     """
                         
     # Get inlet nodes
     nodes = find_inlet_nodes(nodes, inlets_shp, gdobj)    
-        
+                    
     # Remove spurs from network (this includes valid inlets and outlets)
     links, nodes = lnu.remove_all_spurs(links, nodes, dontremove=list(nodes['inlets']))
         
