@@ -12,7 +12,7 @@ import osr, ogr, gdal
 import numpy as np
 import geopandas as gpd
 from pyproj import Proj, transform
-import io_utils as io
+import rivgraph.io_utils as io
 
 
 

@@ -5,15 +5,16 @@ Created on Mon Sep 10 09:59:52 2018
 @author: Jon
 """
 import numpy as np
-from rivgraph import geo_utils as gu
 from scipy.stats import mode
-from rivgraph.ordered_set import OrderedSet
 import geopandas as gpd
 import networkx as nx
 from copy import deepcopy
 from matplotlib import pyplot as plt
 from matplotlib import colors
 import matplotlib.collections as mcoll
+
+from rivgraph import geo_utils as gu
+from rivgraph.ordered_set import OrderedSet
 
 
 def node_updater(nodes, idx, conn):
