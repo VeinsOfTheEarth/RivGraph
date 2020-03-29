@@ -7,7 +7,7 @@ Use RivGraph by creating either a delta or a river class, then applying the asso
 8/6/2019 - RivGraph is being prepared for "official release." The code is up-to-date, but has not been cleaned, commented, or sufficiently documented. There is currently [one example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb) that should get you started; more are underway. 
 
 3/29/2020 - Task list
-- [x] Delta example
+- [x] [Delta example]((https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb)
 - [ ] Braided river example
 - [ ] How to prepare masks for inputs
 - [ ] Where to get masks
