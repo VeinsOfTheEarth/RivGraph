@@ -1,0 +1,5 @@
+[run]
+source = rivgraph
+
+omit =
+    rivgraph/_plotting_metrics.py
