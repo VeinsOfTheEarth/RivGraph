@@ -14,7 +14,7 @@ Use RivGraph by creating either a delta or a river class, then applying the asso
 - [ ] How to draw shorelines
 - [ ] How to fix flow directions
 - [ ] Function documentation
-- [ ] Unit testing
+- [ ] Unit testing - in progress (5/11/2020)
 - [ ] Function for removing artificial nodes
 
 
