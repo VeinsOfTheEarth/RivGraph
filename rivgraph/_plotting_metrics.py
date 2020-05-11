@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """
+_plotting_metrics
+=================
+
 Created on Thu Jun 21 10:35:48 2018
 
 @author: Jon
@@ -36,7 +39,7 @@ for i, (d, dp) in enumerate(zip(result_names, result_paths)):
 plt.close('all')
 fig, ax = plt.subplots()
 for i, (d, dp) in enumerate(zip(result_names, result_paths)):
-    
+
     with open(dp, 'rb') as f:
         deltavars = pickle.load(f)
 
@@ -44,7 +47,7 @@ for i, (d, dp) in enumerate(zip(result_names, result_paths)):
     li25 = np.percentile(LI, 25)
     li50 = np.percentile(LI, 50)
     li75 = np.percentile(LI, 75)
-    
+
     nap = deltavars['n_alt_paths'][:,1]
     nap25 = np.percentile(nap, 25)
     nap50 = np.percentile(nap, 50)
@@ -55,14 +58,14 @@ for i, (d, dp) in enumerate(zip(result_names, result_paths)):
 
     lc = mc.LineCollection(lines, colors=c, linewidths=2)
     ax.add_collection(lc)
-    
+
     plt.plot(li50, nap50, 'o', markersize=8, color=c, markeredgecolor='k')
 #    ax.autoscale()
 plt.legend(result_names)
-    
+
 plt.yscale('log')
 plt.xlabel('Leakage Index')
-params = {'mathtext.default': 'regular' }          
+params = {'mathtext.default': 'regular' }
 plt.rcParams.update(params)
 
 plt.ylabel('$N_{ap}$')
@@ -73,7 +76,7 @@ plt.ylim(0, 10**9)
 plt.close('all')
 #fig, axs = plt.subplots(4, 2, sharex=True, sharey=True)
 fig, axs = plt.subplots(4, 2, sharex=False, sharey=False)
-varsdo = ['Number of Alternative Paths', 'Leakage Index', 'Link Sharing Index', 
+varsdo = ['Number of Alternative Paths', 'Leakage Index', 'Link Sharing Index',
           'Flux Sharing Index', 'Topologic Mutual Information', 'Dynamic Mutual Information',
           'Topologic Conditional Entropy', 'Dynamic Conditional Entropy']
 
@@ -110,31 +113,31 @@ for v in varsdo:
         pp = [3,1]
         dkey = 'dyn_conditional_entropy'
         ylims = [0, 1.2]
-        
-        
-    data = []    
+
+
+    data = []
     for i, (d, dp) in enumerate(zip(result_names, result_paths)):
-        
+
         with open(dp, 'rb') as f:
             deltavars = pickle.load(f)
-        
+
         tempdata = deltavars[dkey]
         if tempdata.shape[1] > 1:
             data.append(tempdata[:,1])
         else:
             data.append(tempdata)
-    
+
     # Plot the data
     axs[pp[0],pp[1]].boxplot(data, labels=result_names, showfliers=False)
     axs[pp[0],pp[1]].set_xticklabels(axs[pp[0],pp[1]].get_xticklabels(), rotation=30)
-    
+
     # Log scale for Nap
     if v == 'Number of Alternative Paths':
         axs[pp[0],pp[1]].set_yscale('log')
-        
+
     # Set y axis limit
     axs[pp[0],pp[1]].set_ylim(ylims)
-        
+
     # Add title
     axs[pp[0],pp[1]].set_title(v)
 
@@ -162,19 +165,6 @@ for i, (d, dp) in enumerate(zip(result_names, result_paths)):
 # Plot the data
 axs.boxplot(data, labels=result_names, showfliers=False)
 axs.set_xticklabels(axs.get_xticklabels(), rotation=30)
-    
+
 # Add title
 axs.set_title('Resistance Distance')
-
-
-
-
-
-
-
-
-
-
-
-
-
