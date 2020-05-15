@@ -16,7 +16,7 @@ Use RivGraph by creating either a delta or a river class, then applying the asso
 - [ ] Function documentation
 - [ ] Unit testing - in progress (5/11/2020)
 - [ ] Function for removing artificial nodes
-
+- [ ] Packaging
 
 For examples of what RivGraph does, see this AGU poster: https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph
 
