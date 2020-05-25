@@ -1,8 +1,8 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="rivgraph",
-    packages=['rivgraph', 'rivgraph.deltas', 'rivgraph.rivers'],
+    packages=find_packages(),
     version="0.2",
     description="Tools for topological analysis of fluvial networks from binary masks",
     author='Jon Schwenk',
