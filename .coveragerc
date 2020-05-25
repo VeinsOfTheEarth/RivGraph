@@ -2,4 +2,4 @@
 source = rivgraph
 
 omit =
-    rivgraph/_plotting_metrics.py
+    rivgraph/ordered_set.py
