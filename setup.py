@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="rivgraph",
-    packages=['rvgraph'],
+    packages=['rivgraph'],
     version="0.2",
     description="Tools for topological analysis of fluvial networks from binary masks",
     author='Jon Schwenk',
