@@ -1,9 +1,8 @@
 from setuptools import setup, find_packages
 
-print(find_packages())
 setup(
     name="rivgraph",
-    packages=find_packages(),
+    packages=['rvgraph'],
     version="0.2",
     description="Tools for topological analysis of fluvial networks from binary masks",
     author='Jon Schwenk',
