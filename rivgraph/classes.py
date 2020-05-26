@@ -196,33 +196,43 @@ class rivnetwork:
         return A
     
     
-    def to_geovectors(self, *kwargs):
+    def to_geovectors(self, what=['links', 'nodes'], ftype='shp'):
+        """
+        ftype = shp or json
+        what = list, 'links', 'nodes', 'mesh', 'centerline', 'centerline_smooth'
+        """
         
-        if len(kwargs) == 0:
-            try:
-                # Save nodes
-                io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.epsg, self.paths['nodes'])
-                
-                # Save links
+        # Reformat user-inputted strings
+        if type(what) is str:
+            what = [what]
+                    
+        # Save each requested geofile
+        for w in what:
+            savepath = os.path.join(self.paths['basepath'], self.name + "_{}.{}".format(w, ftype))
+
+            if w == 'links':
+                self.paths['links'] = savepath
                 io.links_to_geofile(self.links, self.imshape, self.gt, self.epsg, self.paths['links'])
-                print('Links and nodes saved to geofiles: {}, {}.'.format(self.paths['nodes'], self.paths['links']))
-                    
-            except AttributeError:
-                print('Links and nodes could not be saved. Ensure network has been computed.')             
-        else:
-            for kw in kwargs:
-                if kw == 'links':
-                    io.links_to_geofile(self.links, self.imshape, self.gt, self.epsg, self.paths['links'])
-                elif kw == 'nodes':
-                    io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.epsg, self.paths['nodes'])
-                elif kw == 'mesh':
-                    io.meshlines_to_shapefile(self.meshlines, self.epsg, self.paths['meshlines'], nameid=self.name)
-                    io.meshpolys_to_geovectors(self.meshpolys, self.epsg, self.paths['meshpolys'])
-                elif kw == 'centerline':
-                    io.centerline_to_geovector(self.centerline, self.epsg, self.paths['centerline'])
-                elif kw == 'centerline_smooth':
-                    io.centerline_to_geovector(self.centerline_smooth, self.epsg, self.paths['centerline_smooth'])
-                    
+            elif w == 'nodes':
+                self.paths['nodes'] = savepath
+                io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.epsg, self.paths['nodes'])
+            elif type(self) is delta:
+                raise TypeError('Can only export {} for river class.'.format(w))
+            elif w == 'mesh':
+                self.paths['meshlines'] = savepath
+                self.paths['meshpolys'] = savepath
+                io.meshlines_to_shapefile(self.meshlines, self.epsg, self.paths['meshlines'], nameid=self.name)
+                io.meshpolys_to_geovectors(self.meshpolys, self.epsg, self.paths['meshpolys'])
+            elif w == 'centerline':
+                self.paths['centerline'] = savepath
+                io.centerline_to_geovector(self.centerline, self.epsg, self.paths['centerline'])
+            elif w == 'centerline_smooth':
+                self.paths['centerline_smooth'] = savepath
+                io.centerline_to_geovector(self.centerline_smooth, self.epsg, self.paths['centerline_smooth'])
+            
+            print('{} saved to {}.'.format(w, savepath))
+
+
                     
     def write_geotiff(self, writedata='skeleton'):
         """
