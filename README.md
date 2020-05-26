@@ -14,8 +14,10 @@ conda create -n rg # environment here is named 'rg', but choose whatever you'd l
 conda activate rg
 conda install rivgraph -c jschwenk
 </code></pre>
-You may then want to install Spyder or your preferred IDE.
+You may then want to install Spyder or your preferred IDE. Conda *should* fetch all the required dependencies and handle versioning.
 **Note**: While packaged for all platforms, we have currently only tested the win64 platform.
+
+Savvy users have been able to install RivGraph from this Github repo, but usually not without dependency headaches. See the [requirements file](https://github.com/jonschwenk/RivGraph/blob/master/requirements.txt) for dependencies.
 
 How to use?
 -----
