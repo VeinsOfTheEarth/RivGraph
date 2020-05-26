@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import skimage.io
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
-from rivgraph.rivgraph import delta
+from rivgraph.classes import delta
 
 # pytest fixture functionality to create rivgraph.delta classes that can be
 # used by other test functions but save us from re-defining the example class

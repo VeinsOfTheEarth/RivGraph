@@ -3,7 +3,7 @@ import sys, os
 import numpy as np
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
-from rivgraph.rivgraph import delta
+from rivgraph.classes import delta
 
 def test_skeletonize(test_net):
     # do skeletonization
