@@ -10,11 +10,9 @@ Installing
 -----
 RivGraph v0.2 is hosted on the anaconda channel [jschwenk](https://anaconda.org/jschwenk/rivgraph). We recommend installing into a fresh conda environment to minimize the risk of dependency clashes.
 
-<pre><code>
-conda create -n rg # environment here is named 'rg', but choose whatever you'd like
+<pre><code>conda create -n rg # environment here is named 'rg', but choose whatever you'd like
 conda activate rg
-conda install rivgraph -c jschwenk
-</code></pre>
+conda install rivgraph -c jschwenk</code></pre>
 
 You may then want to install Spyder or your preferred IDE. Conda *should* fetch all the required dependencies and handle versioning.
 **Note**: While packaged for all platforms, we have currently only tested the win64 platform.
