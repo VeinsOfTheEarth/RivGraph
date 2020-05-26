@@ -6,7 +6,7 @@ As of 5/26/2020, we are working on buttoning down RivGraph, including documentat
 
 Installing
 -----
-RivGraph v0.2 is hosted on the anaconda channel (jschwenk)[https://anaconda.org/jschwenk/rivgraph]. We recommend installing into a fresh conda environment to minimize the risk of dependency clashes.
+RivGraph v0.2 is hosted on the anaconda channel [jschwenk](https://anaconda.org/jschwenk/rivgraph). We recommend installing into a fresh conda environment to minimize the risk of dependency clashes.
     test
 
 Use RivGraph by creating either a delta or a river class, then applying the associated methods. As there is no documentation as of now, you will have to play with it and dig through the code a bit to understand how to use it. The rivgraph.py file contains these classes, as well as their methods, and should be a great starting place.
