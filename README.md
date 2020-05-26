@@ -1,6 +1,13 @@
-# RivGraph
+About
+-----
+RivGraph is a python package that provides tools for converting a binary mask of a channel network into a graph (i.e. a set of connected links and nodes). One major component of RivGraph is its ability to automatically set flow directions in each link of the network. It also computes morphologic metrics (lengths, widths, branching angles, etc.) and topologic metrics. RivGraph also contains a smattering of other tools and features, including some functions for helping clean and prepare your binary mask.
 
-RivGraph is a python package that assists with converting a binary mask of a channel network into a graph (set of links and nodes). One major component of RivGraph is its ability to automatically set flow directions in each link of the network. It also computes morphologic metrics (lengths, widths, branching angles, etc.) and topologic metrics.
+As of 5/26/2020, we are working on buttoning down RivGraph, including documentation, examples, and packaging. Please check back soon, and feel free to interact by opening an issue or emailing j........k@gmail.com. Now is a good time to add feature requests!
+
+Installing
+-----
+RivGraph v0.2 is hosted on the anaconda channel (jschwenk)[https://anaconda.org/jschwenk/rivgraph]. We recommend installing into a fresh conda environment to minimize the risk of dependency clashes.
+    test
 
 Use RivGraph by creating either a delta or a river class, then applying the associated methods. As there is no documentation as of now, you will have to play with it and dig through the code a bit to understand how to use it. The rivgraph.py file contains these classes, as well as their methods, and should be a great starting place.
 
@@ -16,7 +23,7 @@ Use RivGraph by creating either a delta or a river class, then applying the asso
 - [ ] Function documentation
 - [ ] Unit testing - in progress (5/11/2020)
 - [ ] Function for removing artificial nodes
-- [ ] Packaging - Update 5/25/2020: win64 conda build available @ anaconda.org/jschwenk/rivgraph
+- [x] Conda Packaging - Update 5/25/2020: see anaconda.org/jschwenk/rivgraph
 
 For examples of what RivGraph does, see this AGU poster: https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph
 
