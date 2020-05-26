@@ -43,7 +43,7 @@ These tasks represent what is needed before we "officially" release RivGraph via
 Contacting us
 -------------
 
-The best way to get in touch is to `open an issue  <https://github.com/jonschwenk/rivgraph/issues/new>`__ or comment
+The best way to get in touch is to [open an issue](https://github.com/jonschwenk/rivgraph/issues/new) or comment
   on any open issue or pull request. Otherwise, send an email to j.........k@gmail.com
 
 Citing RivGraph
