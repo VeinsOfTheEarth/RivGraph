@@ -1,46 +1,104 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Nov  2 09:50:38 2018
+rivgraph.py
+====================================
+Classes for running rivgraph commands on your channel network.
 
-@author: Jon
 """
 import os
 import gdal
 import numpy as np
 import networkx as nx
+from scipy.ndimage.morphology import distance_transform_edt
 import rivgraph.io_utils as io
 import rivgraph.geo_utils as gu
 import rivgraph.mask_to_graph as m2g
 import rivgraph.ln_utils as lnu
-
 import rivgraph.deltas.delta_utils as du
 import rivgraph.deltas.delta_directionality as dd
 import rivgraph.deltas.delta_metrics as dm
 import rivgraph.rivers.river_directionality as rd
 import rivgraph.rivers.river_utils as ru
 
-from scipy.ndimage.morphology import distance_transform_edt
-
 ## TODO: TEST this implementation! -- create synthetic georeferencing when non-georeferenced image provided
 
 class rivnetwork:
-    
-    def __init__(self, name, path_to_mask, path_to_results=None, exit_sides=None, verbose=False):
+    """
+    The rivnetwork class organizes data and methods for channel networks. This is 
+    a parent class to the delta and river classes which inherit rivnetwork methods and 
+    attributes. This class thus represents the common elements of river and delta 
+    channel networks.
+    """    
+    def __init__(self, name, path_to_mask, results_folder=None, exit_sides=None, verbose=False):
+        """
+        Initializes a channelnetwork class.
+        
+
+        Parameters
+        ----------
+        name : str
+            The name of the channel network; also defines the folder name for storing results.
+        path_to_mask : str
+           Points to the channel network mask file path
+        results_folder : str
+            Specifies a directory where results should be stored
+        exit_sides : str
+            Only required for river channel netowrks. A two-character string (from N, E, S, or W) that denotes which sides of the image the river intersects (upstream first) -- e.g. 'NS', 'EW', 'NW', etc.
+            
+        
+        Attributes
+        ----------
+        name : str
+            the name of the channel network, usually the river or delta's name
+        verbose : str
+            [True] or False to specify if processing updates should be printed.
+        gdobj : osgeo.gdal.Dataset
+            object created by gdal.Open() that provides access to geotiff metadata
+        mask_path : str
+            filepath to the input binary channel network mask
+        imshape : tuple
+            dimensions of the image (rows, cols)
+        gt : tuple
+            gdal-type Geotransform of the input mask geotiff
+        wkt : str
+            well known text representation of coordinate reference system of input mask geotiff
+        epsg: int
+            epsg code of the coordinate reference system of input mask geotiff
+        unit: str
+            units of the coordinate reference system; typically 'degree' or 'meter'
+        pixarea: int or float
+            area of each pixel, in units of 'unit'
+        pixlen: int or float
+            length of each pixel, assumes sides are equal-length
+        paths: dict
+            dictionary of strings for managing where files should be read/written
+        exit_sides: str
+            two-character string denoting which sides of the image the channel network intersects (N,E,S, and/or W). Upstream side should be given first.
+        Imask: numpy.ndarray
+            binary mask found at mask_path loaded into a numpy array via gdal.Open().ReadAsArray(), dtype=np.bool
+        links: dict
+            Stores the links of the network and associated properties
+        nodes: dict
+            Stores the nodes of the network and associated properties
+        Idist: numpy.ndarray
+            image of the distance transform of the binary mask, dtype=np.float
+
+        """
 
         self.name = name
         self.verbose = verbose
         
         # Get or create georeferencing info
-        self.gdobj = gdal.Open(path_to_mask)
-        self.rasterPath = path_to_mask
+        self.mask_path = path_to_mask
+        self.gdobj = gdal.Open(self.mask_path)
         self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
         
-        if self.gdobj.GetProjection == '':
+        if self.gdobj.GetProjection() == '':
             print('Input mask is unprojected; assigning a dummy projection.')
             # Creates a dummy projection in EPSG:4326 with UL coordinates (0,0) 
             # and pixel resolution = 1. 
-            self.gt = (0, 1, 0, 0, 1, 0)
-            self.wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]'
+            self.gt = (0, 1, 0, 0, 0, -1)
+            self.wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]' # 4326
             self.epsg = 4326
             self.unit = 'degree'
         else:
@@ -49,17 +107,15 @@ class rivnetwork:
             self.epsg = gu.get_EPSG(self.gdobj)
             self.unit = gu.get_unit(self.epsg)
                 
-        if self.unit == 'degree':
-            self.pixarea = 1
-            self.pixlen = 1
-        elif self.unit in ['metre', 'meter', 'foot', 'feet']:
-            self.pixarea = abs(self.gt[1] * self.gt[5])
-            self.pixlen = abs(self.gt[1])
-            
-        # Prepare paths for saving if path_to_results provided
-        if path_to_results is not None:
-            self.paths = io.prepare_paths(path_to_results, name, path_to_mask )
-            
+        self.pixarea = abs(self.gt[1] * self.gt[5])
+        self.pixlen = abs(self.gt[1])
+                
+        # Prepare paths for saving 
+        if results_folder is not None:
+            self.paths = io.prepare_paths(results_folder, name, path_to_mask)
+        else:
+            self.paths = io.prepare_paths(os.path.dirname(os.path.abspath(path_to_mask)) , name, path_to_mask)
+                
         # Save exit sides
         if exit_sides is not None:
             self.exit_sides = exit_sides.lower()
@@ -69,6 +125,10 @@ class rivnetwork:
         
 
     def compute_network(self):
+        """
+        Computes the links and nodes of the channel network mask.  First skeletonizes
+        the mask if not already done, then resolves the skeleton's graph.
+        """
         
         if hasattr(self, 'Iskel') is False:
             self.skeletonize()
@@ -83,6 +143,9 @@ class rivnetwork:
 
         
     def compute_distance_transform(self):
+        """
+        Computes the distance transform of the channel network mask.
+        """
         
         # Load the distance transform if it already exists
         if 'Idist' in self.paths.keys() and os.path.isfile(self.paths['Idist']) is True:
@@ -98,21 +161,40 @@ class rivnetwork:
                 
         
     def compute_link_width_and_length(self):
+        """
+        Computes widths and lengths of each link in the links dictionary and
+        appends them as dictionary attributes.
+        """
         
         if hasattr(self, 'links') is False:
             self.compute_network()
         
         if hasattr(self, 'Idist') is False:
             self.compute_distance_transform()
+
+        if self.verbose is True:
+            print('Computing link widths and lengths...', end='')
                         
         # Widths and lengths are appended to links dict
         self.links = lnu.link_widths_and_lengths(self.links, self.Idist, pixlen=self.pixlen)
         
+        if self.verbose is True:
+            print('done.')
+                        
     
     def compute_junction_angles(self, weight=None):
         """
-        weight refers to how much weight should be given to pixels farther away
-        from the junction node.
+        Computes the angle at nodes where only three links are connected. Directions
+        must be assigned before angles can be computed. Also defines each 3-link
+        node as 'confluence' or 'bifurcation' and appends this designation to 
+        the nodes dictionary.
+        
+        Parameters
+        ----------
+        weight : str
+            [None], 'exp' (exponential), or 'lin' (linear) to determine the decay
+            of the weights the contributions of pixels as we move away from the
+            junction node.            
         """
         
         if 'certain' not in self.links.keys():
@@ -121,12 +203,27 @@ class rivnetwork:
             self.nodes = lnu.junction_angles(self.links, self.nodes, self.imshape, self.pixlen, weight=weight)
         
         
-    def plot(self, *kwargs):
+    def set_flow_dirs_manually(self):
+       """
+       Sets flow directions of links specified by .csv file.
+       """
+       
+       try:
+           self.links, self.nodes = dd.set_dirs_manually(self.links, self.nodes, self.paths['fixlinks_csv'])
+       except AttributeError:
+           print('Cannot set flow directions. Ensure network has been computed and pruned.')
+
+        
+    def plot(self, *kwargs, axis=None):
         """
-        Plots the network. Optional kwargs are
-        'network' - plots labeled links and nodes
-        'directions' - plots links with directionality indicated
-        By default, both will be plotted.
+        Generates matplotlib plots of the network. 
+        
+        Parameters
+        ----------
+        *kwargs : str
+            If [None], both of the following plots will be generated:    
+            'network': links and nodes are plotted, labeled with their ids
+            'directions': links are plotted with their directionality indicated
         """
         ## TODO: add error handling for wrong plotting commands
         
@@ -147,15 +244,25 @@ class rivnetwork:
             if 'certain' not in self.links.keys():
                 print('Must assign link directions before plotting link directions.')
                 return
-
             else:
-                lnu.plot_dirlinks(self.links, self.imshape)
+                d = lnu.plot_dirlinks(self.links, self.imshape)
+                return d
                 
         if plt_network is True:
-            lnu.plot_network(self.links, self.nodes, self.Imask, self.name)       
+            f = lnu.plot_network(self.links, self.nodes, self.Imask, self.name, axis=axis)  
+            return f
         
             
     def save_network(self, path=None):
+        """
+        Writes the link and nodes dictionaries to a .pkl file.
+        
+        Parameters
+        ----------
+        path : str
+            path--including extension--to network .pkl file. If [None], file 
+            written to path found in paths['network_pickle']
+        """
         
         if path==None and hasattr(self, 'paths') is False:      
             print('No path is available to load the network.')
@@ -169,7 +276,16 @@ class rivnetwork:
             
     
     def load_network(self, path=None):
+        """
+        Loads the link and nodes dictionaries from a .pkl file.
         
+        Parameters
+        ----------
+        path : str
+            path--including extension--to network .pkl file. If [None], file 
+            is loaded from path found in paths['network_pickle']
+        """
+       
         if path==None and hasattr(self, 'paths') is False:
             print('No path is available to load the network.')
             return
@@ -184,8 +300,24 @@ class rivnetwork:
                  
 
     def adjacency_matrix(self, weight=None, normalized=False):
+        """
+        Returns the adjacency matrix for a graph defined by links and nodes
+        dictionaries.
         
-        # Created (weighted) adjacency matrix networkx object
+        Parameters
+        ----------
+        weight : str, optional
+            [None] or the attribute in the links dictionary to use for weighting links. Typically 'wid_adj' or 'len'.
+        normalized : bool, optional
+            If True, each row in the adjacency matrix will sum to one. [False] by default.
+        
+        Returns
+        -------
+        A : numpy.ndarray
+             an NxN matrix representing the connectivity of the graph, where N is the
+             number of nodes in the network. See adjacency matrix for more details.
+        """
+        # Create (weighted) adjacency matrix networkx object
         G = dm.graphiphy(self.links, self.nodes, weight=weight)
         
         if normalized is True:
@@ -196,79 +328,159 @@ class rivnetwork:
         return A
     
     
-    def to_geovectors(self, *kwargs):
+    def to_geovectors(self, export='network', ftype='json'):
+        """
+        Writes the links and nodes of the network to geovectors.
         
-        if len(kwargs) == 0:
-            try:
-                # Save nodes
-                io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.epsg, self.paths['nodes'])
-                
-                # Save links
-                io.links_to_geofile(self.links, self.imshape, self.gt, self.epsg, self.paths['links'])
-                print('Links and nodes saved to geofiles: {}, {}.'.format(self.paths['nodes'], self.paths['links']))
-                    
-            except AttributeError:
-                print('Links and nodes could not be saved. Ensure network has been computed.')             
+        Parameters
+        ----------
+        export : str
+            Determines which features to export. Choose from:
+                all (exports all available vector data)
+                network (links and nodes)
+                links
+                nodes
+                centerline (river classes only)
+                mesh (centerline mesh, river classes only)
+                centerline_smooth (river classes only)
+        ftype : str
+            Sets the output file format. Choose from:
+                json (GeoJSON)
+                shp  (ESRI Shapefile)
+        """
+        # Get extension for requested output type
+        if ftype == 'json':
+            ext = 'json'
+        elif ftype == 'shp':
+            ext = 'shp'
         else:
-            for kw in kwargs:
-                if kw == 'links':
+            raise TypeError('Only json and shp output types are supported.')
+            
+        # Prepare list of desired exports
+        if export == 'all':
+            to_export = ['links', 'nodes', 'mesh', 'centerline', 'centerline_smooth']
+        elif export == 'network':
+            to_export = ['links', 'nodes']
+        else:
+            to_export = [export]
+              
+        # Ensure that each requested vector dataset has been computed, then export it        
+        for te in to_export:
+            if te == 'links':
+                if hasattr(self, 'links') is True:
+                    self.paths['links'] = os.path.join(self.paths['basepath'], self.name + '_links.' + ext)
                     io.links_to_geofile(self.links, self.imshape, self.gt, self.epsg, self.paths['links'])
-                elif kw == 'nodes':
+                else:
+                    print('Links have not been computed and thus cannot be exported.')
+            if te == 'nodes':
+                if hasattr(self, 'nodes') is True:
+                    self.paths['nodes'] = os.path.join(self.paths['basepath'], self.name + '_nodes.' + ext)
                     io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.epsg, self.paths['nodes'])
-                elif kw == 'mesh':
-                    io.meshlines_to_shapefile(self.meshlines, self.epsg, self.paths['meshlines'], nameid=self.name)
+                else:
+                    print('Nodes have not been computed and thus cannot be exported.')
+            if te == 'mesh':
+                if hasattr(self, 'meshlines') is True and type(self) is river:
+                    self.paths['meshlines'] = os.path.join(self.paths['basepath'], self.name + '_meshlines.' + ext)
+                    self.paths['meshpolys'] = os.path.join(self.paths['basepath'], self.name + '_meshpolys.' + ext)
+                    io.meshlines_to_shapefile(self.meshlines, self.epsg, self.paths['meshlines'])
                     io.meshpolys_to_geovectors(self.meshpolys, self.epsg, self.paths['meshpolys'])
-                elif kw == 'centerline':
+                else:
+                    print('Mesh has not been computed and thus cannot be exported.')
+            if te == 'centerline':
+                if hasattr(self, 'centerline') is True and type(self) is river:
+                    self.paths['centerline'] = os.path.join(self.paths['basepath'], self.name + '_centerline.' + ext)
                     io.centerline_to_geovector(self.centerline, self.epsg, self.paths['centerline'])
-                elif kw == 'centerline_smooth':
+                else:
+                    print('Centerlines has not been computed and thus cannot be exported.')
+            if te == 'centerline_smooth':
+                if hasattr(self, 'centerline_smooth') is True and type(self) is river:
+                    self.paths['centerline_smooth'] = os.path.join(self.paths['basepath'], self.name + '_centerline_smooth.' + ext)
                     io.centerline_to_geovector(self.centerline_smooth, self.epsg, self.paths['centerline_smooth'])
+                else:
+                    print('Smoothed centerline has not been computed and thus cannot be exported.')
+
                     
-                    
-    def write_geotiff(self, writedata='skeleton'):
+    def to_geotiff(self, export):
         """
-        Options for "writedata": 
-            'links' - geotiff with link directions denoted
-            'skeleton' - skeletonized mask
-            'distance' - distance transformed mask
-        """
+        Writes geotiffs to disk.
         
-        possdata = ['links', 'distance', 'skeleton']
-        if writedata not in possdata:
-            print('Cannot write {}. Choose from {}.'.format(writedata, possdata))
+        Parameters
+        ----------
+        export : str
+            Select a raster to write to geotiff. Choose from:
+                directions (network burned into a raster with link directions from 0 (upstream) to 1 (downstream))
+                skeleton (skeletonized mask)
+                distance (distance-transformed mask)
+        """
+        valid_exports = ['directions', 'distance', 'skeleton']
+        if export not in valid_exports:
+            print('Cannot write {}. Choose from {}.'.format(export, valid_exports))
             return
         
-        if writedata == 'links':
-            io.write_linkdirs_geotiff(self.links, self.gdobj, self.paths['linkdirs'])
-            return
+        if export == 'directions':
+            outpath = self.paths['linkdirs']
+            io.write_linkdirs_geotiff(self.links, self.gdobj, outpath)
+        else:
+            if export == 'distance':
+                raster = self.Idist
+                outpath = self.paths['Idist']
+                dtype = gdal.GDT_Float32
+                color_table = None
+                options = None
+                nbands = 1
+            elif export == 'skeleton':
+                raster = self.Iskel
+                outpath = self.paths['Iskel']
+                dtype = gdal.GDT_Byte
+                color_table = io.colortable('skel')
+                options=['COMPRESS=LZW']
+                nbands = 1
         
-        if writedata == 'distance':
-            raster = self.Idist
-            outpath = self.paths['Idist']
-            dtype = gdal.GDT_Float32
-            color_table = 0
-            nbands = 1
-        elif writedata == 'skeleton':
-            raster = self.Iskel
-            outpath = self.paths['Iskel']
-            dtype = gdal.GDT_Byte
-            color_table = io.colortable('skel')
-            nbands = 1
-        
-        io.write_geotiff(raster, self.gt, self.wkt, outpath, dtype=dtype, color_table=color_table, nbands=nbands)
+            io.write_geotiff(raster, self.gt, self.wkt, outpath, dtype=dtype, options=options, color_table=color_table, nbands=nbands)
         
         print('Geotiff written to {}.'.format(outpath))
 
-            
 
 class delta(rivnetwork):
+    """
+    A class to manage and organize data and methods for analyzing a delta channel network. 
+    This class inherets all the attributes and methods of the rivnetwork class, but also includes delta-specific attributes and methods.
     
-    def __init__(self, name, path_to_mask, path_to_results=None, verbose=False):
+    
+    Attributes
+    ----------
+    Iskel : np.ndarray
+        image of the skeletonized binary mask
+    topo_metrics : dict
+        Contains a number of connectivity and network metrics.   
         
-        rivnetwork.__init__(self, name, path_to_mask, path_to_results, verbose=verbose)
+    """   
+
+    def __init__(self, name, path_to_mask, results_folder=None, verbose=False):
+        """
+        
+        Parameters
+        ----------
+        name : str
+            The name of the delta channel network; also defines the folder name for storing results.
+        path_to_mask : str
+           Points to the channel network mask file path
+        results_folder : str, optional
+            Specifies a directory where results should be stored
+        verbose : str, optional
+            RivGraph will output processing progress if 'True'. Default is 'False'.            
+            
+        """
+        
+        rivnetwork.__init__(self, name, path_to_mask, results_folder, verbose=verbose)
             
     
     def skeletonize(self):
+        """
+        Skeletonizes the delta binary mask.
         
+        """
+
         if hasattr(self, 'Imask') is False:
             raise AttributeError('Mask array was not provided or was unreadable.')
             
@@ -278,8 +490,8 @@ class delta(rivnetwork):
 
         else:
             if self.verbose is True:
-                print('Skeltonizing mask...', end='')
-    
+                print('Skeletonizing mask...', end='')
+            
             self.Iskel = m2g.skeletonize_mask(self.Imask)
             
             if self.verbose is True:
@@ -287,6 +499,10 @@ class delta(rivnetwork):
 
 
     def prune_network(self, path_shoreline=None, path_inletnodes=None):
+        """
+        Prunes the delta by removing spurs and links beyond the provided shoreline. 
+        Paths may be provided to shoreline and inlet nodes shapefiles, otherwise their location is specified by paths dictionary.
+        """
         
         try:
             if path_shoreline is None:
@@ -304,6 +520,9 @@ class delta(rivnetwork):
             
     
     def assign_flow_directions(self):
+        """
+        Computes flow directions for each link in the delta channel network.
+        """        
         
         if hasattr(self, 'links') is False:
             raise AttributeError('Network has not yet been computed.')
@@ -320,14 +539,10 @@ class delta(rivnetwork):
         self.links, self.nodes = dd.set_link_directions(self.links, self.nodes, self.imshape, path_csv=self.paths['fixlinks_csv'])
                     
             
-    def set_flow_dirs_manually(self):
-       
-        try:
-            self.links, self.nodes = dd.set_dirs_manually(self.links, self.nodes, self.paths['fixlinks_csv'])
-        except AttributeError:
-            print('Cannot set flow directions. Ensure network has been computed and pruned.')
-
     def compute_topologic_metrics(self):
+        """
+        Computes a suite of connectivity and network metrics for a delta channel network.
+        """
        
         if hasattr(self, 'links') is False:
             raise AttributeError('Network has not yet been computed.')
@@ -339,17 +554,62 @@ class delta(rivnetwork):
 
             
 class river(rivnetwork):
+    """
+    A class to manage and organize data and methods for analyzing a braided river channel network. 
+    This class inherets all the attributes and methods of the rivnewtwork class, but also includes delta-specific attributes and methods.
     
-    def __init__(self, name, path_to_mask, path_to_results=None, exit_sides=None, verbose=False):
+    ...
+    
+    Attributes
+    ----------
+    Iskel : np.ndarray
+        image of the skeletonized binary mask
+    topo_metrics : dict
+        Contains a number of connectivity and network metrics.    
+    centerline : tuple of two numpy.ndarrays
+        Centerline of the holes-filled river channel network mask. First element in tuple are x-coordinates; second are y-coordinates.
+    centerline_smooth : XXX
+        A smooth version of the centerline
+    max_valley_width_pixels : np.int 
+        The maximum valley width in pixels, defined by widths along the centerline       
+    width_chans : XXX
+        Average channel width
+    width_extent: XXX
+        Average width of the holes-filled channel mask
+    meshlines : XXX
+        The lines of the mesh that are perpendicular to the local river direction
+    meshpolys : XXX
+        Polygons comprising the along-channel mesh
+    
+    Methods
+    -------
+    skeletonize()
+        Skeletonizes the river binary mask; uses a different method than for deltas.
+    prune_network()
+        Prunes the river channel network by removing spurs.
+    compute_centerline()
+        Computes the centerline of the holes-filled river channel network mask.
+    compute_mesh(grid_spacing=None, smoothing=0.1, bufferdist=None)
+        Computes a mesh that follows the channel centerline; grid_spacing sets the length of each grid cell; bufferdist sets the width of each grid cell.
+    assign_flow_direcions()
+        Computes flow directions for each link in the delta channel network.
+    set_flow_dirs_manually()
+        Reads a user-created .csv file found at paths['fixlinks_csv'] to set flow directions of specified liks.
+    """   
+
+    def __init__(self, name, path_to_mask, results_folder=None, exit_sides=None, verbose=False):
         
         if exit_sides is None:
             raise Warning('Must provide exit_sides for river class.') 
         
-        rivnetwork.__init__(self, name, path_to_mask, path_to_results, exit_sides, verbose=verbose)
+        rivnetwork.__init__(self, name, path_to_mask, results_folder, exit_sides, verbose=verbose)
             
         
     def skeletonize(self):
-        
+        """
+        Skeletonizes the river binary mask.
+        """
+
         if hasattr(self, 'Imask') is False:
             raise AttributeError('Mask array was not provided or was unreadable.')
             
@@ -368,7 +628,10 @@ class river(rivnetwork):
 
             
     def prune_network(self):
-        
+        """
+        Prunes the computed river network.
+        """
+
         if hasattr(self, 'links') is False:
             raise AttributeError('Could not prune river. Check that network has been computed.')
             
@@ -379,11 +642,15 @@ class river(rivnetwork):
 
 
     def compute_centerline(self):
+        """
+        Computes the centerline of the holes-filled river binary image.
+        """
         
         if self.verbose is True:
             print('Computing centerline...', end='')
             
-        centerline_pix, self.max_valley_width_pixels = ru.mask_to_centerline(self.Imask, self.exit_sides)
+        centerline_pix, valley_centerline_widths = ru.mask_to_centerline(self.Imask, self.exit_sides)
+        self.max_valley_width_pixels = np.max(valley_centerline_widths)
         self.centerline = gu.xy_to_coords(centerline_pix[:,0], centerline_pix[:,1], self.gt)
         
         if self.verbose is True:
@@ -391,37 +658,61 @@ class river(rivnetwork):
         
     
     def compute_mesh(self, grid_spacing=None, smoothing=0.1, bufferdist=None):
+       """
+       Generates an along-centerline mesh that demarcates a valley-direction
+       of sorts. The mesh is useful for computing spatial statistics as a function
+       of downstream distance.
        
-        if hasattr(self, 'centerline') is False:
+       This tool is tricky to fully automate, and the user may need to play
+       with the smoothing and bufferdist parameters if errors are thrown or
+       the result is not satisfying.
+       
+       Parameters
+       ----------
+       grid_spacing : float
+           Defines the distance between perpendicular-to-ceneterline transects.
+       smoothing : float
+           Defines the smoothness of the left- and right-valleylines as a fraction
+           of the total centerline lenght. Range is [0, 1].
+       bufferdist : float
+           Defines the offset distance of the left- and right-valleylines from
+           from the centerline.       
+       """
+       
+       if hasattr(self, 'centerline') is False:
             self.compute_centerline()
                             
-        # Need channel widths for parameterizing mesh generation
-        if hasattr(self, 'width_chans') is False:
-            self.width_chans, self.width_extent = ru.chan_width(self.centerline, self.Imask, pixarea=self.pixarea)
+       # Need channel widths for parameterizing mesh generation
+       if hasattr(self, 'width_chans') is False:
+           self.width_chans, self.width_extent = ru.chan_width(self.centerline, self.Imask, pixarea=self.pixarea)
                 
-        # If not specified, grid spacing is set based on distribution of link lengths        
-        if grid_spacing is None:
-            
-            # Need link widths to parameterize mesh generation (spacing)
-            if 'len' not in self.links.keys():
-                self.compute_link_width_and_length()
+       # If not specified, grid spacing is set based on distribution of link lengths        
+       if grid_spacing is None:
+           
+           # Need link widths to parameterize mesh generation (spacing)
+           if 'len' not in self.links.keys():
+               self.compute_link_width_and_length()
                 
-            grid_spacing = np.percentile(self.links['len'],25)
+           grid_spacing = np.percentile(self.links['len'],25)
         
-        # If bufferdistance not specified, set it to 10% larger than the maximum valley width
-        if bufferdist is None:
-            bufferdist = self.max_valley_width_pixels * self.pixlen * 1.1
-
-        if self.verbose is True:
-            print('Generating mesh...', end='')
-
-        self.meshlines, self.meshpolys, self.centerline_smooth = ru.centerline_mesh(self.centerline, self.width_chans, bufferdist, grid_spacing, smoothing=smoothing)
+       # If bufferdistance not specified, set it to 10% larger than the maximum valley width
+       if bufferdist is None:
+           bufferdist = self.max_valley_width_pixels * self.pixlen * 1.1
+    
+       if self.verbose is True:
+           print('Generating mesh...', end='')
+    
+       self.meshlines, self.meshpolys, self.centerline_smooth = ru.valleyline_mesh(self.centerline, self.width_chans, bufferdist, grid_spacing, smoothing=smoothing)
         
-        if self.verbose is True:
-            print('done.')
+       if self.verbose is True:
+           print('done.')
 
     
     def assign_flow_directions(self):
+        """
+        Automatically sets flow directions for each link in a braided river channel
+        network.
+        """
         
         if 'inlets' not in self.nodes.keys():
             raise AttributeError('Cannot assign flow directions until prune_network has been run.')
