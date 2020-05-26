@@ -9,11 +9,13 @@ As of 5/26/2020, we are working on buttoning down RivGraph, including documentat
 Installing
 -----
 RivGraph v0.2 is hosted on the anaconda channel [jschwenk](https://anaconda.org/jschwenk/rivgraph). We recommend installing into a fresh conda environment to minimize the risk of dependency clashes.
+
 <pre><code>
 conda create -n rg # environment here is named 'rg', but choose whatever you'd like
 conda activate rg
 conda install rivgraph -c jschwenk
 </code></pre>
+
 You may then want to install Spyder or your preferred IDE. Conda *should* fetch all the required dependencies and handle versioning.
 **Note**: While packaged for all platforms, we have currently only tested the win64 platform.
 
@@ -22,11 +24,13 @@ Savvy users have been able to install RivGraph from this Github repo, but usuall
 How to use?
 -----
 We are working on documentation and examples. Your best bet for getting started is to reproduce the [Colville delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb). Otherwise, use RivGraph by creating either a delta or a river class, then applying the associated methods. Look at the [classes.py](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/classes.py) script to get a sense for what methods are available, and what they're actually doing.
+
 **Note**: there are many functions under the hood that may be useful to you. Check out the [im_utils script](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py) (image utilities) in particular for functions to help whip your mask into shape!
 
 Task list
 -----
 These tasks represent what is needed before we "officially" release RivGraph via publication in the [Journal of Open Source Software](https://joss.theoj.org/).
+
 3/29/2020 - Task list created
 - [x] [Delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb)
 - [ ] Braided river example
