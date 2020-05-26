@@ -23,31 +23,11 @@ jobs:
         PROJVERSION="4.9.3"
     - python: "3.7"
       env:
-        GDALVERSION="2.4.4"
-        PROJVERSION="4.9.3"
-    - python: "3.8"
-      env:
-        GDALVERSION="2.4.4"
-        PROJVERSION="4.9.3"
-    - python: "3.6"
-      env:
-        GDALVERSION="3.0.4"
-        PROJVERSION="6.2.1"
-    - python: "3.7"
-      env:
         GDALVERSION="3.0.4"
         PROJVERSION="6.2.1"
     - python: "3.8"
       env:
         GDALVERSION="3.0.4"
-        PROJVERSION="6.2.1"
-    - python: "3.8"
-      env:
-        GDALVERSION="master"
-        PROJVERSION="6.2.1"
-  allow_failures:
-    - env:
-        GDALVERSION="master"
         PROJVERSION="6.2.1"
 
 addons:
@@ -57,7 +37,6 @@ addons:
     - libgdal-dev
     - libatlas-dev
     - libatlas-base-dev
-    - gfortran
 
 before_install:
   - python -m pip install -U pip
@@ -73,6 +52,7 @@ install:
   - "if [ \"$GDALVERSION\" == \"master\" -o $(gdal-config --version) == \"$GDALVERSION\" ]; then echo \"Using gdal $GDALVERSION\"; else echo \"NOT using gdal $GDALVERSION as expected; aborting\"; exit 1; fi"
   - "python -m pip install -r requirements.txt"
   - "GDAL_CONFIG=$GDALINST/gdal-$GDALVERSION/bin/gdal-config python -m pip install --no-deps --force-reinstall --no-use-pep517 -e ."
+  - "python -m pip install gdal"
   - "python -m pip install pytest"
   - "python -m pip install coveralls>=1.1"
 
