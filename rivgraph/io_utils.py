@@ -26,7 +26,7 @@ def prepare_paths(resultsfolder, name, basetiff):
     Given a results folder, a delta or river name, and a filetype, generates
     paths for saving results or intermediate files.
     """
-    basepath = os.path.join(os.path.normpath(resultsfolder), name)
+    basepath =os.path.normpath(resultsfolder)
 
     # Create results folder if it doesn't exist
     if os.path.isdir(basepath) is False:

@@ -1,15 +1,15 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="rivgraph",
-    packages=['rivgraph', 'deltas', 'rivers'],
+    packages=find_packages(),
     version="0.2",
     description="Tools for topological analysis of fluvial networks from binary masks",
     author='Jon Schwenk',
     author_email='jonschwenk@gmail.com',
     url='https://github.com/jonschwenk/rivgraph',
     keywords=['deltas', 'mask', 'topology', 'networks'],
-    install_requires=['setuptools-git'],
+    #install_requires=['setuptools-git'],
     include_package_data=True,
     zip_safe=False
 )
