@@ -90,24 +90,23 @@ class rivnetwork:
         
         # Get or create georeferencing info
         self.mask_path = path_to_mask
-        self.gdobj = gdal.Open(self.mask_path)
+        self.gdobj = gdal.Open(self.mask_path, gdal.GA_Update)
         self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
         
         if self.gdobj.GetProjection() == '':
             print('Input mask is unprojected; assigning a dummy projection.')
             # Creates a dummy projection in EPSG:4326 with UL coordinates (0,0) 
             # and pixel resolution = 1. 
-            self.gt = (0, 1, 0, 0, 0, -1)
             self.wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]' # 4326
             self.epsg = 4326
             self.unit = 'pixel'
             self.gdobj.SetProjection(self.wkt)
-            self.gdobj.SetGeoTransform(self.gt)
+            self.gdobj.SetGeoTransform((0, 1, 0, self.imshape[1], 0, -1))
         else:
-            self.gt = self.gdobj.GetGeoTransform()
             self.wkt = self.gdobj.GetProjection()
             self.epsg = gu.get_EPSG(self.gdobj)
             self.unit = gu.get_unit(self.epsg)
+        self.gt = self.gdobj.GetGeoTransform()
                 
         self.pixarea = abs(self.gt[1] * self.gt[5])
         self.pixlen = abs(self.gt[1])
