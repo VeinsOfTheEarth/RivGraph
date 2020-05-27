@@ -52,7 +52,7 @@ class rivnetwork:
             the name of the channel network, usually the river or delta's name
         verbose : str
             [True] or False to specify if processing updates should be printed.
-        gdobj : osgeo.gdal.Dataset
+        d : osgeo.gdal.Dataset
             object created by gdal.Open() that provides access to geotiff metadata
         mask_path : str
             filepath to the input binary channel network mask
@@ -100,7 +100,9 @@ class rivnetwork:
             self.gt = (0, 1, 0, 0, 0, -1)
             self.wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]' # 4326
             self.epsg = 4326
-            self.unit = 'degree'
+            self.unit = 'pixel'
+            self.gdobj.SetProjection(self.wkt)
+            self.gdobj.SetGeoTransform(self.gt)
         else:
             self.gt = self.gdobj.GetGeoTransform()
             self.wkt = self.gdobj.GetProjection()
