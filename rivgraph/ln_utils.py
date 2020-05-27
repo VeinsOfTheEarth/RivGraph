@@ -461,7 +461,6 @@ def links_to_gpd(links, gdobj):
     # Append geometries
     geoms = []
     for i, lidx in enumerate(links['idx']):
-
         coords = gu.idx_to_coords(lidx, gdobj)
         geoms.append(shp.geometry.LineString(zip(coords[0], coords[1])))
     links_gpd['geometry'] = geoms
