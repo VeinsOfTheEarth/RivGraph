@@ -1,10 +1,10 @@
 numpy
 scikit-image
-opencv-python
+opencv
 pandas
 networkx
-geopandas==0.5.1
-pyproj==2.2.1
+geopandas
+pyproj
 Shapely
-Fiona==1.8.6
+Fiona
 matplotlib

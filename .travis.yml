@@ -18,13 +18,11 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  # Replace dep1 dep2 ... with your dependencies
+  # Create environment and use conda to install packages and their dependencies
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
   - conda activate test-environment
-  - conda install gdal
-  - conda install poppler"<0.62"
-  - conda install gdal --force-reinstall
-  - pip install -r requirements.txt
+  - conda install -y -q gdal
+  - conda install -y -q --name test-environment --file requirements.txt
   - pip install pytest
 # command to run tests
 script:
@@ -52,13 +50,11 @@ jobs:
         # Useful for debugging any issues with conda
         - conda info -a
 
-        # Replace dep1 dep2 ... with your dependencies
+        # Create environment and use conda to install packages and their dependencies
         - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
         - conda activate test-environment
-        - conda install gdal
-        - conda install poppler"<0.62"
-        - conda install gdal --force-reinstall
-        - pip install -r requirements.txt
+        - conda install -y -q gdal
+        - conda install -y -q --name test-environment --file requirements.txt
         - pip install pytest pytest-cov coveralls
       script: pytest --cov-config=.coveragerc --cov=rivgraph/
       after_success:
