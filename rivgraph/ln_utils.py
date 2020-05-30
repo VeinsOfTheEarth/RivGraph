@@ -461,7 +461,6 @@ def links_to_gpd(links, gdobj):
     # Append geometries
     geoms = []
     for i, lidx in enumerate(links['idx']):
-
         coords = gu.idx_to_coords(lidx, gdobj)
         geoms.append(shp.geometry.LineString(zip(coords[0], coords[1])))
     links_gpd['geometry'] = geoms
@@ -689,11 +688,15 @@ def remove_single_pixel_links(links, nodes):
     return links, nodes
 
 
-def append_link_lengths(links, gd_obj, coordproj=4087):
+def append_link_lengths(links, gd_obj):
     """
-    Appends link lengths to each link. If the coordinate system is unprojected
-    epsg:4326, the coordinates will be transformed to an equidistant projected
-    coordinate system (epsg:4087 unless otherwise specified).
+    Appends link lengths to each link. 
+    
+    5/27/2020 Due to dummy projection problems, removing the transformation
+    of coordinates to 4087. Lengths and widths will be computed in units of
+    the provided CRS. If you want to change this in the future, will need
+    to pass a dummy flag to notify that coordinates should not be transformed
+    for those cases.
     """
 
     epsg = gu.get_EPSG(gd_obj)
@@ -703,8 +706,6 @@ def append_link_lengths(links, gd_obj, coordproj=4087):
     links['len'] = []
     for idcs in links['idx']:
         link_coords = gu.idx_to_coords(idcs, gd_obj)
-        if epsg == 4326:
-            link_coords = gu.transform_coords(link_coords[0], link_coords[1], epsg, coordproj)
         dists = np.sqrt(np.diff(link_coords[0])**2 + np.diff(link_coords[1])**2)
         links['len'].append(np.sum(dists))
 
