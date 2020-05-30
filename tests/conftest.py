@@ -12,11 +12,11 @@ from rivgraph.classes import delta
 
 @pytest.fixture(scope="module")
 def test_net():
-    return delta('colville','tests/data/Colville/Colville_islands_filled.tif','tests/results')
+    return delta('colville','tests/data/Colville/Colville_islands_filled.tif','tests/results/colville')
 
 @pytest.fixture(scope="module")
 def known_net():
-    known_net = delta('known','tests/data/Colville/Colville_islands_filled.tif','tests/results')
+    known_net = delta('known','tests/data/Colville/Colville_islands_filled.tif','tests/results/known')
     known_net.load_network(path='tests/data/Colville/Colville_network.pkl')
     return known_net
 
@@ -36,4 +36,4 @@ def synthetic_cycles():
     skimage.io.imsave('tests/data/SyntheticCycle/skeleton.tif',synthetic)
 
     # create and return rivgraph.delta object
-    return delta('synthetic_cycles','tests/data/SyntheticCycle/skeleton.tif','tests/results')
+    return delta('synthetic_cycles','tests/data/SyntheticCycle/skeleton.tif','tests/results/synthetic_cycles')
