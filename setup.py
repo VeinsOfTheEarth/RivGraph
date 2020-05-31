@@ -9,7 +9,7 @@ setup(
     author_email='jonschwenk@gmail.com',
     url='https://github.com/jonschwenk/rivgraph',
     keywords=['deltas', 'mask', 'topology', 'networks'],
-    #install_requires=['setuptools-git'],
+    classifiers = ['Programming Language :: Python :: 3.6'],
     include_package_data=True,
     zip_safe=False
 )
