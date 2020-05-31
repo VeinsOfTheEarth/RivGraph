@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph.classes import delta
+from rivgraph import io_utils as iu
+
+### Testing of functions that do I/O within the rivgraph.classes.delta class
 
 def test_save(known_net):
     # test saving functionality
@@ -63,6 +66,55 @@ def test_plotnetwork(known_net):
     assert os.path.isfile('tests/results/known/testall.png') == True
     assert os.path.isfile('tests/results/known/testnetwork.png') == True
     assert os.path.isfile('tests/results/known/testdirections.png') == True
+
+### Explicit testing of functions from io_utils.py
+class TestColortable:
+    """
+    Testing options related to colortable() function
+    """
+    def test_binary(self):
+        color_table = iu.colortable('binary')
+        assert np.all(color_table.GetColorEntry(0)==(0, 0, 0, 0))
+        assert np.all(color_table.GetColorEntry(1)==(255, 255, 255, 100))
+
+    def test_mask(self):
+        color_table = iu.colortable('mask')
+        assert np.all(color_table.GetColorEntry(0)==(0, 0, 0, 0))
+        assert np.all(color_table.GetColorEntry(1)==(0, 128, 0, 100))
+
+    def test_tile(self):
+        color_table = iu.colortable('tile')
+        assert np.all(color_table.GetColorEntry(0)==(0, 0, 0, 0))
+        assert np.all(color_table.GetColorEntry(1)==(0, 0, 255, 100))
+
+    def test_JRCmo(self):
+        color_table = iu.colortable('JRCmo')
+        assert np.all(color_table.GetColorEntry(0)==(0, 0, 0, 0))
+        assert np.all(color_table.GetColorEntry(1)==(0, 0, 0, 0))
+        assert np.all(color_table.GetColorEntry(2)==(176, 224, 230, 100))
+
+def test_coords_from_shp():
+    coordspath = 'tests/data/Colville/Colville_inlet_nodes.shp'
+    coords = iu.coords_from_shapefile(coordspath)
+    assert np.all(coords==[(352136.9198745673,
+                            7780855.6952854665),
+                           (345692.87413494784,
+                            7781342.648680793)])
+
+def test_create_manual_dir_csv():
+    csvpath = 'tests/results/known/csvtest.csv'
+    iu.create_manual_dir_csv(csvpath)
+    assert os.path.isfile('tests/results/known/csvtest.csv') == True
+
+# def tests_coords_to_shp():
+#     coords = [(352136.9198745673, 7780855.6952854665),
+#               (345692.87413494784, 7781342.648680793)]
+#     epsg = 32606
+#     outpath = 'test/results/known/test_coords_to_shp.shp'
+#     iu.coords_to_shapefile(coords, epsg, outpath)
+#     # function was breaking and returning NoneType...
+
+### Delete data created by tests in this file ...
 
 def test_delete_files():
     # delete created files at the end

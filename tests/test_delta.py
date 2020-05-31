@@ -20,10 +20,6 @@ def test_compute_network(test_net,known_net):
     # compute network
     test_net.compute_network()
 
-    # # also load known network to compare
-    # known_net = delta('known','tests/data/Colville_islands_filled.tif','tests/results')
-    # known_net.load_network(path='tests/data/Colville_network.pkl')
-
     # check that nodes and links are created
     assert len(test_net.nodes['id']) >= len(known_net.nodes['id'])
     assert len(test_net.links['id']) >= len(known_net.links['id'])
