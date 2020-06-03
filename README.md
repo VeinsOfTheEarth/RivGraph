@@ -8,15 +8,16 @@ As of 5/26/2020, we are working on buttoning down RivGraph, including documentat
 
 Installing
 -----
-RivGraph v0.3 is hosted on the anaconda channel [jschwenk](https://anaconda.org/jschwenk/rivgraph). We recommend installing into a fresh conda environment to minimize the risk of dependency clashes. The easiest way to do this is to download the [environment.yml](https://github.com/jonschwenk/RivGraph/blob/master/environment.yml) file, then open Terminal (Mac/Unix) or Anaconda Prompt (Windows)
+RivGraph v0.3 is hosted on the anaconda channel [jschwenk](https://anaconda.org/jschwenk/rivgraph). We recommend installing into a fresh conda environment to minimize the risk of dependency clashes. The easiest way to do this is to download the [environment.yml](https://github.com/jonschwenk/RivGraph/blob/master/environment.yml) file, then open Terminal (Mac/Unix) or Anaconda Prompt (Windows) and type:
 
 <pre><code>conda env create --file /path/to/environment.yml  # the environment name will be 'rivgraph', but you can change the environment file to name it anything</code></pre>
 
-You may then want to install Spyder or your preferred IDE. Conda *should* fetch all the required dependencies and handle versioning.
+You may then want to install Spyder or your preferred IDE. Conda should fetch all the required dependencies and handle versioning.
 
-If you want to install RivGraph into an already-existing environment, you can run <pre><code>conda install rivgraph -c jschwenk</code></pre>
+If you want to install RivGraph into an already-existing environment, you can run <pre><code>conda activate myenv
+conda install rivgraph -c jschwenk</code></pre>
 
-**Note**: While packaged for all platforms, we have currently only tested the win64 platform.
+**Note**: While packaged for all platforms, we have currently only tested the win64 and linux-64 platforms.
 
 Savvy users have been able to install RivGraph from this Github repo, but usually not without dependency headaches. See the [requirements file](https://github.com/jonschwenk/RivGraph/blob/master/requirements.txt) for dependencies.
 
