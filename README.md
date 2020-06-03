@@ -1,6 +1,5 @@
 [![Build Status](https://api.travis-ci.org/jonschwenk/rivgraph.svg?branch=master)](https://api.travis-ci.org/jonschwenk/rivgraph)
 <br />
-
 About
 -----
 RivGraph is a python package that provides tools for converting a binary mask of a channel network into a graph (i.e. a set of connected links and nodes). One major component of RivGraph is its ability to automatically set flow directions in each link of the network. It also computes morphologic metrics (lengths, widths, branching angles, etc.) and topologic metrics. RivGraph also contains a smattering of other tools and features, including some functions for helping clean and prepare your binary mask. 
