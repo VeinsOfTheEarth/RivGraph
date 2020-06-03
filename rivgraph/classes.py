@@ -9,6 +9,7 @@ import os
 import gdal
 import numpy as np
 import networkx as nx
+from pyproj.crs import CRS
 from scipy.ndimage.morphology import distance_transform_edt
 import rivgraph.io_utils as io
 import rivgraph.geo_utils as gu
@@ -84,38 +85,42 @@ class rivnetwork:
             image of the distance transform of the binary mask, dtype=np.float
 
         """
-
+        # Store some class attributes
         self.name = name
         self.verbose = verbose
-        
-        # Get or create georeferencing info
-        self.mask_path = path_to_mask
-        self.gdobj = gdal.Open(self.mask_path, gdal.GA_Update)
-        self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
-        
-        if self.gdobj.GetProjection() == '':
-            print('Input mask is unprojected; assigning a dummy projection.')
-            # Creates a dummy projection in EPSG:4326 with UL coordinates (0,0) 
-            # and pixel resolution = 1. 
-            self.wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]' # 4326
-            self.epsg = 4326
-            self.unit = 'pixel'
-            self.gdobj.SetProjection(self.wkt)
-            self.gdobj.SetGeoTransform((0, 1, 0, self.imshape[1], 0, -1))
-        else:
-            self.wkt = self.gdobj.GetProjection()
-            self.epsg = gu.get_EPSG(self.gdobj)
-            self.unit = gu.get_unit(self.epsg)
-        self.gt = self.gdobj.GetGeoTransform()
-                
-        self.pixarea = abs(self.gt[1] * self.gt[5])
-        self.pixlen = abs(self.gt[1])
-                
+
         # Prepare paths for saving 
         if results_folder is not None:
             self.paths = io.prepare_paths(results_folder, name, path_to_mask)
         else:
             self.paths = io.prepare_paths(os.path.dirname(os.path.abspath(path_to_mask)) , name, path_to_mask)
+        self.paths['input_mask'] = os.path.normpath(path_to_mask)    
+            
+        # Handle georeferencing
+        self.gdobj = gdal.Open(self.paths['input_mask'], gdal.GA_Update) # GA_Update required for setting dummy projection/geotransform
+        self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
+        
+        # Create dummy georeferencing if none is supplied
+        if self.gdobj.GetProjection() == '':
+            print('Input mask is unprojected; assigning a dummy projection.')
+            # Creates a dummy projection in EPSG:4326 with UL coordinates (0,0) 
+            # and pixel resolution = 1. 
+            self.wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]' # 4326
+            # self.epsg = 4326
+            # self.unit = 'pixel'
+            self.gdobj.SetProjection(self.wkt)
+            self.gdobj.SetGeoTransform((0, 1, 0, self.imshape[1], 0, -1))
+        else:
+            self.wkt = self.gdobj.GetProjection()
+            # self.epsg = gu.get_EPSG(self.gdobj)
+            # self.unit = gu.get_unit(self.epsg)
+        self.gt = self.gdobj.GetGeoTransform()
+         
+        # Store crs as pyproj CRS object for interacting with geopandas
+        self.crs = CRS(self.gdobj.GetProjection())
+        
+        self.pixarea = abs(self.gt[1] * self.gt[5])
+        self.pixlen = abs(self.gt[1])                
                 
         # Save exit sides
         if exit_sides is not None:
@@ -370,27 +375,27 @@ class rivnetwork:
             if te == 'links':
                 if hasattr(self, 'links') is True:
                     self.paths['links'] = os.path.join(self.paths['basepath'], self.name + '_links.' + ext)
-                    io.links_to_geofile(self.links, self.imshape, self.gt, self.epsg, self.paths['links'])
+                    io.links_to_geofile(self.links, self.imshape, self.gt, self.crs, self.paths['links'])
                 else:
                     print('Links have not been computed and thus cannot be exported.')
             if te == 'nodes':
                 if hasattr(self, 'nodes') is True:
                     self.paths['nodes'] = os.path.join(self.paths['basepath'], self.name + '_nodes.' + ext)
-                    io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.epsg, self.paths['nodes'])
+                    io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.crs, self.paths['nodes'])
                 else:
                     print('Nodes have not been computed and thus cannot be exported.')
             if te == 'mesh':
                 if hasattr(self, 'meshlines') is True and type(self) is river:
                     self.paths['meshlines'] = os.path.join(self.paths['basepath'], self.name + '_meshlines.' + ext)
                     self.paths['meshpolys'] = os.path.join(self.paths['basepath'], self.name + '_meshpolys.' + ext)
-                    io.meshlines_to_shapefile(self.meshlines, self.epsg, self.paths['meshlines'])
-                    io.meshpolys_to_geovectors(self.meshpolys, self.epsg, self.paths['meshpolys'])
+                    io.meshlines_to_geovectors(self.meshlines, self.crs, self.paths['meshlines'])
+                    io.meshpolys_to_geovectors(self.meshpolys, self.crs, self.paths['meshpolys'])
                 else:
                     print('Mesh has not been computed and thus cannot be exported.')
             if te == 'centerline':
                 if hasattr(self, 'centerline') is True and type(self) is river:
                     self.paths['centerline'] = os.path.join(self.paths['basepath'], self.name + '_centerline.' + ext)
-                    io.centerline_to_geovector(self.centerline, self.epsg, self.paths['centerline'])
+                    io.centerline_to_geovector(self.centerline, self.crs, self.paths['centerline'])
                 else:
                     print('Centerlines has not been computed and thus cannot be exported.')
             if te == 'centerline_smooth':
