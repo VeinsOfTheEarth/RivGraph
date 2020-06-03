@@ -1,7 +1,6 @@
 language: python
 python:
-  - "3.7"
-  - "3.8"
+  - "3.6"
 install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
@@ -19,11 +18,9 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
-  - conda activate test-environment
-  - conda install gdal
-  - pip install -r requirements.txt
+  # Create environment and use conda to install packages and their dependencies
+  - conda env create -q --file environment.yml
+  - conda activate rivgraph
   - pip install pytest
 # command to run tests
 script:
@@ -33,7 +30,7 @@ script:
 jobs:
   include:
     - stage: coverage
-      python: "3.8"
+      python: "3.6"
       install:
         - sudo apt-get update
         # We do this conditionally because it saves us some downloading if the
@@ -51,11 +48,9 @@ jobs:
         # Useful for debugging any issues with conda
         - conda info -a
 
-        # Replace dep1 dep2 ... with your dependencies
-        - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
-        - conda activate test-environment
-        - conda install gdal
-        - pip install -r requirements.txt
+        # Create environment and use conda to install packages and their dependencies
+        - conda env create -q --file environment.yml
+        - conda activate rivgraph
         - pip install pytest pytest-cov coveralls
       script: pytest --cov-config=.coveragerc --cov=rivgraph/
       after_success:

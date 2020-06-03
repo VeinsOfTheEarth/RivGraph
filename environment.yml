@@ -4,9 +4,14 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - rivgraph
+  - python=3.6
+  - gdal
+  - numpy
   - geopandas=0.7.0
   - scikit-image
   - opencv
   - networkx
   - matplotlib
+  - pyproj
+  - Shapely
+  - Fiona
