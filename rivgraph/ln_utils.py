@@ -17,6 +17,7 @@ from matplotlib import colors
 import matplotlib.collections as mcoll
 import sys
 import os
+from pyproj.crs import CRS
 sys.path.append(os.path.realpath(os.path.dirname(__file__)))
 import geo_utils as gu
 from ordered_set import OrderedSet
@@ -445,34 +446,6 @@ def adjust_for_padding(links, nodes, npad, dims, initial_dims):
     return links, nodes
 
 
-def links_to_gpd(links, gdobj):
-    """
-    Converts links dictionary to a geopandas dataframe.
-    """
-    import shapely as shp
-    from fiona.crs import from_epsg
-
-    # Create geodataframe
-    links_gpd = gpd.GeoDataFrame()
-
-    # Assign CRS
-    links_gpd.crs = from_epsg(gu.get_EPSG(gdobj))
-
-    # Append geometries
-    geoms = []
-    for i, lidx in enumerate(links['idx']):
-        coords = gu.idx_to_coords(lidx, gdobj)
-        geoms.append(shp.geometry.LineString(zip(coords[0], coords[1])))
-    links_gpd['geometry'] = geoms
-
-    # Append ids and connectivity
-    links_gpd['id'] = links['id']
-    links_gpd['us node'] = [c[0] for c in links['conn']]
-    links_gpd['ds node'] = [c[1] for c in links['conn']]
-
-    return links_gpd
-
-
 def remove_disconnected_bridge_links(links, nodes):
 
     G = nx.Graph()
@@ -698,8 +671,6 @@ def append_link_lengths(links, gd_obj):
     to pass a dummy flag to notify that coordinates should not be transformed
     for those cases.
     """
-
-    epsg = gu.get_EPSG(gd_obj)
 
     # Compute and append link lengths -- assumes the CRS is in a projection that
     # respects distances
@@ -980,3 +951,30 @@ def plot_network(links, nodes, Imask, name, axis=None):
     axis.set_title(name)
 
     return
+
+
+def links_to_gpd(links, gdobj):
+    """
+    Converts links dictionary to a geopandas dataframe.
+    """
+    import shapely as shp
+
+    # Create geodataframe
+    links_gpd = gpd.GeoDataFrame()
+
+    # Assign CRS
+    links_gpd.crs = CRS(gdobj.GetProjection())
+
+    # Append geometries
+    geoms = []
+    for i, lidx in enumerate(links['idx']):
+        coords = gu.idx_to_coords(lidx, gdobj)
+        geoms.append(shp.geometry.LineString(zip(coords[0], coords[1])))
+    links_gpd['geometry'] = geoms
+
+    # Append ids and connectivity
+    links_gpd['id'] = links['id']
+    links_gpd['us node'] = [c[0] for c in links['conn']]
+    links_gpd['ds node'] = [c[1] for c in links['conn']]
+
+    return links_gpd

@@ -10,6 +10,9 @@ Created on Tue Sep 11 11:24:42 2018
 Utilities for reading, writing, managing, processing, manipulating, etc.
 geographic data including tiffs, vrts, shapefiles, etc.
 
+6/2/2020 - Consider merging this into io_utils and im_utils. Not much actual
+functionality here, and some of these functions are simply unused.
+
 """
 import osr, ogr, gdal
 import numpy as np
@@ -19,49 +22,6 @@ import os
 import sys
 sys.path.append(os.path.realpath(os.path.dirname(__file__)))
 import io_utils as io
-
-
-
-def get_EPSG(file_or_obj, returndict=False):
-    """
-    Returns the EPSG code from a path to a geotiff (or vrt) or shapefile/GeoJSON/etc.
-    EPSG can be returned as a dict (e.g. geopandas/fiona format) if desired.
-
-    Parameters
-    ----------
-    file_or_obj : str or gdal object
-        Either the path to a georeferenced datafile (geotiff, shapefile, etc.),
-        or an object created by gdal.Open().
-    returndict : bool
-        True or [False] to return the epsg code in a diciionary form for easy
-        passing to fiona/geopandas.
-
-    Returns
-    ----------
-    epsg : int or dict
-        If returndict is False, returns the epsg code. If returndict is True,
-        returns epsg code in dictionary format for easy passing to fiona/
-        geopandas.
-    """
-
-    if type(file_or_obj) is str:
-        rast_obj = gdal.Open(file_or_obj)
-    else:
-        rast_obj = file_or_obj
-
-    if rast_obj is not None: # we have a raster
-        wkt = rast_obj.GetProjection()
-        epsg = wkt2epsg(wkt)
-    else: # we have a shapefile
-        vec = gpd.read_file(file_or_obj)
-        epsg = int(vec.crs['init'].strip('epsg:'))
-
-    if returndict is True:
-        epsg_dict = dict()
-        epsg_dict['init'] = 'epsg:' + str(epsg)
-        return epsg_dict
-    else:
-        return epsg
 
 
 def get_unit(epsg):
@@ -77,9 +37,7 @@ def get_unit(epsg):
     ----------
     unit : str
         The unit of the provided epsg code.
-
     """
-
 
     # Units of projection
     srs = osr.SpatialReference()
@@ -87,60 +45,6 @@ def get_unit(epsg):
     unit = srs.GetAttrValue("UNIT",0)
 
     return unit.lower()
-
-
-
-def wkt2epsg(wkt):
-    """
-    Determines the epsg code for a provided WKT definition. Code was mostly
-    taken from https://gis.stackexchange.com/questions/20298/is-it-possible-to-get-the-epsg-value-from-an-osr-spatialreference-class-using-th
-
-    Arguments
-    ---------
-    wkt : str
-        WKT definition
-
-    Returns
-    ----------
-    epsg : int
-        The epsg code.
-    """
-
-    p_in = osr.SpatialReference()
-    s = p_in.ImportFromWkt(wkt)
-    if wkt[8:23] == 'World_Mollweide':
-        return(54009)
-    if s == 5:  # invalid WKT
-        return None
-    if p_in.IsLocal() == 1:  # this is a local definition
-        return p_in.ExportToWkt()
-    if p_in.IsGeographic() == 1:  # this is a geographic srs
-        cstype = 'GEOGCS'
-    else:  # this is a projected srs
-        cstype = 'PROJCS'
-    an = p_in.GetAuthorityName(cstype)
-    ac = p_in.GetAuthorityCode(cstype)
-    if an is not None and ac is not None:  # return the EPSG code
-#        return str(p_in.GetAuthorityName(cstype)), str(p_in.GetAuthorityCode(cstype))
-        return int(p_in.GetAuthorityCode(cstype))
-
-
-#def geotiff_vals_from_idcs(idcs, I_orig, I_pull):
-#    ## TODO: change the name of this function as geotiffs are no longer handled here
-#    """
-#    Pulls pixel values from an image
-#    Uses the get_array function to pull individual indices from
-#    a vrt or tiff.
-#    I_orig is the image corresponding to the input indices
-#    I_pull is the image that you want to pull values from
-#    """
-#    if I_orig == I_pull:
-#        vals = []
-#        for i in idcs:
-#            val = iu.get_array(i, I_pull, (1,1))[0][0][0]
-#            vals.append(val)
-#
-#    return vals
 
 
 def geotiff_vals_from_coords(coords, gd_obj):
@@ -251,54 +155,6 @@ def xy_to_coords(xs, ys, gt):
     return cx, cy
 
 
-def transform_coordinates(xs, ys, inputEPSG, outputEPSG):
-    """
-    Transforms a set of coordinates from one epsg to another.
-
-    Arguments
-    ---------
-    (xs, ys) : (np.array(), np.array())
-        Specifies the coordinates to transform.
-    inputEPSG : int
-        epsg code corresponding to xs, ys
-    outputEPSG : int
-        epsg code corresponding to desired CRS.
-
-    Returns
-    ----------
-    xyout : (np.array(), np.array())
-        N-element arrays of transformed (x, y) coordinates.
-    """
-
-    if inputEPSG == outputEPSG:
-        return xs, ys
-
-    # Create an ogr object of multipoints
-    points = ogr.Geometry(ogr.wkbMultiPoint)
-
-    for x,y in zip(xs,ys):
-        point = ogr.Geometry(ogr.wkbPoint)
-        point.AddPoint(float(x), float(y))
-        points.AddGeometry(point)
-
-    # Create coordinate transformation
-    inSpatialRef = osr.SpatialReference()
-    inSpatialRef.ImportFromEPSG(inputEPSG)
-
-    outSpatialRef = osr.SpatialReference()
-    outSpatialRef.ImportFromEPSG(outputEPSG)
-
-    coordTransform = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
-
-    # transform point
-    points.Transform(coordTransform)
-
-    xyout = np.array([0,0,0])
-    for i in range(len(xs)):
-        xyout = np.vstack((xyout, points.GetGeometryRef(i).GetPoints()))
-    xyout = xyout[1:,0:2]
-
-    return xyout[:,0], xyout[:,1]
 
 
 def transform_coords(xs, ys, inputEPSG, outputEPSG):
@@ -396,3 +252,131 @@ def crop_geotif(tif, cropto='first_nonzero', npad=0, outpath=None):
     io.write_geotiff(tifcropped, crop_gt, tif_obj.GetProjection(), output_file, dtype=datatype, options=options)
 
     return output_file
+
+""" Graveyard """
+# # These functions removed with the upgrade to geopandas v 0.7
+# def get_EPSG(file_or_obj, returndict=False):
+#     """
+#     Returns the EPSG code from a path to a geotiff (or vrt) or shapefile/GeoJSON/etc.
+#     EPSG can be returned as a dict (e.g. geopandas/fiona format) if desired.
+
+#     Parameters
+#     ----------
+#     file_or_obj : str or gdal object
+#         Either the path to a georeferenced datafile (geotiff, shapefile, etc.),
+#         or an object created by gdal.Open().
+#     returndict : bool
+#         True or [False] to return the epsg code in a diciionary form for easy
+#         passing to fiona/geopandas.
+
+#     Returns
+#     ----------
+#     epsg : int or dict
+#         If returndict is False, returns the epsg code. If returndict is True,
+#         returns epsg code in dictionary format for easy passing to fiona/
+#         geopandas.
+#     """
+
+#     if type(file_or_obj) is str:
+#         rast_obj = gdal.Open(file_or_obj)
+#     else:
+#         rast_obj = file_or_obj
+
+#     if rast_obj is not None: # we have a raster
+#         wkt = rast_obj.GetProjection()
+#         epsg = wkt2epsg(wkt)
+#     else: # we have a shapefile
+#         vec = gpd.read_file(file_or_obj)
+#         epsg = int(vec.crs['init'].strip('epsg:'))
+
+#     if returndict is True:
+#         epsg_dict = dict()
+#         epsg_dict['init'] = 'epsg:' + str(epsg)
+#         return epsg_dict
+#     else:
+#         return epsg
+
+
+# def wkt2epsg(wkt):
+#     """
+#     Determines the epsg code for a provided WKT definition. Code was mostly
+#     taken from https://gis.stackexchange.com/questions/20298/is-it-possible-to-get-the-epsg-value-from-an-osr-spatialreference-class-using-th
+
+#     Arguments
+#     ---------
+#     wkt : str
+#         WKT definition
+
+#     Returns
+#     ----------
+#     epsg : int
+#         The epsg code.
+#     """
+
+#     p_in = osr.SpatialReference()
+#     s = p_in.ImportFromWkt(wkt)
+#     if wkt[8:23] == 'World_Mollweide':
+#         return(54009)
+#     if s == 5:  # invalid WKT
+#         return None
+#     if p_in.IsLocal() == 1:  # this is a local definition
+#         return p_in.ExportToWkt()
+#     if p_in.IsGeographic() == 1:  # this is a geographic srs
+#         cstype = 'GEOGCS'
+#     else:  # this is a projected srs
+#         cstype = 'PROJCS'
+#     an = p_in.GetAuthorityName(cstype)
+#     ac = p_in.GetAuthorityCode(cstype)
+#     if an is not None and ac is not None:  # return the EPSG code
+# #        return str(p_in.GetAuthorityName(cstype)), str(p_in.GetAuthorityCode(cstype))
+#         return int(p_in.GetAuthorityCode(cstype))
+
+# # Unused and redundant
+# def transform_coordinates(xs, ys, inputEPSG, outputEPSG):
+#     """
+#     Transforms a set of coordinates from one epsg to another.
+
+#     Arguments
+#     ---------
+#     (xs, ys) : (np.array(), np.array())
+#         Specifies the coordinates to transform.
+#     inputEPSG : int
+#         epsg code corresponding to xs, ys
+#     outputEPSG : int
+#         epsg code corresponding to desired CRS.
+
+#     Returns
+#     ----------
+#     xyout : (np.array(), np.array())
+#         N-element arrays of transformed (x, y) coordinates.
+#     """
+
+#     if inputEPSG == outputEPSG:
+#         return xs, ys
+
+#     # Create an ogr object of multipoints
+#     points = ogr.Geometry(ogr.wkbMultiPoint)
+
+#     for x,y in zip(xs,ys):
+#         point = ogr.Geometry(ogr.wkbPoint)
+#         point.AddPoint(float(x), float(y))
+#         points.AddGeometry(point)
+
+#     # Create coordinate transformation
+#     inSpatialRef = osr.SpatialReference()
+#     inSpatialRef.ImportFromEPSG(inputEPSG)
+
+#     outSpatialRef = osr.SpatialReference()
+#     outSpatialRef.ImportFromEPSG(outputEPSG)
+
+#     coordTransform = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
+
+#     # transform point
+#     points.Transform(coordTransform)
+
+#     xyout = np.array([0,0,0])
+#     for i in range(len(xs)):
+#         xyout = np.vstack((xyout, points.GetGeometryRef(i).GetPoints()))
+#     xyout = xyout[1:,0:2]
+
+#     return xyout[:,0], xyout[:,1]
