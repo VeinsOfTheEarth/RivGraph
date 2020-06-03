@@ -7,6 +7,7 @@ A collection of functions for pruning a delta channel network.
 
 """
 import geopandas as gpd
+from pyproj.crs import CRS
 import numpy as np
 
 import rivgraph.geo_utils as gu
@@ -90,6 +91,7 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
 
     # Check that CRSs match; reproject inlet points if not
     inlets_gpd = gpd.read_file(inlets_shp)
+<<<<<<< HEAD
     inlets_epsg = int(inlets_gpd.crs['init'].split(':')[1])
     mask_epsg = gu.get_EPSG(gdobj)
     if inlets_epsg != mask_epsg:
@@ -98,6 +100,16 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
     # Convert all nodes to xy coordinates for distance search
     nodes_xy = gu.idx_to_coords(nodes['idx'], gdobj)
 
+=======
+    mask_crs = CRS(gdobj.GetProjection())
+    if inlets_gpd.crs != mask_crs:
+        inlets_gpd = inlets_gpd.to_crs(mask_crs)
+        
+    # Convert all nodes to xy coordinates for distance search
+    nodes_xy = gu.idx_to_coords(nodes['idx'], gdobj)
+    
+    # Map provided inlet nodes to actual network nodes
+>>>>>>> travis-ci
     inlets = []
     for inlet_geom in inlets_gpd.geometry.values:
         # Distances between inlet node and all nodes in network
@@ -146,7 +158,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     shore_gdf = gpd.read_file(shoreline_shp)
 
     # Enusre we have consistent CRS before intersecting
-    if links_gdf.crs['init'] != shore_gdf.crs['init']:
+    if links_gdf.crs != shore_gdf.crs:
         shore_gdf = shore_gdf.to_crs(links_gdf.crs)
     shore_gdf.crs = links_gdf.crs #  This line is to prevent the "crs do not match" warning--the warning is triggered by "nodefs: True" in some crs dicts, not the actual CRS as it ensured to be the same in the previous two lines
 
