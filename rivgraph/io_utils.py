@@ -15,7 +15,6 @@ import numpy as np
 import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point, LineString, Polygon
-import fiona
 import sys
 sys.path.append(os.path.realpath(os.path.dirname(__file__)))
 import geo_utils as gu
@@ -26,7 +25,7 @@ def prepare_paths(resultsfolder, name, basetiff):
     Given a results folder, a delta or river name, and a filetype, generates
     paths for saving results or intermediate files.
     """
-    basepath = os.path.join(os.path.normpath(resultsfolder), name)
+    basepath =os.path.normpath(resultsfolder)
 
     # Create results folder if it doesn't exist
     if os.path.isdir(basepath) is False:
@@ -77,7 +76,7 @@ def get_driver(filename):
     return driver
 
 
-def nodes_to_geofile(nodes, dims, gt, epsg, outpath):
+def nodes_to_geofile(nodes, dims, gt, crs, outpath):
 
     nodexy = np.unravel_index(nodes['idx'], dims)
     x, y = gu.xy_to_coords(nodexy[1], nodexy[0], gt)
@@ -85,7 +84,7 @@ def nodes_to_geofile(nodes, dims, gt, epsg, outpath):
 
     # Create GeoDataFrame for storing geometries and attributes
     gdf = gpd.GeoDataFrame(geometry=all_nodes)
-    gdf.crs = fiona.crs.from_epsg(epsg)
+    gdf.crs = crs
 
     # Store attributes as strings (numpy types give fiona trouble)
     dontstore = ['idx']
@@ -101,7 +100,7 @@ def nodes_to_geofile(nodes, dims, gt, epsg, outpath):
     gdf.to_file(outpath, driver=get_driver(outpath))
 
 
-def links_to_geofile(links, dims, gt, epsg, outpath):
+def links_to_geofile(links, dims, gt, crs, outpath):
 
     # Create line objects to write to shapefile
     all_links = []
@@ -112,7 +111,7 @@ def links_to_geofile(links, dims, gt, epsg, outpath):
 
     # Create GeoDataFrame for storing geometries and attributes
     gdf = gpd.GeoDataFrame(geometry=all_links)
-    gdf.crs = fiona.crs.from_epsg(epsg)
+    gdf.crs = crs
 
     # Store attributes as strings (numpy types give fiona trouble)
     dontstore = ['idx', 'n_networks']
@@ -131,7 +130,7 @@ def links_to_geofile(links, dims, gt, epsg, outpath):
     gdf.to_file(outpath, driver=get_driver(outpath))
 
 
-def centerline_to_geovector(cl, epsg, outpath):
+def centerline_to_geovector(cl, crs, outpath):
     """
     Centerline is already-projected Nx2 numpy array.
     """
@@ -140,7 +139,7 @@ def centerline_to_geovector(cl, epsg, outpath):
 
     # Geopandas dataframe
     cl_df = gpd.GeoDataFrame(geometry=[cl_ls])
-    cl_df.crs = fiona.crs.from_epsg(epsg)
+    cl_df.crs = crs
 
     # Save
     cl_df.to_file(outpath, driver=get_driver(outpath))
@@ -209,8 +208,10 @@ def colortable(ctype):
     return color_table
 
 
-def coords_from_shapefile(coordspath):
+def coords_from_geovector(coordspath):
     """
+    Not called in classes.py
+    
     Retrieves centerline coordinates from shapefile.
     """
     xy_gdf = gpd.read_file(coordspath)
@@ -222,10 +223,15 @@ def coords_from_shapefile(coordspath):
     return coords
 
 
-def coords_to_shapefile(coords, epsg, outpath):
+def coords_to_geovector(coords, epsg, outpath):
     """
+    Not called in classes.py
+    
     Given a list or tuple of (x,y) coordinates and the EPSG code, writes the
     coordinates to a shapefile.
+    
+    This should be replaced by a geodataframe creation, but no use cases
+    yet...
     """
 
     all_coords = []
@@ -264,18 +270,18 @@ def coords_to_shapefile(coords, epsg, outpath):
     datasource = layer = feat = geom = None
 
 
-def meshlines_to_shapefile(lines, epsg, outpath):
+def meshlines_to_geovectors(lines, crs, outpath):
 
     line_geoms = []
     for l in lines:
         line_geoms.append(LineString((l[0], l[1])))
 
     gdf = gpd.GeoDataFrame(geometry=line_geoms)
-    gdf.crs = fiona.crs.from_epsg(epsg)
+    gdf.crs = crs
     gdf.to_file(outpath, driver=get_driver(outpath))
 
 
-def meshpolys_to_geovectors(meshpolys, epsg, outpath):
+def meshpolys_to_geovectors(meshpolys, crs, outpath):
     """
     Exports the meshpolys returned by centerline_mesh as a shapefile.
     """
@@ -284,7 +290,7 @@ def meshpolys_to_geovectors(meshpolys, epsg, outpath):
         pgons.append(Polygon(mp))
 
     gdf = gpd.GeoDataFrame(geometry=pgons)
-    gdf.crs = fiona.crs.from_epsg(epsg)
+    gdf.crs = crs
     gdf.to_file(outpath, driver=get_driver(outpath))
 
 
@@ -321,200 +327,3 @@ def create_manual_dir_csv(csvpath):
     df.to_csv(csvpath, index=False)
 
 
-
-""" Replaced or outdated functions """
-
-#def nodes_to_shapefile(nodes, dims, gt, epsg, outpath):
-#
-#    # Read metadata from links dictionary
-#    dims = nodes['imshape']
-#    gt = nodes['gt']
-#    epsg = nodes['epsg']
-#    outpath = nodes['savepath']
-#
-#    # Create point objects to write to shapefile
-#    if 'id' not in nodes.keys():
-#        ids = list(range(0,len(nodes['idx'])))
-#    else:
-#        ids = nodes['id']
-#
-#    all_nodes = []
-#    for node in nodes['idx']:
-#        pt = ogr.Geometry(type=ogr.wkbPoint)
-#        xy = np.unravel_index(node, dims)
-#        ll = gu.xy_to_coords(xy[1]+.5, xy[0]+.5, gt, inputEPSG=epsg, outputEPSG=epsg)[0]
-#        pt.AddPoint_2D(ll[1], ll[0])
-#        all_nodes.append(pt)
-#
-#    # Write the shapefile
-#    driver = ogr.GetDriverByName('ESRI Shapefile')
-#    datasource = driver.CreateDataSource(outpath)
-#
-#    srs = osr.SpatialReference()
-#    srs.ImportFromEPSG(epsg)
-#
-#    layer = datasource.CreateLayer("Nodes", srs, ogr.wkbPoint)
-#    defn = layer.GetLayerDefn()
-#
-#    idField = ogr.FieldDefn('id', ogr.OFTInteger)
-#    connField = ogr.FieldDefn('conn', ogr.OFTString)
-#
-#    layer.CreateField(idField)
-#    layer.CreateField(connField)
-#
-#    for p, i in zip(all_nodes, ids):
-#
-#        # Create a new feature (attribute and geometry)
-#        feat = ogr.Feature(defn)
-#        feat.SetField('id', int(i))
-#
-#        fieldstr = str(nodes['conn'][nodes['id'].index(i)])
-#        fieldstr = fieldstr[1:-1]
-#        feat.SetField('conn', fieldstr)
-#
-#        # Make a geometry
-#        geom = ogr.CreateGeometryFromWkb(p.ExportToWkb())
-#        feat.SetGeometry(geom)
-#
-#        layer.CreateFeature(feat)
-#        feat = geom = None  # destroy these
-#
-#    # Save and close everything
-#    datasource = layer = feat = geom = None
-
-
-#def links_to_shapefile(links):
-#
-#    # Read metadata from links dictionary
-#    dims = links['imshape']
-#    gt = links['gt']
-#    epsg = links['epsg']
-#    outpath = links['savepath']
-#
-#
-#    # Write the shapefile
-#    driver = ogr.GetDriverByName('ESRI Shapefile')
-#    datasource = driver.CreateDataSource(outpath)
-#
-#    srs = osr.SpatialReference()
-#    srs.ImportFromEPSG(epsg)
-#
-#    layer = datasource.CreateLayer("Links", srs, ogr.wkbLineString)
-#    defn = layer.GetLayerDefn()
-#
-#    # Create fields
-#    idField = ogr.FieldDefn('id', ogr.OFTInteger)
-#    usField = ogr.FieldDefn('us node', ogr.OFTInteger)
-#    dsField = ogr.FieldDefn('ds node', ogr.OFTInteger)
-#    layer.CreateField(idField)
-#    layer.CreateField(usField)
-#    layer.CreateField(dsField)
-#
-#    # Include other attributes if available
-#    if 'len' in links.keys():
-#        lenField = ogr.FieldDefn('length', ogr.OFTReal)
-#        layer.CreateField(lenField)
-#    if 'wid' in links.keys():
-#        lenField = ogr.FieldDefn('width', ogr.OFTReal)
-#        layer.CreateField(lenField)
-#    if 'len_adj' in links.keys():
-#        widField = ogr.FieldDefn('len_adj', ogr.OFTReal)
-#        layer.CreateField(widField)
-#    if 'wid_adj' in links.keys():
-#        widField = ogr.FieldDefn('width_adj', ogr.OFTReal)
-#        layer.CreateField(widField)
-#
-#    usnodes = [c[0] for c in links['conn']]
-#    dsnodes = [c[1] for c in links['conn']]
-#    for i, p in enumerate(all_links):
-#
-#        # Create a new feature (attribute and geometry)
-#        feat = ogr.Feature(defn)
-#        feat.SetField('id', int(links['id'][i]))
-#
-#        # Set upstream and downstream node attributes
-#        fieldstr = str(usnodes[i])
-#        feat.SetField('us node', fieldstr)
-#        fieldstr = str(dsnodes[i])
-#        feat.SetField('ds node', fieldstr)
-#
-#        # Set other attributes if available
-#        if 'len' in links.keys():
-#            fieldstr = str(links['len'][i])
-#            feat.SetField('length', fieldstr)
-#
-#        if 'len_adj' in links.keys():
-#            fieldstr = str(links['len_adj'][i])
-#            feat.SetField('len_adj', fieldstr)
-#
-#        if 'wid' in links.keys():
-#            fieldstr = str(links['wid'][i])
-#            feat.SetField('width', fieldstr)
-#
-#        if 'wid_adj' in links.keys():
-#            fieldstr = str(links['wid_adj'][i])
-#            feat.SetField('wid_adj', fieldstr)
-#
-#        # Make a geometry
-#        geom = ogr.CreateGeometryFromWkb(p.ExportToWkb())
-#        feat.SetGeometry(geom)
-#
-#        layer.CreateFeature(feat)
-#
-#        feat = geom = None  # destroy these
-#
-#    # Save and close everything
-#    datasource = layer = feat = geom = None
-
-#def meshlines_to_shapefile_old(lines, EPSG, outpath, nameid=None):
-#    """
-#    Given meshlines (output by RivMesh), ouput a shapefile.
-#    """
-#
-#    # Create line objects to write to shapefile
-#    all_lines = []
-#    for l in lines:
-#        line = ogr.Geometry(type=ogr.wkbLineString)
-#        line.AddPoint_2D(l[0][0], l[0][1])
-#        line.AddPoint_2D(l[1][0], l[1][1])
-#        all_lines.append(line)
-#
-#    # Write the shapefile
-#    driver = ogr.GetDriverByName('ESRI Shapefile')
-#    datasource = driver.CreateDataSource(outpath)
-#
-#    srs = osr.SpatialReference()
-#    srs.ImportFromEPSG(EPSG)
-#
-#    layer = datasource.CreateLayer("meshlines", srs, ogr.wkbLineString)
-#    defn = layer.GetLayerDefn()
-#
-#    idField = ogr.FieldDefn('id', ogr.OFTInteger)
-#    layer.CreateField(idField)
-#    if nameid is not None:
-#        nameField = ogr.FieldDefn('River_Name', ogr.OFTString)
-#        layer.CreateField(nameField)
-#
-#
-#    for i, p in enumerate(all_lines):
-#
-#        # Create a new feature (attribute and geometry)
-#        feat = ogr.Feature(defn)
-#        feat.SetField('id', int(i))
-#
-#        # Set upstream and downstream node attributes
-#        if nameid is not None:
-#            fieldstr = str(nameid)
-#            feat.SetField('River_Name', fieldstr)
-#
-#        # Make a geometry
-#        geom = ogr.CreateGeometryFromWkb(p.ExportToWkb())
-#        feat.SetGeometry(geom)
-#
-#        layer.CreateFeature(feat)
-#
-#        feat = geom = None  # destroy these
-#
-#    # Save and close everything
-#    datasource = layer = feat = geom = None
-#
