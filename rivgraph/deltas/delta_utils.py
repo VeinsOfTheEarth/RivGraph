@@ -149,13 +149,14 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     # Enusre we have consistent CRS before intersecting
     if links_gdf.crs != shore_gdf.crs:
         shore_gdf = shore_gdf.to_crs(links_gdf.crs)
-    shore_gdf.crs = links_gdf.crs #  This line is to prevent the "crs do not match" warning--the warning is triggered by "nodefs: True" in some crs dicts, not the actual CRS as it ensured to be the same in the previous two lines
                 
     ## Remove the links beyond the shoreline
     # Intersect links with shoreline
     shore_int = gpd.sjoin(links_gdf, shore_gdf, op='intersects', lsuffix='left')
+    
     # Get ids of intersecting links
-    cut_link_ids = shore_int['id_left'].values
+    leftkey = [lid for lid in shore_int.columns if 'id' in lid.lower() and 'left' in lid.lower()][0]
+    cut_link_ids = shore_int[leftkey].values
     
     # Loop through each cut link and truncate it near the intersection point; 
     # add endpoint nodes; adjust connectivities
