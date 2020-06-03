@@ -1,0 +1,12 @@
+name: rivgraph
+channels:
+  - jschwenk
+  - conda-forge
+  - defaults
+dependencies:
+  - rivgraph
+  - geopandas=0.7.0
+  - scikit-image
+  - opencv
+  - networkx
+  - matplotlib
