@@ -3,7 +3,7 @@ scikit-image
 opencv-python
 pandas
 networkx
-geopandas
+geopandas >= 0.7
 pyproj
 Shapely
 Fiona
