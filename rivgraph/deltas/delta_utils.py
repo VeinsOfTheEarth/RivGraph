@@ -91,25 +91,14 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
 
     # Check that CRSs match; reproject inlet points if not
     inlets_gpd = gpd.read_file(inlets_shp)
-<<<<<<< HEAD
-    inlets_epsg = int(inlets_gpd.crs['init'].split(':')[1])
-    mask_epsg = gu.get_EPSG(gdobj)
-    if inlets_epsg != mask_epsg:
-        inlets_gpd = inlets_gpd.to_crs(epsg=mask_epsg)
-
-    # Convert all nodes to xy coordinates for distance search
-    nodes_xy = gu.idx_to_coords(nodes['idx'], gdobj)
-
-=======
     mask_crs = CRS(gdobj.GetProjection())
     if inlets_gpd.crs != mask_crs:
         inlets_gpd = inlets_gpd.to_crs(mask_crs)
-        
+
     # Convert all nodes to xy coordinates for distance search
     nodes_xy = gu.idx_to_coords(nodes['idx'], gdobj)
-    
+
     # Map provided inlet nodes to actual network nodes
->>>>>>> travis-ci
     inlets = []
     for inlet_geom in inlets_gpd.geometry.values:
         # Distances between inlet node and all nodes in network
