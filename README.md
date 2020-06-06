@@ -21,7 +21,7 @@ conda install rivgraph -c jschwenk</code></pre>
 
 **Note**: While packaged for all platforms, we have currently only tested the win64 and linux-64 platforms.
 
-Savvy users have been able to install RivGraph from this Github repo, but usually not without dependency headaches. See the [requirements file](https://github.com/jonschwenk/RivGraph/blob/master/requirements.txt) for dependencies.
+Savvy users have been able to install RivGraph from this Github repo, but usually not without dependency headaches. See the [environment file](https://github.com/jonschwenk/RivGraph/blob/master/environment.yml) for dependencies.
 
 How to use?
 -----
