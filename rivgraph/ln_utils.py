@@ -18,9 +18,8 @@ import matplotlib.collections as mcoll
 import sys
 import os
 from pyproj.crs import CRS
-sys.path.append(os.path.realpath(os.path.dirname(__file__)))
-import geo_utils as gu
-from ordered_set import OrderedSet
+import rivgraph.geo_utils as gu
+from rivgraph.ordered_set import OrderedSet
 
 
 def node_updater(nodes, idx, conn):
@@ -683,28 +682,88 @@ def append_link_lengths(links, gd_obj):
     return links
 
 
-def add_artificial_nodes(links, nodes, gd_obj):
+def find_parallel_links(links, nodes):
+    """
+    Finds all parallel links within the graph. A set of parallel links all have
+    the same start and end node. Parallel links are added as an attribute to
+    the links dictionary.
+    
+    Parameters
+    ----------
+    links : TYPE
+        DESCRIPTION.
+    nodes : TYPE
+        DESCRIPTION.
 
-    # Add aritifical nodes to links that share the same two connected
-    # nodes. This is written generally such that if there are more than two
-    # links that share endpoint nodes, aritifical nodes are added to all but
-    # the shortest link. For simplicity of coding, when a node is added, the
-    # old link is deleted and two new links are put in its place.
+    Returns
+    -------
+    None.
 
-
+    """
+    ## TODO: test this implementation against triplet-parallel links.
+    
     # Find parallel edge pairs/triplets/etc that require aritifical nodes
     G = nx.MultiGraph()
     G.add_nodes_from(nodes['id'])
     for lc, lid in zip(links['conn'], links['id']):
         G.add_edge(lc[0], lc[1], linkid=lid)
 
-    pairs = []
+    parallels = []
     for e in G.edges:
         if e[2] > 0:
             temppair = []
             for i in range(0,e[2]+1):
                 temppair.append(G.edges[e[0],e[1],i]['linkid'])
-            pairs.append(temppair)
+            parallels.append(temppair)
+    
+    links['parallels'] = parallels
+    
+    return links, nodes
+
+
+def add_artificial_nodes(links, nodes, gd_obj):
+    """
+    Some graphical metrics fail for graphs that contain parallel links, or
+    links that share the same end nodes. This function alleviates that issue
+    by inserting artificial nodes into all but one of the parallel links. The
+    shortest link of the parallel set will not receive an artificial node.
+    
+    For simplicity of coding, when a node is added, the old link is deleted and
+    two new links are put in its place.
+    
+    If flow directions have been set for links, the properties of the link that
+    is broken into two are appended to the two parts. This may result in some
+    properties that are no longer correct, e.g. slope. 
+    
+    This function should not be run prior to setting flow directions.
+    
+    The 'guess' attribute of the links where artificial nodes are added 
+    will be incorrect as it doesn't account for the artificial node, but 
+    references the original end nodes.
+
+    Parameters
+    ----------
+    links : TYPE
+        DESCRIPTION.
+    nodes : TYPE
+        DESCRIPTION.
+    gd_obj : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    links : TYPE
+        DESCRIPTION.
+    nodes : TYPE
+        DESCRIPTION.
+    """
+    # Links dictionary keys to copy to new links
+    keys_to_copy = ['certain', 'certain_order', 'certain_alg', 'guess', 'guess_alg', 'slope']
+
+    # Find parallel edge pairs/triplets/etc that require aritifical nodes
+    if 'parallels' not in links.keys():
+        links, nodes = find_parallel_links(links, nodes)
+    pairs = links['parallels']
 
     # Append lengths if not already
     if 'len' not in links.keys():
@@ -712,7 +771,7 @@ def add_artificial_nodes(links, nodes, gd_obj):
 
     arts = []
     # Step 2. Add the aritifical node to the proper links
-    for p in pairs:
+    for p in pairs: # Note that pairs can be triplets etc. as well
 
         # Choose the longest link(s) to add the artificial node
         lens = [links['len'][links['id'].index(l)] for l in p]
@@ -730,11 +789,8 @@ def add_artificial_nodes(links, nodes, gd_obj):
             dists = np.cumsum(np.sqrt(np.diff(coords[0])**2 + np.diff(coords[1])**2))
             dists = np.insert(dists, 0, 0)
             halfdist = dists[-1]/2
-            halfidx = np.argmin(np.abs(dists-halfdist))
-
-            # For simplicity, we will delete the old link and create two new links
-            links, nodes = delete_link(links, nodes, l2b)
-
+            halfidx = np.argmin(np.abs(dists-halfdist))            
+            
             # Create two new links
             newlink1_idcs = idx[:halfidx+1]
             newlink2_idcs = idx[halfidx:]
@@ -742,7 +798,35 @@ def add_artificial_nodes(links, nodes, gd_obj):
             # Adding links will also add the required artificial node
             links, nodes = add_link(links, nodes, newlink1_idcs)
             links, nodes = add_link(links, nodes, newlink2_idcs)
+            
+            # Append the properties to the new links
+            for k in keys_to_copy:
+                if k in links.keys():
+                    if type(links[k]) is list:
+                        links[k].append(links[k][lidx])
+                        links[k].append(links[k][lidx])
+                    elif type(links[k]) is np.ndarray:
+                        links[k] = np.append(links[k], links[k][lidx])
+                        links[k] = np.append(links[k], links[k][lidx])
+                    
+            # Ensure the connectivity remains the same
+            us_node = links['conn'][lidx][0]
+            ds_node = links['conn'][lidx][1]
+            
+            newlinkids = links['id'][-2:]
+            for nl in newlinkids:
+                lconn = links['conn'][links['id'].index(nl)]
+                if us_node in lconn:
+                    if lconn[0] != us_node:
+                        lconn = lconn[::-1]
+                if ds_node in lconn:
+                    if lconn[1] != ds_node:
+                        lconn = lconn[::-1]
+                        
+            # Delete the old link
+            links, nodes = delete_link(links, nodes, l2b)
 
+            # Keep track of the added aritifical nodes
             arts.append(nodes['id'][nodes['idx'].index(idx[halfidx])])
 
     # Remove lengths from links
@@ -752,9 +836,17 @@ def add_artificial_nodes(links, nodes, gd_obj):
     nodes['arts'] = arts
 
     # Get links corresponding to aritifical nodes; there should three links
-    # for every added artificial node. These are used later in setting
-    # directionality
+    # for every added artificial node.
     links = find_art_links(links, nodes)
+    
+    # Remove the length and width keys from the links dictionary--these need
+    # to be recomputed after adding aritifical nodes
+    if len(arts) > 0 and 'len_adj' in links.keys():
+        to_rem = ['wid', 'wid_pix', 'wid_adj', 'len_adj', 'len']
+        for tr in to_rem:
+            if tr in links.keys():
+                del links[tr]
+        print('{} artificial nodes added. Link lengths and widths should be recomputed via the link_widths_and_lengths() function in ln_utils.'.format(len(arts)))
 
     return links, nodes
 
@@ -903,7 +995,6 @@ def plot_dirlinks(links, dims):
             maxy = np.max([maxy, np.max(rc[0])])
             miny = np.min([miny, np.min(rc[1])])
             minx = np.min([minx, np.min(rc[0])])
-
 
     ax.set_xlim(minx, maxx)
     ax.set_ylim(miny, maxy)

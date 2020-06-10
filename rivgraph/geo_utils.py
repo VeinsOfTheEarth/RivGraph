@@ -155,8 +155,6 @@ def xy_to_coords(xs, ys, gt):
     return cx, cy
 
 
-
-
 def transform_coords(xs, ys, inputEPSG, outputEPSG):
     """
     Transforms a set of coordinates from one epsg to another.

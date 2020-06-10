@@ -32,7 +32,6 @@ def skel_to_graph(Iskel):
         Returns True if a skeleton pixel's first neighbor is not a branchpoint (i.e.
         the start pixel is valid), else returns False.
         """
-
         neighs = walk.walkable_neighbors([spidx], Iskel)
         isbp = walk.is_bp(neighs.pop(), Iskel)
 
