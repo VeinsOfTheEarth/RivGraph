@@ -42,7 +42,7 @@ These tasks represent what is needed before we "officially" release RivGraph via
 - [ ] How to fix flow directions
 - [ ] Function documentation
 - [ ] Unit testing - in progress (5/11/2020)
-- [ ] Function for removing artificial nodes
+- [x] Function for removing artificial nodes - 6/10/2020
 - [x] [Conda Packaging](anaconda.org/jschwenk/rivgraph) - Updates 5/25/2020 
 
 
