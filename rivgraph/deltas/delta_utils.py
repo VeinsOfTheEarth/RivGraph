@@ -59,11 +59,14 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
     # Remove sets of links that are disconnected from inlets/outlets except for a single bridge link (effectively re-pruning the network)
     links, nodes = lnu.remove_disconnected_bridge_links(links, nodes)
 
-    # Add artificial nodes where necessary
-    links, nodes = lnu.add_artificial_nodes(links, nodes, gdobj)
+    # # Add artificial nodes where necessary
+    # links, nodes = lnu.add_artificial_nodes(links, nodes, gdobj)
         
     # Remove one-node links
     links, nodes = lnu.remove_single_pixel_links(links, nodes)
+    
+    # Find parallel links
+    links, nodes = lnu.find_parallel_links(links, nodes)
     
     return links, nodes
     
