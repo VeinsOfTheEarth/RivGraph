@@ -25,17 +25,17 @@ import rivgraph.directionality as dy
 ## Todo: create the manual fix csv no matter what; allow user to input values
 ## before running directionality.
 
-#delt = d
-##delt.load_network()
-#delt.compute_link_width_and_length()
-#links = delt.links
-#nodes = delt.nodes
-#Imask = delt.Imask
-#imshape = Imask.shape
-#dims = imshape
-#delt.compute_distance_transform()
-#imshape = delt.Imask.shape
-#path_csv = delt.paths['fixlinks_csv']
+# delt = c
+# #delt.load_network()
+# delt.compute_link_width_and_length()
+# links = delt.links
+# nodes = delt.nodes
+# Imask = delt.Imask
+# imshape = Imask.shape
+# dims = imshape
+# delt.compute_distance_transform()
+# imshape = delt.Imask.shape
+# path_csv = delt.paths['fixlinks_csv']
 
 
 def set_link_directions(links, nodes, imshape, path_csv=None):
@@ -96,7 +96,6 @@ def set_initial_directionality(links, nodes, imshape):
     links, nodes = dy.dir_bridges(links, nodes)
 
     # Set link directions
-
     # First, set inlet/outlet directions as they are always 100% accurate
     links, nodes = dy.set_inletoutlet(links, nodes)
 
@@ -223,10 +222,11 @@ def fix_delta_cycles(links, nodes, imshape):
     allfixed = 1
 
     # Create networkx graph object
-    G = nx.DiGraph()
+    G = nx.MultiDiGraph()
     G.add_nodes_from(nodes['id'])
     for lc in links['conn']:
         G.add_edge(lc[0], lc[1])
+        
 
     # Check for cycles
     cantfix_links = []

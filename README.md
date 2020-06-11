@@ -1,3 +1,5 @@
+[![Build Status](https://api.travis-ci.org/jonschwenk/rivgraph.svg?branch=master)](https://api.travis-ci.org/jonschwenk/rivgraph)
+<br />
 About
 -----
 RivGraph is a python package that provides tools for converting a binary mask of a channel network into a graph (i.e. a set of connected links and nodes). One major component of RivGraph is its ability to automatically set flow directions in each link of the network. It also computes morphologic metrics (lengths, widths, branching angles, etc.) and topologic metrics. RivGraph also contains a smattering of other tools and features, including some functions for helping clean and prepare your binary mask. 
@@ -8,17 +10,18 @@ As of 5/26/2020, we are working on buttoning down RivGraph, including documentat
 
 Installing
 -----
-RivGraph v0.3 is hosted on the anaconda channel [jschwenk](https://anaconda.org/jschwenk/rivgraph). We recommend installing into a fresh conda environment to minimize the risk of dependency clashes. The easiest way to do this is to download the [environment.yml](https://github.com/jonschwenk/RivGraph/blob/master/environment.yml) file, then open Terminal (Mac/Unix) or Anaconda Prompt (Windows)
+RivGraph v0.3 is hosted on the anaconda channel [jschwenk](https://anaconda.org/jschwenk/rivgraph). We recommend installing into a fresh conda environment to minimize the risk of dependency clashes. The easiest way to do this is to download the [environment.yml](https://github.com/jonschwenk/RivGraph/blob/master/environment.yml) file, then open Terminal (Mac/Unix) or Anaconda Prompt (Windows) and type:
 
 <pre><code>conda env create --file /path/to/environment.yml  # the environment name will be 'rivgraph', but you can change the environment file to name it anything</code></pre>
 
-You may then want to install Spyder or your preferred IDE. Conda *should* fetch all the required dependencies and handle versioning.
+You may then want to install Spyder or your preferred IDE. Conda should fetch all the required dependencies and handle versioning.
 
-If you want to install RivGraph into an already-existing environment, you can run <pre><code>conda install rivgraph -c jschwenk</code></pre>
+If you want to install RivGraph into an already-existing environment, you can run <pre><code>conda activate myenv
+conda install rivgraph -c jschwenk</code></pre>
 
-**Note**: While packaged for all platforms, we have currently only tested the win64 platform.
+**Note**: While packaged for all platforms, we have currently only tested the win64 and linux-64 platforms.
 
-Savvy users have been able to install RivGraph from this Github repo, but usually not without dependency headaches. See the [requirements file](https://github.com/jonschwenk/RivGraph/blob/master/requirements.txt) for dependencies.
+Savvy users have been able to install RivGraph from this Github repo, but usually not without dependency headaches. See the [environment file](https://github.com/jonschwenk/RivGraph/blob/master/environment.yml) for dependencies.
 
 How to use?
 -----
@@ -39,7 +42,7 @@ These tasks represent what is needed before we "officially" release RivGraph via
 - [ ] How to fix flow directions
 - [ ] Function documentation
 - [ ] Unit testing - in progress (5/11/2020)
-- [ ] Function for removing artificial nodes
+- [x] Function for removing artificial nodes - 6/10/2020
 - [x] [Conda Packaging](anaconda.org/jschwenk/rivgraph) - Updates 5/25/2020 
 
 

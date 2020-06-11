@@ -29,7 +29,7 @@ def prepare_paths(resultsfolder, name, basetiff):
 
     # Create results folder if it doesn't exist
     if os.path.isdir(basepath) is False:
-        os.mkdir(basepath)
+        os.makedirs(basepath)
 
     # Create dictionary of directories
     paths = dict()
