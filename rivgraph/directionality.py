@@ -14,8 +14,7 @@ import pandas as pd
 from scipy.stats import mode
 import os
 import sys
-sys.path.append(os.path.realpath(os.path.dirname(__file__)))
-import ln_utils as lnu
+from rivgraph import ln_utils as lnu
 
 #cvil.load_network()
 #
@@ -526,6 +525,9 @@ def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True):
     """
     Sets a link directionality; then checks for continuity and artificial nodes.
     """
+    # if links['id'][linkidx] == 409:
+    #     import pdb; pdb.set_trace()
+
     links['conn'][linkidx].remove(usnode)
     links['conn'][linkidx].insert(0,usnode)
     if links['idx'][linkidx][0] != nodes['idx'][nodes['id'].index(usnode)]:
@@ -540,11 +542,18 @@ def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True):
     if checkcontinuity is True:
         # Set any other possible links via continuity
         links, nodes = set_continuity(links, nodes, checknodes=links['conn'][linkidx][:])
-        # Set any other possible links via artificial nodes
-        links, nodes = set_artificial_nodes(links, nodes, checknodes=links['conn'][linkidx][:])
-        # Have to set continuity again, but this time we don't know which nodes to check because
-        # the setting of artificial lin
-        links, nodes = set_continuity(links, nodes, checknodes=links['conn'][linkidx][:])
+       
+        # Also set parallel links connected to this one, or if this link is part
+        # of a parallel set, set the others in the set
+        links, nodes = set_parallel_links(links, nodes, knownlink=links['id'][linkidx])
+       
+        # # Set any other possible links via artificial nodes
+        # links, nodes = set_artificial_nodes(links, nodes, checknodes=links['conn'][linkidx][:])
+      
+        # # Have to set continuity again, but this time we don't know which nodes to check because
+        # # the setting of artificial links
+        # links, nodes = set_continuity(links, nodes, checknodes=links['conn'][linkidx][:])
+        
 
 
     return links, nodes
@@ -1059,6 +1068,75 @@ def set_continuity(links, nodes, checknodes='all'):
     return links, nodes
 
 
+def set_parallel_links(links, nodes, knownlink):
+    """
+    If two links are parallel, they share the same end nodes. If the direction
+    of one of the links is known, the other must be set in the same direction
+    to avoide creating a cycle within the graph. 
+    
+    checklink should refer to a link id whose direction is known.
+    
+    This function replaces 
+    set_artificial_nodes as artificial nodes are no longer computed before
+    setting directions.
+    
+    In a sense, this function is enforcing continuity.
+    
+    There is another way to check parallel links--if any one of a parallel
+    link set is known, all the others can be set. This function as of now
+    only looks for an un-set set of parallel links connected to a known
+    flow direction link.
+    
+
+    Parameters
+    ----------
+    links : TYPE
+        DESCRIPTION.
+    nodes : TYPE
+        DESCRIPTION.
+    knownlink : TYPE
+        id of (known directions) link to check for connections to parallel links.
+
+    Returns
+    -------
+    None.
+
+    """
+    ## TODO: test this
+    alg = 2
+        
+    if 'parallels' not in links.keys():
+        return links, nodes
+    lidx = links['id'].index(knownlink)
+    docheck = False
+    for parpairs in links['parallels']:
+        docheck = False
+        
+        # Determine the upstream and downstream nodes for the parallel set.
+        if knownlink in parpairs: # If the knownlink is part of the set
+            dsnode = links['conn'][lidx][1]
+            usnode = links['conn'][lidx][0]
+        else: # If the knownlink is not part of the set
+            dsnode = links['conn'][lidx][0]
+            usnode = links['conn'][lidx][1]
+ 
+        # Check if any parallel sets are connected to the known link
+        ppnodes = links['conn'][links['id'].index(parpairs[0])][:]
+        for parlink in parpairs:
+            if links['certain'][links['id'].index(parlink)] == 0:
+                if dsnode in ppnodes:
+                    usnode_set = [n for n in ppnodes if n != dsnode][0]
+                    links, nodes = set_link(links, nodes, links['id'].index(parlink), usnode_set, alg=alg, checkcontinuity=False)
+                    docheck = True
+                if usnode in ppnodes:
+                    links, nodes = set_link(links, nodes, links['id'].index(parlink), usnode, alg=alg, checkcontinuity=False)
+                    docheck = True
+        if docheck is True:
+            links, nodes = set_continuity(links, nodes, checknodes=ppnodes)            
+            
+    return links, nodes  
+  
+    
 def set_artificial_nodes(links, nodes, checknodes='all'):
     """
     Set the directionality of links where aritificial nodes were added. For such
@@ -1070,7 +1148,7 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
 
     Can check chosen nodes by specifying their IDs in the checknodes list.
     """
-    alg = 2
+    alg = 2.1
 
     for n in checknodes:
 
