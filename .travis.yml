@@ -52,6 +52,8 @@ jobs:
         - conda env create -q --file environment.yml
         - conda activate rivgraph
         - pip install pytest pytest-cov coveralls
-      script: pytest --cov-config=.coveragerc --cov=rivgraph/
+      script:
+        - python setup.py install
+        - pytest --cov-config=.coveragerc --cov=rivgraph/
       after_success:
         - coveralls
