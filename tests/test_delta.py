@@ -1,14 +1,20 @@
+"""Tests for broader `rivgraph.classes.delta` functions."""
 import pytest
-import sys, os
+import sys
+import os
 import numpy as np
-
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph.classes import delta
 from rivgraph import directionality
 
+
 def test_skeletonize(test_net):
+    """Test skeletonization."""
     # do skeletonization
     test_net.skeletonize()
+    # check that all Iskel 1 values are 1s in the Imask array aka no created 1s
+    mask = np.where(test_net.Iskel == 1)
+    assert np.all(test_net.Imask[mask] == True)
     # ensure the size of the input mask is equal to size of skeletonized output
     assert np.shape(test_net.Imask) == np.shape(test_net.Iskel)
     # ensure max value in skeleton are 1
@@ -35,7 +41,9 @@ def test_skeletonize(test_net):
     assert test_net.Iskel[1298,457] == False
     assert test_net.Imask[1298,457] == True
 
-def test_compute_network(test_net,known_net):
+
+def test_compute_network(test_net, known_net):
+    """Test compute network."""
     # compute network
     test_net.compute_network()
 
@@ -43,25 +51,26 @@ def test_compute_network(test_net,known_net):
     assert len(test_net.nodes['id']) >= len(known_net.nodes['id'])
     assert len(test_net.links['id']) >= len(known_net.links['id'])
 
+
 @pytest.mark.xfail
-def test_prune_network(test_net,known_net):
+def test_prune_network(test_net, known_net):
+    """Test network pruning."""
     # prune the network
     test_net.prune_network(path_shoreline='tests/data/Colville/Colville_shoreline.shp',
-                          path_inletnodes='tests/data/Colville/Colville_inlet_nodes.shp')
+                           path_inletnodes='tests/data/Colville/Colville_inlet_nodes.shp')
 
     # now the number of nodes and links should be exactly the same
-    ### Currently x-failing because changes in directionality computation altered the number of nodes/links identified
+    # Currently x-failing because changes in directionality computation altered the number of nodes/links identified
     assert len(test_net.nodes['id']) == len(known_net.nodes['id'])
     assert len(test_net.links['id']) == len(known_net.links['id'])
 
 
-
-def test_flowdir(test_net,known_net):
-    """Not the most elegant test -- need to streamline"""
+def test_flowdir(test_net, known_net):
+    """Not the most elegant test -- need to streamline."""
     # set directions
     test_net.assign_flow_directions()
 
-    ### Testing point 1 ###
+    # Testing point 1 ###
     # identify corresponding idx value in test network to known 'idx' [0]
     test_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][0])
     # interrogate the 'conn' values to find corresponding 'idx' values
@@ -78,7 +87,7 @@ def test_flowdir(test_net,known_net):
     # have to use the idx values from one of the conn links to verify this
     assert test_net.links['idx'][t_idx[0]] == known_net.links['idx'][k_idx[0]]
 
-    ### Testing point 2 ###
+    # Testing point 2 ###
     # identify corresponding idx value in test network to known 'idx' [30]
     test_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][30])
     # interrogate the 'conn' values to find corresponding 'idx' values
@@ -113,28 +122,27 @@ def test_flowdir(test_net,known_net):
     assert test_net.links['idx'][t_idx[0]] == known_net.links['idx'][k_idx[0]]
 
 
-
-def test_junction_angles(test_net,known_net):
-    """Not the most elegant test -- need to streamline"""
+def test_junction_angles(test_net, known_net):
+    """Not the most elegant test -- need to streamline."""
     # compute the junction angles
     test_net.compute_junction_angles(weight=None)
     known_net.compute_junction_angles(weight=None)
 
-    ### Testing point 1 ###
+    # Testing point 1 ###
     # comparison of calculated junction angle (rounded to integer)
     t_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][0])
-    assert np.floor(test_net.nodes['int_ang'][t_ind]) == np.floor(known_net.nodes['int_ang'][0])
+    assert np.floor(test_net.nodes['int_ang'][t_ind])== np.floor(known_net.nodes['int_ang'][0])
     # comparison of junction type
     assert test_net.nodes['jtype'][t_ind] == known_net.nodes['jtype'][0]
 
-    ### Testing point 2 ###
+    # Testing point 2 ###
     # comparison of calculated junction angle (rounded to nearest 10)
     t_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][20])
     assert np.floor(test_net.nodes['int_ang'][t_ind]/10) == np.floor(known_net.nodes['int_ang'][20]/10)
     # comparison of junction type
     assert test_net.nodes['jtype'][t_ind] == known_net.nodes['jtype'][20]
 
-    ### Testing point 3 ###
+    # Testing point 3 ###
     # comparison of calculated junction angle (rounded to nearest 10)
     t_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][70])
     assert np.floor(test_net.nodes['int_ang'][t_ind]/10) == np.floor(known_net.nodes['int_ang'][70]/10)
@@ -142,7 +150,7 @@ def test_junction_angles(test_net,known_net):
     assert test_net.nodes['jtype'][t_ind] == known_net.nodes['jtype'][70]
 
 
-### currently a bug in the compute_topologic_metrics() method is
+# currently a bug in the compute_topologic_metrics() method is
 # creating a memory overflow so below tests are not enabled now
 
 # def test_metrics(test_net,known_net):

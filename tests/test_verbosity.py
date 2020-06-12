@@ -1,12 +1,14 @@
+"""Tests associated with verbosity outputs."""
 import pytest
-import sys, os
+import sys
+import os
 import io
-import numpy as np
-
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph.classes import delta
 
+
 def test_plot_failure(test_net):
+    """Test network not computed output."""
     # set up capture string
     capturedOutput = io.StringIO()
     sys.stdout = capturedOutput
@@ -19,7 +21,9 @@ def test_plot_failure(test_net):
     # assert output
     assert capturedOutput.getvalue()[:-1] == 'Network has not been computed yet; cannot plot.'
 
+
 def test_save_networkcatch(test_net):
+    """Test network not computed output."""
     # set up capture string
     capturedOutput = io.StringIO()
     sys.stdout = capturedOutput
@@ -33,6 +37,7 @@ def test_save_networkcatch(test_net):
     assert capturedOutput.getvalue()[:-1] == 'Network has not been computed yet. Use the compute_network() method first.'
 
 def test_compute_verbosity(test_net):
+    """Test skeletonization / resolution of links and nodes."""
     # set up capture string
     capturedOutput = io.StringIO()
     sys.stdout = capturedOutput
@@ -46,7 +51,9 @@ def test_compute_verbosity(test_net):
     assert capturedOutput.getvalue()[0:26] == 'Skeletonizing mask...done.'
     assert capturedOutput.getvalue()[27:-1] == 'Resolving links and nodes...done.'
 
+
 def test_distance_verbosity(test_net):
+    """Test distance transform output."""
     # capture string
     capturedOutput = io.StringIO()
     sys.stdout = capturedOutput
@@ -58,7 +65,9 @@ def test_distance_verbosity(test_net):
     # make assertion
     assert capturedOutput.getvalue()[:-1] == 'Computing distance transform...done.'
 
+
 def test_plot_dirs(test_net):
+    """Link direction warning."""
     # capture string
     capturedOutput = io.StringIO()
     sys.stdout = capturedOutput
@@ -69,7 +78,9 @@ def test_plot_dirs(test_net):
     # make assertion
     assert capturedOutput.getvalue()[:-1] == 'Must assign link directions before plotting link directions.'
 
+
 def test_compute_link_verbosity(test_net):
+    """Computing links/widths/lengths output."""
     # capture string
     capturedOutput = io.StringIO()
     sys.stdout = capturedOutput
@@ -80,7 +91,9 @@ def test_compute_link_verbosity(test_net):
     # make assertion
     assert capturedOutput.getvalue()[:-1] == 'Computing link widths and lengths...done.'
 
+
 def test_junction_vebosity(test_net):
+    """Testing junction verbosity."""
     # capture string
     capturedOutput = io.StringIO()
     sys.stdout = capturedOutput
