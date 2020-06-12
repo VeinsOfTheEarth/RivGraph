@@ -1119,7 +1119,11 @@ def set_parallel_links(links, nodes, knownlink):
         else: # If the knownlink is not part of the set
             dsnode = links['conn'][lidx][0]
             usnode = links['conn'][lidx][1]
- 
+        
+        # import pdb; 
+        # if parpairs[0] == 42:
+        #     pdb.set_trace()
+            
         # Check if any parallel sets are connected to the known link
         ppnodes = links['conn'][links['id'].index(parpairs[0])][:]
         for parlink in parpairs:

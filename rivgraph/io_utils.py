@@ -135,10 +135,11 @@ def centerline_to_geovector(cl, crs, outpath):
     Centerline is already-projected Nx2 numpy array.
     """
     # Put points into shapely LineString
-    cl_ls = LineString(zip(cl[0], cl[1]))
+    if type(cl) is not LineString:
+        cl = LineString(zip(cl[0], cl[1]))
 
     # Geopandas dataframe
-    cl_df = gpd.GeoDataFrame(geometry=[cl_ls])
+    cl_df = gpd.GeoDataFrame(geometry=[cl])
     cl_df.crs = crs
 
     # Save
@@ -272,11 +273,7 @@ def coords_to_geovector(coords, epsg, outpath):
 
 def meshlines_to_geovectors(lines, crs, outpath):
 
-    line_geoms = []
-    for l in lines:
-        line_geoms.append(LineString((l[0], l[1])))
-
-    gdf = gpd.GeoDataFrame(geometry=line_geoms)
+    gdf = gpd.GeoDataFrame(geometry=lines)
     gdf.crs = crs
     gdf.to_file(outpath, driver=get_driver(outpath))
 
@@ -285,11 +282,8 @@ def meshpolys_to_geovectors(meshpolys, crs, outpath):
     """
     Exports the meshpolys returned by centerline_mesh as a shapefile.
     """
-    pgons = []
-    for mp in meshpolys:
-        pgons.append(Polygon(mp))
 
-    gdf = gpd.GeoDataFrame(geometry=pgons)
+    gdf = gpd.GeoDataFrame(geometry=meshpolys)
     gdf.crs = crs
     gdf.to_file(outpath, driver=get_driver(outpath))
 
