@@ -97,6 +97,7 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
     mask_crs = CRS(gdobj.GetProjection())
     if inlets_gpd.crs != mask_crs:
         inlets_gpd = inlets_gpd.to_crs(mask_crs)
+        print('Provided inlet points file does not have the same CRS as provided mask. Reprojecting.')
         
     # Convert all nodes to xy coordinates for distance search
     nodes_xy = gu.idx_to_coords(nodes['idx'], gdobj)
@@ -152,6 +153,8 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     # Enusre we have consistent CRS before intersecting
     if links_gdf.crs != shore_gdf.crs:
         shore_gdf = shore_gdf.to_crs(links_gdf.crs)
+        print('Provided shoreline file does not have the same CRS as provided mask. Reprojecting.')
+
                 
     ## Remove the links beyond the shoreline
     # Intersect links with shoreline
