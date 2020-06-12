@@ -11,7 +11,7 @@ import numpy as np
 import networkx as nx
 from scipy.ndimage.morphology import distance_transform_edt
 import shapely
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Polygon
 import scipy.interpolate as si
 from scipy import signal
 from scipy.spatial.distance import cdist
@@ -32,8 +32,9 @@ def prune_river(links, nodes, exit_sides, Iskel, gdobj):
     # Remove spurs from network (this includes valid inlets and outlets unless specified not to remove)
     links, nodes = lnu.remove_all_spurs(links, nodes, dontremove=list(nodes['inlets'] + nodes['outlets']))
 
-    # Add artificial nodes where necessary
-    links, nodes = lnu.add_artificial_nodes(links, nodes, gdobj)
+    # # Add artificial nodes where necessary
+    # links, nodes = lnu.add_artificial_nodes(links, nodes, gdobj)
+    links, nodes = lnu.find_parallel_links(links, nodes)
 
     # Remove sets of links that are disconnected from inlets/outlets except for a single bridge link (effectively re-pruning the network)
     links, nodes = lnu.remove_disconnected_bridge_links(links, nodes)
@@ -522,7 +523,7 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
         coords: 2xN list, tuple, np.array (xs, ys) of coordinates defining centerline
         width_chan: width of the river in same units of coords
         mesh_dist: how wide should the mesh be, in same units of coords
-        mesh_spacing: how far apart should mesh cells be, in same units of coords
+        grid_spacing: how far apart should mesh cells be, in same units of coords
     """
 #    coords = ken.centerline
 #    width_chan = ken.width_chans
@@ -658,7 +659,6 @@ def mirror_line_ends(xs, ys, npad):
 
 
 def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15):
-
     """
     This function generates a mesh over an input river centerline. The mesh
     is generated across the valley, not just the channel width, in order to
@@ -680,6 +680,190 @@ def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15
         lines - the "perpendiculars" to the centerline used to generate the mesh
         polys - coordinates of the polygons representing the grid cells of the mesh
     """
+    
+    def find_cl_intersection_pts_and_distance(endpts, cl):
+        """
+        Given a list of transect endpoints, this computes the intersection
+        point along the centerline, and then returns the corresponding
+        along-centerline distance to that point from the upstream boundary.
+        
+        End transects might not intersect the centerline. In these cases,
+        we rely on the previous processing steps that artificially extended 
+        the centerline and simply drop the transects--effectively clipping
+        the centerline to the first and last transect intersections.
+        """
+        
+        int_pts = []
+        dist_to_int = []
+        for ie, eps in enumerate(endpts):
+            tsect = LineString(eps)
+            int_pt = tsect.intersection(cl)
+            
+            if int_pt.coords == []: # There is no intersection
+                int_pts.append(None)
+                dist_to_int.append(None)
+                continue
+            
+            # Project the intersection point to the centerline and return 
+            # the along-centerline distance of this point
+            dist_to_int.append(float(cl.project(int_pt)))
+            
+            int_pts.append(int_pt)
+            
+        dist_to_int = np.array(dist_to_int)
+        int_pts = np.array(int_pts)
+            
+        # Now clip the distances, centerline, and endpoints where there were no intersections
+        no_ints = dist_to_int==None
+        dist_to_int = dist_to_int[~no_ints]
+        int_pts = int_pts[~no_ints]
+        cl_clip = LineString(zip(np.array(cl.coords.xy[0])[~no_ints], np.array(cl.coords.xy[1])[~no_ints]))
+        ep_clip = [ep for iep, ep in enumerate(endpts) if no_ints[iep]==False]        
+       
+        # Reset the origin
+        dist_to_int = dist_to_int - dist_to_int[0]
+        
+            
+        return dist_to_int, cl_clip, ep_clip
+            
+    
+    def iterative_cl_pt_mapping(cl, bufdists, side):
+        from fastdtw import fastdtw
+        from scipy.spatial.distance import euclidean
+
+        mapper = []
+        lines = []
+        plt.close()
+     
+        old = cl
+        for i, bd in enumerate(bufdists):
+
+            new = shapely_offset_ls(cl, bd, side)
+            
+            Co, Ao, so = curvars(old.coords.xy[0], old.coords.xy[1])
+            Cn, An, sn = curvars(new.coords.xy[0], new.coords.xy[1])
+            
+            Ao = np.insert(Ao, 0, 0)
+            An = np.insert(An, 0, 0)
+            
+            distance, path = fastdtw(Ao, An, dist=euclidean)
+            path = np.array(path)
+            
+            mapper.append(path)
+            lines.append(new)
+            
+            old = new
+   
+        return lines, mapper
+        
+    
+    def get_transect_indices_along_buffered_lines(cl, mapper):
+        """
+        Returns a map of the index of each offset line mapped from the 
+        original centerline. Keys are original centerline indices; values
+        are lists the length of number of offsets (i.e. length of bufdists). 
+        Really only the last entry in each value is needed, but keeping them
+        all for developing/debugging purposes.
+        """
+        pts = {}
+        for i in range(len(cl.coords.xy[0])):
+            
+            idx = i
+            idxlist = [idx]
+
+            for m in mapper:
+                m = np.array(m)
+                m_idx = (np.where(m[:,0]==idx)) # Get the most-downstrea
+                if len(m_idx) > 1:
+                    print(m_idx)
+                m_idx = np.max(m_idx) # Chooses the most downstream if multiple are available
+                idx = m[m_idx,1]
+                idxlist.append(idx)
+            pts[i] = idxlist
+    
+        return pts
+    
+    
+    def get_transect_endpoints_xy(lpts, rpts):
+        """
+        Given dictionaries that map centerline points to indices along buffered
+        left and right lines, this returns the endpoints of each transect.
+        """
+        assert len(lpts) == len(rpts)
+        
+        endpoints = []
+        for i in range(len(lpts)):
+            lidx = lpts[i][-1]
+            ridx = rpts[i][-1]
+            
+            lxy = (llines[-1].coords.xy[0][lidx], llines[-1].coords.xy[1][lidx])
+            rxy = (rlines[-1].coords.xy[0][ridx], rlines[-1].coords.xy[1][ridx])
+            endpoints.append([lxy, rxy])
+            
+        return endpoints
+    
+    
+    def shapely_offset_ls(ls, dist, side):
+        """
+        Just a wrapper around shapely's offset_linestring() function. That 
+        function adds little barbs sometimes to the end of the offset
+        linestring. This function detects and removes those.
+        """
+        offset = offset_linestring(ls, dist, side)
+        
+        # Look for barbs by finding abrupt angle changes
+        _, A, _ = curvars(offset.coords.xy[0], offset.coords.xy[1])
+        possibles = np.where(np.abs(np.diff(A)) > 1.5)[0] # Threshold set at 1.5 radians
+        
+        if len(possibles) == 0:
+            return offset
+        else:
+            st_idx = 0
+            en_idx = len(offset.coords) - 1
+            for p in possibles:
+                if p < len(offset.coords) / 2:
+                    st_idx = max(st_idx, p+1)
+                elif p > len(offset.coords) /2:
+                    en_idx = min(en_idx, p)
+            offset = LineString(offset.coords[st_idx:en_idx])
+        
+        # elif len(possibles) == 1: # Determine if it's the upstream or downstream that's barbed
+        #     if possibles[0] > len(A)/2: # Downstream
+        #         offset = LineString(zip(offset.coords.xy[0][:possibles[0]], offset.coords.xy[1][:possibles[0]]))
+        #     else: # Upstream
+        #         offset = LineString(zip(offset.coords.xy[0][possibles[0]:], offset.coords.xy[1][possibles[0]:]))
+        # elif len(possibles) == 2:
+        #     offset = LineString(zip(offset.coords.xy[0][possibles[0]:possibles[1]], offset.coords.xy[1][possibles[0]:possibles[1]]))
+        # else:
+        #     # import pdb; pdb.set_trace()
+        #     raise Warning('Barbs could not be removed from centerline offset: dist={}, side={}.'.format(dist,side))
+            
+        return offset
+    
+    def mirror_lines(xs_o, ys_o, npad):
+        # Mirror centerline manually since scipy fucks it up - only flip the axis that has the largest displacement
+        # Mirroring done to avoid edge effects when smoothing
+        
+        xs_o2, ys_o2 = mirror_line_ends(xs_o, ys_o, npad)
+        diff_x = np.diff(xs_o[0:npad])
+        xs_o2 = np.concatenate((np.flipud(xs_o[1] - np.cumsum(diff_x)), xs_o))
+        diff_y = np.diff(ys_o[0:npad])
+        ys_o2 = np.concatenate((np.flipud(ys_o[1] - np.cumsum(diff_y)), ys_o))
+    
+        diff_x = np.diff(xs_o[-npad:][::-1])
+        xs_o2 = np.concatenate((xs_o2, xs_o2[-1] - np.cumsum(diff_x)))
+        diff_y = np.diff(ys_o[-npad:][::-1])
+        ys_o2 = np.concatenate((ys_o2, ys_o2[-1] - np.cumsum(diff_y)))
+        
+        return(xs_o2, ys_o2)
+
+
+    """ Function code begins here """
+    # coords = process_river.centerline
+    # width_chan = process_river.width_chans
+    # bufferdist = 0.5 #process_river.max_valley_width_pixels * process_river.pixlen * 1.1
+    # grid_spacing = 0.25# np.percentile(process_river.links['len'],25)
+    # smoothing = 0.5
 
     if np.shape(coords)[0] == 2 and np.size(coords) != 4:
         coords = np.transpose(coords)
@@ -687,303 +871,100 @@ def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15
     # Separate coordinates into xs and ys (o indicates original coordinates)
     xs_o = coords[:,0]
     ys_o = coords[:,1]
-
-    s, ds = s_ds(xs_o, ys_o)
-
+    
     # Set smoothing window size based on smoothing parameter and centerline length
+    s, ds = s_ds(xs_o, ys_o)
     window_len = int(smoothing * s[-1] / np.mean(ds))
     window_len = int(min(len(xs_o)/5, window_len)) # Smoothing window cannot be longer than 1/5 the centerline
     if window_len % 2 == 0: # Window must be odd
         window_len = window_len + 1
 
-    # Mirror centerline manually since scipy fucks it up - only flip the axis that has the largest displacement
-    # Mirroring done to avoid edge effects when smoothing
-    npad = window_len
-    xs_o2, ys_o2 = mirror_line_ends(xs_o, ys_o, npad)
-    npad = window_len
-    diff_x = np.diff(xs_o[0:npad])
-    xs_o2 = np.concatenate((np.flipud(xs_o[1] - np.cumsum(diff_x)), xs_o))
-    diff_y = np.diff(ys_o[0:npad])
-    ys_o2 = np.concatenate((np.flipud(ys_o[1] - np.cumsum(diff_y)), ys_o))
-
-    diff_x = np.diff(xs_o[-npad:][::-1])
-    xs_o2 = np.concatenate((xs_o2, xs_o2[-1] - np.cumsum(diff_x)))
-    diff_y = np.diff(ys_o[-npad:][::-1])
-    ys_o2 = np.concatenate((ys_o2, ys_o2[-1] - np.cumsum(diff_y)))
-
+    # Extend the centerline ends to avoid boundary effects; we'll clip them later    
+    xs_o2, ys_o2 = mirror_lines(xs_o, ys_o, window_len)
+    
     # Smooth the coordinates before buffering
     xs_sm = signal.savgol_filter(xs_o2, window_length=window_len, polyorder=3, mode='interp')
     ys_sm = signal.savgol_filter(ys_o2, window_length=window_len, polyorder=3, mode='interp')
 
-    # Create left and right valleylines from oversmoothed centerline
-    cl = []
-    for x, y in zip(xs_sm, ys_sm):
-        cl.append((x,y))
-    # Shapely bug: if the spacing of nodes near the end of the centerline is too small,
-    # the parallel offset will produce "hooks" on the end. Remove the second and second-to-last
-    # points to help prevent this -- does not prevent all cases!
-    del(cl[1])
-    del(cl[-2])
-    cl = LineString(cl)
-
-    # Offset valley centerline for left and right valleylines
-    left = offset_linestring(cl, bufferdist, 'left')
-    right = offset_linestring(cl, bufferdist, 'right')
-
-    # Resample center, left, and right lines to have evenly spaced points
-    rs_spacing = width_chan/8 # eight points per channel width
-    npts_c, npts_l, npts_r = int(cl.length/rs_spacing), int(left.length/rs_spacing), int(right.length/rs_spacing)
-    c_es, c_spline = resample_line(np.array(cl.coords.xy[0]), np.array(cl.coords.xy[1]), npts_c)
-    l_es, l_spline = resample_line(np.array(left.coords.xy[0]), np.array(left.coords.xy[1]), npts_l)
-    r_es, r_spline = resample_line(np.array(right.coords.xy[0]), np.array(right.coords.xy[1]), npts_r)
-
-    # Put resampled lines in shapely format for intersecting
-    l_shapely = LineString([(x,y) for x,y in zip(l_es[0], l_es[1])])
-    r_shapely = LineString([(x,y) for x,y in zip(r_es[0], r_es[1])])
-
-    """ Get centerline inflection points for mapping to corresponding left/right bank points """
-    # Compute angles, curvatures for each signal
-    Ccl,Acl,scl = curvars(c_es[0], c_es[1])
-    Cl,Al,sl = curvars(l_es[0],  l_es[1])
-    Cr,Ar,sr = curvars(r_es[0], r_es[1])
-
-    # Estimate the smoothing window size
-    widths_per_bend = 10 # How many channel widths make up a bend?
-    expected_num_infs = cl.length/widths_per_bend/width_chan/2 # Divide by 2 since we're operating on buffered, smoothed versions of the centerline, not the centerline itself
-
-    # Try different size windows; use the smallest one that gives the expected number of inflection points
-    posswindows = np.arange(25, len(Ccl)/2, 101, dtype=np.int)
-    # Ensure all windows are odd
-    for ip, pw in enumerate(posswindows):
-        if pw % 2 == 0:
-            posswindows[ip] = pw + 1
-    ninfs = []
-    for w in posswindows:
-        if w % 2 == 0:
-            w = w + 1
-        Ctemp = signal.savgol_filter(Ccl, window_length=w, polyorder=0, mode='interp')
-        ninfs.append(len(inflection_points(Ctemp)))
-    C_smoothing_window = posswindows[np.where(expected_num_infs- ninfs > 0)[0][0]]
-
-    # Find inflection points of center, left and right valleylines
-    # Perform the smoothing on all three curvature signals
-    Ccls = signal.savgol_filter(Ccl, window_length=C_smoothing_window, polyorder=3, mode='interp')
-    Cls = signal.savgol_filter(Cl, window_length=C_smoothing_window, polyorder=3, mode='interp')
-    Crs = signal.savgol_filter(Cr, window_length=C_smoothing_window, polyorder=3, mode='interp')
-
-    infs_c = inflection_points(Ccls)
-    infs_r = inflection_points(Crs)
-    infs_l = inflection_points(Cls)
-
-#    # Get and filter inflection points for centerline - must be buffer width apart
-#    # Method 1: find inflection points using oversmoothing of centerline
-#    n_infs = scl[-1]/10/width_chan
-#    infs_c, _ = inflection_pts_oversmooth(c_es[0], c_es[1], n_infs)
-#    infs_l, _ = inflection_pts_oversmooth(l_es[0], l_es[1], n_infs)
-#    infs_r, _ = inflection_pts_oversmooth(r_es[0], r_es[1], n_infs)
-
-    # Method 2: find inflection points using zero crossings of curvature
-    # Prune centerline inflection points to include only those in original centerline
-    idcs_to_add = int(grid_spacing/rs_spacing) + 1 # Add an extra meshpoly to the upstream and downstream ends to ensure full coverage
-    startidx = np.argmin(np.sqrt((xs_o[0] - c_es[0])**2 + (ys_o[0] - c_es[1])**2)) - idcs_to_add
-    endidx = np.argmin(np.sqrt((xs_o[-1] - c_es[0])**2 + (ys_o[-1] - c_es[1])**2)) + idcs_to_add
-    infs_c = infs_c[np.logical_and(infs_c > startidx, infs_c < endidx)]
-
-    # Insert "inflection points" at beginning and end of list to ensure we cover
-    # the full domain.
-    infs_c = np.concatenate(([startidx], infs_c, [endidx]))
-
-    # Working upstream->downstream, remove inflection points that are within a
-    # buffer width of their downstream neighbor (only for centerline)
-    cs, cds = s_ds(c_es[0], c_es[1])
-    keep_pts = [infs_c[0]]
-    check_pts = np.ndarray.tolist(infs_c[1:])
-    while len(check_pts) > 0:
-        if cs[check_pts[0]] - cs[keep_pts[-1]] > bufferdist:
-            keep_pts.append(check_pts.pop(0))
+    # Create shapely LineString centerline
+    cl = LineString([(x,y) for x, y in zip(xs_sm, ys_sm)])
+    
+    # Simplify the linestring
+    npts = int(cl.length/width_chan/4)
+    tol = width_chan/100
+    while True:
+        cl2 = cl.simplify(tol)
+        if len(cl2.coords) > npts:
+            tol = tol * 1.1
         else:
-            check_pts.pop(0)
-    # Ensures the endpoint is retained
-    if endidx not in keep_pts:
-        keep_pts.pop(-1)
-        keep_pts.append(endidx)
-    infs_c = keep_pts
+            break
 
-#    plt.close('all')
-#    plt.plot(c_es[0], c_es[1])
-#    plt.plot(c_es[0][infs_c], c_es[1][infs_c], 'o')
-#    plt.plot(l_es[0], l_es[1])
-#    plt.plot(l_es[0][infs_l], l_es[1][infs_l], 'o')
-#    plt.plot(r_es[0], r_es[1])
-#    plt.plot(r_es[0][infs_r], r_es[1][infs_r], 'o')
-#    plt.axis('equal')
+    # Offset valley centerline for left and right valleylines    
+    bdists = np.linspace(0, bufferdist, min(int(bufferdist/width_chan/10), 25))   
+    bdists = bdists[1:]
 
-    """ Map each centerline inflection point to its counterpart on the left and right valleylines """
-    # Draw perpendiculars at each centerline point, intersect them with the left/right
-    # valleylines, and find the nearest point on those lines
-    intidx_l = []
-    intidx_r = []
-    for i, ic in enumerate(infs_c):
+    # Iteratively create offset lines and map each centerline index    
+    llines, lmap = iterative_cl_pt_mapping(cl2, bdists, 'left')
+    rlines, rmap = iterative_cl_pt_mapping(cl2, bdists, 'right')
+    
+    lpts = get_transect_indices_along_buffered_lines(cl2, lmap)
+    rpts = get_transect_indices_along_buffered_lines(cl2, rmap)
+    
+    endpts = get_transect_endpoints_xy(lpts, rpts)
+    
+    dists, cl_clip, ep_clip = find_cl_intersection_pts_and_distance(endpts, cl2)
+    dists = np.array([float(d) for d in dists]) # avoid dtype('O') error in numpy.interp
+    
+    # Now build the interpolating functions
+    dists_to_interpolate = np.linspace(0, np.max(dists), 200)
+    xp_l = np.array([ep[0][0] for ep in ep_clip])
+    yp_l = np.array([ep[0][1] for ep in ep_clip])
+    xp_r = np.array([ep[1][0] for ep in ep_clip])
+    yp_r = np.array([ep[1][1] for ep in ep_clip])
+    
+    # Interpolate
+    x_left = np.interp(dists_to_interpolate, dists, xp_l)
+    y_left = np.interp(dists_to_interpolate, dists, yp_l)
+    x_right = np.interp(dists_to_interpolate, dists, xp_r)
+    y_right = np.interp(dists_to_interpolate, dists, yp_r)
+    
+    # # Plot the grid
+    # plt.close('all')
+    # plt.plot(cl.coords.xy[0], cl.coords.xy[1], '--k')
+    # plt.axis('equal')
+    # for xl, yl, xr, yr in zip(x_left, y_left, x_right, y_right):
+    #     plt.plot((xr, xl), (yr,yl))
 
-        # Slope of line from currenct centerline inflection point
-        m = (c_es[1][ic] - c_es[1][ic-1]) / (c_es[0][ic] - c_es[0][ic-1])
-        # Slope of perpendicular line
-        minv = -1/m
-        # Construct perpendicular lines
-        upper_pt = (c_es[0][ic] + bufferdist*2, c_es[1][ic] + bufferdist*2*minv )
-        lower_pt = (c_es[0][ic] - bufferdist*2, c_es[1][ic] - bufferdist*2*minv )
-#        perpx = [upper_pt[0], lower_pt[0]]
-#        perpy = [upper_pt[1], lower_pt[1]]
-#        plt.close('all')
-#        plt.plot(c_es[0], c_es[1])
-#        plt.plot(l_es[0], l_es[1])
-#        plt.plot(r_es[0], r_es[1])
-#        plt.plot(perpx, perpy)
-#        plt.axis('equal')
 
-        perpline = LineString([upper_pt, lower_pt])
+    # Mesh is generated; export transects and polygons as shapely geometries
+    transects = []
+    for xl, yl, xr, yr in zip(x_left, y_left, x_right, y_right):
+        transects.append(((xl, yl), (xr, yr)))
+        
+    # The centerline was elongated to avoid boundary effects, so now we can 
+    # clip the transects to only those that are needed
+    cl_orig = LineString(zip(xs_o, ys_o))
+    intersects_cl = [LineString(t).intersects(cl_orig) for t in transects]
+    first_idx = np.argmax(intersects_cl) - 1
+    last_idx = len(intersects_cl) - np.argmax(intersects_cl[::-1]) - 1 + 1 # -1/+1 for explicitness    
+    transects = [transects[i] for i in range(first_idx, last_idx + 1)]
 
-        for lorr in ['l','r']:
-
-            if lorr == 'l':
-                val_line_shply = l_shapely
-                val_line = l_es
-            elif lorr == 'r':
-                val_line_shply = r_shapely
-                val_line = r_es
-
-            # Find intersection point
-            # At the ends, it's possible that the perpendicular does not intersect the valleylines
-            if perpline.intersects(val_line_shply) is False:
-                if i == 0:
-                    int_pt = (val_line_shply.coords.xy[0][0], val_line_shply.coords.xy[1][0])
-                elif i == len(infs_c) - 1:
-                    int_pt = (val_line_shply.coords.xy[0][-1], val_line_shply.coords.xy[1][-1])
-                else:
-                    raise RuntimeError('Perpendicular lines not intersecting valleylines somewhere; try increasing smoothing parameter.')
-            else:
-                int_pt = perpline.intersection(val_line_shply).coords.xy
-
-            # Find corresponding index along valleyline
-            int_idx = np.argmin(np.sqrt((val_line[0]-int_pt[0])**2 + (val_line[1]-int_pt[1])**2))
-
-            if lorr == 'l':
-                intidx_l.append(int_idx)
-            elif lorr == 'r':
-                intidx_r.append(int_idx)
-
-    # Map the intersection points to the nearest inflection point; if there is no
-    # inflection point within a threshold, just use the intersection point.
-    ii_dist_thresh = width_chan * 3 # threshold for locating matching inflection point
-    # Left
-    lidx = []
-    for il, inti in enumerate(intidx_l):
-        if il == 0 or il == len(intidx_l) - 1: # For the first and last points, we would rather map to the nearest point, not necessarily nearest inflection point
-            lidx.append(inti)
-        else:
-            # Closest inflection point
-            int_inf_dist = np.abs(sl[inti] - sl[infs_l])
-            if np.min(int_inf_dist) < ii_dist_thresh:
-                lidx.append(infs_l[np.argmin(int_inf_dist)])
-            else:
-                lidx.append(inti)
-    # Right
-    ridx = []
-    for ir, inti in enumerate(intidx_r):
-        if ir == 0 or ir == len(intidx_r) - 1: # For the first and last points, we would rather map to the nearest point, not necessarily nearest inflection point
-            ridx.append(inti)
-        else:
-            # Closest inflection point
-            int_inf_dist = np.abs(sr[inti] - sr[infs_r])
-            if np.min(int_inf_dist) < ii_dist_thresh:
-                ridx.append(infs_r[np.argmin(int_inf_dist)])
-            else:
-                ridx.append(inti)
-
-#    # Plot "perpendiculars" to check
-#    plt.close('all')
-#    plt.plot(c_es[0], c_es[1])
-#    plt.plot(l_es[0], l_es[1])
-#    plt.plot(r_es[0], r_es[1])
-#    for clid, leftpt, rightpt in zip(infs_c, lidx, ridx):
-#        plt.plot([c_es[0][clid], l_es[0][leftpt]], [c_es[1][clid], l_es[1][leftpt]],'k')
-#        plt.plot([c_es[0][clid], r_es[0][rightpt]], [c_es[1][clid], r_es[1][rightpt]],'k')
-#    plt.axis('equal')
-
-    """ Now that "perpendiculars" are known at inflection points, the mesh can be
-        generated. Parameterize each segment of line between break points and sample
-        along the line at the same interval for left, right, and center. """
-    # Can re-use the evenly-spaced spline, just need to determine parameterization
-    # between each pair of break points.
-
-#    # Determine starting/ending indices to draw perps--we resampled the centerline so need new index
-#    startidx = np.argmin(np.sqrt((xs_o[0] - c_es[0])**2 + (ys_o[0] - c_es[1])**2))
-#    endidx = np.argmin(np.sqrt((xs_o[-1] - c_es[0])**2 + (ys_o[-1] - c_es[1])**2))
-#
-#    # Prune the inflection indices to the original signal extents
-#    toolow = np.where(infs_c < startidx)[0]
-#    toohigh = np.where(infs_c > endidx)[0]
-#    infs_c = np.delete(infs_c, np.concatenate((toolow, toohigh)))
-#    lidx = np.delete(lidx, np.concatenate((toolow, toohigh)))
-#    ridx = np.delete(ridx, np.concatenate((toolow, toohigh)))
-
-    # Get the u-parameterization corresponding to the grid perps
-    u_c = np.arange(scl[startidx], scl[endidx], grid_spacing)/scl[-1]
-    u_breaks_c = scl[infs_c]/scl[-1]
-    u_breaks_l = sl[lidx]/sl[-1]
-    u_breaks_r = sr[ridx]/sr[-1]
-
-    # Find the u-breaks for left and right lines correspoinding to those in u_breaks
-    u_l = []
-    u_r = []
-    for i in range(len(u_breaks_c)-1):
-
-        du_c = u_breaks_c[i+1] - u_breaks_c[i]
-        breaks_within = u_c[np.where(np.logical_and(u_c >= u_breaks_c[i], u_c < u_breaks_c[i+1]))[0]]
-        start_u_frac = (breaks_within[0] - u_breaks_c[i]) / du_c
-        end_u_frac = (u_breaks_c[i+1] - breaks_within[-1]) / du_c
-        # Left
-        du_l = u_breaks_l[i+1] - u_breaks_l[i]
-        start_u = du_l*start_u_frac + u_breaks_l[i]
-        end_u = u_breaks_l[i+1] - du_l * end_u_frac
-        uvals = np.linspace(start_u, end_u, len(breaks_within))
-        u_l.extend(uvals)
-
-        # Right
-        du_r = u_breaks_r[i+1] - u_breaks_r[i]
-        start_u = du_r*start_u_frac + u_breaks_r[i]
-        end_u = u_breaks_r[i+1] - du_r * end_u_frac
-        uvals = np.linspace(start_u, end_u, len(breaks_within))
-        u_r.extend(uvals)
-
-    # Now resample at the new u-values to get mesh coordinates
-    c_mesh = si.splev(u_c, c_spline)
-    l_mesh = si.splev(u_l, l_spline)
-    r_mesh = si.splev(u_r, r_spline)
-
-#    plt.close('all')
-#    plt.plot(c_es[0], c_es[1])
-#    plt.plot(l_es[0], l_es[1])
-#    plt.plot(r_es[0], r_es[1])
-#    for i in range(len(l_mesh[0])):
-#        plt.plot([l_mesh[0][i], r_mesh[0][i]], [l_mesh[1][i], r_mesh[1][i]])
-#    for i in range(len(c_mesh[0])):
-#        plt.plot(c_mesh[0][i], c_mesh[1][i], 'o')
-#    plt.axis('equal')
-
-    # Mesh is generated; export perpendiculars and grid as shapefile
-    lines = []
-    for lx, ly, rx, ry in zip(l_mesh[0], l_mesh[1], r_mesh[0], r_mesh[1]):
-        lines.append([(lx, ly), (rx, ry)])
-
-    # Mesh polygons
+    # Create mesh polygons
     polys = []
-    for i in range(len(c_mesh[0])-1):
-        polys.append([(l_mesh[0][i], l_mesh[1][i]), (r_mesh[0][i], r_mesh[1][i]),
-                      (r_mesh[0][i+1], r_mesh[1][i+1]), (l_mesh[0][i+1], l_mesh[1][i+1]),
-                      (l_mesh[0][i], l_mesh[1][i])])
-
-    return lines, polys, [c_es[0][startidx:endidx], c_es[1][startidx:endidx]]
+    for i in range(len(transects)-1):
+        polys.append(Polygon([transects[i][0], transects[i][1], 
+                     transects[i+1][1], transects[i+1][0],
+                     transects[i][0]]))
+        
+    # Convert transects to shapely objects
+    transects = [LineString(t) for t in transects]
+    
+    # Clip the smooth centerline for return
+    xs_sm = xs_sm[window_len-1:(len(xs_sm)-window_len+1)]
+    ys_sm = ys_sm[window_len-1:(len(ys_sm)-window_len+1)]
+    cl_smooth = LineString(zip(xs_sm, ys_sm))
+        
+    return transects, polys, cl_smooth
 
 
 def chan_width(coords, Imask, pixarea=1):
@@ -1210,7 +1191,9 @@ class centerline():
             if x is None:
                 x, y, _ = self.__get_x_and_y()
 
-            self.xrs, self.yrs = evenly_space_line(x, y, npts=N)
+            xy, spline = evenly_space_line(x, y, npts=N)
+            self.xrs = xy[0]
+            self.yrs  = xy[1]
 
 
         def s(self, x=None, y=None):
@@ -1493,13 +1476,13 @@ class centerline():
                 ax1.text(s[LZC[i]],0.5,str(i),fontsize=12)
 
 
-def compute_eBI(meshlines_path, links_path, method='local'):
+def compute_eBI(path_meshlines, path_links, method='local'):
     """
     method can be 'local' or 'avg'
     """
-
-    meshline_gdf = gpd.read_file(meshlines_path)
-    links_gdf = gpd.read_file(links_path)
+    
+    meshline_gdf = gpd.read_file(path_meshlines)
+    links_gdf = gpd.read_file(path_links)
 
     if 'wid_adj' not in links_gdf.keys():
         raise RuntimeError('Widths have not been appended to links yet; cannot compute eBI.')

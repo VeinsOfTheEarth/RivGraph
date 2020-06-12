@@ -401,7 +401,7 @@ class rivnetwork:
             if te == 'centerline_smooth':
                 if hasattr(self, 'centerline_smooth') is True and type(self) is river:
                     self.paths['centerline_smooth'] = os.path.join(self.paths['basepath'], self.name + '_centerline_smooth.' + ext)
-                    io.centerline_to_geovector(self.centerline_smooth, self.epsg, self.paths['centerline_smooth'])
+                    io.centerline_to_geovector(self.centerline_smooth, self.crs, self.paths['centerline_smooth'])
                 else:
                     print('Smoothed centerline has not been computed and thus cannot be exported.')
 
@@ -695,7 +695,7 @@ class river(rivnetwork):
        # If not specified, grid spacing is set based on distribution of link lengths        
        if grid_spacing is None:
            
-           # Need link widths to parameterize mesh generation (spacing)
+           # Need link lengths to parameterize mesh generation (spacing)
            if 'len' not in self.links.keys():
                self.compute_link_width_and_length()
                 

@@ -212,33 +212,30 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
     # If an artifical node triad is present, flip its direction and see if the
     # cycle is resolved.
     # See if any links are part of an artificial triad
+    # import pdb; pdb.set_trace()
     clset = set(cyclelinks)
-    all_triads = []
-    triadnodes = []
-    for i, atl in enumerate(links['arts']):
-        artlinks = clset.intersection(set(atl))
-        if len(artlinks) > 0:
-            all_triads.append(atl)
-            triadnodes.append(nodes['arts'][i])
-
+    all_pars = []
+    for i, pl in enumerate(links['parallels']):
+        if len(clset.intersection(set(pl))) > 0:
+            all_pars.append(pl)
+        
     pre_sourcesink = dy.check_continuity(links, nodes) # Get continuity violators before flipping
         
-    if len(all_triads) == 1: # There is one aritificial node triad, flip its direction and re-set other cycle links and see if cycle is resolved
-        # Set all cycle + triad links to unknown
-        certzero = list(set(all_triads[0] + cyclelinks))
+    if len(all_pars) == 1: # There is one parallel link set, flip its direction and re-set other cycle links and see if cycle is resolved
+        certzero = list(set(all_pars[0] + cyclelinks))
         orig_links = dy.cycle_get_original_orientation(links, certzero) # Save the original orientations in case the cycle can't be fixed
         for cz in certzero:
             links['certain'][links['id'].index(cz)] = 0
-        
+
         # Flip the links of the triad
-        for l in all_triads[0]:
+        for l in all_pars[0]:
             links = lnu.flip_link(links, l)
 
-    if len(all_triads) > 1: # If there are multiple triads, more code needs to be written for these cases
-        print('Multiple artifical node triads in the same cycle. Not implemented yet.')
+    if len(all_pars) > 1: # If there are multiple parallel pairs, more code needs to be written for these cases
+        print('Multiple parallel pairs in the same cycle. Not implemented yet.')
         return links, nodes, 0
         
-    elif len(all_triads) == 0: # No aritifical node triads; just re-set all the cycle links and see if cycle is resolved
+    elif len(all_pars) == 0: # No aritifical node triads; just re-set all the cycle links and see if cycle is resolved
         certzero = cyclelinks
         orig_links = dy.cycle_get_original_orientation(links, certzero)
         for cz in certzero:
@@ -282,7 +279,7 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
                 
         links, nodes = re_set_linkdirs(links, nodes, imshape)
         
-            # See if the fix violated continuity - if not, reset to original
+        # See if the fix violated continuity - if not, reset to original
         post_sourcesink = dy.check_continuity(links, nodes)
         if len(set(post_sourcesink) - set(pre_sourcesink)) > 0:
             reset = 1
