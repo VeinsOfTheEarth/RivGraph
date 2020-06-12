@@ -1,5 +1,4 @@
 import pytest
-
 import sys, os
 import numpy as np
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
@@ -9,7 +8,7 @@ from rivgraph import directionality as di
 # network does not have any cycles, so functionality related to cycles is just
 # tested here to show that it does not break a correct/working set of links and
 # nodes. More complicated cycle tests still need to be constructed to catch all
-# of the types of cycles and the methods for handling them. 
+# of the types of cycles and the methods for handling them.
 
 def test_dir_known_link_angles(known_net):
     known_net.skeletonize()

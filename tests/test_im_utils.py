@@ -362,26 +362,53 @@ class TestDilate:
                                       [0., 0., 0., 1., 0., 0., 0., 0.],
                                       [0., 0., 0., 0., 0., 0., 0., 0.]]))
 
-@pytest.mark.xfail
-def test_regionprops():
+def test_regionprops_small():
     I = np.zeros((3,3))
     I[1,1] = 1.0
-    props = ['centroid','mean','perim_len','perimeter','convex_area',
-             'eccentricity','equivalent_diameter','major_axis_length',
-             'minor_axis_length']
-    ### breaks at regionprops() call - need to fix to remove xfail decorator
+    props = ['centroid','mean','perim_len','convex_area',
+             'eccentricity','equivalent_diameter',
+             'major_axis_length','minor_axis_length','invalidinput']
     info = im_utils.regionprops(I,props)
     # make bunch of assertions
     assert [*info] == props
     assert np.all(info['centroid']==[1.,1.])
     assert info['mean']==1.
     assert info['perim_len']==0.
-    assert np.all(info['perimeter']==[1.,1.])
     assert info['convex_area']==1
     assert info['eccentricity']==0
     assert info['equivalent_diameter']==pytest.approx(1.12837917)
     assert info['major_axis_length']==0.
     assert info['minor_axis_length']==0.
+
+def test_regionprops_big():
+    I = np.zeros((20,20))
+    I[1:3,1:3] = 1.0
+    I[15:20,15:20] = 1.0
+    I[7:10,4:12] = 1.0
+    props = ['centroid','mean','perim_len','eccentricity']
+    info = im_utils.regionprops(I,props)
+    # make bunch of assertions
+    assert [*info] == props
+    assert np.all(info['centroid']== np.array([[ 1.5,  1.5],
+                                               [ 8. ,  7.5],
+                                               [17. , 17. ]])
+                                               )
+    assert np.all(info['mean']== np.array([1., 1., 1.]))
+    assert np.all(info['perim_len']== np.array([4., 18., 16.]))
+    assert pytest.approx(info['eccentricity']== np.array([0., 0.93435318, 0.]))
+
+@pytest.mark.xfail
+def test_regionprops_perimeter():
+    I = np.zeros((20,20))
+    I[1:3,1:3] = 1.0
+    I[15:20,15:20] = 1.0
+    I[7:10,4:12] = 1.0
+    props = ['perimeter']
+    info = im_utils.regionprops(I,props)
+    # make bunch of assertions
+    assert [*info] == props
+    ### 'perimeter' option currently broken (hence xfail)
+    # after fix add assertion to validate the output of the perimeter values
 
 def test_crop_binary_im():
     I = np.zeros((5,5))

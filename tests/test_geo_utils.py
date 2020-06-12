@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph import geo_utils
 import osr, ogr, gdal
+import gdal
 
 ### function geo_utils.get_EPSG() no longer exists
 # def test_getEPSG_fromshp():
@@ -88,6 +89,29 @@ def test_croppad_geotiff():
     # assert file name and existance
     assert o_path == outpath
     assert os.path.isfile(o_path) == True
+
+def test_crop_geotiff_output():
+    crop_file = gdal.Open('tests/results/known/cropped.tif')
+    o_file = crop_file.ReadAsArray()
+    # check that first/last rows and columns not all 0s
+    assert np.sum(o_file[0,:]) > 0
+    assert np.sum(o_file[-1,:]) > 0
+    assert np.sum(o_file[:,0]) > 0
+    assert np.sum(o_file[:,-1]) > 0
+
+def test_croppad_geotiff_output():
+    crop_file = gdal.Open('tests/results/known/croppedpad.tif')
+    o_file = crop_file.ReadAsArray()
+    # check that first/last rows and columns are all 0s
+    assert np.sum(o_file[0,:]) == 0
+    assert np.sum(o_file[-1,:]) == 0
+    assert np.sum(o_file[:,0]) == 0
+    assert np.sum(o_file[:,-1]) == 0
+    # check that first/last rows and columns after pads not all 0s
+    assert np.sum(o_file[6,:]) > 0
+    assert np.sum(o_file[-7,:]) > 0
+    assert np.sum(o_file[:,6]) > 0
+    assert np.sum(o_file[:,-7]) > 0
 
 def test_delete_files():
     # delete created files at the end
