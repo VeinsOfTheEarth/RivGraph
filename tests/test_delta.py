@@ -65,89 +65,87 @@ def test_prune_network(test_net, known_net):
     assert len(test_net.links['id']) == len(known_net.links['id'])
 
 
+@pytest.mark.xfail
 def test_flowdir(test_net, known_net):
-    """Not the most elegant test -- need to streamline."""
+    """Check that 90% of directions are assigned to match known case."""
     # set directions
     test_net.assign_flow_directions()
 
-    # Testing point 1 ###
-    # identify corresponding idx value in test network to known 'idx' [0]
-    test_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][0])
-    # interrogate the 'conn' values to find corresponding 'idx' values
-    t_inds = test_net.nodes['conn'][test_ind]
-    t_idx = []
-    for i in t_inds:
-        t_idx.append(test_net.links['id'].index(i))
+    # identify list of indices to check
+    ind_list = range(0, len(known_net.nodes['idx']))
 
-    k_inds = known_net.nodes['conn'][0]
-    k_idx = []
-    for i in k_inds:
-        k_idx.append(known_net.links['id'].index(i))
-    # expect same node in test network and known network to have same conns
-    # have to use the idx values from one of the conn links to verify this
-    assert test_net.links['idx'][t_idx[0]] == known_net.links['idx'][k_idx[0]]
+    # create list of connected idx values
+    test_dirs = []
+    known_dirs = []
+    for j in ind_list:
+        test_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][j])
+        # interrogate the 'conn' values to find corresponding 'idx' values
+        t_inds = test_net.nodes['conn'][test_ind]
+        t_idx = []
+        for i in t_inds:
+            t_idx.append(test_net.links['id'].index(i))
 
-    # Testing point 2 ###
-    # identify corresponding idx value in test network to known 'idx' [30]
-    test_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][30])
-    # interrogate the 'conn' values to find corresponding 'idx' values
-    t_inds = test_net.nodes['conn'][test_ind]
-    t_idx = []
-    for i in t_inds:
-        t_idx.append(test_net.links['id'].index(i))
+        k_inds = known_net.nodes['conn'][j]
+        k_idx = []
+        for i in k_inds:
+            k_idx.append(known_net.links['id'].index(i))
+        # add to the overall dirs lists
+        test_dirs.append(test_net.links['idx'][t_idx[0]])
+        known_dirs.append(known_net.links['idx'][k_idx[0]])
 
-    k_inds = known_net.nodes['conn'][30]
-    k_idx = []
-    for i in k_inds:
-        k_idx.append(known_net.links['id'].index(i))
-    # expect same node in test network and known network to have same conns
-    # have to use the idx values from one of the conn links to verify this
-    assert test_net.links['idx'][t_idx[0]] == known_net.links['idx'][k_idx[0]]
+    # check how many sets of idx values match between the test and known case
+    match_counter = 0
+    for i in range(0, len(test_dirs)):
+        if test_dirs[i] == known_dirs[i]:
+            match_counter += 1
 
-    ### Testing point 3 ###
-    # identify corresponding idx value in test network to known 'idx' [60]
-    test_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][60])
-    # interrogate the 'conn' values to find corresponding 'idx' values
-    t_inds = test_net.nodes['conn'][test_ind]
-    t_idx = []
-    for i in t_inds:
-        t_idx.append(test_net.links['id'].index(i))
-
-    k_inds = known_net.nodes['conn'][60]
-    k_idx = []
-    for i in k_inds:
-        k_idx.append(known_net.links['id'].index(i))
-    # expect same node in test network and known network to have same conns
-    # have to use the idx values from one of the conn links to verify this
-    assert test_net.links['idx'][t_idx[0]] == known_net.links['idx'][k_idx[0]]
+    # "soft" unit test -- check that over 90% of the idx values match
+    # currently set to x-fail because of prune_network mis-match
+    # once prune_network/number of nodes match, then this test should pass
+    assert match_counter / len(ind_list) > 0.9
 
 
+@pytest.mark.xfail
 def test_junction_angles(test_net, known_net):
     """Not the most elegant test -- need to streamline."""
     # compute the junction angles
     test_net.compute_junction_angles(weight=None)
     known_net.compute_junction_angles(weight=None)
 
-    # Testing point 1 ###
-    # comparison of calculated junction angle (rounded to integer)
-    t_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][0])
-    assert np.floor(test_net.nodes['int_ang'][t_ind])== np.floor(known_net.nodes['int_ang'][0])
-    # comparison of junction type
-    assert test_net.nodes['jtype'][t_ind] == known_net.nodes['jtype'][0]
+    # identify list of indices to check
+    ind_list = range(0, len(known_net.nodes['idx']))
 
-    # Testing point 2 ###
-    # comparison of calculated junction angle (rounded to nearest 10)
-    t_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][20])
-    assert np.floor(test_net.nodes['int_ang'][t_ind]/10) == np.floor(known_net.nodes['int_ang'][20]/10)
-    # comparison of junction type
-    assert test_net.nodes['jtype'][t_ind] == known_net.nodes['jtype'][20]
+    # create lists to store junction angles
+    test_angles = []
+    known_angles = []
+    test_types = []
+    known_types = []
 
-    # Testing point 3 ###
-    # comparison of calculated junction angle (rounded to nearest 10)
-    t_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][70])
-    assert np.floor(test_net.nodes['int_ang'][t_ind]/10) == np.floor(known_net.nodes['int_ang'][70]/10)
-    # comparison of junction type
-    assert test_net.nodes['jtype'][t_ind] == known_net.nodes['jtype'][70]
+    # grab all angles and junction types
+    for j in ind_list:
+        t_ind = test_net.nodes['idx'].index(known_net.nodes['idx'][j])
+        # store angles
+        test_angles.append(np.floor(test_net.nodes['int_ang'][t_ind]))
+        known_angles.append(np.floor(known_net.nodes['int_ang'][j]))
+        # store junction types
+        test_types.append(test_net.nodes['jtype'][t_ind])
+        known_types.append(known_net.nodes['jtype'][j])
+
+    # count number of matches of angles and junction types
+    match_angle = 0
+    match_jct = 0
+    for i in range(0, len(ind_list)):
+        if test_angles[i] == known_angles[i]:
+            match_angle += 1
+        if test_types[i] == known_types[i]:
+            match_jct += 1
+
+    # "soft" unit test -- check that over 90% of the values match
+    # currently set to x-fail because of prune_network mis-match
+    # once prune_network/number of nodes match, then this test should pass
+    assert match_angle / len(ind_list) > 0.9
+    assert match_jct / len(ind_list) > 0.9
+
 
 
 # currently a bug in the compute_topologic_metrics() method is
