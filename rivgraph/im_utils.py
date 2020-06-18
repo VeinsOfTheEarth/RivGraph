@@ -7,10 +7,10 @@ Created on Mon Sep 10 10:21:35 2018
 
 @author: Jon
 """
-import numpy as np
-from skimage import morphology, measure, util
 import cv2
+import numpy as np
 from scipy import ndimage as nd
+from skimage import morphology, measure, util
 
 
 def get_array(idx, I, size):
@@ -422,7 +422,7 @@ def regionprops(I, props, connectivity=2):
                 Ip, pads = crop_binary_coords(blob, npad=1)
                 Ip = np.array(Ip, dtype='uint8')
 
-                _, contours, _ = cv2.findContours(Ip, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                contours, _ = cv2.findContours(Ip, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
                 # IMPORTANT: findContours returns points as (x,y) rather than (row, col)
                 contours = contours[0]
                 crows = []
