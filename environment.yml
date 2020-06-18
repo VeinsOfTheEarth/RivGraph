@@ -16,3 +16,4 @@ dependencies:
   - shapely
   - fiona
   - rivgraph
+  - fastdtw
