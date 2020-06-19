@@ -1,3 +1,5 @@
+dist: xenial
+
 language: python
 python:
   - "3.6"
@@ -27,6 +29,7 @@ install:
 script:
   - python setup.py install
   - pytest
+  - pytest --cov-config=.coveragerc --cov=rivgraph/
 
 jobs:
   include:
