@@ -14,21 +14,53 @@ import rivgraph.io_utils as io
 import rivgraph.ln_utils as lnu
 import rivgraph.geo_utils as gu
 import rivgraph.directionality as dy
-import rivgraph.rivers.river_utils as ru
-
-#brahma = b
-#links = brahma.links
-#nodes = brahma.nodes
-#Imask = brahma.Imask
-#exit_sides = brahma.exit_sides
-#gt = brahma.gt
-#meshlines = brahma.meshlines
-#meshpolys = brahma.meshpolys
-#Idt = brahma.Idist
-#path_csv='blah'
 
 
 def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines, meshpolys, Idt, pixlen, manual_set_csv):
+    """
+    This function sets the direction of each link within the network. It
+    calls a number of helping functions and uses a somewhat-complicated logic
+    to achieve this. The algorithms and logic is described in this open-access
+    paper: https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf
+        
+    Every time this is run, all directionality information is reset and 
+    recomputed. This includes checking for manually set links via the provided
+    csv. 
+
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    Imask : np.array
+        Binary mask of the network.
+    exit_sides : str
+        Two-character string of cardinal directions denoting the upstream and 
+        downsteram sides of the image that the network intersects (e.g. 'SW').
+    gt : tuple
+        gdal-type GeoTransform of the original binary mask.
+    meshlines : list
+        List of shapely.geometry.LineStrings that define the valleyline mesh.
+    meshpolys : list
+        List of shapely.geometry.Polygons that define the valleyline mesh.
+    Idt : np.array()
+        Distance transform of Imask.
+    pixlen : float
+        Length resolution of each pixel.
+    manual_set_csv : str, optional
+        Path to a user-provided csv file of known link directions. The default 
+        is None.
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with all directions set.
+    nodes : dict
+        Network nodes and associated properties with all directions set.
+
+    """
     
     imshape = Imask.shape
     
@@ -46,19 +78,21 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines, meshpolys
     links, nodes = dy.set_inletoutlet(links, nodes)
             
     # Set the directions of the links that are more certain via centerline distance method
-    alg = 22
+    # alg = 22
+    alg = dy.algmap('cl_dist_set')
     cl_distthresh = np.percentile(links['cldists'], 85)
     for lid, cld, lg, lga, cert in zip(links['id'],  links['cldists'], links['guess'], links['guess_alg'], links['certain']):
         if cert == 1:
             continue
         if cld >= cl_distthresh:
             linkidx = links['id'].index(lid)
-            if 20 in lga:
-                usnode = lg[lga.index(20)]
+            if dy.algmap('cl_dist_guess') in lga:
+                usnode = lg[lga.index(dy.algmap('cl_dist_guess'))]
                 links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
 
     # Set the directions of the links that are more certain via centerline angle method
-    alg = 23
+    # alg = 23
+    alg = dy.algmap('cl_ang_set')
     cl_angthresh = np.percentile(links['clangs'][np.isnan(links['clangs'])==0], 25)
     for lid, cla, lg, lga, cert in zip(links['id'],  links['clangs'], links['guess'], links['guess_alg'], links['certain']):
         if cert == 1:
@@ -67,12 +101,13 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines, meshpolys
             continue
         if cla <= cl_angthresh:
             linkidx = links['id'].index(lid)
-            if 21 in lga:
-                usnode = lg[lga.index(21)]
+            if dy.algmap('cl_ang_guess') in lga:
+                usnode = lg[lga.index(dy.algmap('cl_ang_guess'))]
                 links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
     
     # Set the directions of the links that are more certain via centerline distance AND centerline angle methods
-    alg = 24
+    # alg = 24
+    alg = dy.algmap('cl_dist_and_ang')
     cl_distthresh = np.percentile(links['cldists'], 70)
     ang_thresh = np.percentile(links['clangs'][np.isnan(links['clangs'])==0], 35)
     for lid, cld, cla, lg, lga, cert in zip(links['id'],  links['cldists'], links['clangs'], links['guess'], links['guess_alg'], links['certain']):
@@ -80,9 +115,9 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines, meshpolys
             continue
         if cld >= cl_distthresh and cla < ang_thresh:
             linkidx = links['id'].index(lid)
-            if 20 in lga and 21 in lga:
-                if lg[lga.index(20)] == lg[lga.index(21)]:
-                    usnode = lg[lga.index(20)]
+            if dy.algmap('cl_dist_guess') in lga and dy.algmap('cl_ang_guess') in lga:
+                if lg[lga.index(dy.algmap('cl_dist_guess'))] == lg[lga.index(dy.algmap('cl_ang_guess'))]:
+                    usnode = lg[lga.index(dy.algmap('cl_dist_guess'))]
                     links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
     
     # Set directions by most-certain angles
@@ -132,9 +167,39 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines, meshpolys
 
 def directional_info(links, nodes, Imask, pixlen, exit_sides, gt, meshlines, meshpolys, Idt):
     """
-    Using the links['guess'] dictionary, sets the directionality of all links.
-    Directions are set in order of certainty--with the more certain being set
-    first.
+    Computes all the information required for link directions to be set for
+    a river channel network.
+    
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    Imask : np.array
+        Binary mask of the network.
+    pixlen : float
+        Length resolution of each pixel.
+    exit_sides : str
+        Two-character string of cardinal directions denoting the upstream and 
+        downsteram sides of the image that the network intersects (e.g. 'SW').
+    gt : tuple
+        gdal-type GeoTransform of the original binary mask.
+    meshlines : list
+        List of shapely.geometry.LineStrings that define the valleyline mesh.
+    meshpolys : list
+        List of shapely.geometry.Polygons that define the valleyline mesh.
+    Idt : np.array()
+        Distance transform of Imask.
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties including directional info.
+    nodes : dict
+        Network nodes and associated properties including directional info.
+
     """
                 
     # Append pixel-based widths to links
@@ -152,7 +217,34 @@ def directional_info(links, nodes, Imask, pixlen, exit_sides, gt, meshlines, mes
 
 def fix_river_cycles(links, nodes, imshape):
     """
-    This algorithm attempts to fix all cycles in the directed river graph.
+    Attempts to resolve all cycles within the river network. This function
+    is essentially a wrapper for fix_river_cycle(), which is where the 
+    heavy lifting is actually done. This function finds cycles, calls 
+    fix_river_cycle() on each one, then aggregates the results.
+
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with all possible cycles fixed.
+    nodes : dict
+        Network nodes and associated properties with all possible cycles fixed.
+    cantfix_links : list of lists
+        Contains link ids of unresolvable cycles. Length is equal to number of
+        unresolvable cycles.
+    cantfix_nodes : TYPE
+        Contains node ids of unresolvable cycles. Length is equal to number of
+        unresolvable cycles.
+
     """
     
     # Create networkx graph object
@@ -196,11 +288,40 @@ def fix_river_cycles(links, nodes, imshape):
 
 def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
     """
-    Attempts to fix a cycle in a directed river network. All directions should
-    be set before running this.
+    Attempts to resolve a single cycle within a river network. The general 
+    logic is that all link directions of the cycle are un-set except for those 
+    set by highly-reliable algorithms, and a modified direction-setting 
+    recipe is implemented to re-set these algorithms. This was developed 
+    according to the most commonly-encountered cases for real braided rivers,
+    but could certainly be improved.
+
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    cyclelinks : list
+        List of link ids that comprise a cycle.
+    cyclenodes : list
+        List of node ids taht comprise a cycle.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with the cycle fixed if possible.
+    nodes : dict
+        Network nodes and associated properties with the cycle fixed if possible.
+    fixed : int
+        1 if the cycle was resolved, else 0.
+
     """
-    
-    dont_reset_algs = [20, 21, 22, 23, 0, 5]    
+                    
+    # dont_reset_algs = [20, 21, 22, 23, 0, 5]  
+    dont_reset_algs = [dy.algmap(key) for key in ['manual_set', 'cl_dist_guess', 'cl_ang_guess', 'cl_dist_set', 'cl_ang_set', 'inletoutlet', 'bridges']]
     
     fixed = 1 # One if fix was successful, else zero
     reset = 0 # One if original orientation need to be reset
@@ -293,11 +414,33 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
        
 
 def re_set_linkdirs(links, nodes, imshape):
+    """
+    Resets the link directions for a braided river channel network. This 
+    function is called to reset directions of links that belong to a cycle.
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with the directions re-set.
+    nodes : dict
+        Network nodes and associated properties with the directions re-set.
+
+    """
         
     links, nodes = dy.set_continuity(links, nodes)
     
     # Set the directions of the links that are more certain via centerline angle method
-    alg = 23.1
+    # alg = 23.1
+    alg = dy.algmap('cl_ang_rs')
     cl_angthresh = np.percentile(links['clangs'][np.isnan(links['clangs'])==0], 40)
     for lid, cla, lg, lga, cert in zip(links['id'],  links['clangs'], links['guess'], links['guess_alg'], links['certain']):
         if cert == 1:
@@ -306,14 +449,14 @@ def re_set_linkdirs(links, nodes, imshape):
             continue
         if cla <= cl_angthresh:
             linkidx = links['id'].index(lid)
-            if 21 in lga:
-                usnode = lg[lga.index(21)]
+            if dy.algmap('cl_ang_guess') in lga:
+                usnode = lg[lga.index(dy.algmap('cl_ang_guess'))]
                 links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
 
     
     angthreshs = np.linspace(0, 1.3, 20)
     for a in angthreshs:
-        links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,  angthresh=a, lenthresh=0, alg=6.1)
+        links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,  angthresh=a, lenthresh=0, alg=dy.algmap('known_fdr_rs'))
 
 
     if np.sum(links['certain']) != len(links['id']):
@@ -323,76 +466,42 @@ def re_set_linkdirs(links, nodes, imshape):
     return links, nodes
 
 
-def set_unknown_cluster_by_widthpct(links, nodes):
-    """
-    Set unknown links based on width differences at endpoints (flow goes wide->narrow)
-    """
-    
-    alg = 26
-    
-    # Get indices of uncertain links
-    uc_idx = np.where(links['certain']==0)[0].tolist()
-
-    # Create graph to find clusters of uncertains    
-    G = nx.Graph()
-    for idx in uc_idx:
-        lc = links['conn'][idx]
-        G.add_edge(lc[0], lc[1])
- 
-    # Compute connected components (nodes)
-    cc = nx.connected_components(G)
-    ccs = [c for c in cc if len(c)>1]
-    
-    # Convert cc nodes to cc edges
-    cc_edges = []
-    for ccnodes in ccs:
-        ccedge = []        
-        for idx in uc_idx:
-            lc = links['conn'][idx]
-            if lc[0] in ccnodes and lc[1] in ccnodes:
-                ccedge.append(links['id'][idx])
-        cc_edges.append(ccedge)
-        
-    # Loop through all the unknown clusters, setting the most-certain-by-width
-    for lclust in cc_edges:
-        widpcts = [links['wid_pctdiff'][links['id'].index(l)][0] for l in lclust]
-        link_toset = lclust[widpcts.index(max(widpcts))]
-        linkidx = links['id'].index(link_toset)
-        usnode = links['guess'][linkidx][links['guess_alg'][linkidx].index(26)]
-        
-        links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg = alg)
-        
-    return links, nodes
-
-
-def get_centerline(links, nodes, Imask, exit_sides, gt):
-    """
-    Guesses link direction by generating a mesh following the centerline,
-    then checking if links' endpoints are within different mesh cells. If so,
-    since the us->ds order of the mesh cells are known, the link direction
-    can be guessed.
-    """
-    
-    # Get centerline
-    cl = ru.mask_to_centerline(Imask, exit_sides)
-    
-    # Transform centerline to coordinates
-    clx, cly = gu.xy_to_coords(cl[:,0], cl[:,1], gt)
-    clcoords = [(x,y) for x,y in zip(clx, cly)]
-    
-    # Get widths for parameterizing centerline mesh
-    pixel_area = gt[1]*-gt[5]
-    width_channels, width_extent = ru.chan_width(clcoords, Imask, pixarea=pixel_area)
-
-    # Generate centerline mesh
-    meshlines, meshpolys = ru.centerline_mesh(clcoords, width_channels, width_extent, n_widths_grid_spacing=.1, n_widths_initial_smooth=50, n_widths_buffer=5)
-    
-    return meshlines, meshpolys, cl
-
-
 def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
+    """
+    Guesses the flow direction of links in a braided river channel network by
+    exploiting a "valleyline" centerline. Two metrics are computed to help
+    guess the correct direction. The first is the number of centerline 
+    transects (meshlines) that the link crosses. The second is the local angle
+    of the centerline compared to the link's angle. These metrics are appended
+    to the links dictionary as links['cldist'] and links['clangs'].
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    meshpolys : list
+        List of shapely.geometry.Polygons that define the valleyline mesh.
+    meshlines : list
+        List of shapely.geometry.LineStrings that define the valleyline mesh.
+    Imask : np.array
+        Binary mask of the network.
+    gt : tuple
+        gdal-type GeoTransform of the original binary mask.
+    pixlen : float
+        Length resolution of each pixel.
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with 'cldists' and 'clangs'
+        attributes appended.
+        
+    """
            
-    alg = 20
+    # alg = 20
+    alg = dy.algmap('cl_dist_guess')
 
     # Create geodataframes for intersecting meshpolys with nodes
     mp_gdf = gpd.GeoDataFrame(geometry=[Polygon(mp) for mp in meshpolys])
@@ -427,7 +536,8 @@ def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
     links['cldists'] = np.abs(cldists)
     
     # Compute guesses based on how the link aligns with the local centerline direction
-    alg = 21
+    # alg = 21
+    alg = dy.algmap('cl_ang_guess')
     clangs = np.ones((len(links['id']),1)) * np.nan
     for i, (lconn, lidx) in enumerate(zip(links['conn'], links['idx'])):        
         # Get coordinates of link endpoints
@@ -469,105 +579,32 @@ def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
             links['guess_alg'][i].append(alg)
     links['clangs'] = clangs
 
-                
     return links
-     
-
-def set_no_backtrack(links, nodes):
-    
-    for lid, nconn, cert in zip(links['id'], links['conn'], links['certain']):
-        
-        if cert != 1:
-            continue
-        
-        if nconn[0] in nodes['inlets'] or nconn[1] in nodes['outlets']:
-            continue
-        
-        uslinks = nodes['conn'][nodes['id'].index(nconn[0])][:]
-        uslinks.remove(lid)
-        dslinks = nodes['conn'][nodes['id'].index(nconn[1])][:]
-        dslinks.remove(lid)
-        
-        us_certains = [l for l in uslinks if links['certain'][links['id'].index(l)] == 1]
-        ds_certains = [l for l in dslinks if links['certain'][links['id'].index(l)] == 1]
-        
-        if len(us_certains) == len(uslinks) and len(ds_certains) != len(dslinks):
-            startnode = nconn[-1]
-            removelink = lid
-            links, nodes = set_shortest_no_backtrack(links, nodes, startnode, removelink, 'ds')
-        elif len(ds_certains) == len(dslinks) and len(us_certains) != len(uslinks):
-            startnode = nconn[0]
-            removelink = lid
-            links, nodes = set_shortest_no_backtrack(links, nodes, startnode, removelink, 'us')
-            
-    return links, nodes
- 
-        
-def set_shortest_no_backtrack(links, nodes, startnode, removelink, usds):
-    
-    alg = 25
-   
-    # Create networkX graph, adding weighted edges
-    weights = links['len']
-    G = nx.Graph()
-    G.add_nodes_from(nodes['id'])
-    for lc, wt in zip(links['conn'], weights):
-        G.add_edge(lc[0], lc[1], weight=wt)
-    
-    # Remove the immediately upstream (or downstream) known link so flow cannot
-    # travel the wrong direction
-    rem_edge = links['conn'][links['id'].index(removelink)]
-    G.remove_edge(rem_edge[0], rem_edge[1])
-    
-    # Find the endnode to travel to
-    if usds == 'ds':
-        endpoints = nodes['outlets']
-    else:
-        endpoints = nodes['inlets']
-        
-    if len(endpoints) == 1:
-        endnode = endpoints[0]
-    else:
-        len_to_ep = []
-        for ep in endpoints:
-            len_to_ep.append(nx.dijkstra_path_length(G, startnode, ep))
-        endnode = endpoints[len_to_ep.index(min(len_to_ep))]
-            
-    # Get shortest path nodes
-    pathnodes = nx.dijkstra_path(G, startnode, endnode, weight='weight')
-        
-    # Convert to link-to-link path
-    pathlinks = []
-    for u,v in zip(pathnodes[0:-1], pathnodes[1:]):
-        ulinks = nodes['conn'][nodes['id'].index(u)]
-        vlinks = nodes['conn'][nodes['id'].index(v)]
-        pathlinks.append([ul for ul in ulinks if ul in vlinks][0])
-                            
-    # Set the directionality of each of the links
-    if usds == 'ds':
-        pathnodes = pathnodes[0:-1]
-    else:
-        pathnodes = pathnodes[1:]
-        
-    for usnode, pl in zip(pathnodes, pathlinks):
-        linkidx = links['id'].index(pl)
-        if links['certain'][linkidx] == 1:
-            break
-        else:
-            links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg = alg)
-
-    return links, nodes
 
 
 def dir_link_widths(links):
     """
-    Guesses direction based on link widths at the endpoints. The node with the
-    larger width is guessed to be the upstream node. The ratio of guessed 
-    upstream to guessed downstream node widths is appended to links.
-    If the width at a link's endpoint is 0, the percent is set to 1000.
-    """
-    
-    alg = 26
+    Guesses each link's direction based on link widths at the endpoints. The 
+    node with the larger width is guessed to be the upstream node. The ratio 
+    of guessed upstream to guessed downstream node widths is appended to links.
+    If the width at a link's endpoint is 0, the percent is set to 1000. This 
+    ratio is appended to the links dictionary as links['wid_pctdiff'].
+
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with 'wid_pctdiff' property
+        appended.
+
+    """    
+    # alg = 26
+    alg = dy.algmap('wid_pctdiff')
     
     widpcts = np.zeros((len(links['id']),1))
     for i in range(len(links['id'])):
@@ -597,3 +634,49 @@ def dir_link_widths(links):
     links['wid_pctdiff'] = widpcts * 100
 
     return links
+
+
+
+""" Functions below here are deprecated or unused, but might be useful later """
+""" No testing performed """
+
+def set_unknown_cluster_by_widthpct(links, nodes):
+    """
+    Set unknown links based on width differences at endpoints (flow goes wide->narrow)
+    """
+    
+    alg = 26
+    
+    # Get indices of uncertain links
+    uc_idx = np.where(links['certain']==0)[0].tolist()
+
+    # Create graph to find clusters of uncertains    
+    G = nx.Graph()
+    for idx in uc_idx:
+        lc = links['conn'][idx]
+        G.add_edge(lc[0], lc[1])
+ 
+    # Compute connected components (nodes)
+    cc = nx.connected_components(G)
+    ccs = [c for c in cc if len(c)>1]
+    
+    # Convert cc nodes to cc edges
+    cc_edges = []
+    for ccnodes in ccs:
+        ccedge = []        
+        for idx in uc_idx:
+            lc = links['conn'][idx]
+            if lc[0] in ccnodes and lc[1] in ccnodes:
+                ccedge.append(links['id'][idx])
+        cc_edges.append(ccedge)
+        
+    # Loop through all the unknown clusters, setting the most-certain-by-width
+    for lclust in cc_edges:
+        widpcts = [links['wid_pctdiff'][links['id'].index(l)][0] for l in lclust]
+        link_toset = lclust[widpcts.index(max(widpcts))]
+        linkidx = links['id'].index(link_toset)
+        usnode = links['guess'][linkidx][links['guess_alg'][linkidx].index(26)]
+        
+        links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg = alg)
+        
+    return links, nodes
