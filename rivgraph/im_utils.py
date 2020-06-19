@@ -56,9 +56,9 @@ def neighbors_flat(idx, imflat, ncols, filt='nonzero'):
     '''
 
     if isinstance(idx, np.generic):
-        idx = np.asscalar(idx)
+        idx = idx.item()
     if isinstance(ncols, np.generic):
-        idx = np.asscalar(ncols)
+        idx = idx.item()
 
     dy = ncols
     dx = 1
