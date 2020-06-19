@@ -5,16 +5,16 @@ Created on Tue Nov  6 14:31:01 2018
 @author: Jon
 """
 
-from rivgraph.rivers import river_utils as ru
-import rivgraph.ln_utils as lnu
-import rivgraph.geo_utils as gu
-import rivgraph.io_utils as io
-import rivgraph.directionality as dy
+import os
+import numpy as np
+import networkx as nx
 import geopandas as gpd
 from shapely.geometry import Polygon, Point
-import numpy as np
-import os
-import networkx as nx
+import rivgraph.io_utils as io
+import rivgraph.ln_utils as lnu
+import rivgraph.geo_utils as gu
+import rivgraph.directionality as dy
+import rivgraph.rivers.river_utils as ru
 
 #brahma = b
 #links = brahma.links
@@ -28,15 +28,15 @@ import networkx as nx
 #path_csv='blah'
 
 
-def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines, meshpolys, Idt, pixlen, path_csv):
+def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines, meshpolys, Idt, pixlen, manual_set_csv):
     
     imshape = Imask.shape
-
+    
     # Add fields to links dict for tracking and setting directionality
-    links['certain'] = np.zeros(len(links['id'])) # tracks whether a link's directionality is certain or not
-    links['certain_order'] = np.zeros(len(links['id'])) # tracks the order in which links certainty is set
-    links['certain_alg'] = np.zeros(len(links['id'])) # tracks the algorithm used to set certainty
-    links['maxang'] = np.ones(len(links['id'])) * np.nan # saves the angle used in set_by_flow_directions, diagnostic only
+    links, nodes = dy.add_directionality_trackers(links, nodes, 'river')    
+    
+    # If a manual fix csv has been provided, set those links first
+    links, nodes = dy.dir_set_manually(links, nodes, manual_set_csv)
 
     # Append morphological information used to set directionality to links dict
     links, nodes = directional_info(links, nodes, Imask, pixlen, exit_sides, gt, meshlines, meshpolys, Idt)
@@ -108,7 +108,7 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines, meshpolys
     # Check for sources or sinks within the graph
     cont_violators = dy.check_continuity(links, nodes)
     
-    # Summray of problems:
+    # Summary of problems:
     manual_fix = 0
     if len(cantfix_cyclelinks) > 0:
         print('Could not fix cycle links: {}.'.format(cantfix_cyclelinks))
@@ -121,11 +121,11 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines, meshpolys
         
     # Create a csv to store manual edits to directionality if does not exist
     if manual_fix == 1:
-        if os.path.isfile(path_csv) is False:
-            io.create_manual_dir_csv(path_csv)
-            print('A .csv file for manual fixes to link directions at {}.'.format(path_csv))
+        if os.path.isfile(manual_set_csv) is False:
+            io.create_manual_dir_csv(manual_set_csv)
+            print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
         else:
-            print('Use the csv file at {} to manually fix link directions.'.format(path_csv))
+            print('Use the csv file at {} to manually fix link directions.'.format(manual_set_csv))
             
     return links, nodes
     
@@ -136,11 +136,7 @@ def directional_info(links, nodes, Imask, pixlen, exit_sides, gt, meshlines, mes
     Directions are set in order of certainty--with the more certain being set
     first.
     """
-    
-    # Add a "guess" entry to keep track of the different information used for flow directionality
-    links['guess'] = [[] for a in range(len(links['id']))]
-    links['guess_alg'] = [[] for a in range(len(links['id']))]
-            
+                
     # Append pixel-based widths to links
     if 'wid_pix' not in links.keys():
         links = lnu.link_widths_and_lengths(links, Idt)
@@ -295,9 +291,6 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
         
     return links, nodes, fixed
        
-#[links['certain'][links['id'].index(l)] for l in set_to_zero]
-#[links['certain_alg'][links['id'].index(l)] for l in set_to_zero]
-#links['conn'][links['id'].index(3661)]
 
 def re_set_linkdirs(links, nodes, imshape):
         
@@ -436,11 +429,7 @@ def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
     # Compute guesses based on how the link aligns with the local centerline direction
     alg = 21
     clangs = np.ones((len(links['id']),1)) * np.nan
-    for i, (lconn, lidx) in enumerate(zip(links['conn'], links['idx'])):
-        
-#        if links['id'][i] == 5795:
-#            break
-        
+    for i, (lconn, lidx) in enumerate(zip(links['conn'], links['idx'])):        
         # Get coordinates of link endpoints
         rc = np.unravel_index([lidx[0], lidx[-1]], Imask.shape)
         
@@ -607,58 +596,4 @@ def dir_link_widths(links):
     # Convert to percent and store in links dict
     links['wid_pctdiff'] = widpcts * 100
 
-    return links    
-
-
-#def linkcheck(links):
-#    import pandas as pd
-#    nc = pd.read_csv(r"X:\RivGraph\Results\Brahma\nodecheck.csv")
-#    wrong = []
-#    ncert = 0
-#    for lid, usn in zip(nc['linkid'], nc['usnode']):
-#        lidx = links['id'].index(lid)
-#        if links['certain'][lidx] == 1:
-#            ncert = ncert + 1
-#            if links['conn'][lidx][0] != usn:
-#                wrong.append(lid)
-#            
-#    print('# certain: {}, frac wrong: {}.'.format(ncert, len(wrong)/ncert))
-#    return wrong
-
-
-#    # Create a "minigraph" that only inlcudes the cycle and the 
-#    # links connected to it, as well as any identified aritifical links/nodes
-#    links_to_use = []
-#    for cn in list(set(cyclenodes + triadnodes)):
-#        links_to_use.extend(nodes['conn'][nodes['id'].index(cn)])
-#    nodes_to_use = []
-#    for lm in links_to_use:
-#        nodes_to_use.extend(links['conn'][links['id'].index(lm)])
-#    links_to_use = list(set(links_to_use))
-#    nodes_to_use = list(set(nodes_to_use))
-#        
-#    keys = ['id', 'conn', 'idx']
-#    minilinks = dict([(key, []) for key in keys])
-#    mininodes = dict([(key, []) for key in keys])
-#    minilinks['id'] = links_to_use
-#    mininodes['id'] = nodes_to_use
-#    minilinks['conn'] = [links['conn'][links['id'].index(l)] for l in links_to_use]
-#    mininodes['conn'] = [nodes['conn'][nodes['id'].index(n)] for n in nodes_to_use]
-#    minilinks['idx'] = [links['idx'][links['id'].index(l)] for l in links_to_use]
-#    mininodes['idx'] = [nodes['idx'][nodes['id'].index(n)] for n in nodes_to_use]
-#    # Remove outside link connections to endnodes of minigraph
-#    for i, nconn in enumerate(mininodes['conn']):
-#        mininodes['conn'][i] = [n for n in nconn if n in minilinks['id']]
-#    mininodes['inlets'] = [n for n, nc in zip(mininodes['id'], mininodes['conn']) if len(nc)==1]
-#    mininodes['outlets'] = []
-#    minilinks['certain'] = np.ones((len(minilinks['id']), 1))
-#    
-#    # Flip the link triad in the minigraph
-#    for l in all_triads[0]:
-#        lidx = minilinks['id'].index(l)
-#        minilinks['conn'][lidx] = minilinks['conn'][lidx][::-1]
-#        minilinks['idx'][lidx] = minilinks['idx'][lidx][::-1]
-#    # Did flipping violate continuity anywhere?
-#    sourcesink = dy.check_continuity(minilinks, mininodes)
-   
-
+    return links
