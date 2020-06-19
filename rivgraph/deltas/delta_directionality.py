@@ -38,7 +38,34 @@ import rivgraph.directionality as dy
 # path_csv = delt.paths['fixlinks_csv']
 
 
-def set_link_directions(links, nodes, imshape, path_csv=None):
+def set_link_directions(links, nodes, imshape, manual_set_csv=None):
+    """
+    Every time this is run, all directions and guesses will be reset.
+
+    Parameters
+    ----------
+    links : TYPE
+        DESCRIPTION.
+    nodes : TYPE
+        DESCRIPTION.
+    imshape : TYPE
+        DESCRIPTION.
+    path_csv : TYPE, optional
+        DESCRIPTION. The default is None.
+
+    Returns
+    -------
+    links : TYPE
+        DESCRIPTION.
+    nodes : TYPE
+        DESCRIPTION.
+
+    """    
+    # Add fields to links dict for tracking and setting directionality
+    links, nodes = dy.add_directionality_trackers(links, nodes, 'delta')    
+    
+    # If a manual fix csv has been provided, set those links first
+    links, nodes = dy.dir_set_manually(links, nodes, manual_set_csv)
 
     # Initial attempt to set directions
     links, nodes = set_initial_directionality(links, nodes, imshape)
@@ -60,10 +87,10 @@ def set_link_directions(links, nodes, imshape, path_csv=None):
     links, nodes, allcyclesfixed = fix_delta_cycles(links, nodes, imshape)
 
     # Create a csv to store manual edits to directionality if does not exist
-    if os.path.isfile(path_csv) is False:
+    if os.path.isfile(manual_set_csv) is False:
         if len(cont_violators) > 0 or allcyclesfixed == 0:
-            io.create_manual_dir_csv(path_csv)
-            print('A .csv file for manual fixes to link directions at {}.'.format(path_csv))
+            io.create_manual_dir_csv(manual_set_csv)
+            print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
 
     if allcyclesfixed == 2:
         print('No cycles were found in network.')
@@ -77,16 +104,6 @@ def set_initial_directionality(links, nodes, imshape):
     Directions are set in order of certainty--with the more certain being set
     first.
     """
-
-    # Add a 'certain' entry to the links dict to keep track of if we're certain that
-    # the direction has been set properly
-    links['certain'] = np.zeros(len(links['id'])) # tracks whether a link's directinoality is certain or not
-    links['certain_order'] = np.zeros(len(links['id'])) # tracks the order in which links certainty is set
-    links['certain_alg'] = np.zeros(len(links['id'])) # tracks the algorithm used to set certainty
-
-    # Add a "guess" entry to keep track of the different algorithms' guesses for flow directionality
-    links['guess'] = [[] for a in range(len(links['id']))] # contains guess at upstream ndoe
-    links['guess_alg'] = [[] for a in range(len(links['id']))] # contains algorithm that made guess
 
     # Compute all the "guesses"
     links, nodes = dy.dir_main_channel(links, nodes)
