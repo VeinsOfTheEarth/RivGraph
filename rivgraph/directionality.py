@@ -16,29 +16,23 @@ import os
 import sys
 from rivgraph import ln_utils as lnu
 
-#cvil.load_network()
-#
-#delt = cvil
-#links = delt.links
-#nodes = delt.nodes
-#Imask = delt.Imask
-##Idt = delt.compute_distance_transform()
-#imshape = delt.Imask.shape
-#path_csv = delt.paths['fixlinks_csv']
-#plot = False
-#compute_guesses=True
-#links['certain_alg'] = np.zeros(len(links['id'])) # tracks the algorithm used to set certainty
-## Add a "guess" entry to keep track of the different guesses for flow directionality
-#links['guess'] = [[] for a in range(len(links['id']))]
-#links['guess_alg'] = [[] for a in range(len(links['id']))]
-#links['certain'] = np.zeros(len(links['id'])) # tracks whether a link's directinoality is certain or not
-#links['certain_order'] = np.zeros(len(links['id'])) # tracks the order in which links certainty is set
-#
-#dy.plot_dirlinks(links, imshape)
-#links['weights'] = weights
-#cvil.links=links
-#cvil.to_geovectors()
 
+def add_directionality_trackers(links, nodes, ntype):
+    
+    # Add a 'certain' entry to the links dict to keep track of if we're certain that
+    # the direction has been set.
+    links['certain'] = np.zeros(len(links['id'])) # tracks whether a link's directinoality is certain or not
+    links['certain_order'] = np.zeros(len(links['id'])) # tracks the order in which links certainty is set
+    links['certain_alg'] = np.zeros(len(links['id'])) # tracks the algorithm used to set certainty
+
+    # Add a "guess" entry to keep track of the different algorithms' guesses for flow directionality
+    links['guess'] = [[] for a in range(len(links['id']))] # contains guess at upstream ndoe
+    links['guess_alg'] = [[] for a in range(len(links['id']))] # contains algorithm that made guess
+
+    if ntype == 'river':
+        links['maxang'] = np.ones(len(links['id'])) * np.nan # saves the angle used in set_by_flow_directions, diagnostic only
+
+    return links, nodes
 
 
 def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
@@ -932,47 +926,27 @@ def fix_cycles(links, nodes):
     return links, nodes, n_cycles_remaining
 
 
-def set_dirs_manually(links, nodes, setlinks_csv):
-
-    # Set any links manually
-    links, nodes = dir_set_manually(links, nodes, setlinks_csv)
-
-    # Ensure we haven't created any sinks/sources
-    links, nodes = fix_badnodes(links, nodes)
-
-    badnodes = check_continuity(links, nodes)
-    if len(badnodes) > 0:
-        print('Nodes {} still violate continuity. Check nearby links and re-fix manually.'.format(badnodes))
-
-    # Fix any cycles we may have created
-    links, nodes, ncyc_remaining = fix_cycles(links, nodes)
-    while ncyc_remaining > 0:
-        old_n = ncyc_remaining
-        links, nodes, ncyc_remaining = fix_cycles(links, nodes)
-        if ncyc_remaining == old_n:
-            if ncyc_remaining > 0:
-                _, cycle_links = get_cycles(links, nodes)
-                print('The following cycles (returned as links) were not resolved: {}.'.format(cycle_links))
-            break
-
-    return links, nodes
-
-
-def dir_set_manually(links, nodes, setlinks_csv):
+def dir_set_manually(links, nodes, manual_set_csv):
     """
-    Sets link directions based on a user-input csv-file. The csv file has
+    Sets link directions based on a user-input csv-file. The csv file has 
     exactly two columns; one for the link id, and one for its upstream node.
     """
-    alg = -1
-
+    alg = -1 
+    
     # Read the csv file for fixing link directions.
-    df = pd.read_csv(setlinks_csv)
-
+    if os.path.isfile(manual_set_csv) is False:
+        print('didnt find')
+        return links, nodes
+    else:
+        print('Using {} to manually set flow directions.'.format(manual_set_csv))
+    
+    df = pd.read_csv(manual_set_csv)
+    
     # Check if any links have been manually corrected and correct them
     if len(df) != 0:
         usnodes = df['usnode'].values
         links_to_set = df['link_id'].values
-
+        
         for lid, usn in zip(links_to_set, usnodes):
             links, nodes = set_link(links, nodes, links['id'].index(lid), usn, alg=alg)
 
@@ -1102,7 +1076,6 @@ def set_parallel_links(links, nodes, knownlink):
     None.
 
     """
-    ## TODO: test this
     alg = 2
         
     if 'parallels' not in links.keys():
