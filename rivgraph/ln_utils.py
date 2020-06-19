@@ -1000,7 +1000,6 @@ def plot_dirlinks(links, dims):
     ax.set_ylim(miny, maxy)
     ax.set_facecolor("black")
     plt.axis('equal')
-    plt.show()
 
     return
 

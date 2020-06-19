@@ -25,7 +25,7 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
     """
     Clips a delta channel network given an inlet and shoreline shapefile and
     removes spurious links.
-    
+
     Parameters
     ----------
     links : dict
@@ -38,7 +38,7 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
         path to the shapefile of inlet locations (point shapefile)
     gdobj : osgeo.gdal.Dataset
         gdal object corresponding to the georeferenced input binary channel mask
-        
+
     Returns
     -------
     links : dict
@@ -46,14 +46,14 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
     nodes : dict
         updated nodes dictionary
     """
-                        
+
     # Get inlet nodes
-    nodes = find_inlet_nodes(nodes, inlets_shp, gdobj)    
-                    
+    nodes = find_inlet_nodes(nodes, inlets_shp, gdobj)
+
     # Remove spurs from network (this includes valid inlets and outlets)
     links, nodes = lnu.remove_all_spurs(links, nodes, dontremove=list(nodes['inlets']))
-        
-    # Clip the network with a shoreline polyline, adding outlet nodes 
+
+    # Clip the network with a shoreline polyline, adding outlet nodes
     links, nodes = clip_by_shoreline(links, nodes, shoreline_shp, gdobj)
 
     # Remove sets of links that are disconnected from inlets/outlets except for a single bridge link (effectively re-pruning the network)
@@ -61,21 +61,21 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
 
     # # Add artificial nodes where necessary
     # links, nodes = lnu.add_artificial_nodes(links, nodes, gdobj)
-        
+
     # Remove one-node links
     links, nodes = lnu.remove_single_pixel_links(links, nodes)
-    
+
     # Find parallel links
     links, nodes = lnu.find_parallel_links(links, nodes)
-    
+
     return links, nodes
-    
+
 
 def find_inlet_nodes(nodes, inlets_shp, gdobj):
     """
     Loads the user-defined inlet nodes point shapefile and uses it to identify
     the inlet nodes within the network.
-    
+
     Parameters
     ----------
     links : dict
@@ -89,19 +89,19 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
     -------
     nodes : dict
         nodes dictionary with 'inlets' key containing list of inlet node ids
-  
-    """    
-            
+
+    """
+
     # Check that CRSs match; reproject inlet points if not
     inlets_gpd = gpd.read_file(inlets_shp)
     mask_crs = CRS(gdobj.GetProjection())
     if inlets_gpd.crs != mask_crs:
         inlets_gpd = inlets_gpd.to_crs(mask_crs)
         print('Provided inlet points file does not have the same CRS as provided mask. Reprojecting.')
-        
+
     # Convert all nodes to xy coordinates for distance search
     nodes_xy = gu.idx_to_coords(nodes['idx'], gdobj)
-    
+
     # Map provided inlet nodes to actual network nodes
     inlets = []
     for inlet_geom in inlets_gpd.geometry.values:
@@ -109,7 +109,7 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
         xy = inlet_geom.xy
         dists = np.sqrt((xy[0][0]-nodes_xy[0])**2 + (xy[1][0]-nodes_xy[1])**2)
         inlets.append(nodes['id'][np.argmin(dists)])
-        
+
     # Append inlets to nodes dict
     nodes['inlets'] = inlets
 
@@ -118,10 +118,10 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
 
 def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     """
-    Clips links by a provided shoreline shapefile. The largest network is 
+    Clips links by a provided shoreline shapefile. The largest network is
     presumed to be the delta network and is thus retained. The network should
     have been de-spurred before running this function.
- 
+
     Parameters
     ----------
     links : dict
@@ -129,7 +129,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     nodes : dict
         stores the network's nodes and their properties
     shoreline_shp : str
-        path to the shapefile of shoreline polyline 
+        path to the shapefile of shoreline polyline
     gdobj : osgeo.gdal.Dataset
         gdal object corresponding to the georeferenced input binary channel mask
 
@@ -140,61 +140,61 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     nodes : dict
         nodes dictionary representing network clipped by the shoreline. 'outlets'
         has been added to the dictionary to store a list of outlet node ids
-    
-    
-    """        
-    
+
+
+    """
+
     # Get links as geopandas dataframe
     links_gdf = lnu.links_to_gpd(links, gdobj)
-    
+
     # Load the coastline as a geopandas object
     shore_gdf = gpd.read_file(shoreline_shp)
-    
+
     # Enusre we have consistent CRS before intersecting
     if links_gdf.crs != shore_gdf.crs:
         shore_gdf = shore_gdf.to_crs(links_gdf.crs)
         print('Provided shoreline file does not have the same CRS as provided mask. Reprojecting.')
 
-                
+
     ## Remove the links beyond the shoreline
     # Intersect links with shoreline
     shore_int = gpd.sjoin(links_gdf, shore_gdf, op='intersects', lsuffix='left')
-    
+
     # Get ids of intersecting links
     leftkey = [lid for lid in shore_int.columns if 'id' in lid.lower() and 'left' in lid.lower()][0]
     cut_link_ids = shore_int[leftkey].values
-    
-    # Loop through each cut link and truncate it near the intersection point; 
+
+    # Loop through each cut link and truncate it near the intersection point;
     # add endpoint nodes; adjust connectivities
     for clid in cut_link_ids:
-        
+
         # Remove the pixel that represents the intersection between the outlet links
         # and the shoreline. Gotta find it first.
         lidx = links['id'].index(clid)
         idcs = links['idx'][lidx][:]
         coords = gu.idx_to_coords(idcs, gdobj)
-        
+
         # Intersection coordinates
-        int_points = links_gdf['geometry'][list(links_gdf['id'].values).index(clid)].intersection(shore_gdf['geometry'][0])  
-        
+        int_points = links_gdf['geometry'][list(links_gdf['id'].values).index(clid)].intersection(shore_gdf['geometry'][0])
+
         if int_points.type == 'Point':
-            dists = np.sqrt((coords[0] - int_points.xy[0][0])**2 + (coords[1] - int_points.xy[1][0])**2) 
+            dists = np.sqrt((coords[0] - int_points.xy[0][0])**2 + (coords[1] - int_points.xy[1][0])**2)
             min_idx = np.argmin(dists)
             max_idx = min_idx
         elif int_points.type == 'MultiPoint':         # Handle multiple intersections by finding the first and last one so we can remove that section of the link
             cutidcs = []
             for pt in int_points:
                 # Find index of closest pixel
-                dists = np.sqrt((coords[0] - pt.xy[0][0])**2 + (coords[1] - pt.xy[1][0])**2) 
-                cutidcs.append(np.argmin(dists))        
+                dists = np.sqrt((coords[0] - pt.xy[0][0])**2 + (coords[1] - pt.xy[1][0])**2)
+                cutidcs.append(np.argmin(dists))
             min_idx = min(cutidcs)
             max_idx = max(cutidcs)
-        
-        # Delete the intersected link and add two new links corresponding to the 
+
+        # Delete the intersected link and add two new links corresponding to the
         # two parts of the (now broken) intersected link
         # First add the two new links
         conn = links['conn'][lidx]
-                
+
         for c in conn:
             nidx = nodes['id'].index(c)
             nflatidx = nodes['idx'][nidx]
@@ -203,7 +203,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
                     newlink_idcs = []
                 else:
                     newlink_idcs = idcs[0:min_idx - 1]
-                    
+
             elif nflatidx == idcs[-1]: # Link corresponds to break (plus one to ensure the break is true) -> end of idcs
                 if max_idx == 0:
                     newlink_idcs = idcs[2:]
@@ -213,18 +213,18 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
                     newlink_idcs = idcs[max_idx + 1:]
             else:
                 RuntimeError('Check link-breaking.')
-                
+
             # Only add new link if it contains and indices
             if len(newlink_idcs) > 0:
                 links, nodes = lnu.add_link(links, nodes, newlink_idcs)
 
         # Now delete the old link
         links, nodes = lnu.delete_link(links, nodes, clid)
-    
+
     # Now that the links have been clipped, remove the links that are not
-    # part of the delta network    
+    # part of the delta network
     shape = (gdobj.RasterYSize, gdobj.RasterXSize)
-        
+
     # Burn links to grid where value is link ID
     I = np.ones(shape, dtype=np.int64) * -1
     # 2-pixel links can be overwritten and disappear, so redo them at the end
@@ -255,11 +255,11 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     # Error checking
     if len(i_contains_inlets) != 1:
         raise RuntimeError('Inlets not contained in any portion of the skeleton.')
-    
+
     # Keep only the pixels in the blob containing the inlets
     keeppix = np.unravel_index(list(blobidcs[i_contains_inlets[0]]), I_bin.shape)
     Itemp = np.zeros(I.shape, dtype=np.bool)
-    Itemp[keeppix[0], keeppix[1]] = True    
+    Itemp[keeppix[0], keeppix[1]] = True
     I[~Itemp] = -1
     keep_ids = set(np.unique(I))
     unwanted_ids = [lid for lid in links['id'] if lid not in keep_ids]
@@ -271,5 +271,5 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     # Store outlets in nodes dict
     outlets = [nid for nid, ncon in zip(nodes['id'], nodes['conn']) if len(ncon) == 1 and nid not in nodes['inlets']]
     nodes['outlets'] = outlets
-        
+
     return links, nodes
