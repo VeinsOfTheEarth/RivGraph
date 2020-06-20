@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import skimage.io
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph.classes import delta
+from rivgraph.classes import river
 
 # pytest fixture functionality to create rivgraph.delta classes that can be
 # used by other test functions but save us from re-defining the example class
@@ -28,6 +29,25 @@ def known_net():
                       'tests/results/known/')
     known_net.load_network(path='tests/data/Colville/Colville_network.pkl')
     return known_net
+
+
+@pytest.fixture(scope="module")
+def test_river():
+    """Define the test river network."""
+    return river('Brahmclip', 'tests/data/Brahma/brahma_mask_clip.tif',
+                 'tests/results/brahma/', exit_sides='ns')
+
+
+@pytest.fixture(scope="module")
+def known_river():
+    """Define the known river network."""
+    known_river = river('Brahmclip', 'tests/data/Brahma/brahma_mask_clip.tif',
+                        'tests/results/brahma/', exit_sides='ns')
+    known_river.compute_network()
+    known_river.compute_mesh()
+    known_river.prune_network()
+    known_river.assign_flow_directions()
+    known_river.save_network()
 
 
 @pytest.fixture(scope="module")
