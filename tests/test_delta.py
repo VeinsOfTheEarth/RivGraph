@@ -107,7 +107,7 @@ def test_flowdir(test_net, known_net):
 
 @pytest.mark.xfail
 def test_junction_angles(test_net, known_net):
-    """Not the most elegant test -- need to streamline."""
+    """Check that 90% of junction angles agree."""
     # compute the junction angles
     test_net.compute_junction_angles(weight=None)
     known_net.compute_junction_angles(weight=None)

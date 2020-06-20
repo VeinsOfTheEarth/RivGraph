@@ -43,11 +43,8 @@ def known_river():
     """Define the known river network."""
     known_river = river('Brahmclip', 'tests/data/Brahma/brahma_mask_clip.tif',
                         'tests/results/brahma/', exit_sides='ns')
-    known_river.compute_network()
-    known_river.compute_mesh()
-    known_river.prune_network()
-    known_river.assign_flow_directions()
-    known_river.save_network()
+    known_river.load_network(path='tests/data/Brahma/Brahmclip_network.pkl')
+    return known_river
 
 
 @pytest.fixture(scope="module")
