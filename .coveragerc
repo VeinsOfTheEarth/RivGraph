@@ -5,4 +5,3 @@ omit =
     *__init__*
     rivgraph/ordered_set.py
     rivgraph/_plotting_metrics.py
-    rivgraph/rivers/*
