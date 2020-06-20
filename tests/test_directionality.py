@@ -53,6 +53,15 @@ def test_return_orient(known_net):
     assert np.all(re_links['certain_alg'][0] == links['certain_alg'][0])
     assert np.all(re_links['certain_order'][0] == links['certain_order'][0])
 
+def test_dir_known_link_angles(known_net):
+    known_net.skeletonize()
+    dims = np.shape(known_net.Iskel)
+    links = known_net.links
+    nodes = known_net.nodes
+    links, nodes = di.dir_known_link_angles(links, nodes, dims)
+    # make assertions
+    assert links['guess'] == known_net.links['guess']
+    assert links['guess_alg'] == known_net.links['guess_alg']
 
 def test_no_backtrack(known_net):
     """Test set_no_backtrack()."""
