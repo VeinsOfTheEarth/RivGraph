@@ -8,16 +8,12 @@ Created on Sun Nov 18 19:26:01 2018
 @author: Jon
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 19 16:42:53 2018
-
-@author: Jon
-"""
 import os
 import numpy as np
 import networkx as nx
-from scipy.stats import mode
+from scipy.stats import mode, linregress
+from scipy.interpolate import interp1d
+from scipy.spatial import ConvexHull
 from scipy.ndimage.morphology import distance_transform_edt
 import rivgraph.io_utils as io
 import rivgraph.directionality as dy
@@ -25,20 +21,42 @@ import rivgraph.directionality as dy
 ## Todo: create the manual fix csv no matter what; allow user to input values
 ## before running directionality.
 
-# delt = c
-# #delt.load_network()
-# delt.compute_link_width_and_length()
-# links = delt.links
-# nodes = delt.nodes
-# Imask = delt.Imask
-# imshape = Imask.shape
-# dims = imshape
-# delt.compute_distance_transform()
-# imshape = delt.Imask.shape
-# path_csv = delt.paths['fixlinks_csv']
+def set_link_directions(links, nodes, imshape, manual_set_csv=None):
+    """
+    This function sets the direction of each link within the network. It
+    calls a number of helping functions and uses a somewhat-complicated logic
+    to achieve this. The algorithms and logic is described in this open-access
+    paper: https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf
+        
+    Every time this is run, all directionality information is reset and 
+    recomputed. This includes checking for manually set links via the provided
+    csv. 
 
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+    manual_set_csv : str, optional
+        Path to a user-provided csv file of known link directions. The default 
+        is None.
 
-def set_link_directions(links, nodes, imshape, path_csv=None):
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with all directions set.
+    nodes : dict
+        Network nodes and associated properties with all directions set.
+
+    """    
+    # Add fields to links dict for tracking and setting directionality
+    links, nodes = dy.add_directionality_trackers(links, nodes, 'delta')    
+    
+    # If a manual fix csv has been provided, set those links first
+    links, nodes = dy.dir_set_manually(links, nodes, manual_set_csv)
 
     # Initial attempt to set directions
     links, nodes = set_initial_directionality(links, nodes, imshape)
@@ -60,10 +78,10 @@ def set_link_directions(links, nodes, imshape, path_csv=None):
     links, nodes, allcyclesfixed = fix_delta_cycles(links, nodes, imshape)
 
     # Create a csv to store manual edits to directionality if does not exist
-    if os.path.isfile(path_csv) is False:
+    if os.path.isfile(manual_set_csv) is False:
         if len(cont_violators) > 0 or allcyclesfixed == 0:
-            io.create_manual_dir_csv(path_csv)
-            print('A .csv file for manual fixes to link directions at {}.'.format(path_csv))
+            io.create_manual_dir_csv(manual_set_csv)
+            print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
 
     if allcyclesfixed == 2:
         print('No cycles were found in network.')
@@ -73,21 +91,33 @@ def set_link_directions(links, nodes, imshape, path_csv=None):
 
 def set_initial_directionality(links, nodes, imshape):
     """
-    Using links['guess'], sets the directionality of all links.
-    Directions are set in order of certainty--with the more certain being set
-    first.
+    Makes an initial attempt to set all flow directions within the network.
+    This represents the core of the "delta recipe" described in the following
+    open access paper: https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf
+    However, note that as RivGraph develops, this recipe may no longer match
+    the one presented in that paper. The recipe chains together a number of 
+    exploitative algorithms to iteratively set flow directions for the most 
+    certain links first.
+
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with initial directions set.
+    nodes : dict
+        Network nodes and associated properties with initial directions set.
+
     """
-
-    # Add a 'certain' entry to the links dict to keep track of if we're certain that
-    # the direction has been set properly
-    links['certain'] = np.zeros(len(links['id'])) # tracks whether a link's directinoality is certain or not
-    links['certain_order'] = np.zeros(len(links['id'])) # tracks the order in which links certainty is set
-    links['certain_alg'] = np.zeros(len(links['id'])) # tracks the algorithm used to set certainty
-
-    # Add a "guess" entry to keep track of the different algorithms' guesses for flow directionality
-    links['guess'] = [[] for a in range(len(links['id']))] # contains guess at upstream ndoe
-    links['guess_alg'] = [[] for a in range(len(links['id']))] # contains algorithm that made guess
-
+    
     # Compute all the "guesses"
     links, nodes = dy.dir_main_channel(links, nodes)
     links, nodes = dir_synthetic_DEM(links, nodes, imshape)
@@ -100,7 +130,8 @@ def set_initial_directionality(links, nodes, imshape):
     links, nodes = dy.set_inletoutlet(links, nodes)
 
     # Use bridges to set links as they are always 100% accurate
-    alg = 5
+    # alg = 5
+    alg = dy.algmap('bridges')
     for lid, idcs, lg, lga, cert in zip(links['id'], links['idx'], links['guess'], links['guess_alg'], links['certain']):
         # Only need to set links that haven't been set
         if cert == 1:
@@ -111,7 +142,8 @@ def set_initial_directionality(links, nodes, imshape):
             links, nodes = dy.set_link(links, nodes, linkidx, lg[lga.index(alg)], alg)
 
     # Use main channels (4) to set links
-    alg = 4
+    # alg = 4
+    alg = dy.algmap('main_chans')
     for lid, idcs, lg, lga, cert in zip(links['id'], links['idx'], links['guess'], links['guess_alg'], links['certain']):
         # Only need to set links that haven't been set
         if cert == 1:
@@ -122,7 +154,8 @@ def set_initial_directionality(links, nodes, imshape):
             links, nodes = dy.set_link(links, nodes, linkidx, lg[lga.index(alg)], alg)
 
     # Set the longest, steepest links according to io_surface (these are those we are most certain of)
-    alg = 13
+    # alg = 13
+    alg = dy.algmap('longest_steepest')
     len75 = np.percentile(links['len_adj'], 75)
     slope50 = np.percentile(np.abs(links['slope']), 50)
     for lid, llen, lg, lga, cert, lslope in zip(links['id'], links['len_adj'], links['guess'], links['guess_alg'], links['certain'], links['slope']):
@@ -130,8 +163,8 @@ def set_initial_directionality(links, nodes, imshape):
             continue
         if llen > len75 and abs(lslope) > slope50:
             linkidx = links['id'].index(lid)
-            if 10 in lga:
-                usnode = lg[lga.index(10)]
+            if dy.algmap('syn_dem') in lga:
+                usnode = lg[lga.index(dy.algmap('syn_dem'))]
                 links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
 
     # Set the most certain angles
@@ -155,14 +188,14 @@ def set_initial_directionality(links, nodes, imshape):
         links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, angthresh=a, lenthresh=3)
 
     # Use io_surface (3) to set links that are longer than the median link length
-    alg = 10
+    alg = dy.algmap('syn_dem')
     medlinklen = np.median(links['len'])
     for lid, llen, lg, lga, cert in zip(links['id'], links['len'], links['guess'], links['guess_alg'], links['certain']):
         if cert == 1:
             continue
-        if llen > medlinklen and 10 in lga:
+        if llen > medlinklen and dy.algmap('syn_dem') in lga:
             linkidx = links['id'].index(lid)
-            usnode = lg[lga.index(10)]
+            usnode = lg[lga.index(dy.algmap('syn_dem'))]
             links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
 
     # Set again by angles, but reduce the lenthresh (shorter links will be set that were not previously)
@@ -171,7 +204,8 @@ def set_initial_directionality(links, nodes, imshape):
         links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, angthresh=a, lenthresh=0)
 
     # If any three methods agree, set that link to whatever they agree on
-    alg = 15
+    # alg = 15
+    alg = dy.algmap('three_agree')
     for lid, idcs, lg, lga, cert in zip(links['id'], links['idx'], links['guess'], links['guess_alg'], links['certain']):
         # Only need to set links that haven't been set
         if cert == 1:
@@ -188,25 +222,27 @@ def set_initial_directionality(links, nodes, imshape):
         links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, angthresh=a, lenthresh=0)
 
     # If artificial DEM and at least one shortest path method agree, set link to be their agreement
-    alg = 16
+    # alg = 16
+    alg = dy.algmap('syn_dem_and_sp')
     for lid, idcs, lg, lga, cert in zip(links['id'], links['idx'], links['guess'], links['guess_alg'], links['certain']):
         # Only need to set links that haven't been set
         if cert == 1:
             continue
         linkidx = links['id'].index(lid)
-        # Set all the links with 2 or more same guesses that are not shortest path
-        if 10 in lga and 11 in lga:
-            if lg[lga.index(10)] == lg[lga.index(11)]:
-                links, nodes = dy.set_link(links, nodes, linkidx, lg[lga.index(10)], alg)
-        elif 10 in lga and 12 in lga:
-            if lg[lga.index(10)] == lg[lga.index(12)]:
-                links, nodes = dy.set_link(links, nodes, linkidx, lg[lga.index(10)], alg)
+        # Set all the links with 2 or more same guesses that are not shortest path (one may be shortest path)
+        if dy.algmap('syn_dem') in lga and dy.algmap('sp_links') in lga:
+            if lg[lga.index(dy.algmap('syn_dem'))] == lg[lga.index(dy.algmap('sp_links'))]:
+                links, nodes = dy.set_link(links, nodes, linkidx, lg[lga.index(dy.algmap('syn_dem'))], alg)
+        elif dy.algmap('syn_dem') in lga and dy.algmap('sp_nodes') in lga:
+            if lg[lga.index(dy.algmap('syn_dem'))] == lg[lga.index(dy.algmap('sp_nodes'))]:
+                links, nodes = dy.set_link(links, nodes, linkidx, lg[lga.index(dy.algmap('syn_dem'))], alg)
 
     # Find remaining uncertain links
     uncertain = [l for l, lc in zip(links['id'], links['certain']) if lc != 1]
 
     # Set remaining uncertains according to io_surface (3)
-    alg = 10
+    # alg = 10 # change this one!
+    alg = dy.algmap('syn_dem')
     for lid in uncertain:
         linkidx = links['id'].index(lid)
         if alg in links['guess_alg'][linkidx]:
@@ -217,6 +253,31 @@ def set_initial_directionality(links, nodes, imshape):
 
 
 def fix_delta_cycles(links, nodes, imshape):
+    """
+    Attempts to resolve all cycles within the delta network. This function
+    is essentially a wrapper for fix_delta_cycle(), which is where the 
+    heavy lifting is actually done. This function finds cycles, calls 
+    fix_delta_cycle() on each one, then aggregates the results.
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with all possible cycles fixed.
+    nodes : dict
+        Network nodes and associated properties with all possible cycles fixed.
+    allfixed : bool
+        True if all cycles were resolved, else False.
+
+    """
 
     # Tracks if all cycles were fixed
     allfixed = 1
@@ -264,12 +325,42 @@ def fix_delta_cycles(links, nodes, imshape):
 
 
 def fix_delta_cycle(links, nodes, cyc_links, imshape):
+    """
+    Attempts to resolve a single cycle within a delta network. The general 
+    logic is that all link directions of the cycle are un-set except for those 
+    set by highly-reliable algorithms, and a modified direction-setting 
+    recipe is implemented to re-set these algorithms. This was developed 
+    according to the most commonly-encountered cases for real deltas, but could
+    certainly be improved.
+    
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    cyc_links : list
+        Link ids comprising the cycle to fix.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with cycle fixed, if possible.
+    nodes : dict
+        Network nodes and associated properties with cycle fixed, if possible.
+    fixed : bool
+        True if the cycle was resolved, else False.
+
+    """
 
     def re_set_linkdirs(links, nodes, imshape):
     # Cycle links are attempted to be reset according to the algorithms here.
         angthreshs = np.linspace(0, 1.2, 20)
         for a in angthreshs:
-            links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, angthresh=a, lenthresh=0, alg=6.1)
+            links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, angthresh=a, lenthresh=0, alg=dy.algmap('known_fdr_rs'))
 
         return links, nodes
 
@@ -278,7 +369,8 @@ def fix_delta_cycle(links, nodes, cyc_links, imshape):
     fixed = 1
 
     # List of algorithm ids that should not be reset if previously used to determine direction
-    dont_reset_algs = [-1, 0, 4, 5, 13]
+    # dont_reset_algs = [-1, 0, 4, 5, 13]
+    dont_reset_algs = [dy.algmap(key) for key in ['manual_set', 'inletoutlet', 'main_chans', 'bridges', 'longest_steepest']]
 
     # Simplest method: unset the cycle links and reset them according to angles
     # Get resettale links
@@ -335,14 +427,30 @@ def fix_delta_cycle(links, nodes, cyc_links, imshape):
 
 
 def hull_coords(xy):
+    """
+    Computes the convex hull of a set of input points. Arranges the convex
+    hull coordinates in a clockwise manner and removes the longest edge.
+    This function is required by dir_synthetic_dem().
 
-    from scipy.spatial import ConvexHull
+    Parameters
+    ----------
+    xy : np.array
+        Two element array. First element contains x coordinates, second 
+        contains y coordinates of points to compute a convex hull around.
+
+    Returns
+    -------
+    hull_coords : np.array()
+        Nx2 array of coordinates defining the convex hull of the input points.
+
+    """
 
     # Find the convex hull of a set of coordinates, then order them clockwisely
     # and remove the longest edge
     hull_verts = ConvexHull(np.transpose(np.vstack((xy[0], xy[1])))).vertices
     hull_coords = np.transpose(np.vstack((xy[0][hull_verts], xy[1][hull_verts])))
     hull_coords = np.reshape(np.append(hull_coords, [hull_coords[0,:]]), (int((hull_coords.size+2)/2), 2))
+    
     # Find the biggest gap between hull points
     dists = np.sqrt((np.diff(hull_coords[:,0]))**2 + np.diff(hull_coords[:,1])**2)
     maxdist = np.argmax(dists) + 1
@@ -358,19 +466,35 @@ def hull_coords(xy):
     return hull_coords
 
 
-def dir_synthetic_DEM(links, nodes, dims):
+def dir_synthetic_DEM(links, nodes, imshape):
     """
-    Set directionality by first building a "DEM surface" where inlets are "hills"
-    and outlets are "depressions," then setting links such that they flow
-    downhill.
-    """
-    from scipy.stats import linregress
-    from scipy.interpolate import interp1d
+    Builds a synthetic DEM by considering inlets as "hills" and outlets as 
+    "depressions." This synthetic is then used to compute the "slope"
+    of each link, which is added to the links dictionary. Additionally,
+    direction guesses for each link's flow are computed.
 
-    alg = 10
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties including a 'slope'.
+    nodes : dict
+        Network nodes and associated properties.
+
+    """
+
+    alg = dy.algmap('syn_dem')
 
     # Create empty image to store surface
-    I = np.ones(dims, dtype=np.float)
+    I = np.ones(imshape, dtype=np.float)
 
     # Get row,col coordinates of outlet nodes, arrange them in a clockwise order
     outs = [nodes['idx'][nodes['id'].index(o)] for o in nodes['outlets']]
@@ -401,14 +525,14 @@ def dir_synthetic_DEM(links, nodes, dims):
     maxwid = max(in_wids)
     keep = [ii for ii, iw in enumerate(in_wids) if abs((iw - maxwid)/maxwid) < .25]
     ins_wide_enough = [ins[k] for k in keep]
-    insxy = np.unravel_index(ins_wide_enough, dims)
+    insxy = np.unravel_index(ins_wide_enough, imshape)
     if len(insxy[0]) < 3:
         hci = np.transpose(np.vstack((insxy[0], insxy[1])))
     else:
         hci = hull_coords(insxy)
 
     # Burn the hull into the Iout surface
-    I = np.zeros(dims, dtype=np.float) + 1
+    I = np.zeros(imshape, dtype=np.float) + 1
     if hci.shape[0] == 1:
         I[hci[0][0], hci[0][1]] = 0
     else:
@@ -426,13 +550,13 @@ def dir_synthetic_DEM(links, nodes, dims):
     # Compute the final surface by adding the inlet and outlet images
     Isurf = Iout + Iin
 
-    # Determine the flow direction of each link
+    # Guess the flow direction of each link
     slopes = []
     for lid in links['id']:
 
         linkidx = links['id'].index(lid)
         lidcs = links['idx'][linkidx][:]
-        rc = np.unravel_index(lidcs, dims)
+        rc = np.unravel_index(lidcs, imshape)
 
         dists_temp = np.cumsum(np.sqrt(np.diff(rc[0])**2 + np.diff(rc[1])**2))
         dists_temp = np.insert(dists_temp, 0, 0)
