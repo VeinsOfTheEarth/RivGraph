@@ -441,7 +441,6 @@ def test_regionprops_big():
                                                            0.]))
 
 
-@pytest.mark.xfail
 def test_regionprops_perimeter():
     """Test of regionprops() 'perimeter' property."""
     I = np.zeros((20, 20))
@@ -452,8 +451,45 @@ def test_regionprops_perimeter():
     info = im_utils.regionprops(I, props)
     # make bunch of assertions
     assert [*info] == props
-    # 'perimeter' option currently broken (hence xfail)
-    # after fix add assertion to validate the output of the perimeter values
+    assert info['perimeter'].shape == (3,)
+    assert np.all(info['perimeter'][0] == np.array([[1, 1],
+                                                    [2, 1],
+                                                    [2, 2],
+                                                    [1, 2]]))
+    assert np.all(info['perimeter'][1] == np.array([[7, 4],
+                                                    [8, 4],
+                                                    [9, 4],
+                                                    [9, 5],
+                                                    [9, 6],
+                                                    [9, 7],
+                                                    [9, 8],
+                                                    [9, 9],
+                                                    [9, 10],
+                                                    [9, 11],
+                                                    [8, 11],
+                                                    [7, 11],
+                                                    [7, 10],
+                                                    [7, 9],
+                                                    [7, 8],
+                                                    [7, 7],
+                                                    [7, 6],
+                                                    [7, 5]]))
+    assert np.all(info['perimeter'][2] == np.array([[15, 15],
+                                                    [16, 15],
+                                                    [17, 15],
+                                                    [18, 15],
+                                                    [19, 15],
+                                                    [19, 16],
+                                                    [19, 17],
+                                                    [19, 18],
+                                                    [19, 19],
+                                                    [18, 19],
+                                                    [17, 19],
+                                                    [16, 19],
+                                                    [15, 19],
+                                                    [15, 18],
+                                                    [15, 17],
+                                                    [15, 16]]))
 
 
 def test_crop_binary_im():
