@@ -34,16 +34,16 @@ Task list
 These tasks represent what is needed before we "officially" release RivGraph via publication in the [Journal of Open Source Software](https://joss.theoj.org/).
 
 3/29/2020 - Task list created
+- [x] [Conda Packaging](anaconda.org/jschwenk/rivgraph) - Updates 5/25/2020 
 - [x] [Delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb)
-- [ ] Braided river example
+- [x] Braided river example
+- [x] How to fix flow directions (shown in braided river example, section 7.1)
+- [x] Function for removing artificial nodes - 6/10/2020
+- [ ] Unit testing - in progress (5/11/2020)
 - [ ] How to prepare masks for inputs
 - [ ] Where to get masks
 - [ ] How to draw shorelines
-- [ ] How to fix flow directions
 - [ ] Function documentation
-- [ ] Unit testing - in progress (5/11/2020)
-- [x] Function for removing artificial nodes - 6/10/2020
-- [x] [Conda Packaging](anaconda.org/jschwenk/rivgraph) - Updates 5/25/2020 
 
 
 Contacting us
