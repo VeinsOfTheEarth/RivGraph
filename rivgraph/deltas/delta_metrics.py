@@ -256,10 +256,12 @@ def delta_subN_F(A, epsilon = 10**-10):
     d, v = np.linalg.eig(L)
     # Renormalize eigenvectors to one
     for i in range(v.shape[1]):
-        if np.max(v[:,i]) == 0:
+        # set values below epsilon to 0
+        v[:, i][v[:, i] < epsilon] = 0
+        if np.max(v[:, i]) == 0:
             continue
         else:
-            v[:,i] = v[:,i] / np.max(v[:,i])
+            v[:, i] = v[:, i] / np.max(v[:, i])
 
     # Null space basis
     SubN = v[:, np.where(np.abs(d)<epsilon)[0]]
