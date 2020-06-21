@@ -21,6 +21,13 @@ import gdal
 #         assert epsg['init'] == 'epsg:32606'
 
 
+def test_get_unit():
+    """Test get_unit() function."""
+    epsg = 32606
+    unit = geo_utils.get_unit(epsg)
+    assert unit == 'metre'
+
+
 def test_geotiff_vals_from_coords():
     """Test geotiff_vals_from_coords()."""
     # read in origin point
