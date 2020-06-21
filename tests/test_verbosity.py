@@ -5,6 +5,7 @@ import os
 import io
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph.classes import delta
+from rivgraph.classes import river
 
 
 def test_plot_failure(test_net):
@@ -103,3 +104,42 @@ def test_junction_vebosity(test_net):
     sys.stdout == sys.__stdout__
     # make assertion
     assert capturedOutput.getvalue()[:-1] == 'Junction angles cannot be computed before link directions are set.'
+
+
+def test_skeletonize(test_river):
+    """Test river skeletonization."""
+    # capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+    # do skeletonization
+    test_river.verbose = True
+    test_river.skeletonize()
+    sys.stdout == sys.__stdout__
+    # make assertion
+    assert capturedOutput.getvalue()[:-1] == 'Skeletonizing mask...done.'
+
+
+def test_compute_centerline(test_river):
+    """Test compute_centerline function."""
+    # capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+    # do skeletonization
+    test_river.verbose = True
+    test_river.compute_centerline()
+    sys.stdout == sys.__stdout__
+    # make assertion
+    assert capturedOutput.getvalue()[:-1] == 'Computing centerline...done.'
+
+
+def test_compute_mesh(test_river):
+    """Test compute_mesh function."""
+    # capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+    # do skeletonization
+    test_river.verbose = True
+    test_river.compute_mesh()
+    sys.stdout == sys.__stdout__
+    # make assertion
+    assert capturedOutput.getvalue()[:-1] == 'Resolving links and nodes...done.\nComputing distance transform...done.\nComputing link widths and lengths...done.\nGenerating mesh...done.'
