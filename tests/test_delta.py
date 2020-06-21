@@ -58,14 +58,12 @@ def test_prune_network(test_net, known_net):
     # prune the network
     test_net.prune_network(path_shoreline='tests/data/Colville/Colville_shoreline.shp',
                            path_inletnodes='tests/data/Colville/Colville_inlet_nodes.shp')
-
     # now the number of nodes and links should be exactly the same
     # Currently x-failing because changes in directionality computation altered the number of nodes/links identified
     assert len(test_net.nodes['id']) == len(known_net.nodes['id'])
     assert len(test_net.links['id']) == len(known_net.links['id'])
 
 
-@pytest.mark.xfail
 def test_flowdir(test_net, known_net):
     """Check that 90% of directions are assigned to match known case."""
     # set directions
@@ -100,14 +98,11 @@ def test_flowdir(test_net, known_net):
             match_counter += 1
 
     # "soft" unit test -- check that over 90% of the idx values match
-    # currently set to x-fail because of prune_network mis-match
-    # once prune_network/number of nodes match, then this test should pass
     assert match_counter / len(ind_list) > 0.9
 
 
-@pytest.mark.xfail
 def test_junction_angles(test_net, known_net):
-    """Not the most elegant test -- need to streamline."""
+    """Check that 90% of junction angles agree."""
     # compute the junction angles
     test_net.compute_junction_angles(weight=None)
     known_net.compute_junction_angles(weight=None)
@@ -141,35 +136,33 @@ def test_junction_angles(test_net, known_net):
             match_jct += 1
 
     # "soft" unit test -- check that over 90% of the values match
-    # currently set to x-fail because of prune_network mis-match
-    # once prune_network/number of nodes match, then this test should pass
     assert match_angle / len(ind_list) > 0.9
     assert match_jct / len(ind_list) > 0.9
 
 
 
-# currently a bug in the compute_topologic_metrics() method is
-# creating a memory overflow so below tests are not enabled now
+# currently the compute_topologic_metrics() method is
+# creating a memory overflow warning (sometimes)
 
-# def test_metrics(test_net,known_net):
-#     # compute metrics
-#     test_net.compute_topologic_metrics()
-#     known_net.compute_topologic_metrics()
-#
-#     assert len(test_net.topo_metrics.keys()) == len(known_net.topo_metrics.keys())
+def test_metrics(test_net,known_net):
+    # compute metrics
+    test_net.compute_topologic_metrics()
+    known_net.compute_topologic_metrics()
 
-
-# def test_adj(test_net,known_net):
-#     # define adjacency matrices
-#     test_adj = test_net.adjacency_matrix()
-#     known_adj = known_net.adjacency_matrix()
-#
-#     assert np.shape(test_adj) == np.shape(known_adj)
-#     assert np.sum(test_adj) == np.sum(known_adj)
+    assert len(test_net.topo_metrics.keys()) == len(known_net.topo_metrics.keys())
 
 
-# def test_adj_norm(test_net):
-#     # test normalization of the adjacency matrix
-#     t_norm = test_net.adjacency_matrix(normalized=True)
-#
-#     assert np.max(np.sum(t_norm, axis=1)) == 1
+def test_adj(test_net,known_net):
+    # define adjacency matrices
+    test_adj = test_net.adjacency_matrix()
+    known_adj = known_net.adjacency_matrix()
+
+    assert np.shape(test_adj) == np.shape(known_adj)
+    assert np.sum(test_adj) == np.sum(known_adj)
+
+
+def test_adj_norm(test_net):
+    # test normalization of the adjacency matrix
+    t_norm = test_net.adjacency_matrix(normalized=True)
+
+    assert np.max(np.sum(t_norm, axis=1)) == 1
