@@ -34,7 +34,7 @@ def test_get_unit():
     epsg = 4326
     crs = CRS.from_epsg(epsg)
     unit = geo_utils.get_unit(crs)
-    asser unit == 'degree'
+    assert unit == 'degree'
 
 
 def test_geotiff_vals_from_coords():
