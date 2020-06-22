@@ -9,6 +9,7 @@ from rivgraph import geo_utils
 import osr
 import ogr
 import gdal
+from pyproj import CRS
 
 # function geo_utils.get_EPSG() no longer exists
 # def test_getEPSG_fromshp():
@@ -23,9 +24,17 @@ import gdal
 
 def test_get_unit():
     """Test get_unit() function."""
+    # Projected CRS
     epsg = 32606
-    unit = geo_utils.get_unit(epsg)
-    assert unit == 'metre'
+    crs = CRS.from_epsg(epsg)
+    unit = geo_utils.get_unit(crs)
+    assert unit == 'meter
+    
+    # Unprojected CRS
+    epsg = 4326
+    crs = CRS.from_epsg(epsg)
+    unit = geo_utils.get_unit(crs)
+    asser unit == 'degree'
 
 
 def test_geotiff_vals_from_coords():
