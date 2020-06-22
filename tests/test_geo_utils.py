@@ -28,7 +28,7 @@ def test_get_unit():
     epsg = 32606
     crs = CRS.from_epsg(epsg)
     unit = geo_utils.get_unit(crs)
-    assert unit == 'meter
+    assert unit == 'meter'
     
     # Unprojected CRS
     epsg = 4326
