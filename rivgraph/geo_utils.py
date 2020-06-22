@@ -14,37 +14,61 @@ geographic data including tiffs, vrts, shapefiles, etc.
 functionality here, and some of these functions are simply unused.
 
 """
-import osr, ogr, gdal
+import gdal
 import numpy as np
-import geopandas as gpd
-from pyproj import Proj, transform
+from pyproj import Transformer
+import warnings
 import os
 import sys
 sys.path.append(os.path.realpath(os.path.dirname(__file__)))
 import io_utils as io
 
 
-def get_unit(epsg):
+def get_unit(crs):
     """
     Returns the units for a projection defined by an EPSG code.
+    See https://en.wikibooks.org/wiki/PROJ.4#Units for a list of unit string 
+    maps.
 
     Parameters
     ----------
-    epsg : int, float, or str
-        The epsg code.
+    crs : pyproj CRS object
+        Defines the coordinate reference system.
 
     Returns
     ----------
     unit : str
         The unit of the provided epsg code.
     """
+    # The to_proj4() function generates a warning.
+    warnings.simplefilter(action='ignore', category=UserWarning)
+    p4 = crs.to_proj4()
+    warnings.simplefilter(action='default', category=UserWarning)
+   
+    projkey = p4[p4.index('+proj=') + len('+proj='):].split(' ')[0]
+    
+    if projkey == 'longlat':
+        unit = 'degree'
+    else:
+        unitstr = p4[p4.index('+units=') + len('+units='):].split(' ')[0]
+    
+        p4units = {'m' : 'meter',
+                   'cm' : 'centimeter',
+                   'dm' : 'decimenter',
+                   'ft' : 'foot',
+                   'in' : 'inch',
+                   'km' : 'kilometer',
+                   'mi' : 'international statute mile',
+                   'mm' : 'millimeter',
+                   'yd' : 'international yard'}
+    
+        if unitstr in p4units.keys():
+            unit = p4units[unitstr]
+        else: 
+            unit = unitstr
+            raise Warning('Unit type {} not understood.'.format(unitstr)) 
 
-    # Units of projection
-    srs = osr.SpatialReference()
-    srs.SetFromUserInput("EPSG:" + str(epsg))
-    unit = srs.GetAttrValue("UNIT",0)
-
-    return unit.lower()
+    return unit
 
 
 def geotiff_vals_from_coords(coords, gd_obj):
@@ -172,12 +196,13 @@ def transform_coords(xs, ys, inputEPSG, outputEPSG):
     Returns
     ----------
     xy : np.array()
-        N-element array of transformed (x, y) coordinates.
+        Two element array of transformed (x, y) coordinates. xy[0] are 
+        transformed x coordinates, xy[1] are transformed y coordinates.
     """
-
-    in_proj = Proj(init='epsg:'+str(inputEPSG))
-    out_proj = Proj(init='epsg:'+str(outputEPSG))
-    xy = transform(in_proj, out_proj, xs, ys)
+    
+    proj = Transformer.from_crs(inputEPSG, outputEPSG, always_xy=True)
+    xt, yt = proj.transform(xs, ys)
+    xy = np.array((xt, yt))
 
     return xy
 
