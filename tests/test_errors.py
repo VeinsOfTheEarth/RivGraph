@@ -7,12 +7,13 @@ sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph.classes import delta
 from rivgraph.classes import river
 from rivgraph import ln_utils
+from rivgraph.deltas import delta_metrics
 
 
 def test_geovectorType(known_net):
     """Raise TypeError in to_geovectors() function."""
     with pytest.raises(Exception):
-        known_net.to_geovecors(ftype='invalid')
+        known_net.to_geovectors(ftype='invalid')
 
 
 def test_no_shoreline(test_net):
@@ -30,7 +31,7 @@ def test_no_inlet(test_net):
 def test_flow_no_network(test_net):
     """Raise attribute error due to lack of links (network not computed)."""
     with pytest.raises(Exception):
-        test_net.assign_flow_direcions()
+        test_net.assign_flow_directions()
 
 
 def test_compute_metrics(test_net):
@@ -57,3 +58,18 @@ def test_junction_angles(test_river):
     with pytest.raises(Exception):
         ln_utils.junction_angles(test_river.links, test_river.nodes,
                                  test_river.Iskel.shape, 5)
+
+
+def test_graphiphy():
+    """Raise RuntimeError due to missing weight."""
+    links = dict()
+    nodes = dict()
+    with pytest.raises(Exception):
+        delta_metrics.graphiphy(links, nodes, weight='bad')
+
+
+def test_inlet_outlet():
+    """Raise RuntimeError due to multiple apexes."""
+    A = np.ones((5, 5))
+    with pytest.raises(Exception):
+        delta_metrics.find_inlet_outlet_nodes(A)
