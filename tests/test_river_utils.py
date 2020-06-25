@@ -78,3 +78,69 @@ def test_eBI_avg():
        11,  9, 14, 12, 12, 13, 12, 10, 10, 10,  8,  7,  9,  6,  4,  4,  6,
         6,  4,  3,  5,  6,  8,  7, 10,  9,  8,  8,  7,  7,  7,  5,  5,  5,
         4,  3,  3,  3,  4,  6,  4,  5,  6,  4,  5,  5,  2,  2,  2,  2]))
+
+
+class TestCenterline:
+    """Testing the river_utils.centerline() class."""
+
+    def test_init(self):
+        """Init the class."""
+        x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
+        CL = ru.centerline(x, y)
+        # make assertions
+        assert np.all(CL.xo == x)
+        assert np.all(CL.yo == y)
+
+    def test_init_const_attr(self):
+        """Init with constant attribute."""
+        x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
+        attribs = {}
+        attribs['width'] = 10.
+        CL = ru.centerline(x, y, attribs)
+        # make assertions
+        assert np.all(CL.xo == x)
+        assert np.all(CL.yo == y)
+        assert CL.width == 10.0
+
+    def test_init_attr(self):
+        """Init with attribute list."""
+        x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
+        attribs = {}
+        attribs['width'] = np.ones((11,))*10
+        CL = ru.centerline(x, y, attribs)
+        # make assertions
+        assert np.all(CL.xo == x)
+        assert np.all(CL.yo == y)
+        assert np.all(CL.width == np.ones((11,))*10)
+
+    def test_get_xy(self):
+        """Test get xy function."""
+        x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
+        CL = ru.centerline(x, y)
+        x, y, vers = CL._centerline__get_x_and_y()
+        # make assertions
+        assert np.all(x == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        assert np.all(y == [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1])
+        assert vers == 'original'
+
+    def test_s(self):
+        """Test the s() function."""
+        x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
+        CL = ru.centerline(x, y)
+        sss = CL.s()
+        # make assertions
+        assert np.all(sss == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+
+    def test_ds(self):
+        """Test the ds() function."""
+        x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
+        CL = ru.centerline(x, y)
+        dss = CL.ds()
+        # make assertions
+        assert np.all(dss == [1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])
