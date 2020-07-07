@@ -40,6 +40,18 @@ def test_outvec_shp(known_net):
     assert os.path.isfile(known_net.paths['nodes']) == True
 
 
+def test_outvec_all(known_river):
+    """Test writing all variables out as json."""
+    known_river.compute_mesh()
+    known_river.to_geovectors(export='all')
+    # check that files exist
+    assert os.path.isfile(known_river.paths['links']) == True
+    assert os.path.isfile(known_river.paths['nodes']) == True
+    assert os.path.isfile(known_river.paths['meshlines']) == True
+    assert os.path.isfile(known_river.paths['centerline']) == True
+    assert os.path.isfile(known_river.paths['centerline_smooth']) == True
+
+
 def test_to_geotiff(known_net):
     """Have to re-create skeleton."""
     known_net.skeletonize()
@@ -139,5 +151,8 @@ def test_delete_files():
     """Delete created files at the end."""
     for i in os.listdir('tests/results/known/'):
         os.remove('tests/results/known/'+i)
+    for i in os.listdir('tests/results/brahma/'):
+        os.remove('tests/results/brahma/'+i)
     # check directory is empty
     assert os.listdir('tests/results/known/') == []
+    assert os.listdir('tests/results/brahma/') == []

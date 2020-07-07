@@ -1,4 +1,4 @@
-dist: xenial
+dist: bionic
 
 language: python
 python:
@@ -17,6 +17,7 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
+
   # Useful for debugging any issues with conda
   - conda info -a
 
@@ -24,7 +25,9 @@ install:
   - conda env create -q --file environment.yml
   - conda activate rivgraph
   - conda uninstall rivgraph
+  - sudo apt-get install gnutls-bin
   - pip install pytest
+
 # command to run tests
 script:
   - python setup.py install
@@ -57,6 +60,8 @@ jobs:
         - conda activate rivgraph
         - conda uninstall rivgraph
         - pip install pytest pytest-cov coveralls
+        - sudo apt-get install -f
+        - pip install opencv-python
       script:
         - pytest --cov-config=.coveragerc --cov=rivgraph/
       after_success:

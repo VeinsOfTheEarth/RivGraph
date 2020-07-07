@@ -495,10 +495,10 @@ def trim_idcs(sizeI, idcs):
     fit within a raster of sizeI
     """
 
-    idcs = idcs[idcs[:,0]>sizeI[0],:]
-    idcs = idcs[idcs[:,1]>sizeI[1],:]
-    idcs = idcs[idcs[:,0]<0,:]
-    idcs = idcs[idcs[:,1]<0,:]
+    idcs = idcs[idcs[:, 0] < sizeI[0], :]
+    idcs = idcs[idcs[:, 1] < sizeI[1], :]
+    idcs = idcs[idcs[:, 0] >= 0, :]
+    idcs = idcs[idcs[:, 1] >= 0, :]
 
     return idcs
 

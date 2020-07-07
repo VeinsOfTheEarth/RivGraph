@@ -614,11 +614,15 @@ class TestBpKernels:
                                        [0, 0, 0]]))
 
 
-"""LOOK AT FCT - May be incorrectly written"""
-# def test_trim_idcs():
-#     idcs = np.array([[0,1,2,5],[0,0,1,5]]).T
-#     sizeI = [2,2]
-#     new = im_utils.trim_idcs(sizeI, idcs)
+def test_trim_idcs():
+    """Tests the trim_idcs method."""
+    idcs = np.array([[0, 1, 2, 5], [0, 0, 1, 5]]).T
+    sizeI = [3, 3]
+    new = im_utils.trim_idcs(sizeI, idcs)
+    # make assertions
+    assert np.all(new[0] == np.array([0, 0]))
+    assert np.all(new[1] == np.array([1, 0]))
+    assert np.all(new[2] == np.array([2, 1]))
 
 
 class TestSkelBranchpts:
@@ -634,6 +638,31 @@ class TestSkelBranchpts:
         I[4, 4] = 1
         Ipbs = im_utils.skel_branchpoints(I)
         assert np.all(Ipbs == np.array([[0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [0, 0, 1, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [1, 0, 0, 0, 1]]))
+
+    def test_plus(self):
+        """Test a + configuration."""
+        I = np.zeros((5,5))
+        I[:, 2] = 1
+        I[2, :] = 1
+        Ipbs = im_utils.skel_branchpoints(I)
+        assert np.all(Ipbs == np.array([[0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [0, 0, 1, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0]]))
+
+    def test_cross(self):
+        """Test a x configuration."""
+        I = np.zeros((5, 5))
+        for i in range(0, 5):
+            I[i, i] = 1
+            I[i, -(i+1)] = 1
+        Ipbs = im_utils.skel_branchpoints(I)
+        assert np.all(Ipbs == np.array([[1, 0, 0, 0, 1],
                                         [0, 0, 0, 0, 0],
                                         [0, 0, 1, 0, 0],
                                         [0, 0, 0, 0, 0],
