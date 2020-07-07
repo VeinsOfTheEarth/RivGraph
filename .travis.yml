@@ -17,6 +17,8 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
+  - sudo apt-get update
+  - sudo apt install -f
   # Useful for debugging any issues with conda
   - conda info -a
 
@@ -25,7 +27,6 @@ install:
   - conda activate rivgraph
   - conda uninstall rivgraph
   - pip install pytest
-  - sudo apt install -f
 # command to run tests
 script:
   - python setup.py install
