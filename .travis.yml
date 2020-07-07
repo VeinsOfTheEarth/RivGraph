@@ -5,8 +5,7 @@ python:
   - "3.6"
 install:
   - sudo apt-get update
-  - sudo apt-cache policy libgnutls30
-  - sudo apt install -f
+  - sudo apt-get upgrade
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
