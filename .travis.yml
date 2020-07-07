@@ -2,7 +2,7 @@ dist: xenial
 
 language: python
 python:
-  - "3.7"
+  - "3.6"
 install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
@@ -25,6 +25,7 @@ install:
   - conda activate rivgraph
   - conda uninstall rivgraph
   - pip install pytest
+  - sudo apt install -f
 # command to run tests
 script:
   - python setup.py install
@@ -34,7 +35,7 @@ script:
 jobs:
   include:
     - stage: coverage
-      python: "3.7"
+      python: "3.6"
       install:
         - sudo apt-get update
         # We do this conditionally because it saves us some downloading if the
