@@ -4,10 +4,7 @@ language: python
 python:
   - "3.6"
 install:
-  - wget http://mirrors.kernel.org/ubuntu/pool/main/libi/libidn2/libidn2-0_2.0.4-1.1build2_amd64.deb
-  - sudo dpkg -i libidn2-0_2.0.4-1.1build2_amd64.deb
   - sudo apt-get update
-  - sudo apt-get upgrade
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -28,6 +25,7 @@ install:
   - conda env create -q --file environment.yml
   - conda activate rivgraph
   - conda uninstall rivgraph
+  - sudo apt-get install gnutls
   - pip install pytest
 
 # command to run tests
@@ -41,10 +39,7 @@ jobs:
     - stage: coverage
       python: "3.6"
       install:
-        - wget http://mirrors.kernel.org/ubuntu/pool/main/libi/libidn2/libidn2-0_2.0.4-1.1build2_amd64.deb
-        - sudo dpkg -i libidn2-0_2.0.4-1.1build2_amd64.deb
         - sudo apt-get update
-        - sudo apt-get upgrade
         # We do this conditionally because it saves us some downloading if the
         # version is the same.
         - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -64,6 +59,7 @@ jobs:
         - conda env create -q --file environment.yml
         - conda activate rivgraph
         - conda uninstall rivgraph
+        - sudo apt-get install gnutls
         - pip install pytest pytest-cov coveralls
       script:
         - pytest --cov-config=.coveragerc --cov=rivgraph/
