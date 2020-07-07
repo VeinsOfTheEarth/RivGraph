@@ -5,6 +5,8 @@ python:
   - "3.6"
 install:
   - sudo apt-get update
+  - sudo apt-cache policy libgnutls30
+  - sudo apt install -f
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -27,11 +29,6 @@ install:
   - conda uninstall rivgraph
   - pip install pytest
 
-  # apt update
-  - sudo apt-get update
-  - sudo apt-cache policy libgnutls30
-  - sudo apt install -f
-    
 # command to run tests
 script:
   - python setup.py install
