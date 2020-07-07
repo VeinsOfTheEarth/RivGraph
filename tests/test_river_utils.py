@@ -144,3 +144,14 @@ class TestCenterline:
         dss = CL.ds()
         # make assertions
         assert np.all(dss == [1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])
+
+    def test_C(self):
+        """Test the C() function."""
+        x = [0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 0]
+        y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        CL = ru.centerline(x, y)
+        Cs = CL.C()
+        # make assertions
+        assert pytest.approx(Cs == np.array([-0., 0., 0., 0., 0.,
+                                             1.57079633, 1.57079633,
+                                             0., 0., 0., 0.]))
