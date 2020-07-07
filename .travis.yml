@@ -4,8 +4,6 @@ language: python
 python:
   - "3.6"
 install:
-  - wget http://mirrors.kernel.org/ubuntu/pool/main/libi/libidn2/libidn2-0_2.0.4-1.1build2_amd64.deb
-  - sudo dpkg -i libidn2-0_2.0.4-1.1build2_amd64.deb
   - sudo apt-get update
   - sudo apt-get upgrade
   # We do this conditionally because it saves us some downloading if the
@@ -42,6 +40,7 @@ jobs:
       python: "3.6"
       install:
         - sudo apt-get update
+        - sudo apt-get upgrade
         # We do this conditionally because it saves us some downloading if the
         # version is the same.
         - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
