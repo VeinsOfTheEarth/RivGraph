@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Unit tests for im_utils.py."""
 import pytest
 import sys
@@ -407,7 +408,7 @@ def test_regionprops_small():
     props = ['centroid', 'mean', 'perim_len', 'convex_area',
              'eccentricity', 'equivalent_diameter',
              'major_axis_length', 'minor_axis_length', 'invalidinput']
-    info = im_utils.regionprops(I, props)
+    info, _ = im_utils.regionprops(I, props)
     # make bunch of assertions
     assert [*info] == props
     assert np.all(info['centroid'] == [1., 1.])
@@ -427,7 +428,7 @@ def test_regionprops_big():
     I[15:20, 15:20] = 1.0
     I[7:10, 4:12] = 1.0
     props = ['centroid', 'mean', 'perim_len', 'eccentricity']
-    info = im_utils.regionprops(I, props)
+    info, _ = im_utils.regionprops(I, props)
     # make bunch of assertions
     assert [*info] == props
     assert np.all(info['centroid'] == np.array([[1.5, 1.5],
@@ -448,7 +449,7 @@ def test_regionprops_perimeter():
     I[15:20, 15:20] = 1.0
     I[7:10, 4:12] = 1.0
     props = ['perimeter']
-    info = im_utils.regionprops(I, props)
+    info, _ = im_utils.regionprops(I, props)
     # make bunch of assertions
     assert [*info] == props
     assert info['perimeter'].shape == (3,)
