@@ -163,7 +163,6 @@ def idcs_no_turnaround(idcs, Iskel):
     for all cases.
     """
     ncols = Iskel.shape[1]
-
     idxdif = idcs[0]-idcs[1]
 
     if idxdif == -ncols - 1:

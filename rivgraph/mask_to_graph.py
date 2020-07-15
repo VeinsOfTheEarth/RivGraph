@@ -1,26 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-mask_to_graph
+mask_to_graph.py
 =============
+Functions for converting a binary channel mask to a graphical representation.
 
 Created on Tue Apr 10 14:29:01 2018
-
-@author: Jon
 """
 
-
-from rivgraph import walk
-from rivgraph import ln_utils as lnu
-from rivgraph import im_utils as iu
-from skimage import morphology, measure
-import numpy as np
 import cv2
-import sys
-import os
-sys.path.append(os.path.realpath(os.path.dirname(__file__)))
-from ordered_set import OrderedSet
+import numpy as np
+from skimage import morphology, measure
+from rivgraph import walk
+import rivgraph.ln_utils as lnu
+import rivgraph.im_utils as imu
+from rivgraph.ordered_set import OrderedSet
 
-#Iskel = rg.Iskel
 
 def skel_to_graph(Iskel):
     """
@@ -47,11 +41,11 @@ def skel_to_graph(Iskel):
         """
 
         # Get skeleton connectivity
-        eps = iu.skel_endpoints(Iskel)
+        eps = imu.skel_endpoints(Iskel)
         eps = set(np.ravel_multi_index(eps, Iskel.shape))
 
         # Get one endpoint per connected component in network
-        rp = iu.regionprops(Iskel, ['coords'])
+        rp, _ = imu.regionprops(Iskel, ['coords'])
         startpoints = []
         for ni in rp['coords']:
             idcs = set(np.ravel_multi_index((ni[:,0], ni[:,1]), Iskel.shape))
@@ -78,8 +72,8 @@ def skel_to_graph(Iskel):
     # Initialize topology storage vars
     nodes = dict()
     nodes['idx'] = OrderedSet([])
-    nodes['conn'] = [] #[[] for i in range(3)]
-
+    nodes['conn'] = []
+    
     links = dict()
     links['idx'] = [[]]
     links['conn'] = [[]]
@@ -166,7 +160,7 @@ def skel_to_graph(Iskel):
                     # If we can't walk to a 4-connected, try to walk in a direction that does not turn us around
                     elif len(noturnidx) == 1:
                         links = lnu.link_updater(links, linkid, noturnidx)
-                    # Else, fuck. You've found a critical flaw in the algorithm.
+                    # Else, shit. You've found a critical flaw in the algorithm.
                     else:
                         print('idx: {}, poss_steps: {}'.format(links['idx'][linkidx][-1], poss_steps))
                         raise RuntimeError('Ambiguous which step to take next :(')
@@ -207,8 +201,7 @@ def skel_to_graph(Iskel):
     links, nodes = lnu.adjust_for_padding(links, nodes, npad, dims, initial_dims)
 
     # Add indices to nodes--this probably should've been done in network extraction
-    # but since nodes have unique idx it was unnecessary. IDs may be required
-    # for further processing, though.
+    # but since nodes have unique idx it was unnecessary. 
     nodes['id'] = OrderedSet(range(0,len(nodes['idx'])))
 
     # Remove duplicate links if they exist; for some single-pixel links,
@@ -234,12 +227,12 @@ def skeletonize_mask(Imask):
     Iskel = simplify_skel(Iskel)
 
     # Fill small skeleton holes, re-skeletonize, and re-simplify
-    Iskel = iu.fill_holes(Iskel, maxholesize=4)
+    Iskel = imu.fill_holes(Iskel, maxholesize=4)
     Iskel = morphology.skeletonize(Iskel)
     Iskel = simplify_skel(Iskel)
 
     # Fill single pixel holes
-    Iskel = iu.fill_holes(Iskel, maxholesize=1)
+    Iskel = imu.fill_holes(Iskel, maxholesize=1)
 
     return Iskel
 
@@ -258,7 +251,7 @@ def skeletonize_river_mask(I, es, padscale=2):
     """
 
     # Crop image
-    Ic, crop_pads = iu.crop_binary_im(I)
+    Ic, crop_pads = imu.crop_binary_im(I)
 
     # Pad image (reflects channels at image edges)
     Ip, pads = pad_river_im(Ic, es, pm=padscale)
@@ -277,20 +270,19 @@ def skeletonize_river_mask(I, es, padscale=2):
     Iskel = simplify_skel(Iskel)
 
     # Fill small skeleton holes, re-skeletonize, and re-simplify
-    Iskel = iu.fill_holes(Iskel, maxholesize=4)
+    Iskel = imu.fill_holes(Iskel, maxholesize=4)
     Iskel = morphology.skeletonize(Iskel)
     Iskel = simplify_skel(Iskel)
 
     # Fill single pixel holes
-    Iskel = iu.fill_holes(Iskel, maxholesize=1)
+    Iskel = imu.fill_holes(Iskel, maxholesize=1)
 
     # The handling of edges can leave pieces of the skeleton stranded (i.e.
     # disconnected from the main skeleton). Remove those here by keeping the
     # largest blob.
-    Iskel = iu.largest_blobs(Iskel, nlargest=1, action='keep')
+    Iskel = imu.largest_blobs(Iskel, nlargest=1, action='keep')
 
     return Iskel
-
 
 
 def simplify_skel(Iskel):
@@ -305,12 +297,12 @@ def simplify_skel(Iskel):
 
     Iskel = np.array(Iskel, dtype=np.uint8)
 
-    Ic = iu.im_connectivity(Iskel)
+    Ic = imu.im_connectivity(Iskel)
     ypix, xpix = np.where(Ic > 2) # Get all pixels with connectivity > 2
 
 
     for y, x in zip(ypix, xpix):
-        nv = iu.neighbor_vals(Iskel, x, y)
+        nv = imu.neighbor_vals(Iskel, x, y)
 
         # Skip edge cases
         if np.any(np.isnan(nv)) == True:
