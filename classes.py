@@ -14,7 +14,9 @@ from scipy.ndimage.morphology import distance_transform_edt
 import rivgraph.io_utils as io
 import rivgraph.geo_utils as gu
 import rivgraph.mask_to_graph as m2g
+import rivgraph.im_utils as im
 import rivgraph.ln_utils as lnu
+import rivgraph.mask_utils as mu
 import rivgraph.deltas.delta_utils as du
 import rivgraph.deltas.delta_directionality as dd
 import rivgraph.deltas.delta_metrics as dm
@@ -204,7 +206,61 @@ class rivnetwork:
         else:
             self.nodes = lnu.junction_angles(self.links, self.nodes, self.imshape, self.pixlen, weight=weight)
             
+            
+    def get_islands(self, props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length', 'surrounding_links']):
+        """
+        Finds all the islands in the binary mask and computes their morphological
+        properties. Can be used to help "clean" masks of small islands. 
 
+        Parameters
+        ----------
+        props : list, optional
+            Properties to compute for each island. Properties can be any of those
+            provided by rivgraph.im_utils.regionprops.
+            The default is ['area', 'maxwidth', 'major_axis_length', 'minor_axis_length'].
+       
+        Returns
+        -------
+        islands : geopandas GeoDataFrame
+             Contains the polygons of each island with the requested property
+             attributes as columns. An additional 'remove' attribute is 
+             initialized to make thresholding easier. 
+        """
+        
+        do_surr = False
+        if 'surrounding_links' in props:
+            props.remove('surrounding_links')
+            if hasattr(self, 'links') is True:
+                do_surr = True
+            else:
+                print('Cannot compute surrounding island links without first computing the network. Skipping.')
+
+        if self.verbose is True:
+            print('Getting island properties...', end='')
+        
+        islands, Iislands = mu.get_island_properties(self.Imask, self.pixlen, self.pixarea, self.crs, self.gt, props)
+        
+        if self.verbose is True:
+            print('done.')
+        
+        if do_surr is True:
+            if hasattr(self.links, 'wid_adj') is False:
+                self.compute_link_width_and_length()
+            
+            if self.verbose is True:
+                print('Computing surrounding links for each island...', end='')
+
+            islands = mu.surrounding_link_properties(self.links, self.nodes, self.Imask, islands, Iislands, self.pixlen, self.pixarea)
+        
+            if self.verbose is True:
+                print('done.')
+
+        # Add a column to be used for thresholding
+        islands['remove'] = [False for i in range(len(islands))]
+        
+        return islands, Iislands
+        
+        
     def plot(self, *kwargs, axis=None):
         """
         Generates matplotlib plots of the network.
