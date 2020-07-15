@@ -684,7 +684,7 @@ class river(rivnetwork):
 
         else:
             if self.verbose is True:
-                print('Skeltonizing mask...', end='')
+                print('Skeletonizing mask...', end='')
 
             self.Iskel = m2g.skeletonize_river_mask(self.Imask, self.exit_sides)
 
