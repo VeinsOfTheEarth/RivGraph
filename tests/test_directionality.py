@@ -105,6 +105,31 @@ def test_flip_links_in_G():
     assert y == (3, 2, {})
 
 
+def test_get_link_vec(known_net):
+    """Test function get_link_vector()."""
+    links = known_net.links
+    nodes = known_net.nodes
+    imshape = known_net.imshape
+    linkid = 968
+    pixlen = known_net.pixlen
+    link_vec = di.get_link_vector(links, nodes, linkid, imshape, pixlen)
+    # make assertion
+    assert pytest.approx(link_vec == np.array([0.19371217, 0.98105841]))
+
+
+def test_get_link_vec_trim(known_net):
+    """Test function get_link_vector()."""
+    links = known_net.links
+    nodes = known_net.nodes
+    imshape = known_net.imshape
+    linkid = 968
+    pixlen = known_net.pixlen
+    link_vec = di.get_link_vector(links, nodes, linkid,
+                                  imshape, pixlen, trim=True)
+    # make assertion
+    assert pytest.approx(link_vec == np.array([0.37003286, 0.92901867]))
+
+
 def test_source_sink(known_net):
     """
     Test fix_sources_and_sinks().
@@ -115,6 +140,35 @@ def test_source_sink(known_net):
     # make some assertions
     assert len(nodes['id']) == len(known_net.nodes['id'])
     assert len(links['id']) == len(known_net.links['id'])
+
+
+def test_find_cycle(known_net):
+    """Test find_a_cycle() by creating one."""
+    links = known_net.links
+    links = lnu.flip_link(links, 964)
+    c_nodes, c_links = di.find_a_cycle(links, known_net.nodes)
+    # make assertions
+    assert c_nodes == [761, 784]
+    assert c_links == [964, 964]
+
+
+@pytest.mark.xfail
+def test_fix_cycles(known_net):
+    """Test fix_cycles()."""
+    links = known_net.links
+    nodes = known_net.nodes
+    # check that cycle exists
+    c_nodes, c_links = di.find_a_cycle(links, nodes)
+    assert c_nodes == [761, 784]
+    assert c_links == [964, 964]
+    # check that there are no continuity issues
+    problem_nodes = di.check_continuity(links, nodes)
+    assert problem_nodes == []
+    # now try to fix the cycles
+    links, nodes, n_cycles = di.fix_cycles(links, nodes)
+    # test fails at di.fix_cycles(links, nodes)
+    # mystery given that c_nodes & c_links exist, aka there is a cycle
+    # error: networkx.exception.NetworkXError: The edge 784-761 not in graph.
 
 
 def test_bad_continuity(known_net):
@@ -133,17 +187,16 @@ def test_bad_continuity(known_net):
 
 @pytest.mark.xfail
 def test_fix_source_sink(known_net):
-    """Actually test fix_sources_and_sinks().
-
-    Currently fails when the fix_sources_and_sinks function is called.
-    Haven't looked into this error very closely.
-    But know that old_problem_nodes == [177], so there are links to be flipped
-    and a problem to be 'fixed' by the function..."""
+    """Actually test fix_sources_and_sinks()."""
     links = known_net.links
-    old_problem_nodes = di.check_continuity(links, known_net.nodes)
-    newlinks, nodes = di.fix_sources_and_sinks(links, known_net.nodes)
-    problem_nodes = di.check_continuity(links, known_net.nodes)
     # verify that old problem node existed
+    old_problem_nodes = di.check_continuity(links, known_net.nodes)
     assert old_problem_nodes == [177]
+    # try to fix the continuity issue
+    newlinks, nodes = di.fix_sources_and_sinks(links, known_net.nodes)
+    # test fails at di.fix_sources_and_sinks(links, known_net.nodes)
+    # we know an issue exists because we verified the problem node
+    # error message: KeyError: 1081
+    problem_nodes = di.check_continuity(links, known_net.nodes)
     # make assertion that no problem node exists - aka 'fix' worked
     assert problem_nodes == []
