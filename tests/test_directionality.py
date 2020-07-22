@@ -6,6 +6,7 @@ import numpy as np
 import networkx as nx
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph import directionality as di
+from rivgraph import ln_utils as lnu
 
 # Functions on the 'known_net' of the extracted Colville network. This
 # network does not have any cycles, so functionality related to cycles is just
@@ -102,3 +103,47 @@ def test_flip_links_in_G():
     # make assertions
     assert x == (2, 1, {})
     assert y == (3, 2, {})
+
+
+def test_source_sink(known_net):
+    """
+    Test fix_sources_and_sinks().
+
+    This test really just checks that the function doesn't break anything.
+    """
+    links, nodes = di.fix_sources_and_sinks(known_net.links, known_net.nodes)
+    # make some assertions
+    assert len(nodes['id']) == len(known_net.nodes['id'])
+    assert len(links['id']) == len(known_net.links['id'])
+
+
+def test_bad_continuity(known_net):
+    """
+    Test check_continuity().
+
+    This test flips links so that continuity is disturbed.
+    """
+    links = known_net.links
+    links = lnu.flip_link(links, 199)
+    links = lnu.flip_link(links, 198)
+    problem_nodes = di.check_continuity(links, known_net.nodes)
+    # make assertion that a problem node has been created
+    assert problem_nodes == [177]
+
+
+@pytest.mark.xfail
+def test_fix_source_sink(known_net):
+    """Actually test fix_sources_and_sinks().
+
+    Currently fails when the fix_sources_and_sinks function is called.
+    Haven't looked into this error very closely.
+    But know that old_problem_nodes == [177], so there are links to be flipped
+    and a problem to be 'fixed' by the function..."""
+    links = known_net.links
+    old_problem_nodes = di.check_continuity(links, known_net.nodes)
+    newlinks, nodes = di.fix_sources_and_sinks(links, known_net.nodes)
+    problem_nodes = di.check_continuity(links, known_net.nodes)
+    # verify that old problem node existed
+    assert old_problem_nodes == [177]
+    # make assertion that no problem node exists - aka 'fix' worked
+    assert problem_nodes == []
