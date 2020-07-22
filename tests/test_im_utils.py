@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Unit tests for im_utils.py."""
 import pytest
 import sys
@@ -407,7 +408,7 @@ def test_regionprops_small():
     props = ['centroid', 'mean', 'perim_len', 'convex_area',
              'eccentricity', 'equivalent_diameter',
              'major_axis_length', 'minor_axis_length', 'invalidinput']
-    info = im_utils.regionprops(I, props)
+    info, _ = im_utils.regionprops(I, props)
     # make bunch of assertions
     assert [*info] == props
     assert np.all(info['centroid'] == [1., 1.])
@@ -427,7 +428,7 @@ def test_regionprops_big():
     I[15:20, 15:20] = 1.0
     I[7:10, 4:12] = 1.0
     props = ['centroid', 'mean', 'perim_len', 'eccentricity']
-    info = im_utils.regionprops(I, props)
+    info, _ = im_utils.regionprops(I, props)
     # make bunch of assertions
     assert [*info] == props
     assert np.all(info['centroid'] == np.array([[1.5, 1.5],
@@ -448,7 +449,7 @@ def test_regionprops_perimeter():
     I[15:20, 15:20] = 1.0
     I[7:10, 4:12] = 1.0
     props = ['perimeter']
-    info = im_utils.regionprops(I, props)
+    info, _ = im_utils.regionprops(I, props)
     # make bunch of assertions
     assert [*info] == props
     assert info['perimeter'].shape == (3,)
@@ -614,11 +615,15 @@ class TestBpKernels:
                                        [0, 0, 0]]))
 
 
-"""LOOK AT FCT - May be incorrectly written"""
-# def test_trim_idcs():
-#     idcs = np.array([[0,1,2,5],[0,0,1,5]]).T
-#     sizeI = [2,2]
-#     new = im_utils.trim_idcs(sizeI, idcs)
+def test_trim_idcs():
+    """Tests the trim_idcs method."""
+    idcs = np.array([[0, 1, 2, 5], [0, 0, 1, 5]]).T
+    sizeI = [3, 3]
+    new = im_utils.trim_idcs(sizeI, idcs)
+    # make assertions
+    assert np.all(new[0] == np.array([0, 0]))
+    assert np.all(new[1] == np.array([1, 0]))
+    assert np.all(new[2] == np.array([2, 1]))
 
 
 class TestSkelBranchpts:
@@ -634,6 +639,31 @@ class TestSkelBranchpts:
         I[4, 4] = 1
         Ipbs = im_utils.skel_branchpoints(I)
         assert np.all(Ipbs == np.array([[0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [0, 0, 1, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [1, 0, 0, 0, 1]]))
+
+    def test_plus(self):
+        """Test a + configuration."""
+        I = np.zeros((5,5))
+        I[:, 2] = 1
+        I[2, :] = 1
+        Ipbs = im_utils.skel_branchpoints(I)
+        assert np.all(Ipbs == np.array([[0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [0, 0, 1, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0]]))
+
+    def test_cross(self):
+        """Test a x configuration."""
+        I = np.zeros((5, 5))
+        for i in range(0, 5):
+            I[i, i] = 1
+            I[i, -(i+1)] = 1
+        Ipbs = im_utils.skel_branchpoints(I)
+        assert np.all(Ipbs == np.array([[1, 0, 0, 0, 1],
                                         [0, 0, 0, 0, 0],
                                         [0, 0, 1, 0, 0],
                                         [0, 0, 0, 0, 0],

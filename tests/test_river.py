@@ -5,6 +5,8 @@ import os
 import numpy as np
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph.classes import river
+from rivgraph import geo_utils
+from rivgraph.rivers import river_utils as ru
 
 
 def test_compute_network(test_river, known_river):
@@ -75,3 +77,83 @@ def test_assign_flow_directions(test_river, known_river):
 
     # "soft" unit test -- check that over 90% of the idx values match
     assert match_counter / len(ind_list) > 0.9
+
+
+def test_river_ne():
+    """Test river with exit sides 'ne'."""
+    img_path = 'tests/data/Brahma/brahma_mask_clip.tif'
+    out_path = 'tests/results/brahma/cropped.tif'
+    geo_utils.crop_geotif(img_path, npad=10, outpath=out_path)
+    test_ne = river('Brahmclip', out_path,
+                    'tests/results/brahma/', exit_sides='ne')
+    test_ne.compute_network()
+    test_ne.compute_mesh()
+    test_ne.prune_network()
+
+    # make assertions
+    assert len(test_ne.nodes['inlets']) == 1
+    assert len(test_ne.nodes['outlets']) == 1
+    assert test_ne.exit_sides == 'ne'
+
+
+def test_river_sw():
+    """Test river with exit sides 'sw'."""
+    test_sw = river('Brahmclip', 'tests/data/Brahma/brahma_mask_clip.tif',
+                    'tests/results/brahma/', exit_sides='sw')
+    test_sw.compute_network()
+    test_sw.compute_mesh()
+    test_sw.prune_network()
+
+    # make assertions
+    assert len(test_sw.nodes['inlets']) == 1
+    assert len(test_sw.nodes['outlets']) == 1
+    assert test_sw.exit_sides == 'sw'
+
+
+def test_chan_width(test_river):
+    """Test channel width function."""
+    width_channels, width_extent = ru.chan_width(test_river.centerline,
+                                                 test_river.Imask,
+                                                 pixarea=test_river.pixarea)
+
+    # make assertions
+    assert width_channels == pytest.approx(3495.076578549182)
+    assert width_extent == pytest.approx(8533.070813532931)
+
+
+def test_resample_line(test_river):
+    """Test resample_line()."""
+    resampled_coords, spline = ru.resample_line(test_river.centerline[0],
+                                                test_river.centerline[1])
+
+    # make assertions
+    assert np.shape(resampled_coords) == np.shape(test_river.centerline)
+    assert np.shape(spline) == (3,)
+
+
+def test_evenly_space_line(test_river):
+    """Test evenly_space_line()."""
+    resampled_coords, spline = ru.evenly_space_line(test_river.centerline[0],
+                                                    test_river.centerline[1])
+
+    # make assertions
+    assert np.shape(resampled_coords) == np.shape(test_river.centerline)
+    assert np.shape(spline) == (3,)
+
+
+def test_centerline_mesh(test_river):
+    """Test centerline_mesh()."""
+    width_channels, width_extent = ru.chan_width(test_river.centerline,
+                                                 test_river.Imask,
+                                                 pixarea=test_river.pixarea)
+    perps_out, polys, cl_resampled, s_out = ru.centerline_mesh(test_river.centerline,
+                                            width_channels,
+                                            test_river.max_valley_width_pixels*test_river.pixlen*1.1,
+                                            test_river.max_valley_width_pixels*test_river.pixlen*1.1/10,
+                                            1)
+
+    # make assertions
+    assert np.shape(perps_out) == (86, 2, 2)
+    assert np.shape(polys) == (86, 5, 2)
+    assert np.shape(cl_resampled) == (126, 2)
+    assert np.shape(s_out) == (86,)

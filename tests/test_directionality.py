@@ -3,6 +3,7 @@ import pytest
 import sys
 import os
 import numpy as np
+import networkx as nx
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph import directionality as di
 
@@ -53,6 +54,7 @@ def test_return_orient(known_net):
     assert np.all(re_links['certain_alg'][0] == links['certain_alg'][0])
     assert np.all(re_links['certain_order'][0] == links['certain_order'][0])
 
+
 def test_dir_known_link_angles(known_net):
     known_net.skeletonize()
     dims = np.shape(known_net.Iskel)
@@ -62,6 +64,7 @@ def test_dir_known_link_angles(known_net):
     # make assertions
     assert links['guess'] == known_net.links['guess']
     assert links['guess_alg'] == known_net.links['guess_alg']
+
 
 def test_no_backtrack(known_net):
     """Test set_no_backtrack()."""
@@ -78,3 +81,24 @@ def test_no_backtrack(known_net):
     assert nb_nodes['id'] == nodes['id']
     assert nb_nodes['conn'] == nodes['conn']
     assert nb_nodes['inlets'] == nodes['inlets']
+
+
+def test_merge_list_of_lists():
+    """Test the function merge_list_of_lists()."""
+    inlist = [[1, 2, 3], [1, 2, 4], [2, 4, 6]]
+    merged = di.merge_list_of_lists(inlist)
+    # make assertion of single list of unique values
+    assert merged == [[1, 2, 3, 4, 6]]
+
+
+def test_flip_links_in_G():
+    """Test the function flip_links_in_G()."""
+    # create networkx graph to use
+    G = nx.DiGraph()
+    G.add_edge(1, 2)
+    G.add_edge(2, 3)
+    G = di.flip_links_in_G(G, 'all')
+    [x, y] = G.edges.data()
+    # make assertions
+    assert x == (2, 1, {})
+    assert y == (3, 2, {})

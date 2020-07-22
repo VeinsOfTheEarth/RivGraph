@@ -10,7 +10,10 @@ Created on Mon Sep 10 10:21:35 2018
 import cv2
 import numpy as np
 from scipy import ndimage as nd
+import geopandas as gpd
+from shapely.geometry import Polygon
 from skimage import morphology, measure, util
+import rivgraph.geo_utils as gu
 
 
 def get_array(idx, I, size):
@@ -302,7 +305,7 @@ def remove_blobs(I, blobthresh, connectivity=2):
     """
 
     props = ['area', 'coords']
-    rp = regionprops(I, props, connectivity=connectivity)
+    rp, _ = regionprops(I, props, connectivity=connectivity)
     areas = np.array(rp['area'])
     coords = rp['coords']
 
@@ -357,7 +360,7 @@ def largest_blobs(I, nlargest=1, action='remove', connectivity=2):
     binary image.
     """
     props = ['area', 'coords']
-    rp = regionprops(I, props, connectivity=connectivity)
+    rp, _ = regionprops(I, props, connectivity=connectivity)
     areas = np.array(rp['area'])
     coords = rp['coords']
     # Sorts the areas array and keeps the nlargest indices
@@ -385,7 +388,7 @@ def blob_idcs(I, connectivity=2):
     than x,y.
     """
     props = ['coords']
-    rp = regionprops(I, props, connectivity=connectivity)
+    rp, _ = regionprops(I, props, connectivity=connectivity)
     coords = rp['coords']
     idcs = []
     for c in coords:
@@ -395,6 +398,8 @@ def blob_idcs(I, connectivity=2):
 
 
 def regionprops(I, props, connectivity=2):
+    
+    ### TODO: Add a check that appropriate props are requested
 
     Ilabeled = measure.label(I, background=0, connectivity=connectivity)
     properties = measure.regionprops(Ilabeled, intensity_image=I)
@@ -443,12 +448,14 @@ def regionprops(I, props, connectivity=2):
             allprop = [p.major_axis_length for p in properties]
         elif prop == 'minor_axis_length':
             allprop = [p.minor_axis_length for p in properties]
+        elif prop == 'label':
+            allprop = [p.label for p in properties]
         else:
             print('{} is not a valid property.'.format(prop))
 
         out[prop] = np.array(allprop)
 
-    return out
+    return out, Ilabeled
 
 
 def erode(I, n=1, strel='square'):
@@ -489,16 +496,16 @@ def dilate(I, n=1, strel='square'):
 
 
 
-def trim_idcs(sizeI, idcs):
+def trim_idcs(imshape, idcs):
     """
     Trims a list of x,y indices by removing rows containing indices that cannot
-    fit within a raster of sizeI
+    fit within a raster of imshape
     """
 
-    idcs = idcs[idcs[:,0]>sizeI[0],:]
-    idcs = idcs[idcs[:,1]>sizeI[1],:]
-    idcs = idcs[idcs[:,0]<0,:]
-    idcs = idcs[idcs[:,1]<0,:]
+    idcs = idcs[idcs[:, 0] < imshape[0], :]
+    idcs = idcs[idcs[:, 1] < imshape[1], :]
+    idcs = idcs[idcs[:, 0] >= 0, :]
+    idcs = idcs[idcs[:, 1] >= 0, :]
 
     return idcs
 
@@ -523,7 +530,7 @@ def crop_binary_im(I, connectivity=2):
 
 def crop_binary_coords(coords, npad=0):
 
-    # Coords are of format [y, x]
+    # Coords are of format [row, col]
 
     uly = np.min(coords[:,0]) - npad
     ulx = np.min(coords[:,1]) - npad
@@ -556,7 +563,7 @@ def fill_holes(I, maxholesize=0):
 
         # Get blob properties of complement image
         props = ['coords','area']
-        rp = regionprops(Icomp, props, connectivity=1)
+        rp, _ = regionprops(Icomp, props, connectivity=1)
 
         # Blob indices less than specified threshold
         keepidcs = [i for i, x in enumerate(rp['area']) if x <= maxholesize]
@@ -571,7 +578,7 @@ def fill_holes(I, maxholesize=0):
 def im_connectivity(im):
     """
     Returns an image of 8-connectivity for an input image of all pixels in a
-    binary image.ss
+    binary image.
     """
     # Fix input
     im = im.copy()
@@ -699,7 +706,7 @@ def skel_branchpoints(Iskel):
     # Count the neighbors, remove the one with fewer neighbors. Neighbors are
     # counted distinctly, i.e. none are shared between the two branchpoints when counting.
     # Find all the cases
-    rp = regionprops(Ibps, ['area','coords'], connectivity=1)
+    rp, _ = regionprops(Ibps, ['area','coords'], connectivity=1)
     idcs = np.where(rp['area']==2)[0]
     for idx in idcs:
         c = rp['coords'][idx] # coordinates of both 4-connected branchpoint pixels

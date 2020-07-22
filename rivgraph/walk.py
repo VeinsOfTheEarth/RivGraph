@@ -163,7 +163,6 @@ def idcs_no_turnaround(idcs, Iskel):
     for all cases.
     """
     ncols = Iskel.shape[1]
-
     idxdif = idcs[0]-idcs[1]
 
     if idxdif == -ncols - 1:
@@ -183,7 +182,7 @@ def idcs_no_turnaround(idcs, Iskel):
     elif idxdif == ncols+1:
         walkdirs = [-1, -ncols-1, -ncols]
 
-    poss_walk_idcs = idcs[-1] +  walkdirs
+    poss_walk_idcs = [idcs[-1] + wd for wd in walkdirs]
     return poss_walk_idcs
 
 

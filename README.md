@@ -25,7 +25,7 @@ Savvy users have been able to install RivGraph from this Github repo, but usuall
 
 How to use?
 -----
-We are working on documentation and examples. Your best bet for getting started is to reproduce the [Colville delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb). Otherwise, use RivGraph by creating either a delta or a river class, then applying the associated methods. Look at the [classes.py](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/classes.py) script to get a sense for what methods are available, and what they're actually doing.
+We are working on documentation and examples. Your best bet for getting started is to reproduce the [Colville delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb) or the[Brahmaputra river example](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb). Otherwise, use RivGraph by creating either a delta or a river class, then applying the associated methods. Look at the [classes.py](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/classes.py) script to get a sense for what methods are available, and what they're actually doing.
 
 **Note**: there are many functions under the hood that may be useful to you. Check out the [im_utils script](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py) (image utilities) in particular for functions to help whip your mask into shape!
 
@@ -58,7 +58,7 @@ Citing RivGraph
 Citations help us justify the effort that goes into building and maintaining this project. If you
 used RivGraph for your research, please consider citing us.
 
-As of 5/26/2020, please cite our [ESurf Dynamics paper]((https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html) and/or our [AGU Presentation](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph). We hope to soon publish RivGraph in the Journal of Open Source Software.
+As of 5/26/2020, please cite our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html) and/or our [AGU Presentation](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph). We hope to soon publish RivGraph in the Journal of Open Source Software.
 
 License
 -------
