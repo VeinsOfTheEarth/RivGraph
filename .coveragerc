@@ -5,3 +5,11 @@ omit =
     *__init__*
     rivgraph/ordered_set.py
     rivgraph/_plotting_metrics.py
+
+[report]
+exclude_lines =
+    def set_no_backtrack
+    def set_shortest_no_backtrack
+    def set_artificial_nodes
+    def set_unknown_cluster_by_widthpct
+    

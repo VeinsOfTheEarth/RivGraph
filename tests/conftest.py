@@ -17,6 +17,7 @@ from rivgraph.classes import river
 @pytest.fixture(scope="module")
 def test_net():
     """Define the test network."""
+    np.random.seed(1)
     return delta('colville', 'tests/data/Colville/Colville_islands_filled.tif',
                  'tests/results/colville/')
 
@@ -24,6 +25,7 @@ def test_net():
 @pytest.fixture(scope="module")
 def known_net():
     """Define the known network to test against."""
+    np.random.seed(1)
     known_net = delta('known',
                       'tests/data/Colville/Colville_islands_filled.tif',
                       'tests/results/known/')
@@ -34,6 +36,7 @@ def known_net():
 @pytest.fixture(scope="module")
 def test_river():
     """Define the test river network."""
+    np.random.seed(1)
     return river('Brahmclip', 'tests/data/Brahma/brahma_mask_clip.tif',
                  'tests/results/brahma/', exit_sides='ns')
 
@@ -41,6 +44,7 @@ def test_river():
 @pytest.fixture(scope="module")
 def known_river():
     """Define the known river network."""
+    np.random.seed(1)
     known_river = river('Brahmclip', 'tests/data/Brahma/brahma_mask_clip.tif',
                         'tests/results/brahma/', exit_sides='ns')
     known_river.load_network(path='tests/data/Brahma/Brahmclip_network.pkl')
@@ -50,6 +54,7 @@ def known_river():
 @pytest.fixture(scope="module")
 def synthetic_cycles():
     """Creation of synthetic skeleton."""
+    np.random.seed(1)
     # create synthetic binary skeleton
     synthetic = np.zeros((10, 10))
     synthetic[0, 7] = 1

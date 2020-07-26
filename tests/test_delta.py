@@ -66,6 +66,7 @@ def test_prune_network(test_net, known_net):
 
 def test_flowdir(test_net, known_net):
     """Check that 90% of directions are assigned to match known case."""
+    np.random.seed(1)
     # set directions
     test_net.assign_flow_directions()
 
@@ -103,6 +104,7 @@ def test_flowdir(test_net, known_net):
 
 def test_junction_angles(test_net, known_net):
     """Check that 90% of junction angles agree."""
+    np.random.seed(1)
     # compute the junction angles
     test_net.compute_junction_angles(weight=None)
     known_net.compute_junction_angles(weight=None)
@@ -145,6 +147,7 @@ def test_junction_angles(test_net, known_net):
 # creating a memory overflow warning (sometimes)
 
 def test_metrics(test_net,known_net):
+    np.random.seed(1)
     # compute metrics
     test_net.compute_topologic_metrics()
     known_net.compute_topologic_metrics()
