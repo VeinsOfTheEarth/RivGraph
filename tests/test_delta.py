@@ -145,7 +145,7 @@ def test_junction_angles(test_net, known_net):
 # currently the compute_topologic_metrics() method is
 # creating a memory overflow warning (sometimes)
 
-@pytest.mark.timeout(120)
+@pytest.mark.timeout(30)
 def test_metrics(test_net, known_net):
     np.random.seed(1)
     # compute metrics

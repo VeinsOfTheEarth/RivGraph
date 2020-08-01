@@ -156,6 +156,26 @@ def test_coords_to_from_geovector(known_net):
     assert os.path.isfile(outpath) == True
 
 
+def test_prep_paths():
+    """Test prepare_paths()."""
+    resultsfolder = 'tests/results/new'
+    name = 'new'
+    basetiff = 'tests/data/Colville/Colville_islands_filled.tif'
+    paths = iu.prepare_paths(resultsfolder, name, basetiff)
+    # assertions
+    assert type(paths) == dict
+    assert paths['basepath'] == resultsfolder
+    assert paths['maskpath'] == basetiff
+    assert paths['Iskel'] == 'tests/results/new/new_skel.tif'
+    assert paths['Idist'] == 'tests/results/new/new_dist.tif'
+    assert paths['network_pickle'] == 'tests/results/new/new_network.pkl'
+    assert paths['fixlinks_csv'] == 'tests/results/new/new_fixlinks.csv'
+    assert paths['linkdirs'] == 'tests/results/new/new_link_directions.tif'
+    assert paths['metrics'] == 'tests/results/new/new_metrics.pkl'
+    assert paths['shoreline'] == 'tests/results/new/new_shoreline.shp'
+    assert paths['inlet_nodes'] == 'tests/results/new/new_inlet_nodes.shp'
+
+
 # Delete data created by tests in this file ...
 
 def test_delete_files():
@@ -164,6 +184,8 @@ def test_delete_files():
         os.remove('tests/results/known/'+i)
     for i in os.listdir('tests/results/brahma/'):
         os.remove('tests/results/brahma/'+i)
+    os.rmdir('tests/results/new')
     # check directory is empty
     assert os.listdir('tests/results/known/') == []
     assert os.listdir('tests/results/brahma/') == []
+    assert os.path.isdir('tests/results/new') is False
