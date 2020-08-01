@@ -12,4 +12,4 @@ exclude_lines =
     def set_shortest_no_backtrack
     def set_artificial_nodes
     def set_unknown_cluster_by_widthpct
-    
+    def hand_clean

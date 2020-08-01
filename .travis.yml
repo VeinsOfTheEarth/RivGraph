@@ -27,6 +27,7 @@ install:
   - conda uninstall rivgraph
   - sudo apt-get install gnutls-bin
   - pip install pytest
+  - pip install pytest-timeout
 
 # command to run tests
 script:

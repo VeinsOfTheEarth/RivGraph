@@ -8,6 +8,36 @@ from rivgraph.classes import delta
 from rivgraph.classes import river
 
 
+def test_to_geovectors(test_net):
+    """Test not being able to write geovectors."""
+    # set up capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+    # enable verbosity
+    test_net.verbose = True
+    # try geovector
+    test_net.to_geovectors(export='all')
+    # grab output
+    sys.stdout = sys.__stdout__
+    # assert output
+    assert capturedOutput.getvalue()[:-1] == 'Links have not been computed and thus cannot be exported.\nNodes have not been computed and thus cannot be exported.\nMesh has not been computed and thus cannot be exported.\nCenterlines has not been computed and thus cannot be exported.\nSmoothed centerline has not been computed and thus cannot be exported.'
+
+
+def test_to_geotiff(test_net):
+    """Test invalid export value."""
+    # set up capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+    # enable verbosity
+    test_net.verbose = True
+    # try geovector
+    test_net.to_geotiff('invalid')
+    # grab output
+    sys.stdout = sys.__stdout__
+    # assert output
+    assert capturedOutput.getvalue()[:-1] == "Cannot write invalid. Choose from ['directions', 'distance', 'skeleton']."
+
+
 def test_plot_failure(test_net):
     """Test network not computed output."""
     # set up capture string
