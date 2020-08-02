@@ -109,6 +109,16 @@ def test_crop_geotiff():
     assert os.path.isfile(o_path) == True
 
 
+def test_crop_geotiff_out():
+    """Test crop_geotif() with no outpath."""
+    g_path = 'tests/data/Colville/Colville_islands_filled.tif'
+    # run cropping function
+    o_path = geo_utils.crop_geotif(g_path)
+    # assert file name and existance
+    assert o_path == g_path.split('.')[-2] + '_cropped.tif'
+    assert os.path.isfile(o_path) == True
+
+
 def test_croppad_geotiff():
     """Test crop_geotif() with padding."""
     g_path = 'tests/data/Colville/Colville_islands_filled.tif'
