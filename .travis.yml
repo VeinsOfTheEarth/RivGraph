@@ -27,6 +27,7 @@ install:
   - conda uninstall rivgraph
   - sudo apt-get install gnutls-bin
   - pip install pytest
+  - pip install pytest-timeout
 
 # command to run tests
 script:
@@ -59,7 +60,7 @@ jobs:
         - conda env create -q --file environment.yml
         - conda activate rivgraph
         - conda uninstall rivgraph
-        - pip install pytest pytest-cov coveralls
+        - pip install pytest pytest-timeout pytest-cov coveralls
         - sudo apt-get install -f
         - pip install opencv-python
       script:

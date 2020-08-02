@@ -24,20 +24,32 @@ class TestIslandProps:
         # make assertion about gdf shape
         assert np.shape(gdf) == (99, 2)
 
-    @pytest.mark.xfail
     def test_maxwidth(self, test_net):
         """Test given maxwidth."""
-        # not implemented yet
-        pass
+        props = ['maxwidth']
+        gdf, Ilabel = mask_utils.get_island_properties(test_net.Imask,
+                                                       test_net.pixlen,
+                                                       test_net.pixarea,
+                                                       test_net.crs,
+                                                       test_net.gt,
+                                                       props)
+        # assert image mask size same as labeled image size
+        assert Ilabel.shape == test_net.Imask.shape
+        # make assertion about gdf shape
+        assert np.shape(gdf) == (99, 3)
 
-    @pytest.mark.xfail
-    def test_perimeter(self, test_net):
-        """Test given perimeter."""
-        # not implemented yet
-        pass
 
-    @pytest.mark.xfail
     def test_islandprops(self, test_net):
         """Test given island properties."""
-        # not implemented yet
-        pass
+        props = ['area', 'major_axis_length', 'minor_axis_length',
+                 'perim_len', 'convex_area']
+        gdf, Ilabel = mask_utils.get_island_properties(test_net.Imask,
+                                                       test_net.pixlen,
+                                                       test_net.pixarea,
+                                                       test_net.crs,
+                                                       test_net.gt,
+                                                       props)
+        # assert image mask size same as labeled image size
+        assert Ilabel.shape == test_net.Imask.shape
+        # make assertion about gdf shape
+        assert np.shape(gdf) == (99, 7)

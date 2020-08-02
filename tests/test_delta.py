@@ -142,11 +142,11 @@ def test_junction_angles(test_net, known_net):
     assert match_jct / len(ind_list) > 0.9
 
 
-
 # currently the compute_topologic_metrics() method is
 # creating a memory overflow warning (sometimes)
 
-def test_metrics(test_net,known_net):
+@pytest.mark.timeout(180)
+def test_metrics(test_net, known_net):
     np.random.seed(1)
     # compute metrics
     test_net.compute_topologic_metrics()
@@ -155,7 +155,7 @@ def test_metrics(test_net,known_net):
     assert len(test_net.topo_metrics.keys()) == len(known_net.topo_metrics.keys())
 
 
-def test_adj(test_net,known_net):
+def test_adj(test_net, known_net):
     # define adjacency matrices
     test_adj = test_net.adjacency_matrix()
     known_adj = known_net.adjacency_matrix()

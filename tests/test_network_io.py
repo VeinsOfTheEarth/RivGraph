@@ -133,19 +133,50 @@ def test_create_manual_dir_csv():
     assert os.path.isfile('tests/results/known/csvtest.csv') == True
 
 
-@pytest.mark.xfail
-def tests_coords_to_shp():
-    """Test function coords_to_shp()."""
-    coords = [(352136.9198745673, 7780855.6952854665),
-              (345692.87413494784, 7781342.648680793)]
+def test_coords_to_from_geovector(known_net):
+    """Test coords_from_geovector and coords_to_geovector."""
+    # coords from geovector
+    known_net.to_geovectors()
+    geopath = known_net.paths['links']
+    coords = iu.coords_from_geovector(geopath)
+    # assert some things about the coords
+    assert np.shape(coords) == (242, 2)
+    assert len(coords) == 242
+    assert coords[0] == (353827.29959433706, 7821290.700172625)
+    assert coords[50] == (361360.8647424011, 7812192.341367241)
+    assert coords[100] == (346717.38596547034, 7815122.508759654)
+    assert coords[150] == (371436.42101470684, 7819696.967898813)
+    assert coords[200] == (351223.7288797986, 7788932.034091183)
+
+    # coords to geovector
     epsg = 32606
-    outpath = 'test/results/known/test_coords_to_shp.shp'
-    iu.coords_to_shapefile(coords, epsg, outpath)
-    # function was breaking and returning NoneType...
-    # fix to remove xfail
+    outpath = 'tests/results/known/geo_test.shp'
+    iu.coords_to_geovector(coords, epsg, outpath)
+    # assert file is created
+    assert os.path.isfile(outpath) == True
+
+
+def test_prep_paths():
+    """Test prepare_paths()."""
+    resultsfolder = 'tests/results/new'
+    name = 'new'
+    basetiff = 'tests/data/Colville/Colville_islands_filled.tif'
+    paths = iu.prepare_paths(resultsfolder, name, basetiff)
+    # assertions
+    assert type(paths) == dict
+    assert paths['basepath'] == resultsfolder
+    assert paths['maskpath'] == basetiff
+    assert paths['Iskel'] == 'tests/results/new/new_skel.tif'
+    assert paths['Idist'] == 'tests/results/new/new_dist.tif'
+    assert paths['network_pickle'] == 'tests/results/new/new_network.pkl'
+    assert paths['fixlinks_csv'] == 'tests/results/new/new_fixlinks.csv'
+    assert paths['linkdirs'] == 'tests/results/new/new_link_directions.tif'
+    assert paths['metrics'] == 'tests/results/new/new_metrics.pkl'
+    assert paths['shoreline'] == 'tests/results/new/new_shoreline.shp'
+    assert paths['inlet_nodes'] == 'tests/results/new/new_inlet_nodes.shp'
+
 
 # Delete data created by tests in this file ...
-
 
 def test_delete_files():
     """Delete created files at the end."""
@@ -153,6 +184,8 @@ def test_delete_files():
         os.remove('tests/results/known/'+i)
     for i in os.listdir('tests/results/brahma/'):
         os.remove('tests/results/brahma/'+i)
+    os.rmdir('tests/results/new')
     # check directory is empty
     assert os.listdir('tests/results/known/') == []
     assert os.listdir('tests/results/brahma/') == []
+    assert os.path.isdir('tests/results/new') is False

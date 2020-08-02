@@ -127,6 +127,38 @@ class TestCenterline:
         assert np.all(y == [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1])
         assert vers == 'original'
 
+    def test_get_xy_rs(self):
+        """Test get xy function with rs."""
+        x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
+        xrs = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        yrs = [11, 11, 11, 11, 11, 11, 11, 11, 11, 11,  11]
+        attribs = {}
+        attribs['xrs'] = xrs
+        attribs['yrs'] = yrs
+        CL = ru.centerline(x, y, attribs=attribs)
+        x, y, vers = CL._centerline__get_x_and_y()
+        # make assertions
+        assert np.all(x == [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+        assert np.all(y == [11, 11, 11, 11, 11, 11, 11, 11, 11, 11,  11])
+        assert vers == 'resampled'
+
+    def test_get_xy_sm(self):
+        """Test get xy function with xs."""
+        x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
+        xs = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        ys = [11, 11, 11, 11, 11, 11, 11, 11, 11, 11,  11]
+        attribs = {}
+        attribs['xs'] = xs
+        attribs['ys'] = ys
+        CL = ru.centerline(x, y, attribs=attribs)
+        x, y, vers = CL._centerline__get_x_and_y()
+        # make assertions
+        assert np.all(x == [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+        assert np.all(y == [11, 11, 11, 11, 11, 11, 11, 11, 11, 11,  11])
+        assert vers == 'smooth'
+
     def test_s(self):
         """Test the s() function."""
         x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
