@@ -13,3 +13,5 @@ exclude_lines =
     def set_artificial_nodes
     def set_unknown_cluster_by_widthpct
     def hand_clean
+    def mig_rate_zs
+    def zs_plot
