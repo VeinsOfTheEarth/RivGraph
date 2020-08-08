@@ -27,10 +27,10 @@ def set_link_directions(links, nodes, imshape, manual_set_csv=None):
     calls a number of helping functions and uses a somewhat-complicated logic
     to achieve this. The algorithms and logic is described in this open-access
     paper: https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf
-        
-    Every time this is run, all directionality information is reset and 
+
+    Every time this is run, all directionality information is reset and
     recomputed. This includes checking for manually set links via the provided
-    csv. 
+    csv.
 
     Parameters
     ----------
@@ -41,7 +41,7 @@ def set_link_directions(links, nodes, imshape, manual_set_csv=None):
     imshape : tuple
         Shape of binary mask as (nrows, ncols).
     manual_set_csv : str, optional
-        Path to a user-provided csv file of known link directions. The default 
+        Path to a user-provided csv file of known link directions. The default
         is None.
 
     Returns
@@ -51,12 +51,13 @@ def set_link_directions(links, nodes, imshape, manual_set_csv=None):
     nodes : dict
         Network nodes and associated properties with all directions set.
 
-    """    
+    """
     # Add fields to links dict for tracking and setting directionality
-    links, nodes = dy.add_directionality_trackers(links, nodes, 'delta')    
-    
+    links, nodes = dy.add_directionality_trackers(links, nodes, 'delta')
+
     # If a manual fix csv has been provided, set those links first
-    links, nodes = dy.dir_set_manually(links, nodes, manual_set_csv)
+    if manual_set_csv is not None:
+        links, nodes = dy.dir_set_manually(links, nodes, manual_set_csv)
 
     # Initial attempt to set directions
     links, nodes = set_initial_directionality(links, nodes, imshape)
@@ -95,8 +96,8 @@ def set_initial_directionality(links, nodes, imshape):
     This represents the core of the "delta recipe" described in the following
     open access paper: https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf
     However, note that as RivGraph develops, this recipe may no longer match
-    the one presented in that paper. The recipe chains together a number of 
-    exploitative algorithms to iteratively set flow directions for the most 
+    the one presented in that paper. The recipe chains together a number of
+    exploitative algorithms to iteratively set flow directions for the most
     certain links first.
 
 
@@ -117,7 +118,7 @@ def set_initial_directionality(links, nodes, imshape):
         Network nodes and associated properties with initial directions set.
 
     """
-    
+
     # Compute all the "guesses"
     links, nodes = dy.dir_main_channel(links, nodes)
     links, nodes = dir_synthetic_DEM(links, nodes, imshape)
@@ -255,8 +256,8 @@ def set_initial_directionality(links, nodes, imshape):
 def fix_delta_cycles(links, nodes, imshape):
     """
     Attempts to resolve all cycles within the delta network. This function
-    is essentially a wrapper for fix_delta_cycle(), which is where the 
-    heavy lifting is actually done. This function finds cycles, calls 
+    is essentially a wrapper for fix_delta_cycle(), which is where the
+    heavy lifting is actually done. This function finds cycles, calls
     fix_delta_cycle() on each one, then aggregates the results.
 
     Parameters
@@ -287,7 +288,7 @@ def fix_delta_cycles(links, nodes, imshape):
     G.add_nodes_from(nodes['id'])
     for lc in links['conn']:
         G.add_edge(lc[0], lc[1])
-        
+
 
     # Check for cycles
     cantfix_links = []
@@ -326,13 +327,13 @@ def fix_delta_cycles(links, nodes, imshape):
 
 def fix_delta_cycle(links, nodes, cyc_links, imshape):
     """
-    Attempts to resolve a single cycle within a delta network. The general 
-    logic is that all link directions of the cycle are un-set except for those 
-    set by highly-reliable algorithms, and a modified direction-setting 
-    recipe is implemented to re-set these algorithms. This was developed 
+    Attempts to resolve a single cycle within a delta network. The general
+    logic is that all link directions of the cycle are un-set except for those
+    set by highly-reliable algorithms, and a modified direction-setting
+    recipe is implemented to re-set these algorithms. This was developed
     according to the most commonly-encountered cases for real deltas, but could
     certainly be improved.
-    
+
 
     Parameters
     ----------
@@ -435,7 +436,7 @@ def hull_coords(xy):
     Parameters
     ----------
     xy : np.array
-        Two element array. First element contains x coordinates, second 
+        Two element array. First element contains x coordinates, second
         contains y coordinates of points to compute a convex hull around.
 
     Returns
@@ -450,7 +451,7 @@ def hull_coords(xy):
     hull_verts = ConvexHull(np.transpose(np.vstack((xy[0], xy[1])))).vertices
     hull_coords = np.transpose(np.vstack((xy[0][hull_verts], xy[1][hull_verts])))
     hull_coords = np.reshape(np.append(hull_coords, [hull_coords[0,:]]), (int((hull_coords.size+2)/2), 2))
-    
+
     # Find the biggest gap between hull points
     dists = np.sqrt((np.diff(hull_coords[:,0]))**2 + np.diff(hull_coords[:,1])**2)
     maxdist = np.argmax(dists) + 1
@@ -468,7 +469,7 @@ def hull_coords(xy):
 
 def dir_synthetic_DEM(links, nodes, imshape):
     """
-    Builds a synthetic DEM by considering inlets as "hills" and outlets as 
+    Builds a synthetic DEM by considering inlets as "hills" and outlets as
     "depressions." This synthetic is then used to compute the "slope"
     of each link, which is added to the links dictionary. Additionally,
     direction guesses for each link's flow are computed.
