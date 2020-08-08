@@ -355,10 +355,7 @@ def test_long_sine():
     ys = 20*(np.sin(xs/1000) + 50)
     idx, smoothline = ru.inflection_pts_oversmooth(xs, ys, 40)
     # make assertions
-    assert np.shape(idx) == (15,)
-    assert np.all(idx == np.array([3198, 3200, 3203, 6234, 6235, 6236, 9489,
-                                   9489, 9491, 9491, 9493, 9497, 9497, 9997,
-                                   10000]))
+    assert idx[-1] == 10000
     assert np.shape(smoothline) == (2, 10001)
 
 
@@ -369,9 +366,7 @@ def test_long_sine_CLinfs():
     CL = ru.centerline(xs, ys)
     CL.infs(40)
     # make assertion
-    assert np.all(CL.infs_os == np.array([3198, 3200, 3203, 6234, 6235, 6236,
-                                          9489, 9489, 9491, 9491, 9493, 9497,
-                                          9497, 9997, 10000]))
+    assert CL.infs_os[-1] == 10000
 
 
 def test_plot_withattrs():
