@@ -1,29 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-walk
-====
+walk.py
+=============
+Functions for walking along skeletons and finding branchpoints.
 
 Created on Mon Sep 10 09:39:19 2018
-
-@author: Jon
 """
 import numpy as np
 from skimage import measure
 from scipy import stats
-import sys
-import os
-sys.path.append(os.path.realpath(os.path.dirname(__file__)))
-import im_utils as iu
-import ln_utils as lnu
+import rivgraph.im_utils as iu
+import rivgraph.ln_utils as lnu
 
-
-
-#linkid = linkid
-#bpnode = poss_steps[isbp.index(1)]
-#nodes = nodes
-#links = links
-#links2do = links
-#Iskel = Iskel
 
 def handle_bp(linkid, bpnode, nodes, links, links2do, Iskel):
     """
@@ -31,7 +19,37 @@ def handle_bp(linkid, bpnode, nodes, links, links2do, Iskel):
     initialize all un-done links emanating from the branchpoint. Each new link
     contains the branchpoint as the first index, and this function also takes
     the first step of the link.
-    """
+
+
+    Parameters
+    ----------
+    linkid : int
+        Link id of the link walking from.
+    bpnode : np.int
+        Node id of the branchpoint to be resolved.
+    nodes : dict
+        Network nodes and associated properties.
+    links : dict
+        Network links and associated properties.
+    links2do : OrderedSet
+        This set keeps track of all the links that still need to be resolved
+        in the full skeleton. It is generated and populated in mask_to_graph.
+    Iskel : np.ndarray
+        Image of the local skeletonized mask.
+
+    Returns
+    -------
+    links : TYPE
+        Network links and associated properties with the branchpoint links
+        added.
+    nodes : TYPE
+        Network nodes and associated properties with the branchpoint-related
+        nodes added.
+    links2do : OrderedSet
+        Same as input, but with new link emanators added and linkid removed.
+
+    """    
+    
     links2do.remove(linkid)
 
     # If the branchpoint has already been visited, we don't need to re-initialize emanating links
@@ -140,6 +158,26 @@ def handle_bp(linkid, bpnode, nodes, links, links2do, Iskel):
 
 
 def bp_cluster(bp, Iskel):
+    """
+    Finds clusters of branchpoints; i.e. branchpoints that are immediately
+    adjacent to each other in an 8-connected sense. This function is self-
+    referential in order to find all neighboring branchpoints.
+
+    Parameters
+    ----------
+    bp : list
+        Contains the branchpoint cluster as indices (np.ravel_multi_index) 
+        within Iskel. In the initial call, this list contains only a single
+        branchpoint.
+    Iskel : np.ndarray
+        Image of the skeletonized mask.
+
+    Returns
+    -------
+    bp : list
+        Contains the branchpoint cluster as indices (np.ravel_multi_index) 
+        within Iskel.
+    """
 
     bp_neighs = walkable_neighbors(bp, Iskel)
     while bp_neighs:
@@ -161,7 +199,24 @@ def idcs_no_turnaround(idcs, Iskel):
     e.g. if moving down, only indices further below idcs[1] will be returned.
     Based on directionality, only three possible indices should be returned
     for all cases.
-    """
+
+
+    Parameters
+    ----------
+    idcs : list
+        Resolved indices within Iskel of the link, in order, for which the next
+        step needs to be taken.
+    Iskel : np.ndarray
+        Image of the skeletonized mask.
+
+    Returns
+    -------
+    poss_walk_idcs : list
+        Indices within Iskel of possible next steps that ensure the walk will
+        not move "backwards."
+
+    """    
+        
     ncols = Iskel.shape[1]
     idxdif = idcs[0]-idcs[1]
 
@@ -188,12 +243,30 @@ def idcs_no_turnaround(idcs, Iskel):
 
 def cant_walk(links, linkidx, nodes, Iskel):
     """
-    Given an input link (linkidx), return all the pixels that cannot be walked
+    Given an input link defined by linkidx, return all the pixels that cannot be walked
     to. These include:
         1) originating node (and any nodes adjacent to this one)
         2) emanating links (i.e. first pixel away from each node)
         3) links that have been resolved walking AWAY from the node (toward node not included)
-    """
+
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    linkidx : int
+        Index of the link id within links['id'] of the link to analyze.
+    nodes : dict
+        Network nodes and associated properties.
+    Iskel : np.ndarray
+        Image of the skeletonized mask.
+
+    Returns
+    -------
+    walked : set
+        Indices of pixels within Iskel that have already been walked to.
+
+    """    
 
     # 1. Originating node and its adjacent nodes
     bps = bp_cluster([links['idx'][linkidx][0]], Iskel)
@@ -220,6 +293,24 @@ def cant_walk(links, linkidx, nodes, Iskel):
 
 
 def find_emanators(bpnode, Iskel):
+    """
+    Returns all possible next steps along the skeleton from a given pixel.
+    Emanators are the second nodes in each link, or the first nodes away from
+    the link endpoint.
+
+    Parameters
+    ----------
+    bpnode : np.int
+        Index within Iskel to look for emanators.
+    Iskel : np.ndarray
+        Image of the skeletonized mask.
+
+    Returns
+    -------
+    all_emanators: set
+        Indices within Iskel representing emanating nodes from bpnode.
+
+    """
 
     # First, find all connected branchpoints
     branchpoints = bp_cluster([bpnode], Iskel)
@@ -228,32 +319,31 @@ def find_emanators(bpnode, Iskel):
     emanators = set()
     for bp in branchpoints:
         emanators = emanators | set(walkable_neighbors([bp], Iskel))
+        
+    all_emanators = emanators - set(branchpoints)
 
-    return emanators - set(branchpoints)
-
-
-def adjacent_bps(bp, Iskel, bps):
-
-    # Find branchpoint neighbors that are also branchpoints
-    bpneighs = walkable_neighbors([bp], Iskel)
-    bpneighs = [bpn for bpn in bpneighs if bpn not in bps]
-
-    bps_recheck = []
-    for bpcheck in bpneighs:
-        if is_bp(bpcheck, Iskel):
-            bps.append(bpcheck)
-
-    for bpcheck in bps_recheck:
-            bps = bps + adjacent_bps(bpcheck, Iskel, bps)
-
-    return bps
+    return all_emanators
 
 
 def walkable_neighbors(link, Iskel):
     """
-    Returns all the walkable neighbors from the end pixel of an input link.
-    Indices can be excluded with the idx_exclude set, and the other pixels
-    in the link are also excluded as possibilities.
+    Returns all the walkable neighbors from the end pixel of an input link. 
+    Walkable neighbors are simply pixels that are "on" within Iskel. The pixels 
+    in the link are excluded as possibilities.
+
+    Parameters
+    ----------
+    link : list
+        Contains all the pixel indices within Iskel of the link to find
+        walkable neighbors.
+    Iskel : np.ndarray
+        Image of the skeletonized mask.
+
+    Returns
+    -------
+    neighs : set
+        Indices within Iskel of neighboring pixels to walk to.
+
     """
 
     idx = link[-1]
@@ -270,6 +360,24 @@ def walkable_neighbors(link, Iskel):
 
 
 def get_neighbors(idx, Iskel):
+    """
+    Returns a flattened array of the neighboring pixel indices within Iskel 
+    that are True. Only looks at 8-connected neighbors (i.e. a 3x3 kernel with
+    centered on idx).
+
+    Parameters
+    ----------
+    idx : np.int
+        Index within Iskel to get neighbors.
+    Iskel : np.ndarray
+        Image of the skeletonized mask, but can be any image array.
+
+    Returns
+    -------
+    neighbor_idcs_gloal : list
+        Indices within Iskel of True pixels bordering idx.
+
+    """
 
     size = (3,3)
     cent_idx = 4 # OR int((size[0]*size[1] - 1) / 2)
@@ -286,7 +394,30 @@ def get_neighbors(idx, Iskel):
 
 
 def delete_link(linkid, links, nodes):
+    """
+    Deletes a link from the links dictionary and updates the nodes dictionary
+    to account for the deleted link. This is a special case of the delete_link
+    found in ln_utils.py, as no properties have been added yet. It is possible
+    that this function could be replaced by that one.
 
+    Parameters
+    ----------
+    linkid : int
+        Id of the link to delete.
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with the link deleted.
+    nodes : dict
+        Network nodes and associated properties with the link deleted.
+
+    """
+    ##TODO: Replace this function with the one in ln_utils. 
 
     # Get index of link within links dict
     lid = links['id'].index(linkid)
@@ -304,6 +435,36 @@ def delete_link(linkid, links, nodes):
 
 
 def check_dup_links(linkid, links, nodes, links2do):
+    """
+    Checks that the link represented by linkid has no dubplicates in the 
+    network. If so, the link is removed.
+
+    Parameters
+    ----------
+    linkid : int
+        Id of the link to check for duplication.
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    links2do : OrderedSet
+        This set keeps track of all the links that still need to be resolved
+        in the full skeleton. It is generated and populated in mask_to_graph.
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with duplicate link removed, if
+        it existed.
+    nodes : dict
+        Network nodes and associated properties with duplicate ilnk removed, if
+        it existed.
+    links2do : OrderedSet
+        This set keeps track of all the links that still need to be resolved
+        in the full skeleton. It is generated and populated in mask_to_graph.
+        The duplicate link, if found, is removed from this set.
+
+    """
 
     linkidx = links['id'].index(linkid)
 
@@ -335,11 +496,26 @@ def check_dup_links(linkid, links, nodes, links2do):
 
 
 def is_bp(idx, Iskel):
+    """
+    Determines if the index given by idx is a branchpoint. Branchpoints are
+    not simply pixels in the skeleton with more than two neighbors; they are
+    pruned through a somewhat complicated procedure that minimizes the number
+    of required branchpoints to preserve the skeleton topology. 
+
+    Parameters
+    ----------
+    idx : np.int
+        Index within Iskel to determine if it is a branchpoint.
+    Iskel : np.ndarray
+        Image of the skeletonized mask, but can be any image array.
+
+    Returns
+    -------
+    isbp : int
+        1 if idx is a branchpoint, else 0.
 
     """
-    Returns 1 if a pixel is a branchpoint in a skeleton given by vrtpath; else 0
-    """
-
+    ## TODO: change to return True/False rather than 1/0.
     # Trivial case, only one or two neighbors is not bp
     neighs = get_neighbors(idx, Iskel)
     if len(neighs) < 3:
@@ -349,7 +525,7 @@ def is_bp(idx, Iskel):
     big_enough = 0
     size = (7,7)
 
-    # Loop to ensure our size is large enough to capture all connected nconn>2 pixels
+    # Loop to ensure the domain is large enough to capture all connected nconn>2 pixels
     while big_enough == 0:
         centidx = (int((size[0]-1)/2), int((size[1]-1)/2))
         I, roffset, coffset = iu.get_array(idx, Iskel, size)
@@ -401,13 +577,36 @@ def is_bp(idx, Iskel):
 
     # Check input idx for being a branchpoint
     if idx in bps:
-        return 1
+        isbp = 1
     else:
-        return 0
+        isbp = 0
+        
+    return isbp
 
 
 def isbp_parsimonious(Ic, Icr, Inar, Infr):
+    """
+    Computes parsimonious set of branchpoints.
 
+    Parameters
+    ----------
+    Ic : np.ndarray
+        Image of possible branchpoints; values correspond to number of 
+        neighbors.
+    Icr : np.ndarray
+        Raveled (np.ravel) version of Ic.
+    Inar : np.ndarray
+        Raveled version of image returned by naxes_connectivity.
+    Infr : np.ndarray
+        Raveled version of image returned by nfour_connectivity.
+
+    Returns
+    -------
+    bps : list
+        All branchpoint indices within Ic.
+
+    """
+    
     # Find all possible branchpoints by considerng those with conn>2
     bp_poss = np.where(Ic>2)
     bp_poss_i = np.ravel_multi_index(bp_poss, Ic.shape)
@@ -426,7 +625,7 @@ def isbp_parsimonious(Ic, Icr, Inar, Infr):
     # If only one branchpoint is required, use it. However, there could be
     # multiple branchpoints that can serve as the single; use the one with
     # highest naxes-connectivity; if there are still multiple choices, take the
-    # highest 4-connectivity. If there are still no unique choices, look for the
+    # highest 4-connectivity. If there are still no unique choices, choose the
     # highest 4-connected among the highest naxes-connected.
     if len(bpsolo) > 0:
         naxconn = Inar[bpsolo]
@@ -480,6 +679,25 @@ def isbp_parsimonious(Ic, Icr, Inar, Infr):
 
 
 def isbp_walk_for_bps(I, bpi):
+    """
+    Finds branchpoints by ensuring that all pixels in the sub-skeleton can be 
+    walked to from the set of already-found branchpoints, without visiting
+    the same pixel more than once.
+
+    Parameters
+    ----------
+    I : np.ndarray
+        Binary image of a skeleton. In RivGraph, the skeleton is a reduced and 
+        padded version of Iskel.
+    bpi : list
+        Indices within I of the branchpoint to begin walk.
+
+    Returns
+    -------
+    bpi : list
+        Branchpoint indices in I.
+
+    """
 
     bpi = set(bpi)
 
@@ -530,10 +748,30 @@ def isbp_walk_for_bps(I, bpi):
                 walked.add(idx)
                 walked.update(neighs)
 
-    return  bpi
+    return bpi
 
 
 def naxes_connectivity(I):
+    """
+    Computes the number of axes of connectivity for each pixel in an input
+    skeleton. The maximum is four; horizontal, vertical, and two diagonals.
+    
+    The number of axes of pixel connectivity is used to determine where to
+    place branchpoints.
+
+    Parameters
+    ----------
+    I : np.ndarray
+        Binary image of a skeleton. In RivGraph, the skeleton is a reduced and 
+        padded version of Iskel.
+
+    Returns
+    -------
+    Inax : np.ndarray
+        Same shape as I; values correspond to the number of axes represented
+        by each pixel's connectivity.
+
+    """
 
     # Get the pixels we want to check (exclude edge pixels)
     Ir = np.ravel(I)
@@ -565,6 +803,23 @@ def naxes_connectivity(I):
     return Inax
 
 
+""" Graveyard """
+
+# def adjacent_bps(bp, Iskel, bps):
+    
+#     # Find branchpoint neighbors that are also branchpoints
+#     bpneighs = walkable_neighbors([bp], Iskel)
+#     bpneighs = [bpn for bpn in bpneighs if bpn not in bps]
+
+#     bps_recheck = []
+#     for bpcheck in bpneighs:
+#         if is_bp(bpcheck, Iskel):
+#             bps.append(bpcheck)
+
+#     for bpcheck in bps_recheck:
+#             bps = bps + adjacent_bps(bpcheck, Iskel, bps)
+
+#     return bps
 
 
 #def pattern_vals(basepattern):
