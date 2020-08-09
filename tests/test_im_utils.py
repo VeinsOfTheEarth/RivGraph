@@ -669,6 +669,35 @@ class TestSkelBranchpts:
                                         [0, 0, 0, 0, 0],
                                         [1, 0, 0, 0, 1]]))
 
+    def test_three_horiz(self):
+        """Test 3 branchpoints in a row."""
+        I = np.zeros((5, 10))
+        I[2, :] = 1
+        I[1:4, 3:6] = 1
+        Ipbs = im_utils.skel_branchpoints(I)
+        assert np.all(Ipbs == np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                                        [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]))
+
+    def test_three_vert(self):
+        """Test 3 branchpoints in a column."""
+        I = np.zeros((10, 5))
+        I[:, 2] = 1
+        I[3:6, 1:4] = 1
+        Ipbs = im_utils.skel_branchpoints(I)
+        assert np.all(Ipbs == np.array([[0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [0, 0, 1, 1, 0],
+                                        [0, 1, 1, 1, 0],
+                                        [0, 0, 1, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0]]))
+
     def test_colville_branchpoints(self, known_net):
         """Test branchpoints on colville skeleton."""
         known_net.skeletonize()

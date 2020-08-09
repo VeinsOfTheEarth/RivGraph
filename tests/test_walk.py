@@ -59,3 +59,7 @@ class TestIdcs_No_Turnaround:
         idcs = [6, 0]
         poss_walk_idcs = walk.idcs_no_turnaround(idcs, Iskel)
         assert np.all(poss_walk_idcs == [-1, -6, -5])
+
+
+def test_adj_bps():
+    """Test adjacent_bps()."""

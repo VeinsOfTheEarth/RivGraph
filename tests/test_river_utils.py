@@ -2,12 +2,90 @@
 import pytest
 import sys
 import os
+import io
 import numpy as np
+import matplotlib.pyplot as plt
 import shapely
 from shapely.geometry import MultiLineString
 from shapely.geometry import LineString
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph.rivers import river_utils as ru
+
+
+class TestFindInletsOutlets:
+    """Testing the find_inlet_outlet_nodes() function."""
+
+    def test_find_inletoutlet_ne(self, known_river):
+        """Test using north and east exit sides."""
+        nodes = known_river.nodes
+        links = known_river.links
+        known_river.skeletonize()
+        Iskel = known_river.Iskel
+        exit_sides = ['n', 'e']
+        nodes = ru.find_inlet_outlet_nodes(links, nodes, exit_sides, Iskel)
+        # assert that correct nodes were assigned as inlets/outlets
+        assert nodes['inlets'] == [247]
+        assert nodes['outlets'] == [872]
+
+    def test_find_inletoutlet_ns(self, known_river):
+        """Test using north and south exit sides."""
+        nodes = known_river.nodes
+        links = known_river.links
+        known_river.skeletonize()
+        Iskel = known_river.Iskel
+        exit_sides = ['n', 's']
+        nodes = ru.find_inlet_outlet_nodes(links, nodes, exit_sides, Iskel)
+        # assert that correct nodes were assigned as inlets/outlets
+        assert nodes['inlets'] == [247]
+        assert nodes['outlets'] == [1919]
+
+    def test_find_inletoutlet_nw(self, known_river):
+        """Test using north and west exit sides."""
+        nodes = known_river.nodes
+        links = known_river.links
+        known_river.skeletonize()
+        Iskel = known_river.Iskel
+        exit_sides = ['n', 'w']
+        nodes = ru.find_inlet_outlet_nodes(links, nodes, exit_sides, Iskel)
+        # assert that correct nodes were assigned as inlets/outlets
+        assert nodes['inlets'] == [247]
+        assert nodes['outlets'] == [150]
+
+    def test_find_inletoutlet_es(self, known_river):
+        """Test using east and south exit sides."""
+        nodes = known_river.nodes
+        links = known_river.links
+        known_river.skeletonize()
+        Iskel = known_river.Iskel
+        exit_sides = ['e', 's']
+        nodes = ru.find_inlet_outlet_nodes(links, nodes, exit_sides, Iskel)
+        # assert that correct nodes were assigned as inlets/outlets
+        assert nodes['inlets'] == [872]
+        assert nodes['outlets'] == [1919]
+
+    def test_find_inletoutlet_ew(self, known_river):
+        """Test using east and west exit sides."""
+        nodes = known_river.nodes
+        links = known_river.links
+        known_river.skeletonize()
+        Iskel = known_river.Iskel
+        exit_sides = ['e', 'w']
+        nodes = ru.find_inlet_outlet_nodes(links, nodes, exit_sides, Iskel)
+        # assert that correct nodes were assigned as inlets/outlets
+        assert nodes['inlets'] == [872]
+        assert nodes['outlets'] == [150]
+
+    def test_find_inletoutlet_sw(self, known_river):
+        """Test using south and west exit sides."""
+        nodes = known_river.nodes
+        links = known_river.links
+        known_river.skeletonize()
+        Iskel = known_river.Iskel
+        exit_sides = ['s', 'w']
+        nodes = ru.find_inlet_outlet_nodes(links, nodes, exit_sides, Iskel)
+        # assert that correct nodes were assigned as inlets/outlets
+        assert nodes['inlets'] == [1919]
+        assert nodes['outlets'] == [150]
 
 
 def test_offset_linestring():
@@ -187,3 +265,181 @@ class TestCenterline:
         assert pytest.approx(Cs == np.array([-0., 0., 0., 0., 0.,
                                              1.57079633, 1.57079633,
                                              0., 0., 0., 0.]))
+
+
+def test_sine_curvature():
+    """Use a sine wave to compute curvature."""
+    xs = np.linspace(0, 100, 101)
+    ys = np.sin(xs) + 5
+    C, Areturn, sdist = ru.curvars(xs, ys)
+    # make some simple assertions about shape of outputs
+    assert C.shape == (100,)
+    assert Areturn.shape == (100,)
+    assert sdist.shape == (100,)
+    # now define this as a centerline
+    CL = ru.centerline(xs, ys)
+    # smooth the centerline
+    CL.window_cl = 10
+    CL.smooth(n=2)
+    # make some assertions about the smoothing
+    assert CL.xs.shape == (101,)
+    assert CL.ys.shape == (101,)
+    assert np.sum(CL.xs != xs) > 0
+    assert np.sum(CL.ys != ys) > 0
+    # resample the centerline to 50 points
+    CL.resample(50)
+    # assert resampled dimensions are as expected
+    assert CL.xrs.shape == (50,)
+    assert CL.yrs.shape == (50,)
+
+
+def test_smooth_nowindow():
+    """smooth() without providing a window."""
+    xs = np.linspace(0, 100, 101)
+    ys = np.sin(xs) + 5
+    CL = ru.centerline(xs, ys)
+    # set up capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+    # smooth the centerline
+    CL.smooth()
+    # grab output
+    sys.stdout = sys.__stdout__
+    # assert output
+    assert capturedOutput.getvalue()[:-1] == 'Must provide a smoothing window.'
+
+
+def test_sine_csmooth():
+    """Use a sine wave to compute curvature."""
+    xs = np.linspace(0, 100, 101)
+    ys = np.sin(xs) + 5
+    CL = ru.centerline(xs, ys)
+    CL.window_C = 11
+    # smooth the centerline
+    Cs = CL.Csmooth()
+    # check that the smoothed shape is what we expect
+    assert Cs.shape == (101,)
+
+
+def test_csmooth_nowindow():
+    """csmooth() without providing a window."""
+    xs = np.linspace(0, 100, 101)
+    ys = np.sin(xs) + 5
+    CL = ru.centerline(xs, ys)
+    # set up capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+    # smooth the centerline
+    Cs = CL.Csmooth()
+    # grab output
+    sys.stdout = sys.__stdout__
+    # assert output
+    assert capturedOutput.getvalue()[:-1] == 'Must provide a smoothing window.'
+
+
+def test_sine_plot():
+    """Use sine wave to test plotting of CenterLine."""
+    xs = np.linspace(0, 100, 101)
+    ys = np.sin(xs) + 5
+    CL = ru.centerline(xs, ys)
+    CL.plot()
+    plt.savefig('tests/results/synthetic_cycles/sinewave.png')
+    plt.close()
+    # assert file exists now
+    assert os.path.isfile('tests/results/synthetic_cycles/sinewave.png') == True
+
+
+def test_long_sine():
+    """Stretched sine wave."""
+    xs = np.linspace(0, 10000, 10001)
+    ys = 20*(np.sin(xs/1000) + 50)
+    idx, smoothline = ru.inflection_pts_oversmooth(xs, ys, 40)
+    # make assertions
+    assert idx[-1] == 10000
+    assert np.shape(smoothline) == (2, 10001)
+
+
+def test_long_sine_CLinfs():
+    """Long sine wave into CL and using infs function."""
+    xs = np.linspace(0, 10000, 10001)
+    ys = 20*(np.sin(xs/1000) + 50)
+    CL = ru.centerline(xs, ys)
+    CL.infs(40)
+    # make assertion
+    assert CL.infs_os[-1] == 10000
+
+
+def test_plot_withattrs():
+    """Testing CenterLine plotting with various attributes."""
+    xs = np.linspace(0, 100, 101)
+    ys = np.sin(xs) + 5
+    CL = ru.centerline(xs, ys)
+    CL.infs_os = [0]
+    CL.ints_all = [1]
+    CL.ints = [2]
+    CL.plot()
+    plt.savefig('tests/results/synthetic_cycles/sinewaveattrs.png')
+    plt.close()
+    # assert file exists now
+    assert os.path.isfile('tests/results/synthetic_cycles/sinewaveattrs.png') == True
+
+
+def test_zs_noinflection():
+    """zs_plot without inflection points."""
+    xs = np.linspace(0, 100, 101)
+    ys = np.sin(xs) + 5
+    CL = ru.centerline(xs, ys)
+    # set up capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+    # call plot
+    CL.zs_plot()
+    # grab output
+    sys.stdout = sys.__stdout__
+    # assert output
+    assert capturedOutput.getvalue()[:-1] == 'Must compute inflection points first.'
+
+
+def test_zs_noints():
+    """zs_plot without intersection points."""
+    xs = np.linspace(0, 100, 101)
+    ys = np.sin(xs) + 5
+    CL = ru.centerline(xs, ys)
+    CL.infs_os = [1]
+    # set up capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+    # call plot
+    CL.zs_plot()
+    # grab output
+    sys.stdout = sys.__stdout__
+    # assert output
+    assert capturedOutput.getvalue()[:-1] == 'Must compute intersections first.'
+
+
+def test_zs_nomigrates():
+    """zs_plot without migration rates."""
+    xs = np.linspace(0, 100, 101)
+    ys = np.sin(xs) + 5
+    CL = ru.centerline(xs, ys)
+    CL.infs_os = [1]
+    CL.ints = [2]
+    # set up capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+    # call plot
+    CL.zs_plot()
+    # grab output
+    sys.stdout = sys.__stdout__
+    # assert output
+    assert capturedOutput.getvalue()[:-1] == 'Must compute migration rates first.'
+
+
+# Delete data created by tests in this file ...
+
+def test_delete_files():
+    """Delete created files at the end."""
+    for i in os.listdir('tests/results/synthetic_cycles/'):
+        os.remove('tests/results/synthetic_cycles/'+i)
+    # check directory is empty
+    assert os.listdir('tests/results/synthetic_cycles/') == []

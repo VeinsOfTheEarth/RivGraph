@@ -56,22 +56,23 @@ def synthetic_cycles():
     """Creation of synthetic skeleton."""
     np.random.seed(1)
     # create synthetic binary skeleton
-    synthetic = np.zeros((10, 10))
+    synthetic = np.zeros((15, 10))
     synthetic[0, 7] = 1
     synthetic[1, 6] = 1
     synthetic[2, 5] = 1
-    synthetic[2, 2] = 1
     synthetic[2, 3] = 1
-    synthetic[3, 1] = 1
-    synthetic[3, 4] = 1
-    synthetic[4, 2] = 1
-    synthetic[4, 3] = 1
-    synthetic[4, 5] = 1
-    synthetic[5, 5] = 1
-    synthetic[6, 5] = 1
-    synthetic[7, 4] = 1
-    synthetic[8, 4] = 1
-    synthetic[9, 4] = 1
+    synthetic[3, 3:6] = 1
+    synthetic[4, 2:4] = 1
+    synthetic[4, 5:7] = 1
+    synthetic[5, 1:3] = 1
+    synthetic[5, 6:8] = 1
+    synthetic[6, 1:3] = 1
+    synthetic[6, 6:8] = 1
+    synthetic[7, 2:4] = 1
+    synthetic[7, 5:7] = 1
+    synthetic[8, 3:6] = 1
+    synthetic[9:, 4] = 1
+
     # visualize synthetic case as a png to look at and a tif to use
     plt.imshow(synthetic)
     plt.savefig('tests/data/SyntheticCycle/skeleton.png')

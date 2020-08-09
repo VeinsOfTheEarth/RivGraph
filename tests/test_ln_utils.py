@@ -98,3 +98,49 @@ def test_add_art_nodes(test_net):
     # assert that arts is now in nodes and links
     assert ('arts' in links) is True
     assert ('arts' in nodes) is True
+
+
+def test_junction_angles_exp(known_net):
+    """Testing junction_angles with exp weighting."""
+    nodes = known_net.nodes
+    links = known_net.links
+    imshape = known_net.imshape
+    pixlen = known_net.pixlen
+    # pop junction keys out of nodes before recreating them
+    _ = nodes.pop('jtype')
+    _ = nodes.pop('int_ang')
+    _ = nodes.pop('width_ratio')
+    nodes = ln_utils.junction_angles(links, nodes, imshape, pixlen,
+                                     weight='exp')
+    assert ('jtype' in nodes.keys()) is True
+    assert ('int_ang' in nodes.keys()) is True
+    assert ('width_ratio' in nodes.keys()) is True
+
+
+def test_junction_angles_linear(known_net):
+    """Testing junction_angles with linear weighting."""
+    nodes = known_net.nodes
+    links = known_net.links
+    imshape = known_net.imshape
+    pixlen = known_net.pixlen
+    # pop junction keys out of nodes before recreating them
+    _ = nodes.pop('jtype')
+    _ = nodes.pop('int_ang')
+    _ = nodes.pop('width_ratio')
+    nodes = ln_utils.junction_angles(links, nodes, imshape, pixlen,
+                                     weight='linear')
+    assert ('jtype' in nodes.keys()) is True
+    assert ('int_ang' in nodes.keys()) is True
+    assert ('width_ratio' in nodes.keys()) is True
+
+
+def test_artificial_nodes(synthetic_cycles):
+    """Test adding artificial nodes."""
+    synthetic_cycles.compute_link_width_and_length()
+    links = synthetic_cycles.links
+    nodes = synthetic_cycles.nodes
+    gobj = gdal.Open('tests/data/SyntheticCycle/skeleton.tif')
+    links, nodes = ln_utils.add_artificial_nodes(links, nodes, gobj)
+    # make assertions
+    assert ('arts' in links.keys()) is True
+    assert links['arts'] == [[5, 6, 2]]

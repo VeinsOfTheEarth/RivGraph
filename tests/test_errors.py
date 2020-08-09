@@ -85,3 +85,11 @@ def test_inlet_outlet():
     A = np.ones((5, 5))
     with pytest.raises(RuntimeError):
         delta_metrics.find_inlet_outlet_nodes(A)
+
+
+def test_river_noexit():
+    """Raise Warning when river created without exit sides."""
+    with pytest.raises(Warning):
+        river('synth_river',
+              'tests/data/SyntheticCycle/skeleton.tif',
+              'tests/results/synthetic_cycles/')

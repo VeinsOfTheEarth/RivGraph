@@ -2,6 +2,7 @@
 import pytest
 import sys
 import os
+import io
 import numpy as np
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph.classes import river
@@ -77,6 +78,21 @@ def test_assign_flow_directions(test_river, known_river):
 
     # "soft" unit test -- check that over 90% of the idx values match
     assert match_counter / len(ind_list) > 0.9
+
+
+def test_assign_flow_directions_verbose(test_river):
+    """Test assigning flow directions verbosity."""
+    # set up capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+
+    test_river.verbose = True
+    test_river.assign_flow_directions()
+
+    # grab output
+    sys.stdout = sys.__stdout__
+    # assert output
+    assert capturedOutput.getvalue()[:-1] == 'Setting link directionality...Using tests/results/brahma/Brahmclip_fixlinks.csv to manually set flow directions.\nAttempting to fix 3 cycles.\nCould not fix cycle links: [[1472, 1471, 1452, 1455, 1476], [1604, 1634, 1635, 1605]].\nUse the csv file at tests/results/brahma/Brahmclip_fixlinks.csv to manually fix link directions.\ndone.'
 
 
 def test_river_ne():

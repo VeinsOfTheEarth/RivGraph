@@ -2,11 +2,13 @@
 import pytest
 import sys
 import os
+import io
 import numpy as np
 import networkx as nx
 sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph import directionality as di
 from rivgraph import ln_utils as lnu
+from rivgraph.deltas import delta_directionality as dd
 
 # Functions on the 'known_net' of the extracted Colville network. This
 # network does not have any cycles, so functionality related to cycles is just
@@ -171,6 +173,46 @@ def test_fix_cycles(known_net):
     # error: networkx.exception.NetworkXError: The edge 784-761 not in graph.
 
 
+@pytest.mark.xfail
+def test_fix_delta_cycles(known_net):
+    """Test fix_delta_cycles()."""
+    links = known_net.links
+    nodes = known_net.nodes
+    imshape = known_net.Imask.shape
+    # check if a cycle exists
+    c_nodes, c_links = di.find_a_cycle(links, nodes)
+    assert c_nodes == [761, 784]
+    assert c_links == [964, 964]
+    # verify that no continuity issues exist
+    problem_nodes = di.check_continuity(links, nodes)
+    assert problem_nodes == []
+    # try to fix the cycle
+    links, nodes, allfixed = dd.fix_delta_cycles(links, nodes, imshape)
+    # get a KeyError in OrderedSet - KeyError: 1081
+    # happens when the 'set_parallel_links' function is run
+
+
+@pytest.mark.xfail
+def test_fix_cycles_river(known_river):
+    """Test fix_cycles() with river example."""
+    links = known_river.links
+    nodes = known_river.nodes
+    # flip link to create a cycle
+    links = lnu.flip_link(links, 2494)
+    # check that cycle exists
+    c_nodes, c_links = di.find_a_cycle(links, nodes)
+    assert c_nodes == [1794, 1805]
+    assert c_links == [2494, 2494]
+    # check that there are no continuity issues
+    problem_nodes = di.check_continuity(links, nodes)
+    assert problem_nodes == []
+    # now try to fix the cycles
+    links, nodes, n_cycles = di.fix_cycles(links, nodes)
+    # test fails at di.fix_cycles(links, nodes)
+    # mystery given that c_nodes & c_links exist, aka there is a cycle
+    # error: networkx.exception.NetworkXError: The edge 1065-1051 not in graph.
+
+
 def test_bad_continuity(known_net):
     """
     Test check_continuity().
@@ -200,3 +242,44 @@ def test_fix_source_sink(known_net):
     problem_nodes = di.check_continuity(links, known_net.nodes)
     # make assertion that no problem node exists - aka 'fix' worked
     assert problem_nodes == []
+
+
+@pytest.mark.xfail
+def test_set_link_directions(known_net):
+    """Test set_link_directions()."""
+    links = known_net.links
+    nodes = known_net.nodes
+    imshape = known_net.Imask.shape
+    # verify that old problem node exists or create it
+    old_problem_nodes = di.check_continuity(links, nodes)
+    if 177 in old_problem_nodes:
+        assert old_problem_nodes == [177]
+    else:
+        links = lnu.flip_link(links, 198)
+        old_problem_nodes = di.check_continuity(links, nodes)
+        assert old_problem_nodes == [177]
+    # set up capture string
+    capturedOutput = io.StringIO()
+    sys.stdout = capturedOutput
+    # apply the function
+    newlinks, newnodes = dd.set_link_directions(links, nodes, imshape)
+    # grab output
+    sys.stdout = sys.__stdout__
+    # assert output
+    assert capturedOutput.getvalue()[:-1] == 'Nodes 177 violate continuity. Check connected links and fix manually.'
+    # currently getting an error when setting the initial directionality to links/nodes...
+
+
+def test_fix_source_sink_river(known_river):
+    """Test fix_sources_and_sinks() with river example."""
+    links = known_river.links
+    # flip links to create sources/sinks and check that it happened
+    links = lnu.flip_link(links, 2635)
+    links = lnu.flip_link(links, 2634)
+    bad_nodes = di.check_continuity(links, known_river.nodes)
+    assert bad_nodes == [1897, 1899]
+    # now try to fix them
+    newlinks, nodes = di.fix_sources_and_sinks(links, known_river.nodes)
+    # re-check for sources and sinks and verify that there are less bad nodes
+    fixed_nodes = di.check_continuity(newlinks, known_river.nodes)
+    assert len(fixed_nodes) < len(bad_nodes)
