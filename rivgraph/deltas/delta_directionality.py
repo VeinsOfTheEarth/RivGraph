@@ -56,8 +56,7 @@ def set_link_directions(links, nodes, imshape, manual_set_csv=None):
     links, nodes = dy.add_directionality_trackers(links, nodes, 'delta')
 
     # If a manual fix csv has been provided, set those links first
-    if manual_set_csv is not None:
-        links, nodes = dy.dir_set_manually(links, nodes, manual_set_csv)
+    links, nodes = dy.dir_set_manually(links, nodes, manual_set_csv)
 
     # Initial attempt to set directions
     links, nodes = set_initial_directionality(links, nodes, imshape)
