@@ -1,9 +1,10 @@
 from setuptools import setup, find_packages
+from rivgraph import __version__
 
 setup(
     name="rivgraph",
     packages=find_packages(),
-    version="0.3",
+    version=__version__,
     description="Tools for topological analysis of fluvial networks from binary masks",
     author='Jon Schwenk',
     author_email='jonschwenk@gmail.com',
