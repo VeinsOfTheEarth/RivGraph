@@ -1,0 +1,658 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>rivgraph.ordered_set &mdash; RivGraph 0.3 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../background/index.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Installation Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apiref/index.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RivGraph</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>rivgraph.ordered_set</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for rivgraph.ordered_set</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">ordered_set</span>
+<span class="sd">===========</span>
+
+<span class="sd">An OrderedSet is a custom MutableSet that remembers its order, so that every</span>
+<span class="sd">entry has an index that can be looked up.</span>
+
+<span class="sd">Based on a recipe originally posted to ActiveState Recipes by Raymond Hettiger,</span>
+<span class="sd">and released under the MIT license.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">itertools</span> <span class="k">as</span> <span class="nn">it</span>
+
+<span class="n">SLICE_ALL</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;3.0.0&quot;</span>
+
+
+<div class="viewcode-block" id="is_iterable"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.is_iterable">[docs]</a><span class="k">def</span> <span class="nf">is_iterable</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Are we being asked to look up a list of things, instead of a single thing?</span>
+<span class="sd">    We check for the `__iter__` attribute so that this can cover types that</span>
+<span class="sd">    don&#39;t have to be known by this module, such as NumPy arrays.</span>
+
+<span class="sd">    Strings, however, should be considered as atomic values to look up, not</span>
+<span class="sd">    iterables. The same goes for tuples, since they are immutable and therefore</span>
+<span class="sd">    valid entries.</span>
+
+<span class="sd">    We don&#39;t need to check for the Python 2 `unicode` type, because it doesn&#39;t</span>
+<span class="sd">    have an `__iter__` attribute anyway.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OrderedSet"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet">[docs]</a><span class="k">class</span> <span class="nc">OrderedSet</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">MutableSet</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An OrderedSet is a custom MutableSet that remembers its order, so that</span>
+<span class="sd">    every entry has an index that can be looked up.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; OrderedSet([1, 1, 2, 3, 2])</span>
+<span class="sd">        OrderedSet([1, 2, 3])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="OrderedSet.__init__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">iterable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span> <span class="o">|=</span> <span class="n">iterable</span></div>
+
+<div class="viewcode-block" id="OrderedSet.__len__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.__len__">[docs]</a>    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the number of unique elements in the ordered set</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; len(OrderedSet([]))</span>
+<span class="sd">            0</span>
+<span class="sd">            &gt;&gt;&gt; len(OrderedSet([1, 2]))</span>
+<span class="sd">            2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.__getitem__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the item at a given index.</span>
+
+<span class="sd">        If `index` is a slice, you will get back that slice of items. If it&#39;s</span>
+<span class="sd">        the slice [:], a copy of this object is returned.</span>
+
+<span class="sd">        If `index` is a list or a similar iterable, you&#39;ll get the OrderedSet</span>
+<span class="sd">        of items corresponding to those indices. This is similar to NumPy&#39;s</span>
+<span class="sd">        &quot;fancy indexing&quot;.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet([1, 2, 3])</span>
+<span class="sd">            &gt;&gt;&gt; self[1]</span>
+<span class="sd">            2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="n">SLICE_ALL</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;__index__&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">result</span>
+        <span class="k">elif</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">index</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Don&#39;t know how to index an OrderedSet by </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.copy"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a shallow copy of this object.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet([1, 2, 3])</span>
+<span class="sd">            &gt;&gt;&gt; other = self.copy()</span>
+<span class="sd">            &gt;&gt;&gt; self == other</span>
+<span class="sd">            True</span>
+<span class="sd">            &gt;&gt;&gt; self is other</span>
+<span class="sd">            False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># The state can&#39;t be an empty list.</span>
+            <span class="c1"># We need to return a truthy value, or else __setstate__ won&#39;t be run.</span>
+            <span class="c1">#</span>
+            <span class="c1"># This could have been done more gracefully by always putting the state</span>
+            <span class="c1"># in a tuple, but this way is backwards- and forwards- compatible with</span>
+            <span class="c1"># previous versions of OrderedSet.</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="p">(</span><span class="kc">None</span><span class="p">,):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+<div class="viewcode-block" id="OrderedSet.__contains__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.__contains__">[docs]</a>    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test if the item is in this ordered set</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; 1 in OrderedSet([1, 3, 2])</span>
+<span class="sd">            True</span>
+<span class="sd">            &gt;&gt;&gt; 5 in OrderedSet([1, 3, 2])</span>
+<span class="sd">            False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span></div>
+
+<div class="viewcode-block" id="OrderedSet.add"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add `key` as an item to this OrderedSet, then return its index.</span>
+
+<span class="sd">        If `key` is already in the OrderedSet, return the index it already</span>
+<span class="sd">        had.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet()</span>
+<span class="sd">            &gt;&gt;&gt; self.append(3)</span>
+<span class="sd">            0</span>
+<span class="sd">            &gt;&gt;&gt; print(self)</span>
+<span class="sd">            OrderedSet([3])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+    <span class="n">append</span> <span class="o">=</span> <span class="n">add</span>
+
+<div class="viewcode-block" id="OrderedSet.update"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the set with the given iterable sequence, then return the index</span>
+<span class="sd">        of the last element inserted.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet([1, 2, 3])</span>
+<span class="sd">            &gt;&gt;&gt; self.update([3, 1, 5, 1, 4])</span>
+<span class="sd">            4</span>
+<span class="sd">            &gt;&gt;&gt; print(self)</span>
+<span class="sd">            OrderedSet([1, 2, 3, 5, 4])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">item_index</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">:</span>
+                <span class="n">item_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Argument needs to be an iterable, got </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">item_index</span></div>
+
+<div class="viewcode-block" id="OrderedSet.index"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the index of a given entry, raising an IndexError if it&#39;s not</span>
+<span class="sd">        present.</span>
+
+<span class="sd">        `key` can be an iterable of entries that is not a string, in which case</span>
+<span class="sd">        this returns a list of indices.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet([1, 2, 3])</span>
+<span class="sd">            &gt;&gt;&gt; self.index(2)</span>
+<span class="sd">            1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">subkey</span><span class="p">)</span> <span class="k">for</span> <span class="n">subkey</span> <span class="ow">in</span> <span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="OrderedSet.pop"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.pop">[docs]</a>    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove and return the last element from the set.</span>
+
+<span class="sd">        Raises KeyError if the set is empty.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet([1, 2, 3])</span>
+<span class="sd">            &gt;&gt;&gt; self.pop()</span>
+<span class="sd">            3</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Set is empty&quot;</span><span class="p">)</span>
+
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">elem</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">elem</span></div>
+
+<div class="viewcode-block" id="OrderedSet.discard"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.discard">[docs]</a>    <span class="k">def</span> <span class="nf">discard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove an element.  Do not raise an exception if absent.</span>
+
+<span class="sd">        The MutableSet mixin uses this to implement the .remove() method, which</span>
+<span class="sd">        *does* raise an error when asked to remove a non-existent item.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet([1, 2, 3])</span>
+<span class="sd">            &gt;&gt;&gt; self.discard(2)</span>
+<span class="sd">            &gt;&gt;&gt; print(self)</span>
+<span class="sd">            OrderedSet([1, 3])</span>
+<span class="sd">            &gt;&gt;&gt; self.discard(2)</span>
+<span class="sd">            &gt;&gt;&gt; print(self)</span>
+<span class="sd">            OrderedSet([1, 3])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">v</span> <span class="o">&gt;=</span> <span class="n">i</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span> <span class="o">-</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="OrderedSet.clear"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove all items from this OrderedSet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="OrderedSet.__iter__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.__iter__">[docs]</a>    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; list(iter(OrderedSet([1, 2, 3])))</span>
+<span class="sd">            [1, 2, 3]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.__reversed__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.__reversed__">[docs]</a>    <span class="k">def</span> <span class="fm">__reversed__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; list(reversed(OrderedSet([1, 2, 3])))</span>
+<span class="sd">            [3, 2, 1]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.__repr__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">()&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">(</span><span class="si">%r</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="OrderedSet.__eq__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.__eq__">[docs]</a>    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns true if the containers have the same items. If `other` is a</span>
+<span class="sd">        Sequence, then order is checked, otherwise it is ignored.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet([1, 3, 2])</span>
+<span class="sd">            &gt;&gt;&gt; self == [1, 3, 2]</span>
+<span class="sd">            True</span>
+<span class="sd">            &gt;&gt;&gt; self == [1, 2, 3]</span>
+<span class="sd">            False</span>
+<span class="sd">            &gt;&gt;&gt; self == [2, 3]</span>
+<span class="sd">            False</span>
+<span class="sd">            &gt;&gt;&gt; self == OrderedSet([3, 2, 1])</span>
+<span class="sd">            False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># In Python 2 deque is not a Sequence, so treat it as one for</span>
+        <span class="c1"># consistent behavior with Python 3.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">)):</span>
+            <span class="c1"># Check that this OrderedSet contains the same elements, in the</span>
+            <span class="c1"># same order, as the other object.</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">other_as_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="c1"># If `other` can&#39;t be converted into a set, it&#39;s not equal.</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="n">other_as_set</span></div>
+
+<div class="viewcode-block" id="OrderedSet.union"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.union">[docs]</a>    <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">sets</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Combines all unique items.</span>
+<span class="sd">        Each items order is defined by its first appearance.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet.union(OrderedSet([3, 1, 4, 1, 5]), [1, 3], [2, 0])</span>
+<span class="sd">            &gt;&gt;&gt; print(self)</span>
+<span class="sd">            OrderedSet([3, 1, 4, 5, 2, 0])</span>
+<span class="sd">            &gt;&gt;&gt; self.union([8, 9])</span>
+<span class="sd">            OrderedSet([3, 1, 4, 5, 2, 0, 8, 9])</span>
+<span class="sd">            &gt;&gt;&gt; self | {10}</span>
+<span class="sd">            OrderedSet([3, 1, 4, 5, 2, 0, 10])</span>
+<span class="sd">            &gt;&gt;&gt; OrderedSet.union(OrderedSet([1, 2, 3]))</span>
+<span class="sd">            OrderedSet([1, 2, 3])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">OrderedSet</span><span class="p">)</span> <span class="k">else</span> <span class="n">OrderedSet</span>
+        <span class="n">containers</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">it</span><span class="o">.</span><span class="n">chain</span><span class="p">([</span><span class="bp">self</span><span class="p">],</span> <span class="n">sets</span><span class="p">))</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">containers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">items</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.intersection"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.intersection">[docs]</a>    <span class="k">def</span> <span class="nf">intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">sets</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns elements in common between all sets. Order is defined only</span>
+<span class="sd">        by the first set.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet.intersection(OrderedSet([0, 1, 2, 3]), [1, 2, 3])</span>
+<span class="sd">            &gt;&gt;&gt; print(self)</span>
+<span class="sd">            OrderedSet([1, 2, 3])</span>
+<span class="sd">            &gt;&gt;&gt; self.intersection([2, 4, 5], [1, 2, 3, 4])</span>
+<span class="sd">            OrderedSet([2])</span>
+<span class="sd">            &gt;&gt;&gt; OrderedSet.intersection(OrderedSet([1, 2, 3]))</span>
+<span class="sd">            OrderedSet([1, 2, 3])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">OrderedSet</span><span class="p">)</span> <span class="k">else</span> <span class="n">OrderedSet</span>
+        <span class="k">if</span> <span class="n">sets</span><span class="p">:</span>
+            <span class="n">common</span> <span class="o">=</span> <span class="nb">set</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="n">sets</span><span class="p">))</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">common</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">items</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.difference"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.difference">[docs]</a>    <span class="k">def</span> <span class="nf">difference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">sets</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns all elements that are in this set but not the others.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; OrderedSet([1, 2, 3]).difference(OrderedSet([2]))</span>
+<span class="sd">            OrderedSet([1, 3])</span>
+<span class="sd">            &gt;&gt;&gt; OrderedSet([1, 2, 3]) - OrderedSet([2])</span>
+<span class="sd">            OrderedSet([1, 3])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="nb">set</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="n">sets</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">other</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.issubset"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.issubset">[docs]</a>    <span class="k">def</span> <span class="nf">issubset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Report whether another set contains this set.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; OrderedSet([1, 2, 3]).issubset({1, 2})</span>
+<span class="sd">            False</span>
+<span class="sd">            &gt;&gt;&gt; OrderedSet([1, 2, 3]).issubset({1, 2, 3, 4})</span>
+<span class="sd">            True</span>
+<span class="sd">            &gt;&gt;&gt; OrderedSet([1, 2, 3]).issubset({1, 4, 3, 5})</span>
+<span class="sd">            False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>  <span class="c1"># Fast check for obvious cases</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="ow">in</span> <span class="n">other</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.issuperset"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.issuperset">[docs]</a>    <span class="k">def</span> <span class="nf">issuperset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Report whether this set contains another set.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; OrderedSet([1, 2]).issuperset([1, 2, 3])</span>
+<span class="sd">            False</span>
+<span class="sd">            &gt;&gt;&gt; OrderedSet([1, 2, 3, 4]).issuperset({1, 2, 3})</span>
+<span class="sd">            True</span>
+<span class="sd">            &gt;&gt;&gt; OrderedSet([1, 4, 3, 5]).issuperset({1, 2, 3})</span>
+<span class="sd">            False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>  <span class="c1"># Fast check for obvious cases</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">other</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.symmetric_difference"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.symmetric_difference">[docs]</a>    <span class="k">def</span> <span class="nf">symmetric_difference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the symmetric difference of two sets as a new set.</span>
+<span class="sd">        (I.e. all elements that are in exactly one of the sets.)</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet([1, 4, 3, 5, 7])</span>
+<span class="sd">            &gt;&gt;&gt; other = OrderedSet([9, 7, 1, 3, 2])</span>
+<span class="sd">            &gt;&gt;&gt; self.symmetric_difference(other)</span>
+<span class="sd">            OrderedSet([4, 5, 9, 2])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">OrderedSet</span><span class="p">)</span> <span class="k">else</span> <span class="n">OrderedSet</span>
+        <span class="n">diff1</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">diff2</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">diff1</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">diff2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.difference_update"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.difference_update">[docs]</a>    <span class="k">def</span> <span class="nf">difference_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">sets</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a copy of self with items from other removed</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet([1, 2, 3])</span>
+<span class="sd">            &gt;&gt;&gt; self.difference_update(OrderedSet([2]))</span>
+<span class="sd">            &gt;&gt;&gt; print(self)</span>
+<span class="sd">            OrderedSet([1, 3])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">it</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">sets</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.intersection_update"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.intersection_update">[docs]</a>    <span class="k">def</span> <span class="nf">intersection_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update a set with the intersection of itself and another.</span>
+<span class="sd">        Order depends only on the first element</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet([1, 4, 3, 5, 7])</span>
+<span class="sd">            &gt;&gt;&gt; other = OrderedSet([9, 7, 1, 3, 2])</span>
+<span class="sd">            &gt;&gt;&gt; self.intersection_update(other)</span>
+<span class="sd">            &gt;&gt;&gt; print(self)</span>
+<span class="sd">            OrderedSet([1, 3, 7])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">to_remove</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">other</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">to_remove</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OrderedSet.symmetric_difference_update"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ordered_set.OrderedSet.symmetric_difference_update">[docs]</a>    <span class="k">def</span> <span class="nf">symmetric_difference_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update a set with the intersection of itself and another.</span>
+<span class="sd">        Order depends only on the first element</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; self = OrderedSet([1, 4, 3, 5, 7])</span>
+<span class="sd">            &gt;&gt;&gt; other = OrderedSet([9, 7, 1, 3, 2])</span>
+<span class="sd">            &gt;&gt;&gt; self.symmetric_difference_update(other)</span>
+<span class="sd">            &gt;&gt;&gt; print(self)</span>
+<span class="sd">            OrderedSet([4, 5, 9, 2])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">OrderedSet</span><span class="p">)</span> <span class="k">else</span> <span class="n">OrderedSet</span>
+        <span class="n">diff2</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">difference_update</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">diff2</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, J. Schwenk &amp; J. Hariharan
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
