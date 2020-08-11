@@ -23,7 +23,6 @@ import rivgraph.deltas.delta_metrics as dm
 import rivgraph.rivers.river_directionality as rd
 import rivgraph.rivers.river_utils as ru
 
-
 class rivnetwork:
     """
     The rivnetwork class organizes data and methods for channel networks. This is
