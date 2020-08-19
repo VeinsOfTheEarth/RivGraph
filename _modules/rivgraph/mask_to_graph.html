@@ -160,11 +160,7 @@
   <h1>Source code for rivgraph.mask_to_graph</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">mask_to_graph.py</span>
-<span class="sd">=============</span>
 <span class="sd">Functions for converting a binary channel mask to a graphical representation.</span>
-
-<span class="sd">Created on Tue Apr 10 14:29:01 2018</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">cv2</span>
@@ -178,28 +174,97 @@
 
 <div class="viewcode-block" id="skel_to_graph"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.skel_to_graph">[docs]</a><span class="k">def</span> <span class="nf">skel_to_graph</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Breaks a skeletonized image into links and nodes; exports if desired.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Resolves a skeleton into its consitutent links and nodes.   </span>
+<span class="sd">    This function finds a starting point to walk along a skeleton, then begins</span>
+<span class="sd">    the walk. Rules are in place to ensure the network is fully resolved. One</span>
+<span class="sd">    of the key algorithms called by this function involves the identfication of</span>
+<span class="sd">    branchpoints in a way that eliminates unnecessary ones to create a parsimonious</span>
+<span class="sd">    network. Rules are baked in for how to walk along the skeleton in cases </span>
+<span class="sd">    where multiple branchpoints are clustered or there are multiple possible</span>
+<span class="sd">    links to walk along.</span>
+<span class="sd">    </span>
+<span class="sd">    Note that some minor adjustments to the skeleton may be made in order to </span>
+<span class="sd">    reduce the complexity of the network. For example, in the case of a &quot;+&quot; </span>
+<span class="sd">    with a missing center pixel in the skeleton, this function will add the </span>
+<span class="sd">    pixel to the center to enable the use of a single branchpoint as opposed to </span>
+<span class="sd">    four.</span>
+<span class="sd">    </span>
+<span class="sd">    The takeaway is that there is no guarantee that the input skeleton will</span>
+<span class="sd">    be perfectly preserved when network-ifying. One possible workaround, if </span>
+<span class="sd">    perfect preservation is required, is to resample the skeleton to double the</span>
+<span class="sd">    resolution.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Iskel : np.ndarray</span>
+<span class="sd">        Binary image of a skeleton.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Links of the network with four properties: </span>
+<span class="sd">            &#39;id&#39; - a list of unique ids for each link in the network</span>
+<span class="sd">            &#39;idx&#39; - a list containing the pixel indices within Iskel that </span>
+<span class="sd">                    defines the link. These are ordered.</span>
+<span class="sd">            &#39;conn&#39; - a list of 2-element lists containing the node ids that</span>
+<span class="sd">                     the link is connected to.</span>
+<span class="sd">            &#39;n_networks&#39; - the number of disconnected networks found in the</span>
+<span class="sd">                           skeleton</span>
+<span class="sd">        </span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Nodes of the network with four properties:</span>
+<span class="sd">            &#39;id&#39; - a list of unique ids for each node in the network</span>
+<span class="sd">            &#39;idx&#39; - the index within Iskel of the node location</span>
+<span class="sd">            &#39;conn&#39; - a list of lists containing the link ids connected to this</span>
+<span class="sd">                     node</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="k">def</span> <span class="nf">check_startpoint</span><span class="p">(</span><span class="n">spidx</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns True if a skeleton pixel&#39;s first neighbor is not a branchpoint (i.e.</span>
-<span class="sd">        the start pixel is valid), else returns False.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Returns True if a skeleton pixel&#39;s first neighbor is not a branchpoint </span>
+<span class="sd">        (i.e. the start pixel is valid for a walk), else returns False.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        spidx : int</span>
+<span class="sd">            Index within Iskel of the point to check.</span>
+<span class="sd">        Iskel : np.array</span>
+<span class="sd">            Image of skeletonized mask.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        chk_sp : bool</span>
+<span class="sd">            True if the startpoint is valid; else False.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">neighs</span> <span class="o">=</span> <span class="n">walk</span><span class="o">.</span><span class="n">walkable_neighbors</span><span class="p">([</span><span class="n">spidx</span><span class="p">],</span> <span class="n">Iskel</span><span class="p">)</span>
         <span class="n">isbp</span> <span class="o">=</span> <span class="n">walk</span><span class="o">.</span><span class="n">is_bp</span><span class="p">(</span><span class="n">neighs</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="n">Iskel</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">isbp</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
+            <span class="n">chk_sp</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">chk_sp</span> <span class="o">=</span> <span class="kc">False</span>
+            
+        <span class="k">return</span> <span class="n">chk_sp</span>
 
 
     <span class="k">def</span> <span class="nf">find_starting_pixels</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds an endpoint pixel to begin network resolution</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Finds an endpoint pixel to begin walking to resolve network.</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Iskel : np.array</span>
+<span class="sd">            Image of skeletonized mask.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        startpoints : list</span>
+<span class="sd">            Possible starting points for the walk.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get skeleton connectivity</span>
         <span class="n">eps</span> <span class="o">=</span> <span class="n">imu</span><span class="o">.</span><span class="n">skel_endpoints</span><span class="p">(</span><span class="n">Iskel</span><span class="p">)</span>
         <span class="n">eps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">Iskel</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
@@ -223,7 +288,6 @@
     <span class="n">initial_dims</span> <span class="o">=</span> <span class="n">Iskel</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">npad</span> <span class="o">=</span> <span class="mi">20</span>
     <span class="n">Iskel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">Iskel</span><span class="p">,</span> <span class="n">npad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="n">constant_values</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
     <span class="n">dims</span> <span class="o">=</span> <span class="n">Iskel</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="c1"># Find starting points of all the networks in Iskel</span>
@@ -323,7 +387,7 @@
                     <span class="c1"># Else, shit. You&#39;ve found a critical flaw in the algorithm.</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;idx: </span><span class="si">{}</span><span class="s1">, poss_steps: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">poss_steps</span><span class="p">))</span>
-                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Ambiguous which step to take next :(&#39;</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Ambiguous which step to take next :( Please raise issue at https://github.com/jonschwenk/RivGraph/issues.&#39;</span><span class="p">)</span>
 
                 <span class="k">elif</span> <span class="nb">sum</span><span class="p">(</span><span class="n">isbp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="c1"># If we&#39;ve already accounted for this branchpoint, delete the link and halt</span>
@@ -374,9 +438,21 @@
 
 <div class="viewcode-block" id="skeletonize_mask"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.skeletonize_mask">[docs]</a><span class="k">def</span> <span class="nf">skeletonize_mask</span><span class="p">(</span><span class="n">Imask</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Skeletonize any input binary mask.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Skeletonizes an input binary image, typically a mask. Also performs some </span>
+<span class="sd">    skeleton simplification by (1) removing pixels that don&#39;t alter connectivity,</span>
+<span class="sd">    and (2) filling small skeleton holes and reskeletonizing.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Imask : np.array</span>
+<span class="sd">        Binary image to be skeletonized.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Iskel : np.array</span>
+<span class="sd">        The skeletonization of Imask.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Create copy of mask to skeletonize</span>
     <span class="n">Iskel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
 
@@ -399,8 +475,11 @@
 
 <div class="viewcode-block" id="skeletonize_river_mask"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.skeletonize_river_mask">[docs]</a><span class="k">def</span> <span class="nf">skeletonize_river_mask</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">es</span><span class="p">,</span> <span class="n">padscale</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Skeletonize a binary river mask. Crops mask to river extents, reflects the</span>
-<span class="sd">    mask at the appropriate borders, skeletonizes, then un-crops the mask.</span>
+<span class="sd">    Skeletonizes a binary mask of a river channel network. Differs from </span>
+<span class="sd">    skeletonize mask above by using knowledge of the exit sides of the river</span>
+<span class="sd">    with respect to the mask (I) to avoid edge effects of skeletonization by</span>
+<span class="sd">    mirroring the mask at its ends, then trimming it after processing. As with</span>
+<span class="sd">    skeletonize_mask, skeleton simplification is performed.</span>
 
 <span class="sd">    INPUTS:</span>
 <span class="sd">        I - binary river mask to skeletonize</span>
@@ -408,8 +487,27 @@
 <span class="sd">             sides of the image that intersect the river. e.g. &#39;NS&#39;, &#39;EN&#39;, &#39;WS&#39;</span>
 <span class="sd"> padscale - (Optional) number of pixels to reflect I before skeletonization</span>
 <span class="sd">               to remove edge effects of skeletonization</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary river mask to skeletonize.</span>
+<span class="sd">    es : str</span>
+<span class="sd">        A two-character string (from N, E, S, or W) that denotes which sides </span>
+<span class="sd">        of the image the river intersects (upstream first) -- e.g. &#39;NS&#39;, &#39;EW&#39;, </span>
+<span class="sd">        &#39;NW&#39;, etc.</span>
+<span class="sd">    padscale : int, optional</span>
+<span class="sd">        Pad multiplier that sets the size of the padding. Multplies the blob</span>
+<span class="sd">        size along the axis of the image that the blob intersect to determine</span>
+<span class="sd">        the padding distance. The default is 2.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Iskel : np.array</span>
+<span class="sd">        The skeletonization of I.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Crop image</span>
     <span class="n">Ic</span><span class="p">,</span> <span class="n">crop_pads</span> <span class="o">=</span> <span class="n">imu</span><span class="o">.</span><span class="n">crop_binary_im</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
 
@@ -447,19 +545,27 @@
 
 <div class="viewcode-block" id="simplify_skel"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.simplify_skel">[docs]</a><span class="k">def</span> <span class="nf">simplify_skel</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This function iterates through all skeleton pixels</span>
-<span class="sd">    pixels that have connectivity &gt; 2. It removes the pixel and checks if the</span>
+<span class="sd">    This function iterates through all skeleton pixels pixels that have </span>
+<span class="sd">    connectivity &gt; 2. It removes the pixel and checks if the</span>
 <span class="sd">    number of blobs has changed after removal. If so, the pixel is necessary to</span>
-<span class="sd">    maintain connectivity. Otherwise the pixel is not retained.</span>
-<span class="sd">    It also adds pixels to the centers of &quot;+&quot; cases, as this reduces the number</span>
+<span class="sd">    maintain connectivity. Otherwise the pixel is not retained. It also adds </span>
+<span class="sd">    pixels to the centers of &quot;+&quot; cases, as this reduces the number</span>
 <span class="sd">    of branchpoints from 4 to 1.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Iskel : np.array</span>
+<span class="sd">        Image of the skeleton to simplify.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Iskel : np.array</span>
+<span class="sd">        The simplified skeleton.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">Iskel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Iskel</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
-
     <span class="n">Ic</span> <span class="o">=</span> <span class="n">imu</span><span class="o">.</span><span class="n">im_connectivity</span><span class="p">(</span><span class="n">Iskel</span><span class="p">)</span>
     <span class="n">ypix</span><span class="p">,</span> <span class="n">xpix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ic</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="c1"># Get all pixels with connectivity &gt; 2</span>
-
 
     <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ypix</span><span class="p">,</span> <span class="n">xpix</span><span class="p">):</span>
         <span class="n">nv</span> <span class="o">=</span> <span class="n">imu</span><span class="o">.</span><span class="n">neighbor_vals</span><span class="p">(</span><span class="n">Iskel</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -493,16 +599,28 @@
 <span class="sd">    rectangle. This simplifies skeletonization and interpretation in cases</span>
 <span class="sd">    where the channel is complex near the boundaries.</span>
 
-<span class="sd">    INPUTS:</span>
-<span class="sd">        I - binary river mask to pad</span>
-<span class="sd">        es - NSEW &quot;exit sides&quot; corresponding to the upstream and downstream</span>
-<span class="sd">             sides of the image that intersect the river. e.g. &#39;NS&#39;, &#39;EN&#39;, &#39;WS&#39;</span>
-<span class="sd">        pm - (Optional) &quot;pad multiplier&quot; that sets the size of the padding.</span>
-<span class="sd">    OUTPUTS:</span>
-<span class="sd">        Ip - padded version of I</span>
-<span class="sd">        pads - [n,s,e,w] padding values (number of pixels)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image to pad; typically a river channel network.</span>
+<span class="sd">    es : str</span>
+<span class="sd">        A two-character string (from N, E, S, or W) that denotes which sides </span>
+<span class="sd">        of the image the river intersects (upstream first) -- e.g. &#39;NS&#39;, &#39;EW&#39;, </span>
+<span class="sd">        &#39;NW&#39;, etc.</span>
+<span class="sd">    pm : int, optional</span>
+<span class="sd">        Pad multiplier that sets the size of the padding. Multplies the blob</span>
+<span class="sd">        size along the axis of the image that the blob intersect to determine</span>
+<span class="sd">        the padding distance. The default is 2.</span>
 
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Ip : np.array</span>
+<span class="sd">        The padded image..</span>
+<span class="sd">    pads : list</span>
+<span class="sd">        4 entry list containing the number of pixels padded on the [n, s, e, w]</span>
+<span class="sd">        edges of the image.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Ip</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># so original array is not modified</span>
     <span class="n">pads</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c1"># saves the number of pixels padded to each [n,s,e,w] edge</span>
 
@@ -520,7 +638,7 @@
         <span class="n">Ip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">addpad</span><span class="p">,</span> <span class="n">Ip</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="s1">&#39;s&#39;</span> <span class="ow">in</span> <span class="n">es</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-
+        
         <span class="n">rowidcs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">==</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">st</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">rowidcs</span><span class="p">)</span>
         <span class="n">en</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">rowidcs</span><span class="p">)</span>

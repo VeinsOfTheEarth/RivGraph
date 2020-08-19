@@ -162,18 +162,15 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">directionality</span>
 <span class="sd">==============</span>
-
 <span class="sd">Created on Wed Nov  7 11:38:16 2018</span>
-
 <span class="sd">@author: Jon</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">mode</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">rivgraph</span> <span class="kn">import</span> <span class="n">ln_utils</span> <span class="k">as</span> <span class="n">lnu</span>
 
 
@@ -182,7 +179,6 @@
 <span class="sd">    Adds fields to the links and nodes dictionaries that are required for </span>
 <span class="sd">    setting and diagnosing directionality. Nodes are not altered in this </span>
 <span class="sd">    function, but passed for consistency and generalizability.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -191,14 +187,12 @@
 <span class="sd">        Network nodes and associated properties.</span>
 <span class="sd">    ntype : str</span>
 <span class="sd">        Network type. Choose either &#39;delta&#39; or &#39;river&#39;.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links with added directionality properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># Add a &#39;certain&#39; entry to the links dict to keep track of links whose directions have been set</span>
@@ -223,17 +217,14 @@
 <span class="sd">    set link directionality. These numbers are found in links[&#39;guess_alg&#39;] and</span>
 <span class="sd">    links[&#39;certain_alg&#39;] and are useful for diagnosing issues in setting</span>
 <span class="sd">    directionality.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    key : str</span>
 <span class="sd">        See the mapper below for the possible keywords.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    algno : float or int</span>
 <span class="sd">        Numeric representation of direction-setting algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">mapper</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sourcesinkfix&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span>
@@ -276,7 +267,6 @@
 <span class="sd">    endpoints to the nearest nodes of the nearest main channel. If the nearest</span>
 <span class="sd">    nodes of the main channel include more than 2 + nodethresh nodes, the</span>
 <span class="sd">    direction of the main channel is used to set the unknown link.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -289,7 +279,6 @@
 <span class="sd">        Threshold for the number of nodes along the nearest main channel that</span>
 <span class="sd">        must be encompassed by the unknown link&#39;s endnodes to confidently</span>
 <span class="sd">        set the unknown link&#39;s direction. The default is 0.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -298,7 +287,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># alg = 3 # identifier for diagnostics</span>
@@ -388,7 +376,6 @@
 <div class="viewcode-block" id="nodepath_to_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.nodepath_to_links">[docs]</a><span class="k">def</span> <span class="nf">nodepath_to_links</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a path defined by node ids to a path defined by link ids. </span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    path : list</span>
@@ -397,12 +384,10 @@
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    linkpath : list</span>
 <span class="sd">        Link ids comprising the path defined by the given node ids.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">linkpath</span> <span class="o">=</span> <span class="p">[]</span>
@@ -418,19 +403,16 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the index of the inlet occurring at the widest link. Index is with</span>
 <span class="sd">    respect to the nodes[&#39;id&#39;] list.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    inlet_idx : int</span>
 <span class="sd">        Index of the inlet node of the widest link.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Find apex node, assuming it&#39;s connected to the widest channel(s)</span>
@@ -451,15 +433,12 @@
 <span class="sd">    Guesses directionality of links based on shortest paths from widest inlet</span>
 <span class="sd">    link to all the outlet links. Links are also weighted by width, such that</span>
 <span class="sd">    deviations from the &quot;main channel&quot; width cost more to traverse.</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -468,7 +447,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># alg = 4 # identifier for diagnostics</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;main_chans&#39;</span><span class="p">)</span>
@@ -513,15 +491,12 @@
 <span class="sd">    path flows through the link attached to the node (as opposed to immediately)</span>
 <span class="sd">    away from the link), its directionality is set; otherwise nothing</span>
 <span class="sd">    is done. Note that this will not set all links&#39; directionalities.</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -530,7 +505,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># alg = 12 # identifier for diagnostics</span>
@@ -591,8 +565,6 @@
 <span class="sd">    closer to the nearest outlet (or preoutlet). &quot;difthresh&quot; refers to the </span>
 <span class="sd">    difference in distances between endpoint nodes; higher means directionality </span>
 <span class="sd">    is less likely to be ascertained.</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -604,7 +576,6 @@
 <span class="sd">        between an unknown link&#39;s endpoints for directionality to be set. </span>
 <span class="sd">        Lengths are measured from the link&#39;s endpoints to the nearest </span>
 <span class="sd">        outlet (or preoutlet). The default is 0.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -613,7 +584,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># alg = 11 # identifier for diagnostics</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;sp_links&#39;</span><span class="p">)</span>
@@ -669,7 +639,6 @@
 <span class="sd">    such that its orientation minimizes the error between its neighbors and</span>
 <span class="sd">    itself.</span>
 <span class="sd">    </span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -681,7 +650,6 @@
 <span class="sd">    checklinks : list OR str, optional</span>
 <span class="sd">        A list of link ids can be provided to check only specific links.</span>
 <span class="sd">        Otherwise, the default is &#39;all&#39; which checks all links.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -690,7 +658,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">angle_between</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
@@ -774,15 +741,12 @@
 <span class="sd">    removed from the network, there will no longer be just one connected </span>
 <span class="sd">    network. Directionality is inferred by consideration of which subnetwork </span>
 <span class="sd">    (after removing the bridge link) contains inlet and outlet nodes.</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -791,7 +755,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># alg = 5 # identifier for diagnostic</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;bridges&#39;</span><span class="p">)</span>
@@ -872,20 +835,17 @@
 <span class="sd">    Saves the orientation of a set of links. Used before attempting to fix</span>
 <span class="sd">    cycles. Properties besides &#39;conn&#39; must also be reversed, so their original</span>
 <span class="sd">    orientations are also stored.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    lids : list</span>
 <span class="sd">        Link ids whose orientations should be saved.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    orig : dict</span>
 <span class="sd">        A subset of the links dictionary containing the orientations of each</span>
 <span class="sd">        link in lids.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">lidx</span> <span class="o">=</span> <span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lids</span><span class="p">]</span>
@@ -904,7 +864,6 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a set of links to its original orientation.</span>
 <span class="sd">    </span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -912,12 +871,10 @@
 <span class="sd">    orig : dict</span>
 <span class="sd">        Network links and associated properties to return to original</span>
 <span class="sd">        orientations.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties in their original orientations.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">oid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">orig</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]):</span>
@@ -935,18 +892,15 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Merges a list of lists into a single list, but removes duplicates. </span>
 <span class="sd">    Uses networkx and itertools for a fun solution.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    inlist : list of lists</span>
 <span class="sd">        List of lists to merge without dulplicates.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    merged : list</span>
 <span class="sd">        List of length equal to number of unique entries across all lists of</span>
 <span class="sd">        inlist.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># Combine overlapping cycles (where cycles share the same nodes, join them)</span>
@@ -964,7 +918,6 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets a link directionality. Option to check for continuity (including </span>
 <span class="sd">    parallel links) after setting.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -982,14 +935,12 @@
 <span class="sd">    checkcontinuity : bool, optional</span>
 <span class="sd">        If True, checks nearby links for continuity and parallel links after</span>
 <span class="sd">        setting the link&#39;s direction. The default is True.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties with updated link direction.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties with updated link direction.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">usnode</span><span class="p">)</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">usnode</span><span class="p">)</span>
@@ -1020,15 +971,12 @@
 <span class="sd">    not create a cycle; if multiple links can be flipped, the shortest one is </span>
 <span class="sd">    chosen. If no solution is found, links are returned to their original</span>
 <span class="sd">    orientation.</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -1037,7 +985,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network links and associated properties with sources/sinks fixed if</span>
 <span class="sd">        possible.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">badnodes</span> <span class="o">=</span> <span class="n">check_continuity</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
 
@@ -1098,20 +1045,16 @@
 <span class="sd">    Finds all sinks or sources within the network, excluding inlets and outlets.</span>
 <span class="sd">    Returns any nodes where continuity is violated. Only checks nodes for whom</span>
 <span class="sd">    all attached links are certain.</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    problem_nodes : list</span>
 <span class="sd">        Node ids corresponding to nodes[&#39;id&#39;] where continuity is violated.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">problem_nodes</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">nidx</span><span class="p">,</span> <span class="n">nconn</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">],</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]):</span>
@@ -1143,21 +1086,18 @@
 <span class="sd">    Finds a single cycle in the network. Multiple cycles may exist; this </span>
 <span class="sd">    function returns only the first one encountered.</span>
 <span class="sd">    </span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    cycle_nodes : list</span>
 <span class="sd">        Node ids comprising the cycle. Arranged in order of cycle.</span>
 <span class="sd">    cycle_links : list</span>
 <span class="sd">        Link ids comprising the cycle. Arranged in order of cycle.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
@@ -1184,8 +1124,6 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds either all cycles in the network or cycles containing the checknode&#39;th</span>
 <span class="sd">    node. Cycles are returned as both nodes and links.</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -1195,7 +1133,6 @@
 <span class="sd">    checknode : int OR str, optional</span>
 <span class="sd">        ID of node to check for its inclusion in any cycles. If the default </span>
 <span class="sd">        value &#39;all&#39; is selected, all cycles will be returned.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    cycle_nodes : list of lists</span>
@@ -1245,8 +1182,6 @@
 <div class="viewcode-block" id="flip_links_in_G"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.flip_links_in_G">[docs]</a><span class="k">def</span> <span class="nf">flip_links_in_G</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">links2flip</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Flips the directionality of links in a networkx graph object.</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    G : networkx.Graph or similar</span>
@@ -1254,12 +1189,10 @@
 <span class="sd">    links2flip : tuple or </span>
 <span class="sd">        An Nx2 tuple containing the US and DS node ids of the edge (link) to </span>
 <span class="sd">        flip.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    G : networkx.Graph or similar</span>
 <span class="sd">        Graph object representing the network with the requested links flipped.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">links2flip</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
         <span class="n">links2flip</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
@@ -1280,15 +1213,12 @@
 <span class="sd">    are tried, and if any of them result in a source/sink node or a cycle, </span>
 <span class="sd">    another approach is attempted until the cycle is resolved or we run out</span>
 <span class="sd">    of approaches.</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -1299,7 +1229,6 @@
 <span class="sd">        resolved</span>
 <span class="sd">    n_cycles_remaining : int</span>
 <span class="sd">        Number of cycles that were unresolvable.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Create networkx graph object</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
@@ -1486,8 +1415,6 @@
 <span class="sd">    exactly two columns; one called &#39;link_id&#39;, and one called &#39;usnode&#39;.</span>
 <span class="sd">    This file can be created automatically by the function </span>
 <span class="sd">    io_utils.create_manual_dir_csv().</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -1496,7 +1423,6 @@
 <span class="sd">        Network nodes and associated properties.</span>
 <span class="sd">    manual_set_csv : str</span>
 <span class="sd">        Path to csv defining which links have which upstream nodes.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -1505,7 +1431,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties with specified links set</span>
 <span class="sd">        manually.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># alg = -1 </span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;manual_set&#39;</span><span class="p">)</span>
@@ -1533,14 +1458,12 @@
 <div class="viewcode-block" id="set_inletoutlet"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_inletoutlet">[docs]</a><span class="k">def</span> <span class="nf">set_inletoutlet</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets directions of links that are connected to inlets and outlets.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -1549,7 +1472,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># alg = 0</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;inletoutlet&#39;</span><span class="p">)</span>
@@ -1590,7 +1512,6 @@
 <span class="sd">    are no sources or sinks within the network. Iterates until no more links </span>
 <span class="sd">    directions can be set.</span>
 <span class="sd">    </span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -1600,7 +1521,6 @@
 <span class="sd">    checknodes : list OR str, optional</span>
 <span class="sd">        Each link connected to each node id in this list will be checked for</span>
 <span class="sd">        continuity. All nodes will be checked if using the default value &#39;all&#39;.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -1609,7 +1529,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># alg = 1</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;continuity&#39;</span><span class="p">)</span>
@@ -1669,7 +1588,6 @@
 <span class="sd">    the graph. This function thus prevents cycles from being created and in</span>
 <span class="sd">    general should be run after any link direction is set.</span>
 <span class="sd">    </span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -1679,7 +1597,6 @@
 <span class="sd">    knownlink : int</span>
 <span class="sd">        Link id of link whose direction has been set to check for parallel</span>
 <span class="sd">        links.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -1688,7 +1605,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># alg = 2</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;parallels&#39;</span><span class="p">)</span>
@@ -1733,8 +1649,6 @@
 <span class="sd">    channels are connected to narrow channels.</span>
 <span class="sd">    </span>
 <span class="sd">    Requires a link contain at least min_len_for_trim pixels post-trimming.</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -1753,13 +1667,11 @@
 <span class="sd">        If True, links will be trimmed to remove possibly direction-biasing</span>
 <span class="sd">        end segments. If False, the untrimmed link endpoints will define the</span>
 <span class="sd">        vector direction. The default is False.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    link_vec : np.array</span>
 <span class="sd">        Two-element array describing the x and y components of the direction</span>
 <span class="sd">        vector describing the link.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">min_len_for_trim</span> <span class="o">=</span> <span class="mi">3</span> <span class="c1"># number of pixels remaining after trim to use trimmed version; else defaults to using endpoints</span>
@@ -1840,7 +1752,6 @@
 <span class="sd">        set the unknown link&#39;s directionality. The default is 1.</span>
 <span class="sd">    alg : float, optional</span>
 <span class="sd">        Algorithm ID to assign to the set link. The default is 6.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -1849,7 +1760,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="k">def</span> <span class="nf">get_candidates</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">lenthresh</span><span class="p">,</span> <span class="n">nknown_thresh</span><span class="p">):</span>
@@ -2121,8 +2031,6 @@
 <span class="sd">    Method 1 sets a broken link if its counterpart is known.</span>
 <span class="sd">    Method 2 sets a side of the loop if the other side is known.</span>
 <span class="sd">    Method 3 sets both sides if the input to one of the end nodes is known.</span>
-
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -2132,7 +2040,6 @@
 <span class="sd">    checknodes : int or str, optional</span>
 <span class="sd">        Node ids to check for presence of settable artificial links. If &#39;all&#39;,</span>
 <span class="sd">        all nodes in the network are checked.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -2141,7 +2048,6 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">alg</span> <span class="o">=</span> <span class="mf">2.1</span>
@@ -2230,7 +2136,6 @@
         <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_continuity</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">checknodes</span><span class="o">=</span><span class="n">endnodes</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
-
 </pre></div>
 
            </div>

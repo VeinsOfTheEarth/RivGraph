@@ -160,13 +160,6 @@
   <h1>Source code for rivgraph.geo_utils</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">geo_utils</span>
-<span class="sd">=========</span>
-
-<span class="sd">Created on Tue Sep 11 11:24:42 2018</span>
-
-<span class="sd">@author: Jon</span>
-
 <span class="sd">Utilities for reading, writing, managing, processing, manipulating, etc.</span>
 <span class="sd">geographic data including tiffs, vrts, shapefiles, etc.</span>
 
@@ -178,10 +171,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">Transformer</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)))</span>
-<span class="kn">import</span> <span class="nn">io_utils</span> <span class="k">as</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">rivgraph.io_utils</span> <span class="k">as</span> <span class="nn">io</span>
 
 
 <div class="viewcode-block" id="get_unit"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.geo_utils.get_unit">[docs]</a><span class="k">def</span> <span class="nf">get_unit</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
@@ -199,6 +189,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    unit : str</span>
 <span class="sd">        The unit of the provided epsg code.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># The to_proj4() function generates a warning.</span>
     <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span>

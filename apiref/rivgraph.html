@@ -98,11 +98,9 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">rivgraph</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#directionality">directionality</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#geo-utils">geo_utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#im-utils">im_utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#io-utils">io_utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ln-utils">ln_utils</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mask-to-graph-py">mask_to_graph.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ordered-set">ordered_set</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#walk-py">walk.py</a></li>
 </ul>
@@ -182,24 +180,23 @@
 <span id="id1"></span><h1>rivgraph<a class="headerlink" href="#rivgraph" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="module-rivgraph.directionality"></span><div class="section" id="directionality">
 <h2>directionality<a class="headerlink" href="#directionality" title="Permalink to this headline">¶</a></h2>
-<p>Created on Wed Nov  7 11:38:16 2018</p>
-<p>&#64;author: Jon</p>
+<p>Created on Wed Nov  7 11:38:16 2018
+&#64;author: Jon</p>
 <dl class="function">
 <dt id="rivgraph.directionality.add_directionality_trackers">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">add_directionality_trackers</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>ntype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#add_directionality_trackers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.add_directionality_trackers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds fields to the links and nodes dictionaries that are required for
 setting and diagnosing directionality. Nodes are not altered in this
-function, but passed for consistency and generalizability.</p>
+function, but passed for consistency and generalizability.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict
+:param ntype: Network type. Choose either ‘delta’ or ‘river’.
+:type ntype: str</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-<li><p><strong>ntype</strong> (<em>str</em>) – Network type. Choose either ‘delta’ or ‘river’.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links with added directionality properties.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
 </ul>
@@ -214,16 +211,15 @@ function, but passed for consistency and generalizability.</p>
 <dd><p>Returns a numeric key corresponding to each algorithm used by RivGraph to
 set link directionality. These numbers are found in links[‘guess_alg’] and
 links[‘certain_alg’] and are useful for diagnosing issues in setting
-directionality.</p>
+directionality.
+:param key: See the mapper below for the possible keywords.
+:type key: str</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – See the mapper below for the possible keywords.</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>algno</strong> – Numeric representation of direction-setting algorithm.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>algno</strong> – Numeric representation of direction-setting algorithm.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float or int</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float or int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -233,19 +229,17 @@ directionality.</p>
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">check_continuity</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#check_continuity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.check_continuity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds all sinks or sources within the network, excluding inlets and outlets.
 Returns any nodes where continuity is violated. Only checks nodes for whom
-all attached links are certain.</p>
+all attached links are certain.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-</ul>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>problem_nodes</strong> – Node ids corresponding to nodes[‘id’] where continuity is violated.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>problem_nodes</strong> – Node ids corresponding to nodes[‘id’] where continuity is violated.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -255,20 +249,18 @@ all attached links are certain.</p>
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">cycle_get_original_orientation</code><span class="sig-paren">(</span><em>links</em>, <em>lids</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#cycle_get_original_orientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.cycle_get_original_orientation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves the orientation of a set of links. Used before attempting to fix
 cycles. Properties besides ‘conn’ must also be reversed, so their original
-orientations are also stored.</p>
+orientations are also stored.
+:param links: Network links and associated properties.
+:type links: dict
+:param lids: Link ids whose orientations should be saved.
+:type lids: list</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>lids</strong> (<em>list</em>) – Link ids whose orientations should be saved.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>orig</strong> – A subset of the links dictionary containing the orientations of each
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>orig</strong> – A subset of the links dictionary containing the orientations of each
 link in lids.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -301,16 +293,14 @@ orientations.</p></li>
 must pass through to reach the outlet; in other words, if a bridge link is
 removed from the network, there will no longer be just one connected
 network. Directionality is inferred by consideration of which subnetwork
-(after removing the bridge link) contains inlet and outlet nodes.</p>
+(after removing the bridge link) contains inlet and outlet nodes.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -356,16 +346,14 @@ according to this algorithm.</p></li>
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">dir_main_channel</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#dir_main_channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.dir_main_channel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Guesses directionality of links based on shortest paths from widest inlet
 link to all the outlet links. Links are also weighted by width, such that
-deviations from the “main channel” width cost more to traverse.</p>
+deviations from the “main channel” width cost more to traverse.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -382,17 +370,16 @@ according to this algorithm.</p></li>
 <dd><p>Sets link directions based on a user-provided csv-file. The csv file has
 exactly two columns; one called ‘link_id’, and one called ‘usnode’.
 This file can be created automatically by the function
-io_utils.create_manual_dir_csv().</p>
+io_utils.create_manual_dir_csv().
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict
+:param manual_set_csv: Path to csv defining which links have which upstream nodes.
+:type manual_set_csv: str</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-<li><p><strong>manual_set_csv</strong> (<em>str</em>) – Path to csv defining which links have which upstream nodes.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with specified links set
 manually.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with specified links set
@@ -409,20 +396,20 @@ manually.</p></li>
 <dd><p>Guesses a link’s directionality by which of its endpoint nodes is
 closer to the nearest outlet (or preoutlet). “difthresh” refers to the
 difference in distances between endpoint nodes; higher means directionality
-is less likely to be ascertained.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-<li><p><strong>difthresh</strong> (<em>int</em><em>, </em><em>optional</em>) – Threshold for the length (in number of nodes) that must be surpassed
-between an unknown link’s endpoints for directionality to be set.
+is less likely to be ascertained.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict
+:param difthresh: Threshold for the length (in number of nodes) that must be surpassed</p>
+<blockquote>
+<div><p>between an unknown link’s endpoints for directionality to be set.
 Lengths are measured from the link’s endpoints to the nearest
-outlet (or preoutlet). The default is 0.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+outlet (or preoutlet). The default is 0.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -440,16 +427,14 @@ according to this algorithm.</p></li>
 nodes to the nearest outlet (or pre-outlet). For each unknown link, if the
 path flows through the link attached to the node (as opposed to immediately)
 away from the link), its directionality is set; otherwise nothing
-is done. Note that this will not set all links’ directionalities.</p>
+is done. Note that this will not set all links’ directionalities.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -488,16 +473,14 @@ function returns only the first one encountered.</p>
 <dd><p>Attempts to remove all cycles in the directed graph. A number of approaches
 are tried, and if any of them result in a source/sink node or a cycle,
 another approach is attempted until the cycle is resolved or we run out
-of approaches.</p>
+of approaches.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with all possible cycles
 resolved.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with all possible cycles
@@ -516,16 +499,14 @@ resolved</p></li>
 near the problem node(s). The links to flip are chosen by ensuring they do
 not create a cycle; if multiple links can be flipped, the shortest one is
 chosen. If no solution is found, links are returned to their original
-orientation.</p>
+orientation.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with sources/sinks fixed if
 possible.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network links and associated properties with sources/sinks fixed if
@@ -539,20 +520,19 @@ possible.</p></li>
 <dl class="function">
 <dt id="rivgraph.directionality.flip_links_in_G">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">flip_links_in_G</code><span class="sig-paren">(</span><em>G</em>, <em>links2flip</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#flip_links_in_G"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.flip_links_in_G" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flips the directionality of links in a networkx graph object.</p>
+<dd><p>Flips the directionality of links in a networkx graph object.
+:param G: Graph object representing the network.
+:type G: networkx.Graph or similar
+:param links2flip: An Nx2 tuple containing the US and DS node ids of the edge (link) to</p>
+<blockquote>
+<div><p>flip.</p>
+</div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>G</strong> (<em>networkx.Graph</em><em> or </em><em>similar</em>) – Graph object representing the network.</p></li>
-<li><p><strong>links2flip</strong> (<em>tuple or</em>) – An Nx2 tuple containing the US and DS node ids of the edge (link) to
-flip.</p></li>
-</ul>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>G</strong> – Graph object representing the network with the requested links flipped.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>G</strong> – Graph object representing the network with the requested links flipped.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>networkx.Graph or similar</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>networkx.Graph or similar</p>
 </dd>
 </dl>
 </dd></dl>
@@ -561,18 +541,18 @@ flip.</p></li>
 <dt id="rivgraph.directionality.get_cycles">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">get_cycles</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>checknode='all'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#get_cycles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.get_cycles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds either all cycles in the network or cycles containing the checknode’th
-node. Cycles are returned as both nodes and links.</p>
+node. Cycles are returned as both nodes and links.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict
+:param checknode: ID of node to check for its inclusion in any cycles. If the default</p>
+<blockquote>
+<div><p>value ‘all’ is selected, all cycles will be returned.</p>
+</div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-<li><p><strong>checknode</strong> (<em>int OR str</em><em>, </em><em>optional</em>) – ID of node to check for its inclusion in any cycles. If the default
-value ‘all’ is selected, all cycles will be returned.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>cycle_nodes</strong> (<em>list of lists</em>) – List containing lists of all cycles found in the network; cycles are
 returned in cyclic order and in terms of node ids.</p></li>
 <li><p><strong>cycles_links</strong> (<em>TYPE</em>) – List containing lists of all cycles found in the network; cycles are
@@ -590,27 +570,31 @@ returned in cyclic order and in terms of link ids.</p></li>
 flow through a link based on its connectivity. This function will first trim
 the link by its endpoint (half)width values to mitigate cases where where wide
 channels are connected to narrow channels.</p>
-<p>Requires a link contain at least min_len_for_trim pixels post-trimming.</p>
+<p>Requires a link contain at least min_len_for_trim pixels post-trimming.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict
+:param linkid: ID of the link correspoinding to those found in links[‘id’].
+:type linkid: int
+:param imshape: Shape of the binary mask as (nrows, ncols).
+:type imshape: tuple
+:param pixlen: Length resolution of each pixel. The default is 1.
+:type pixlen: float, optional
+:param normalized: If True, will return a vector on [-1, 1]. The default is True.
+:type normalized: bool, optional
+:param trim: If True, links will be trimmed to remove possibly direction-biasing</p>
+<blockquote>
+<div><p>end segments. If False, the untrimmed link endpoints will define the
+vector direction. The default is False.</p>
+</div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-<li><p><strong>linkid</strong> (<em>int</em>) – ID of the link correspoinding to those found in links[‘id’].</p></li>
-<li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of the binary mask as (nrows, ncols).</p></li>
-<li><p><strong>pixlen</strong> (<em>float</em><em>, </em><em>optional</em>) – Length resolution of each pixel. The default is 1.</p></li>
-<li><p><strong>normalized</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, will return a vector on [-1, 1]. The default is True.</p></li>
-<li><p><strong>trim</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, links will be trimmed to remove possibly direction-biasing
-end segments. If False, the untrimmed link endpoints will define the
-vector direction. The default is False.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>link_vec</strong> – Two-element array describing the x and y components of the direction
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>link_vec</strong> – Two-element array describing the x and y components of the direction
 vector describing the link.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -619,17 +603,16 @@ vector describing the link.</p>
 <dt id="rivgraph.directionality.merge_list_of_lists">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">merge_list_of_lists</code><span class="sig-paren">(</span><em>inlist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#merge_list_of_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.merge_list_of_lists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merges a list of lists into a single list, but removes duplicates.
-Uses networkx and itertools for a fun solution.</p>
+Uses networkx and itertools for a fun solution.
+:param inlist: List of lists to merge without dulplicates.
+:type inlist: list of lists</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>inlist</strong> (<em>list of lists</em>) – List of lists to merge without dulplicates.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>merged</strong> – List of length equal to number of unique entries across all lists of
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>merged</strong> – List of length equal to number of unique entries across all lists of
 inlist.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -637,20 +620,19 @@ inlist.</p>
 <dl class="function">
 <dt id="rivgraph.directionality.nodepath_to_links">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">nodepath_to_links</code><span class="sig-paren">(</span><em>path</em>, <em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#nodepath_to_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.nodepath_to_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts a path defined by node ids to a path defined by link ids.</p>
+<dd><p>Converts a path defined by node ids to a path defined by link ids.
+:param path: Node ids comprising a path within the network.
+:type path: list
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>list</em>) – Node ids comprising a path within the network.</p></li>
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-</ul>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>linkpath</strong> – Link ids comprising the path defined by the given node ids.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>linkpath</strong> – Link ids comprising the path defined by the given node ids.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -664,18 +646,18 @@ loops, flow will travel the same way through both sides of the loop (to avoid
 cycles). Therefore, if one side is known, we can set the other side.
 Method 1 sets a broken link if its counterpart is known.
 Method 2 sets a side of the loop if the other side is known.
-Method 3 sets both sides if the input to one of the end nodes is known.</p>
+Method 3 sets both sides if the input to one of the end nodes is known.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict
+:param checknodes: Node ids to check for presence of settable artificial links. If ‘all’,</p>
+<blockquote>
+<div><p>all nodes in the network are checked.</p>
+</div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-<li><p><strong>checknodes</strong> (<em>int</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Node ids to check for presence of settable artificial links. If ‘all’,
-all nodes in the network are checked.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -734,20 +716,21 @@ main channels are found as the widest, shortest paths from each inlet to
 each outlet. For each unknown link, the distance is computed from its
 endpoints to the nearest nodes of the nearest main channel. If the nearest
 nodes of the main channel include more than 2 + nodethresh nodes, the
-direction of the main channel is used to set the unknown link.</p>
+direction of the main channel is used to set the unknown link.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict
+:param imshape: Shape of binary mask as (nrows, ncols).
+:type imshape: tuple
+:param nodethresh: Threshold for the number of nodes along the nearest main channel that</p>
+<blockquote>
+<div><p>must be encompassed by the unknown link’s endnodes to confidently
+set the unknown link’s direction. The default is 0.</p>
+</div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-<li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of binary mask as (nrows, ncols).</p></li>
-<li><p><strong>nodethresh</strong> (<em>int</em><em>, </em><em>optional</em>) – Threshold for the number of nodes along the nearest main channel that
-must be encompassed by the unknown link’s endnodes to confidently
-set the unknown link’s direction. The default is 0.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -788,16 +771,14 @@ according to this algorithm.</p></li>
 <dl class="function">
 <dt id="rivgraph.directionality.set_inletoutlet">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">set_inletoutlet</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#set_inletoutlet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.set_inletoutlet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets directions of links that are connected to inlets and outlets.</p>
+<dd><p>Sets directions of links that are connected to inlets and outlets.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -812,14 +793,18 @@ according to this algorithm.</p></li>
 <dt id="rivgraph.directionality.set_link">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">set_link</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>linkidx</em>, <em>usnode</em>, <em>alg=9999</em>, <em>checkcontinuity=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#set_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.set_link" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets a link directionality. Option to check for continuity (including
-parallel links) after setting.</p>
+parallel links) after setting.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict
+:param linkidx: Index of link within links[‘id’] to set. This index can be found from</p>
+<blockquote>
+<div><p>the link id via links[‘id’].index(linkid).</p>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-<li><p><strong>linkidx</strong> (<em>int</em>) – Index of link within links[‘id’] to set. This index can be found from
-the link id via links[‘id’].index(linkid).</p></li>
 <li><p><strong>usnode</strong> (<em>int</em>) – Node id of the upstream node.</p></li>
 <li><p><strong>alg</strong> (<em>int</em><em>, </em><em>optional</em>) – The algorithm id used to set the link. Used for diagnostic purposes and
 fixing cycles. The default is 9999.</p></li>
@@ -870,29 +855,23 @@ according to this algorithm.</p></li>
 <dt id="rivgraph.directionality.widest_inlet_index">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">widest_inlet_index</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#widest_inlet_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.widest_inlet_index" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds the index of the inlet occurring at the widest link. Index is with
-respect to the nodes[‘id’] list.</p>
+respect to the nodes[‘id’] list.
+:param links: Network links and associated properties.
+:type links: dict
+:param nodes: Network nodes and associated properties.
+:type nodes: dict</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-</ul>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>inlet_idx</strong> – Index of the inlet node of the widest link.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>inlet_idx</strong> – Index of the inlet node of the widest link.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>int</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.geo_utils"></span><div class="section" id="geo-utils">
-<h2>geo_utils<a class="headerlink" href="#geo-utils" title="Permalink to this headline">¶</a></h2>
-<p>Created on Tue Sep 11 11:24:42 2018</p>
-<p>&#64;author: Jon</p>
-<p>Utilities for reading, writing, managing, processing, manipulating, etc.
+<span class="target" id="module-rivgraph.geo_utils"></span><p>Utilities for reading, writing, managing, processing, manipulating, etc.
 geographic data including tiffs, vrts, shapefiles, etc.</p>
 <p>6/2/2020 - Consider merging this into io_utils and im_utils. Not much actual
 functionality here, and some of these functions are simply unused.</p>
@@ -1050,17 +1029,32 @@ Automatically created by gdal’s GetGeoTransform() method.</p></li>
 </dl>
 </dd></dl>
 
-</div>
 <span class="target" id="module-rivgraph.im_utils"></span><div class="section" id="im-utils">
 <h2>im_utils<a class="headerlink" href="#im-utils" title="Permalink to this headline">¶</a></h2>
-<p>Created on Mon Sep 10 10:21:35 2018</p>
-<p>&#64;author: Jon</p>
+<p>Almost all the functions that manipulate images within this file require that
+the images be binary.</p>
+<p>Many of these functions are wrappers around functionality found in skimage or
+opencv that either add additonal functionality or provide convenience.</p>
 <dl class="function">
 <dt id="rivgraph.im_utils.blob_idcs">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">blob_idcs</code><span class="sig-paren">(</span><em>I</em>, <em>connectivity=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#blob_idcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.blob_idcs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list where each entry contains a set of all indices within each
-connected blob. Indices are returned as single-index coordinates, rather
-than x,y.</p>
+<dd><p>Finds all the indices for each blob within I.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary image containing blobs.</p></li>
+<li><p><strong>connectivity</strong> (<em>int</em><em>, </em><em>optional</em>) – If 1, 4-connectivity will be used to determine connected blobs. If
+2, 8-connectivity will be used. The default is 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>idcs</strong> – An n-element list of sets, where n is the number of blobs in I, and
+each set contains the pixel indices within I of a blob.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -1068,14 +1062,83 @@ than x,y.</p>
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">bp_kernels</code><span class="sig-paren">(</span><em>caseno</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#bp_kernels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.bp_kernels" title="Permalink to this definition">¶</a></dt>
 <dd><p>Provides kernels for convolving with branchpoints image to remove special
 cases (where three branchpoints make an “L” shape). There are 8 possible
-orientations (or caseno’s).</p>
+orientations (caseno’s).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>caseno</strong> (<em>int</em>) – Identifier for specific kernel cases. Can be 1-8.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>kernel</strong> – 3x3 kernel corresponding to the caseno.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.im_utils.crop_binary_coords">
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">crop_binary_coords</code><span class="sig-paren">(</span><em>coords</em>, <em>npad=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#crop_binary_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.crop_binary_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crops a set of (row, col) coordinates (e.g. blob indices) to the smallest
+possible array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> (<em>np.array</em>) – N x 2 array. First column are rows, second are columns of pixel coordinates.</p></li>
+<li><p><strong>npad</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of pixels to pad the cropped array by. The default is 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Image of the cropped coordinates, plus padding if desired.</p></li>
+<li><p><strong>pads</strong> (<em>list</em>) – Number of pixels in [left, top, right, bottom] direction that were
+cropped.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.crop_binary_im">
-<code class="descclassname">rivgraph.im_utils.</code><code class="descname">crop_binary_im</code><span class="sig-paren">(</span><em>I</em>, <em>connectivity=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#crop_binary_im"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.crop_binary_im" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crops a binary image to the smallest bounding box containing all the blobs
-in the image.</p>
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">crop_binary_im</code><span class="sig-paren">(</span><em>I</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#crop_binary_im"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.crop_binary_im" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crops a binary image to the smallest bounding box containing all the “on”
+pixels in the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>I</strong> (<em>np.array</em>) – Binary image to crop.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>Icrop</strong> (<em>np.array</em>) – The cropped binary image.</p></li>
+<li><p><strong>pads</strong> (<em>list</em>) – Four element list containing the number of pixels that were cropped
+from the [left, top, right, bottom] of I.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.im_utils.dilate">
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">dilate</code><span class="sig-paren">(</span><em>I</em>, <em>n=1</em>, <em>strel='square'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#dilate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.dilate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dilates a binary image using a specified kernel shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary image to dilate.</p></li>
+<li><p><strong>n</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of times to apply the dilating kernel. The default is 1.</p></li>
+<li><p><strong>strel</strong> (<em>str</em><em>, </em><em>optional</em>) – Kernel shape. Follows skimage’s options, but only ‘square’, ‘plus’, and
+‘disk’ are supported. The default is ‘square’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Id</strong> – Dilated binary image. Same shape as I.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -1087,36 +1150,146 @@ in the new image if ‘thresh’ fraction of its area is covered by the
 higher-res image. E.g. set ‘thresh’ to zero if you want the output image
 to be “on” everywhere at least a single pixel is “on” in the original
 image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary image to downsample.</p></li>
+<li><p><strong>newsize</strong> (<em>tuple</em>) – Two entry tuple (nrows, ncols) specifying the desired shape of the
+image.</p></li>
+<li><p><strong>thresh</strong> (<em>float</em><em>, </em><em>optional</em>) – The fraction of filled area that downsampled pixels must have to
+consider them on. Setting to 0 is the equialent of “all touched”.
+The default is 0.05.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Iout</strong> – The downsampled image.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.edge_coords">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">edge_coords</code><span class="sig-paren">(</span><em>sizeI</em>, <em>dtype='flat'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#edge_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.edge_coords" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given an image size, returns the coordinates of all the edge pixels (4 edges).
-Can return as indices (dtype=flat) or x,y coordinates (dtyep=’xy’).</p>
+Can return as indices (dtype=flat) or x,y coordinates (dtype=’xy’).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sizeI</strong> (<em>tuple</em>) – Shape of the image.</p></li>
+<li><p><strong>dtype</strong> (<em>str</em><em>, </em><em>optional</em>) – If ‘flat’, returns output as indices within I. If ‘xy’, returns (col, row)
+of edge pixels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>edgepts</strong> – Coordinates of the edge pixels. If dtype==’flat’, returns a set. If
+dtype==’xy’, returns a list of [columns, rows].</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>set or list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.im_utils.erode">
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">erode</code><span class="sig-paren">(</span><em>I</em>, <em>n=1</em>, <em>strel='square'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#erode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.erode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Erodes a binary image using a specified kernel shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary image to erode.</p></li>
+<li><p><strong>n</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of times to apply the eroding kernel. The default is 1.</p></li>
+<li><p><strong>strel</strong> (<em>str</em><em>, </em><em>optional</em>) – Kernel shape. Follows skimage’s options, but only ‘square’, ‘plus’, and
+‘disk’ are supported. The default is ‘square’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Ie</strong> – Eroded binary image. Same shape as I.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.im_utils.fill_holes">
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">fill_holes</code><span class="sig-paren">(</span><em>I</em>, <em>maxholesize=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#fill_holes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.fill_holes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fills holes up to a specified size in a binary image. The boundary pixels
+of the image are turned off before identifying holes so that holes created
+by the edge of the image are not considered holes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary image.</p></li>
+<li><p><strong>maxholesize</strong> (<em>int</em><em>, </em><em>optional</em>) – The maximum allowed hole size in pixels. The default is 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>I</strong> – The holes-filled image.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.four_conn">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">four_conn</code><span class="sig-paren">(</span><em>idcs</em>, <em>I</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#four_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.four_conn" title="Permalink to this definition">¶</a></dt>
-<dd><p>Counts the number of 4-connected neighbors for a given flat index in I.
+<dd><p>Returns the number of 4-connected neighbors for a given flat index in I.
 idcs must be a list, even if a single value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idcs</strong> (<em>list</em>) – Indices within I to find 4-connected neighbors.</p></li>
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>fourconn</strong> – Number of four-connected neighbors for each index in idcs.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.get_array">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">get_array</code><span class="sig-paren">(</span><em>idx</em>, <em>I</em>, <em>size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#get_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.get_array" title="Permalink to this definition">¶</a></dt>
-<dd><p>Size is (nrows, ncols) corresponding to the number of rows, columns to return with
-idx at the center. idx can be flattend index or [row, col]</p>
-<p>## Should add check for border cases so we don’t query to raster
-## beyond its bounds</p>
+<dd><p>Returns a sub-image of an input image, centered at a specified index within
+the input image and a specified size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<em>int</em>) – Index within I on which to center the returned array. Can also be a
+[row, col] list.</p></li>
+<li><p><strong>I</strong> (<em>np.array</em>) – Image to pull from.</p></li>
+<li><p><strong>size</strong> (<em>list</em>) – Two-entry list specifying the number of [rows, cols] to return from
+I centered at idx.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>subimage</strong> (<em>np.array</em>) – The sub-image of I, centered at idx with shape specified by size.</p></li>
+<li><p><strong>row</strong> (<em>int</em>) – The first row within I that the sub-image is drawn from.</p></li>
+<li><p><strong>col</strong> (<em>int</em>) – The first column within I that the sub-image is drawn from.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.hand_clean">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">hand_clean</code><span class="sig-paren">(</span><em>I</em>, <em>action='erase'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#hand_clean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.hand_clean" title="Permalink to this definition">¶</a></dt>
 <dd><p>Allows user to hand-draw regions of interest on a binary mask that can
-either be filled (set to True) or erased (set to False).</p>
+either be filled (set to True) or erased (set to False). Only one polygon
+can be drawn per call.</p>
 <dl class="simple">
 <dt>Interact with plot via the following:</dt><dd><p>left-click: save a vertex of the polygon
 right-click: remove the last point (useful when zooming/panning)
@@ -1124,35 +1297,193 @@ enter key: stop recording points</p>
 </dd>
 </dl>
 <p>Possible actions are ‘erase’ (default) and ‘fill’.</p>
+<p>Requires matplotlib and Python Image Library (PIL), but they are imported
+here so that this function can be imported independently of the script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary image to fill or erase with hand-drawn polygons.</p></li>
+<li><p><strong>action</strong> (<em>str</em><em>, </em><em>optional</em>) – If ==’fill’, will fill the drawn region. If ==’erase’, will erase the
+drawn region. The default is ‘erase’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>I</strong> – The image with the hand-drawn polygon either filled or erased.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.im_connectivity">
-<code class="descclassname">rivgraph.im_utils.</code><code class="descname">im_connectivity</code><span class="sig-paren">(</span><em>im</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#im_connectivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.im_connectivity" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">im_connectivity</code><span class="sig-paren">(</span><em>I</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#im_connectivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.im_connectivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an image of 8-connectivity for an input image of all pixels in a
 binary image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>I</strong> (<em>np.array</em>) – Binary image.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Iret</strong> – Image of 8-connectivity count for each pixel in the input image.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.im_utils.imshowpair">
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">imshowpair</code><span class="sig-paren">(</span><em>I1</em>, <em>I2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#imshowpair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.imshowpair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overlays two binary images with a color scheme that shows their differences
+and overlaps. Provides similar functionality to matlab’s imshowpair. Useful
+for quick diagnostic of differences between two binary images.</p>
+<p>This function will plot on current figure if it exists, else it will create
+a new one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I1</strong> (<em>np.array</em>) – The first binary image.</p></li>
+<li><p><strong>I2</strong> (<em>np.array</em>) – The second binary image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.largest_blobs">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">largest_blobs</code><span class="sig-paren">(</span><em>I</em>, <em>nlargest=1</em>, <em>action='remove'</em>, <em>connectivity=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#largest_blobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.largest_blobs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a binary image with the nlargest blobs removed from the input
-binary image.</p>
+<dd><p>Provides filtering for the largest blobs in a binary image. Can choose to
+either keep or remove them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary image to filter.</p></li>
+<li><p><strong>nlargest</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of blobs to filter. The default is 1.</p></li>
+<li><p><strong>action</strong> (<em>str</em><em>, </em><em>optional</em>) – If ‘keep’, will keep the nlargest blobs. If ‘remove’, will remove the
+nlargest blobs. The default is ‘remove’.</p></li>
+<li><p><strong>connectivity</strong> (<em>int</em><em>, </em><em>optional</em>) – If 1, 4-connectivity will be used to determine connected blobs. If
+2, 8-connectivity will be used. The default is 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Ic</strong> – The filtered image. Same shape as I.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.neighbor_idcs">
-<code class="descclassname">rivgraph.im_utils.</code><code class="descname">neighbor_idcs</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#neighbor_idcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.neighbor_idcs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Input x,y coordinates and return all the neighbor indices.</p>
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">neighbor_idcs</code><span class="sig-paren">(</span><em>c</em>, <em>r</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#neighbor_idcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.neighbor_idcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the column, row coordinats of all eight neighbors of a given
+column and row.</p>
+<p>Returns are ordered as
+[0 1 2</p>
+<blockquote>
+<div><p>3   4
+5 6 7]</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c</strong> (<em>int</em>) – Column.</p></li>
+<li><p><strong>r</strong> (<em>int</em>) – Row.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>cidcs</strong> (<em>list</em>) – Columns of the eight neighbors.</p></li>
+<li><p><strong>ridcs</strong> (<em>TYPE</em>) – Rows of the eight neighbors.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.im_utils.neighbor_vals">
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">neighbor_vals</code><span class="sig-paren">(</span><em>I</em>, <em>c</em>, <em>r</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#neighbor_vals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.neighbor_vals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the neighbor values in I of a specified pixel coordinate. Handles
+edge cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Image to draw values from.</p></li>
+<li><p><strong>c</strong> (<em>int</em>) – Column defining pixel to find neighbor values.</p></li>
+<li><p><strong>r</strong> (<em>int</em>) – Row defining pixel to find neighbor values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>vals</strong> – A flattened array of all the neighboring pixel values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.im_utils.neighbor_xy">
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">neighbor_xy</code><span class="sig-paren">(</span><em>c</em>, <em>r</em>, <em>idx</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#neighbor_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.neighbor_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the coordinates of a neighbor of a pixel given the index of the
+desired neighbor. Indices should be provided according to
+[0 1 2</p>
+<blockquote>
+<div><p>3   4
+5 6 7].</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c</strong> (<em>int</em>) – Column of the pixel to find the neighbor.</p></li>
+<li><p><strong>r</strong> (<em>int</em>) – Row of the pixel to find the neighbor.</p></li>
+<li><p><strong>idx</strong> (<em>int</em>) – Index of the neighbor position.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>c</strong> (<em>int</em>) – Column of the neighbor pixel.</p></li>
+<li><p><strong>r</strong> (<em>int</em>) – Row of the neighbor pixel.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.neighbors_flat">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">neighbors_flat</code><span class="sig-paren">(</span><em>idx</em>, <em>imflat</em>, <em>ncols</em>, <em>filt='nonzero'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#neighbors_flat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.neighbors_flat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a flattened image (np.ravel) and an index, returns all the
-neighboring indices and their values. Uses native python datatypes.
-Set filt=’nonzero’ for returning only nonzero indices; otherwise set
-filt=’none’ to return all indices and values.</p>
+<dd><p>Returns all 8-neighbor pixel indices and values from an index of a
+flattened image. Can filter out zero values with the filt keyword.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<em>int</em>) – Index within imflat to return neighbors.</p></li>
+<li><p><strong>imflat</strong> (<em>np.array</em>) – Flattened image (using np.ravel).</p></li>
+<li><p><strong>ncols</strong> (<em>int</em>) – Number of columns in the un-flattened image.</p></li>
+<li><p><strong>filt</strong> (<em>str</em><em>, </em><em>optional</em>) – If ‘nonzero’, only nonzero indices and values are returned. Else all
+neighbors are returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>idcs</strong> (<em>np.array</em>) – Indices within the flattened image of neighboring pixels.</p></li>
+<li><p><strong>vals</strong> (<em>np.array</em>) – Values within the flattened image of neighboring pixels; matches idcs.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -1160,33 +1491,137 @@ filt=’none’ to return all indices and values.</p>
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">nfour_connectivity</code><span class="sig-paren">(</span><em>I</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#nfour_connectivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.nfour_connectivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an image of four-connectivity for each pixel, where the pixel value
 is the number of 4-connected neighbors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>I</strong> (<em>np.array</em>) – Binary image.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Infc</strong> – Image of 4-connectivity for each pixel. Same shape as I.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.im_utils.regionprops">
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">regionprops</code><span class="sig-paren">(</span><em>I</em>, <em>props</em>, <em>connectivity=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#regionprops"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.regionprops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds blobs within a binary image and returns requested properties of
+each blob.</p>
+<p>This function was modeled after matlab’s regionprops and is essentially
+a wrapper for skimage’s regionprops. Not all of skimage’s available blob
+properties are available here, but they can easily be added.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary image containing blobs.</p></li>
+<li><p><strong>props</strong> (<em>list</em>) – Properties to compute for each blob. Can include ‘area’, ‘coords’,
+‘perimeter’, ‘centroid’, ‘mean’, ‘perimeter’, ‘perim_len’, ‘convex_area’,
+‘eccentricity’, ‘convex_area’, ‘major_axis_length’, ‘minor_axis_length’,
+‘label’.</p></li>
+<li><p><strong>connectivity</strong> (<em>int</em><em>, </em><em>optional</em>) – If 1, 4-connectivity will be used to determine connected blobs. If
+2, 8-connectivity will be used. The default is 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>out</strong> (<em>dict</em>) – Keys of the dictionary correspond to the requested properties. Values
+for each key are lists of that property, in order such that, e.g., the
+first entry of each property’s list corresponds to the same blob.</p></li>
+<li><p><strong>Ilabeled</strong> (<em>np.array</em>) – Image where each pixel’s value corresponds to its blob label. Labels
+can be returned by specifying ‘label’ as a property.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.reglobalize_flat_idx">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">reglobalize_flat_idx</code><span class="sig-paren">(</span><em>idxlist</em>, <em>idxlistdims</em>, <em>row_offset</em>, <em>col_offset</em>, <em>globaldims</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#reglobalize_flat_idx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.reglobalize_flat_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>If idxlist is (x,y), then idxlistdims should be (dim_x, dim_y), etc.</p>
+<dd><p>Takes a list of indices from a subimage and returns their indices within
+their parent image.</p>
+<p>If idxlist is (x,y), then idxlistdims should be (dim_x, dim_y), etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idxlist</strong> (<em>np.array</em><em> or </em><em>list</em><em> or </em><em>set</em>) – List-like array of indices within the subimage.</p></li>
+<li><p><strong>idxlistdims</strong> (<em>tuple</em>) – (nrows, ncols) of the subimage.</p></li>
+<li><p><strong>row_offset</strong> (<em>int</em>) – The row in the parent image corresponding to the lowest row in the
+subimage.</p></li>
+<li><p><strong>col_offset</strong> (<em>int</em>) – The column in the parent image corresponding to the left-most column
+in the subimage.</p></li>
+<li><p><strong>globaldims</strong> (<em>tuple</em>) – (nrows, ncols) of the parent image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>idcsflat</strong> – The indices in indexlist in terms of the parent image.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.remove_blobs">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">remove_blobs</code><span class="sig-paren">(</span><em>I</em>, <em>blobthresh</em>, <em>connectivity=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#remove_blobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.remove_blobs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a binary image with blobs less than size blobthresh removed from
-the input binary image.</p>
+<dd><p>Remove blobs of a binary image that are smaller than blobthresh. A blob is
+simply a set of connected “on” pixels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary image to remove blobs from.</p></li>
+<li><p><strong>blobthresh</strong> (<em>int</em>) – Minimum number of pixels a blob must contain for it to be kept.</p></li>
+<li><p><strong>connectivity</strong> (<em>int</em><em>, </em><em>optional</em>) – If 1, 4-connectivity will be used to determine connected blobs. If
+2, 8-connectivity will be used. The default is 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Ic</strong> – Binary image with blobs filetered. Same shape as I.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.skel_branchpoints">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">skel_branchpoints</code><span class="sig-paren">(</span><em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#skel_branchpoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.skel_branchpoints" title="Permalink to this definition">¶</a></dt>
-<dd><p>For a given input skeleton image/array, returns the x,y coordinates of the
-branchpoints.</p>
+<dd><p>Finds the branchpoints in a skeletonized image. Branchpoints are not simply
+those with more than two neighbors; they are identified in a way that
+minimizes the number of branchpoints required to resolve the skeleton
+fully with the fewest number of branchpoints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Iskel</strong> (<em>np.array</em>) – Skeletonized image.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Ibps</strong> – Binary image of shape Iskel where only branchpoints are on.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.skel_endpoints">
-<code class="descclassname">rivgraph.im_utils.</code><code class="descname">skel_endpoints</code><span class="sig-paren">(</span><em>skel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#skel_endpoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.skel_endpoints" title="Permalink to this definition">¶</a></dt>
-<dd><p>For a given input skeleton image/array, returns the x,y coordinates of
-the endpoints (eps).</p>
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">skel_endpoints</code><span class="sig-paren">(</span><em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#skel_endpoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.skel_endpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds all the endpoints of a skeleton.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Iskel</strong> (<em>np.array</em>) – Binary skeleton image.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>eps</strong> – Skeleton endpoint positions in (row, col) format.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -1198,13 +1633,74 @@ the endpoints (eps).</p>
 0 1 0</p>
 <p>and its rotations. The center pixel would be removed as doing so
 does not break connectivity of the skeleton.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>caseno</strong> (<em>int</em>) – Identifier for specific kernel cases. Can be 1-4.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>kernel</strong> – 3x3 kernel corresponding to the caseno.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.im_utils.skel_pixel_curvature">
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">skel_pixel_curvature</code><span class="sig-paren">(</span><em>Iskel</em>, <em>nwalk=4</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#skel_pixel_curvature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.skel_pixel_curvature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides an estimate of the curvature at most pixels within a skeleton image.
+Not all pixels are considered; some boundary pixels (i.e. those
+near the end of the skeleton) will not be computed. The more pruned and
+thinned the input skeleton, the less likely that any strange values will
+be returned. This code was written so that strange cases are merely
+skipped.</p>
+<p>Given an input skeleton image, the code looks at each pixel and fits a
+trendline through npix pixels “upstream” and “downstream” of the pixel in
+question. Scale is therefore set by npixels; larger will reduce
+variability in the curvature estimates.</p>
+<dl class="simple">
+<dt>INPUTS:      Iskel - binary image of skeleton whose pixels you want</dt><dd><p>curvature values</p>
+</dd>
+</dl>
+<p>OUTPUTS:         I - image of skeleton with curvature values at pixels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Iskel</strong> (<em>np.array</em>) – Binary skeleton image to compute curvatures.</p></li>
+<li><p><strong>nwalk</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of pixels to walk away, in each direction, to define the
+curve to compute a pixel’s curvature. Higher results in smoother
+curvature values. The default is 4.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>I</strong> – Image wherein pixel values represent the curvature of the skeleton.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.trim_idcs">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">trim_idcs</code><span class="sig-paren">(</span><em>imshape</em>, <em>idcs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#trim_idcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.trim_idcs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Trims a list of x,y indices by removing rows containing indices that cannot
-fit within a raster of imshape</p>
+<dd><p>Trims a list of indices by removing the indices that cannot fit within a
+raster of imshape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of image to filter idcs against.</p></li>
+<li><p><strong>idcs</strong> (<em>np.array</em>) – Indices to ensure fit within an image of shape imshape.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>idcs</strong> – Indices that can fit within imshape.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -1415,10 +1911,7 @@ up with a link of one pixel. This function removes those.</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.mask_to_graph"></span><div class="section" id="mask-to-graph-py">
-<h2>mask_to_graph.py<a class="headerlink" href="#mask-to-graph-py" title="Permalink to this headline">¶</a></h2>
-<p>Functions for converting a binary channel mask to a graphical representation.</p>
-<p>Created on Tue Apr 10 14:29:01 2018</p>
+<span class="target" id="module-rivgraph.mask_to_graph"></span><p>Functions for converting a binary channel mask to a graphical representation.</p>
 <dl class="function">
 <dt id="rivgraph.mask_to_graph.pad_river_im">
 <code class="descclassname">rivgraph.mask_to_graph.</code><code class="descname">pad_river_im</code><span class="sig-paren">(</span><em>I</em>, <em>es</em>, <em>pm=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_to_graph.html#pad_river_im"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_to_graph.pad_river_im" title="Permalink to this definition">¶</a></dt>
@@ -1426,16 +1919,25 @@ up with a link of one pixel. This function removes those.</p>
 Different than mirrored padding in that the “mirror” here is just a
 rectangle. This simplifies skeletonization and interpretation in cases
 where the channel is complex near the boundaries.</p>
-<dl>
-<dt>INPUTS:</dt><dd><p>I - binary river mask to pad
-es - NSEW “exit sides” corresponding to the upstream and downstream</p>
-<blockquote>
-<div><p>sides of the image that intersect the river. e.g. ‘NS’, ‘EN’, ‘WS’</p>
-</div></blockquote>
-<p>pm - (Optional) “pad multiplier” that sets the size of the padding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary image to pad; typically a river channel network.</p></li>
+<li><p><strong>es</strong> (<em>str</em>) – A two-character string (from N, E, S, or W) that denotes which sides
+of the image the river intersects (upstream first) – e.g. ‘NS’, ‘EW’,
+‘NW’, etc.</p></li>
+<li><p><strong>pm</strong> (<em>int</em><em>, </em><em>optional</em>) – Pad multiplier that sets the size of the padding. Multplies the blob
+size along the axis of the image that the blob intersect to determine
+the padding distance. The default is 2.</p></li>
+</ul>
 </dd>
-<dt>OUTPUTS:</dt><dd><p>Ip - padded version of I
-pads - [n,s,e,w] padding values (number of pixels)</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>Ip</strong> (<em>np.array</em>) – The padded image..</p></li>
+<li><p><strong>pads</strong> (<em>list</em>) – 4 entry list containing the number of pixels padded on the [n, s, e, w]
+edges of the image.</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1443,32 +1945,112 @@ pads - [n,s,e,w] padding values (number of pixels)</p>
 <dl class="function">
 <dt id="rivgraph.mask_to_graph.simplify_skel">
 <code class="descclassname">rivgraph.mask_to_graph.</code><code class="descname">simplify_skel</code><span class="sig-paren">(</span><em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_to_graph.html#simplify_skel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_to_graph.simplify_skel" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function iterates through all skeleton pixels
-pixels that have connectivity &gt; 2. It removes the pixel and checks if the
+<dd><p>This function iterates through all skeleton pixels pixels that have
+connectivity &gt; 2. It removes the pixel and checks if the
 number of blobs has changed after removal. If so, the pixel is necessary to
-maintain connectivity. Otherwise the pixel is not retained.
-It also adds pixels to the centers of “+” cases, as this reduces the number
+maintain connectivity. Otherwise the pixel is not retained. It also adds
+pixels to the centers of “+” cases, as this reduces the number
 of branchpoints from 4 to 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Iskel</strong> (<em>np.array</em>) – Image of the skeleton to simplify.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Iskel</strong> – The simplified skeleton.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.mask_to_graph.skel_to_graph">
 <code class="descclassname">rivgraph.mask_to_graph.</code><code class="descname">skel_to_graph</code><span class="sig-paren">(</span><em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_to_graph.html#skel_to_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_to_graph.skel_to_graph" title="Permalink to this definition">¶</a></dt>
-<dd><p>Breaks a skeletonized image into links and nodes; exports if desired.</p>
+<dd><p>Resolves a skeleton into its consitutent links and nodes.
+This function finds a starting point to walk along a skeleton, then begins
+the walk. Rules are in place to ensure the network is fully resolved. One
+of the key algorithms called by this function involves the identfication of
+branchpoints in a way that eliminates unnecessary ones to create a parsimonious
+network. Rules are baked in for how to walk along the skeleton in cases
+where multiple branchpoints are clustered or there are multiple possible
+links to walk along.</p>
+<p>Note that some minor adjustments to the skeleton may be made in order to
+reduce the complexity of the network. For example, in the case of a “+”
+with a missing center pixel in the skeleton, this function will add the
+pixel to the center to enable the use of a single branchpoint as opposed to
+four.</p>
+<p>The takeaway is that there is no guarantee that the input skeleton will
+be perfectly preserved when network-ifying. One possible workaround, if
+perfect preservation is required, is to resample the skeleton to double the
+resolution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Iskel</strong> (<em>np.ndarray</em>) – Binary image of a skeleton.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul>
+<li><p><strong>links</strong> (<em>dict</em>) –</p>
+<dl>
+<dt>Links of the network with four properties:</dt><dd><p>’id’ - a list of unique ids for each link in the network
+‘idx’ - a list containing the pixel indices within Iskel that</p>
+<blockquote>
+<div><p>defines the link. These are ordered.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>’conn’ - a list of 2-element lists containing the node ids that</dt><dd><p>the link is connected to.</p>
+</dd>
+<dt>’n_networks’ - the number of disconnected networks found in the</dt><dd><p>skeleton</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><p><strong>nodes</strong> (<em>dict</em>) –</p>
+<dl>
+<dt>Nodes of the network with four properties:</dt><dd><p>’id’ - a list of unique ids for each node in the network
+‘idx’ - the index within Iskel of the node location
+‘conn’ - a list of lists containing the link ids connected to this</p>
+<blockquote>
+<div><p>node</p>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.mask_to_graph.skeletonize_mask">
 <code class="descclassname">rivgraph.mask_to_graph.</code><code class="descname">skeletonize_mask</code><span class="sig-paren">(</span><em>Imask</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_to_graph.html#skeletonize_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_to_graph.skeletonize_mask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Skeletonize any input binary mask.</p>
+<dd><p>Skeletonizes an input binary image, typically a mask. Also performs some
+skeleton simplification by (1) removing pixels that don’t alter connectivity,
+and (2) filling small skeleton holes and reskeletonizing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Imask</strong> (<em>np.array</em>) – Binary image to be skeletonized.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Iskel</strong> – The skeletonization of Imask.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.mask_to_graph.skeletonize_river_mask">
 <code class="descclassname">rivgraph.mask_to_graph.</code><code class="descname">skeletonize_river_mask</code><span class="sig-paren">(</span><em>I</em>, <em>es</em>, <em>padscale=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_to_graph.html#skeletonize_river_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_to_graph.skeletonize_river_mask" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
-<div><p>Skeletonize a binary river mask. Crops mask to river extents, reflects the
-mask at the appropriate borders, skeletonizes, then un-crops the mask.</p>
+<div><p>Skeletonizes a binary mask of a river channel network. Differs from
+skeletonize mask above by using knowledge of the exit sides of the river
+with respect to the mask (I) to avoid edge effects of skeletonization by
+mirroring the mask at its ends, then trimming it after processing. As with
+skeletonize_mask, skeleton simplification is performed.</p>
 <dl>
 <dt>INPUTS:</dt><dd><blockquote>
 <div><p>I - binary river mask to skeletonize</p>
@@ -1480,13 +2062,30 @@ mask at the appropriate borders, skeletonizes, then un-crops the mask.</p>
 </dd>
 </dl>
 </div></blockquote>
+<dl>
+<dt>padscale - (Optional) number of pixels to reflect I before skeletonization</dt><dd><blockquote>
+<div><p>to remove edge effects of skeletonization</p>
+</div></blockquote>
 <dl class="simple">
-<dt>padscale - (Optional) number of pixels to reflect I before skeletonization</dt><dd><p>to remove edge effects of skeletonization</p>
+<dt>I<span class="classifier">np.array</span></dt><dd><p>Binary river mask to skeletonize.</p>
+</dd>
+<dt>es<span class="classifier">str</span></dt><dd><p>A two-character string (from N, E, S, or W) that denotes which sides
+of the image the river intersects (upstream first) – e.g. ‘NS’, ‘EW’,
+‘NW’, etc.</p>
+</dd>
+<dt>padscale<span class="classifier">int, optional</span></dt><dd><p>Pad multiplier that sets the size of the padding. Multplies the blob
+size along the axis of the image that the blob intersect to determine
+the padding distance. The default is 2.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Iskel<span class="classifier">np.array</span></dt><dd><p>The skeletonization of I.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
 <span class="target" id="module-rivgraph.ordered_set"></span><div class="section" id="ordered-set">
 <h2>ordered_set<a class="headerlink" href="#ordered-set" title="Permalink to this headline">¶</a></h2>
 <p>An OrderedSet is a custom MutableSet that remembers its order, so that every

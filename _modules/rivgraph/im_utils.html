@@ -162,32 +162,50 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">im_utils</span>
 <span class="sd">========</span>
+<span class="sd">Almost all the functions that manipulate images within this file require that</span>
+<span class="sd">the images be binary.</span>
 
-<span class="sd">Created on Mon Sep 10 10:21:35 2018</span>
-
-<span class="sd">@author: Jon</span>
+<span class="sd">Many of these functions are wrappers around functionality found in skimage or</span>
+<span class="sd">opencv that either add additonal functionality or provide convenience. </span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">cv2</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span> <span class="k">as</span> <span class="n">nd</span>
-<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span>
 <span class="kn">from</span> <span class="nn">skimage</span> <span class="kn">import</span> <span class="n">morphology</span><span class="p">,</span> <span class="n">measure</span><span class="p">,</span> <span class="n">util</span>
-<span class="kn">import</span> <span class="nn">rivgraph.geo_utils</span> <span class="k">as</span> <span class="nn">gu</span>
+<span class="c1"># import geopandas as gpd</span>
+<span class="c1"># from shapely.geometry import Polygon</span>
+<span class="c1"># import rivgraph.geo_utils as gu</span>
 
+<span class="c1">## TODO: add checks for inputs to ensure proper types</span>
 
 <div class="viewcode-block" id="get_array"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.get_array">[docs]</a><span class="k">def</span> <span class="nf">get_array</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Size is (nrows, ncols) corresponding to the number of rows, columns to return with</span>
-<span class="sd">    idx at the center. idx can be flattend index or [row, col]</span>
+<span class="sd">    Returns a sub-image of an input image, centered at a specified index within</span>
+<span class="sd">    the input image and a specified size.</span>
 
-<span class="sd">    ## Should add check for border cases so we don&#39;t query to raster</span>
-<span class="sd">    ## beyond its bounds</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    idx : int</span>
+<span class="sd">        Index within I on which to center the returned array. Can also be a</span>
+<span class="sd">        [row, col] list.</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Image to pull from.</span>
+<span class="sd">    size : list</span>
+<span class="sd">        Two-entry list specifying the number of [rows, cols] to return from</span>
+<span class="sd">        I centered at idx.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    subimage : np.array</span>
+<span class="sd">        The sub-image of I, centered at idx with shape specified by size.</span>
+<span class="sd">    row : int</span>
+<span class="sd">        The first row within I that the sub-image is drawn from.</span>
+<span class="sd">    col : int</span>
+<span class="sd">        The first column within I that the sub-image is drawn from.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">dims</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">shape</span>
+    <span class="c1">## TODO: Should add check for border cases so we don&#39;t query to raster </span>
+    <span class="c1"># beyond its bounds. Or add error handling for those cases.</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">lidx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
@@ -195,7 +213,7 @@
         <span class="n">lidx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">idx</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">lidx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+        <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -205,19 +223,37 @@
     <span class="n">row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span> <span class="o">-</span> <span class="p">(</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">col</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">col</span> <span class="o">-</span> <span class="p">(</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
 
-    <span class="n">array</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">row</span><span class="p">:</span><span class="n">row</span><span class="o">+</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">col</span><span class="p">:</span><span class="n">col</span><span class="o">+</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">subimage</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">row</span><span class="p">:</span><span class="n">row</span><span class="o">+</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">col</span><span class="p">:</span><span class="n">col</span><span class="o">+</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="n">array</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span></div>
+    <span class="k">return</span> <span class="n">subimage</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span></div>
 
 
 <div class="viewcode-block" id="neighbors_flat"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.neighbors_flat">[docs]</a><span class="k">def</span> <span class="nf">neighbors_flat</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">imflat</span><span class="p">,</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">filt</span><span class="o">=</span><span class="s1">&#39;nonzero&#39;</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Given a flattened image (np.ravel) and an index, returns all the</span>
-<span class="sd">    neighboring indices and their values. Uses native python datatypes.</span>
-<span class="sd">    Set filt=&#39;nonzero&#39; for returning only nonzero indices; otherwise set</span>
-<span class="sd">    filt=&#39;none&#39; to return all indices and values.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns all 8-neighbor pixel indices and values from an index of a </span>
+<span class="sd">    flattened image. Can filter out zero values with the filt keyword. </span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    idx : int</span>
+<span class="sd">        Index within imflat to return neighbors.</span>
+<span class="sd">    imflat : np.array</span>
+<span class="sd">        Flattened image (using np.ravel).</span>
+<span class="sd">    ncols : int</span>
+<span class="sd">        Number of columns in the un-flattened image.</span>
+<span class="sd">    filt : str, optional</span>
+<span class="sd">        If &#39;nonzero&#39;, only nonzero indices and values are returned. Else all</span>
+<span class="sd">        neighbors are returned.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    idcs : np.array</span>
+<span class="sd">        Indices within the flattened image of neighboring pixels.</span>
+<span class="sd">    vals : np.array</span>
+<span class="sd">        Values within the flattened image of neighboring pixels; matches idcs.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">generic</span><span class="p">):</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ncols</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">generic</span><span class="p">):</span>
@@ -225,15 +261,9 @@
 
     <span class="n">dy</span> <span class="o">=</span> <span class="n">ncols</span>
     <span class="n">dx</span> <span class="o">=</span> <span class="mi">1</span>
-
-    <span class="n">possneighs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">idx</span><span class="o">-</span><span class="n">dy</span><span class="o">-</span><span class="n">dx</span><span class="p">,</span>
-                  <span class="n">idx</span><span class="o">-</span><span class="n">dy</span><span class="p">,</span>
-                  <span class="n">idx</span><span class="o">-</span><span class="n">dy</span><span class="o">+</span><span class="n">dx</span><span class="p">,</span>
-                  <span class="n">idx</span><span class="o">-</span><span class="n">dx</span><span class="p">,</span>
-                  <span class="n">idx</span><span class="o">+</span><span class="n">dx</span><span class="p">,</span>
-                  <span class="n">idx</span><span class="o">+</span><span class="n">dy</span><span class="o">-</span><span class="n">dx</span><span class="p">,</span>
-                  <span class="n">idx</span><span class="o">+</span><span class="n">dy</span><span class="p">,</span>
-                  <span class="n">idx</span><span class="o">+</span><span class="n">dy</span><span class="o">+</span><span class="n">dx</span><span class="p">])</span>
+    <span class="n">possneighs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">idx</span><span class="o">-</span><span class="n">dy</span><span class="o">-</span><span class="n">dx</span><span class="p">,</span> <span class="n">idx</span><span class="o">-</span><span class="n">dy</span><span class="p">,</span> <span class="n">idx</span><span class="o">-</span><span class="n">dy</span><span class="o">+</span><span class="n">dx</span><span class="p">,</span>
+                           <span class="n">idx</span><span class="o">-</span><span class="n">dx</span><span class="p">,</span>            <span class="n">idx</span><span class="o">+</span><span class="n">dx</span><span class="p">,</span>
+                           <span class="n">idx</span><span class="o">+</span><span class="n">dy</span><span class="o">-</span><span class="n">dx</span><span class="p">,</span> <span class="n">idx</span><span class="o">+</span><span class="n">dy</span><span class="p">,</span> <span class="n">idx</span><span class="o">+</span><span class="n">dy</span><span class="o">+</span><span class="n">dx</span><span class="p">])</span>
 
     <span class="c1"># For handling edge cases</span>
     <span class="k">if</span> <span class="n">idx</span> <span class="o">%</span> <span class="n">ncols</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># first column of image</span>
@@ -276,10 +306,34 @@
 
 <div class="viewcode-block" id="reglobalize_flat_idx"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.reglobalize_flat_idx">[docs]</a><span class="k">def</span> <span class="nf">reglobalize_flat_idx</span><span class="p">(</span><span class="n">idxlist</span><span class="p">,</span> <span class="n">idxlistdims</span><span class="p">,</span> <span class="n">row_offset</span><span class="p">,</span> <span class="n">col_offset</span><span class="p">,</span> <span class="n">globaldims</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a list of indices from a subimage and returns their indices within</span>
+<span class="sd">    their parent image.</span>
+<span class="sd">    </span>
 <span class="sd">    If idxlist is (x,y), then idxlistdims should be (dim_x, dim_y), etc.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">convertflag</span> <span class="o">=</span> <span class="mi">0</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    idxlist : np.array or list or set</span>
+<span class="sd">        List-like array of indices within the subimage.</span>
+<span class="sd">    idxlistdims : tuple</span>
+<span class="sd">        (nrows, ncols) of the subimage.</span>
+<span class="sd">    row_offset : int</span>
+<span class="sd">        The row in the parent image corresponding to the lowest row in the </span>
+<span class="sd">        subimage.</span>
+<span class="sd">    col_offset : int</span>
+<span class="sd">        The column in the parent image corresponding to the left-most column</span>
+<span class="sd">        in the subimage.</span>
+<span class="sd">    globaldims : tuple</span>
+<span class="sd">        (nrows, ncols) of the parent image.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    idcsflat : list</span>
+<span class="sd">        The indices in indexlist in terms of the parent image.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="c1"># Handle input</span>
+    <span class="n">convertflag</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">idxlist</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
         <span class="n">idxlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">idxlist</span><span class="p">]</span>
         <span class="n">convertflag</span> <span class="o">=</span> <span class="s1">&#39;int&#39;</span>
@@ -302,12 +356,21 @@
 
 
 <div class="viewcode-block" id="nfour_connectivity"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.nfour_connectivity">[docs]</a><span class="k">def</span> <span class="nf">nfour_connectivity</span><span class="p">(</span><span class="n">I</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns an image of four-connectivity for each pixel, where the pixel value</span>
 <span class="sd">    is the number of 4-connected neighbors.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Infc : np.array</span>
+<span class="sd">        Image of 4-connectivity for each pixel. Same shape as I.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Ir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
     <span class="n">edgeidcs</span> <span class="o">=</span> <span class="n">edge_coords</span><span class="p">(</span><span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">)</span>
 
@@ -328,10 +391,23 @@
 
 <div class="viewcode-block" id="four_conn"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.four_conn">[docs]</a><span class="k">def</span> <span class="nf">four_conn</span><span class="p">(</span><span class="n">idcs</span><span class="p">,</span> <span class="n">I</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Counts the number of 4-connected neighbors for a given flat index in I.</span>
+<span class="sd">    Returns the number of 4-connected neighbors for a given flat index in I.</span>
 <span class="sd">    idcs must be a list, even if a single value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    idcs : list</span>
+<span class="sd">        Indices within I to find 4-connected neighbors.</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fourconn : list</span>
+<span class="sd">        Number of four-connected neighbors for each index in idcs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">Iflat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">))</span>
 
     <span class="n">fourconn</span> <span class="o">=</span> <span class="p">[]</span>
@@ -346,7 +422,21 @@
 <div class="viewcode-block" id="edge_coords"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.edge_coords">[docs]</a><span class="k">def</span> <span class="nf">edge_coords</span><span class="p">(</span><span class="n">sizeI</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given an image size, returns the coordinates of all the edge pixels (4 edges).</span>
-<span class="sd">    Can return as indices (dtype=flat) or x,y coordinates (dtyep=&#39;xy&#39;).</span>
+<span class="sd">    Can return as indices (dtype=flat) or x,y coordinates (dtype=&#39;xy&#39;).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sizeI : tuple</span>
+<span class="sd">        Shape of the image.</span>
+<span class="sd">    dtype : str, optional</span>
+<span class="sd">        If &#39;flat&#39;, returns output as indices within I. If &#39;xy&#39;, returns (col, row)</span>
+<span class="sd">        of edge pixels.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    edgepts : set or list</span>
+<span class="sd">        Coordinates of the edge pixels. If dtype==&#39;flat&#39;, returns a set. If</span>
+<span class="sd">        dtype==&#39;xy&#39;, returns a list of [columns, rows].</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># xs</span>
     <span class="n">x_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sizeI</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
@@ -370,100 +460,179 @@
     <span class="k">return</span> <span class="n">edgepts</span></div>
 
 
-<div class="viewcode-block" id="neighbor_idcs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.neighbor_idcs">[docs]</a><span class="k">def</span> <span class="nf">neighbor_idcs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="neighbor_idcs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.neighbor_idcs">[docs]</a><span class="k">def</span> <span class="nf">neighbor_idcs</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Input x,y coordinates and return all the neighbor indices.</span>
+<span class="sd">    Returns the column, row coordinats of all eight neighbors of a given</span>
+<span class="sd">    column and row.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns are ordered as</span>
+<span class="sd">    [0 1 2</span>
+<span class="sd">     3   4</span>
+<span class="sd">     5 6 7]</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    c : int</span>
+<span class="sd">        Column.</span>
+<span class="sd">    r : int</span>
+<span class="sd">        Row.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cidcs : list</span>
+<span class="sd">        Columns of the eight neighbors.</span>
+<span class="sd">    ridcs : TYPE</span>
+<span class="sd">        Rows of the eight neighbors.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">xidcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">yidcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">cidcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ridcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="n">xidcs</span><span class="p">,</span> <span class="n">yidcs</span></div>
+    <span class="k">return</span> <span class="n">cidcs</span><span class="p">,</span> <span class="n">ridcs</span></div>
 
 
-<span class="k">def</span> <span class="nf">neighbor_vals</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="neighbor_vals"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.neighbor_vals">[docs]</a><span class="k">def</span> <span class="nf">neighbor_vals</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the neighbor values in I of a specified pixel coordinate. Handles</span>
+<span class="sd">    edge cases.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Image to draw values from.</span>
+<span class="sd">    c : int</span>
+<span class="sd">        Column defining pixel to find neighbor values.</span>
+<span class="sd">    r : int</span>
+<span class="sd">        Row defining pixel to find neighbor values.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    vals : np.array</span>
+<span class="sd">        A flattened array of all the neighboring pixel values.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
     <span class="n">vals</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span>
 
-    <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
 
-        <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">im</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">r</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">I</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
 
-    <span class="k">elif</span> <span class="n">x</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">im</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
 
-        <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">im</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">r</span> <span class="o">==</span> <span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
 
-    <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">r</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
 
-    <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">im</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">r</span> <span class="o">==</span> <span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">]</span>
-        <span class="n">vals</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+        <span class="n">vals</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        
+    <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">vals</span></div>
 
 
-<span class="k">def</span> <span class="nf">neighbor_xy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
-    <span class="c1"># Feed in x, y location and a neighbor index</span>
-    <span class="c1"># Return the x, y location of the neighbor</span>
-    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
-    <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span> <span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+<div class="viewcode-block" id="neighbor_xy"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.neighbor_xy">[docs]</a><span class="k">def</span> <span class="nf">neighbor_xy</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the coordinates of a neighbor of a pixel given the index of the</span>
+<span class="sd">    desired neighbor. Indices should be provided according to </span>
+<span class="sd">    [0 1 2</span>
+<span class="sd">     3   4</span>
+<span class="sd">     5 6 7].</span>
 
-    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">xs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">ys</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    c : int</span>
+<span class="sd">        Column of the pixel to find the neighbor.</span>
+<span class="sd">    r : int</span>
+<span class="sd">        Row of the pixel to find the neighbor.</span>
+<span class="sd">    idx : int</span>
+<span class="sd">        Index of the neighbor position.</span>
 
-    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    c : int</span>
+<span class="sd">        Column of the neighbor pixel.</span>
+<span class="sd">    r : int</span>
+<span class="sd">        Row of the neighbor pixel.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span> <span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+    <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> <span class="n">cs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">+</span> <span class="n">rs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">c</span><span class="p">,</span> <span class="n">r</span></div>
 
 
 <div class="viewcode-block" id="remove_blobs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.remove_blobs">[docs]</a><span class="k">def</span> <span class="nf">remove_blobs</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">blobthresh</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a binary image with blobs less than size blobthresh removed from</span>
-<span class="sd">    the input binary image.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Remove blobs of a binary image that are smaller than blobthresh. A blob is</span>
+<span class="sd">    simply a set of connected &quot;on&quot; pixels.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image to remove blobs from.</span>
+<span class="sd">    blobthresh : int</span>
+<span class="sd">        Minimum number of pixels a blob must contain for it to be kept.</span>
+<span class="sd">    connectivity : int, optional</span>
+<span class="sd">        If 1, 4-connectivity will be used to determine connected blobs. If </span>
+<span class="sd">        2, 8-connectivity will be used. The default is 2. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Ic : np.array</span>
+<span class="sd">        Binary image with blobs filetered. Same shape as I.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">props</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;area&#39;</span><span class="p">,</span> <span class="s1">&#39;coords&#39;</span><span class="p">]</span>
     <span class="n">rp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">regionprops</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="n">connectivity</span><span class="p">)</span>
     <span class="n">areas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rp</span><span class="p">[</span><span class="s1">&#39;area&#39;</span><span class="p">])</span>
@@ -478,7 +647,27 @@
     <span class="k">return</span> <span class="n">Ic</span></div>
 
 
-<span class="k">def</span> <span class="nf">imshowpair</span><span class="p">(</span><span class="n">I1</span><span class="p">,</span> <span class="n">I2</span><span class="p">):</span>
+<div class="viewcode-block" id="imshowpair"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.imshowpair">[docs]</a><span class="k">def</span> <span class="nf">imshowpair</span><span class="p">(</span><span class="n">I1</span><span class="p">,</span> <span class="n">I2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Overlays two binary images with a color scheme that shows their differences</span>
+<span class="sd">    and overlaps. Provides similar functionality to matlab&#39;s imshowpair. Useful</span>
+<span class="sd">    for quick diagnostic of differences between two binary images.</span>
+<span class="sd">    </span>
+<span class="sd">    This function will plot on current figure if it exists, else it will create</span>
+<span class="sd">    a new one.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I1 : np.array</span>
+<span class="sd">        The first binary image.</span>
+<span class="sd">    I2 : np.array</span>
+<span class="sd">        The second binary image.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span>
     <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
@@ -491,33 +680,32 @@
     <span class="n">bounds</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">,</span><span class="mf">2.5</span><span class="p">,</span><span class="mf">3.5</span><span class="p">]</span>
     <span class="n">norm</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">BoundaryNorm</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">cmap</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
 
-    <span class="c1"># tell imshow about color map so that only set colors are used</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">Ip</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;upper&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
-
-<span class="c1">#    img = plt.imshow(Ip, origin=&#39;upper&#39;,</span>
-<span class="c1">#                        cmap=cmap, norm=norm)</span>
-<span class="c1">#    # make a color bar</span>
-<span class="c1">#    plt.colorbar(img, cmap=cmap, norm=norm, boundaries=bounds, ticks=[0, 5, 10])</span>
-
-
-<span class="c1">#def fill_islands(I, min_n_island_pixels=20):</span>
-<span class="c1">#</span>
-<span class="c1">#    # Invert binary image</span>
-<span class="c1">#    Icomp = util.invert(I)</span>
-<span class="c1">#</span>
-<span class="c1">#    # Compute region props</span>
-<span class="c1">#    props = [&#39;coords&#39;,&#39;area&#39;]</span>
-<span class="c1">#    rp = regionprops(Icomp, props, connectivity=1)</span>
-<span class="c1">#    for a, c in zip(rp[&#39;area&#39;], rp[&#39;coords&#39;]):</span>
-<span class="c1">#        if a &lt; min_n_island_pixels:</span>
-<span class="c1">#            I[c[:,0], c[:,1]] = True</span>
-<span class="c1">#    return I</span>
-
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">Ip</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;upper&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span></div>
+    
 
 <div class="viewcode-block" id="largest_blobs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.largest_blobs">[docs]</a><span class="k">def</span> <span class="nf">largest_blobs</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">nlargest</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;remove&#39;</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a binary image with the nlargest blobs removed from the input</span>
-<span class="sd">    binary image.</span>
+<span class="sd">    Provides filtering for the largest blobs in a binary image. Can choose to </span>
+<span class="sd">    either keep or remove them.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image to filter.</span>
+<span class="sd">    nlargest : int, optional</span>
+<span class="sd">        Number of blobs to filter. The default is 1.</span>
+<span class="sd">    action : str, optional</span>
+<span class="sd">        If &#39;keep&#39;, will keep the nlargest blobs. If &#39;remove&#39;, will remove the </span>
+<span class="sd">        nlargest blobs. The default is &#39;remove&#39;.</span>
+<span class="sd">    connectivity : int, optional</span>
+<span class="sd">        If 1, 4-connectivity will be used to determine connected blobs. If </span>
+<span class="sd">        2, 8-connectivity will be used. The default is 2. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Ic : np.array</span>
+<span class="sd">        The filtered image. Same shape as I.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">props</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;area&#39;</span><span class="p">,</span> <span class="s1">&#39;coords&#39;</span><span class="p">]</span>
     <span class="n">rp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">regionprops</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="n">connectivity</span><span class="p">)</span>
@@ -543,9 +731,22 @@
 
 <div class="viewcode-block" id="blob_idcs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.blob_idcs">[docs]</a><span class="k">def</span> <span class="nf">blob_idcs</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a list where each entry contains a set of all indices within each</span>
-<span class="sd">    connected blob. Indices are returned as single-index coordinates, rather</span>
-<span class="sd">    than x,y.</span>
+<span class="sd">    Finds all the indices for each blob within I.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image containing blobs.</span>
+<span class="sd">    connectivity : int, optional</span>
+<span class="sd">        If 1, 4-connectivity will be used to determine connected blobs. If </span>
+<span class="sd">        2, 8-connectivity will be used. The default is 2. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    idcs : list</span>
+<span class="sd">        An n-element list of sets, where n is the number of blobs in I, and</span>
+<span class="sd">        each set contains the pixel indices within I of a blob.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">props</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;coords&#39;</span><span class="p">]</span>
     <span class="n">rp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">regionprops</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="n">connectivity</span><span class="p">)</span>
@@ -557,10 +758,41 @@
     <span class="k">return</span> <span class="n">idcs</span></div>
 
 
-<span class="k">def</span> <span class="nf">regionprops</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="regionprops"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.regionprops">[docs]</a><span class="k">def</span> <span class="nf">regionprops</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds blobs within a binary image and returns requested properties of</span>
+<span class="sd">    each blob.</span>
+<span class="sd">    </span>
+<span class="sd">    This function was modeled after matlab&#39;s regionprops and is essentially</span>
+<span class="sd">    a wrapper for skimage&#39;s regionprops. Not all of skimage&#39;s available blob</span>
+<span class="sd">    properties are available here, but they can easily be added.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image containing blobs.</span>
+<span class="sd">    props : list</span>
+<span class="sd">        Properties to compute for each blob. Can include &#39;area&#39;, &#39;coords&#39;, </span>
+<span class="sd">        &#39;perimeter&#39;, &#39;centroid&#39;, &#39;mean&#39;, &#39;perimeter&#39;, &#39;perim_len&#39;, &#39;convex_area&#39;,</span>
+<span class="sd">        &#39;eccentricity&#39;, &#39;convex_area&#39;, &#39;major_axis_length&#39;, &#39;minor_axis_length&#39;,</span>
+<span class="sd">        &#39;label&#39;.</span>
+<span class="sd">    connectivity : int, optional</span>
+<span class="sd">        If 1, 4-connectivity will be used to determine connected blobs. If </span>
+<span class="sd">        2, 8-connectivity will be used. The default is 2. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out : dict</span>
+<span class="sd">        Keys of the dictionary correspond to the requested properties. Values</span>
+<span class="sd">        for each key are lists of that property, in order such that, e.g., the</span>
+<span class="sd">        first entry of each property&#39;s list corresponds to the same blob.</span>
+<span class="sd">    Ilabeled : np.array</span>
+<span class="sd">        Image where each pixel&#39;s value corresponds to its blob label. Labels</span>
+<span class="sd">        can be returned by specifying &#39;label&#39; as a property.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1">### TODO: Add a check that appropriate props are requested</span>
-
     <span class="n">Ilabeled</span> <span class="o">=</span> <span class="n">measure</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="n">connectivity</span><span class="p">)</span>
     <span class="n">properties</span> <span class="o">=</span> <span class="n">measure</span><span class="o">.</span><span class="n">regionprops</span><span class="p">(</span><span class="n">Ilabeled</span><span class="p">,</span> <span class="n">intensity_image</span><span class="o">=</span><span class="n">I</span><span class="p">)</span>
 
@@ -588,7 +820,7 @@
                 <span class="n">Ip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Ip</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span>
 
                 <span class="n">contours</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">findContours</span><span class="p">(</span><span class="n">Ip</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">RETR_TREE</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CHAIN_APPROX_NONE</span><span class="p">)</span>
-                <span class="c1"># IMPORTANT: findContours returns points as (x,y) rather than (row, col)</span>
+                <span class="c1"># IMPORTANT: findContours returns points as (col, row) rather than (row, col)</span>
                 <span class="n">contours</span> <span class="o">=</span> <span class="n">contours</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">crows</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">ccols</span> <span class="o">=</span> <span class="p">[]</span>
@@ -615,10 +847,29 @@
 
         <span class="n">out</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">allprop</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">Ilabeled</span>
+    <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">Ilabeled</span></div>
 
 
-<span class="k">def</span> <span class="nf">erode</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">strel</span><span class="o">=</span><span class="s1">&#39;square&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="erode"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.erode">[docs]</a><span class="k">def</span> <span class="nf">erode</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">strel</span><span class="o">=</span><span class="s1">&#39;square&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Erodes a binary image using a specified kernel shape.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image to erode.</span>
+<span class="sd">    n : int, optional</span>
+<span class="sd">        Number of times to apply the eroding kernel. The default is 1.</span>
+<span class="sd">    strel : str, optional</span>
+<span class="sd">        Kernel shape. Follows skimage&#39;s options, but only &#39;square&#39;, &#39;plus&#39;, and</span>
+<span class="sd">        &#39;disk&#39; are supported. The default is &#39;square&#39;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Ie : np.array</span>
+<span class="sd">        Eroded binary image. Same shape as I.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">I</span>
@@ -630,13 +881,33 @@
     <span class="k">elif</span> <span class="n">strel</span> <span class="o">==</span> <span class="s1">&#39;disk&#39;</span><span class="p">:</span>
         <span class="n">selem</span> <span class="o">=</span> <span class="n">morphology</span><span class="o">.</span><span class="n">disk</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
+    <span class="n">Ie</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
-        <span class="n">I</span> <span class="o">=</span> <span class="n">morphology</span><span class="o">.</span><span class="n">erosion</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">selem</span><span class="p">)</span>
+        <span class="n">Ie</span> <span class="o">=</span> <span class="n">morphology</span><span class="o">.</span><span class="n">erosion</span><span class="p">(</span><span class="n">Ie</span><span class="p">,</span> <span class="n">selem</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">I</span>
+    <span class="k">return</span> <span class="n">Ie</span></div>
 
 
-<span class="k">def</span> <span class="nf">dilate</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">strel</span><span class="o">=</span><span class="s1">&#39;square&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="dilate"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.dilate">[docs]</a><span class="k">def</span> <span class="nf">dilate</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">strel</span><span class="o">=</span><span class="s1">&#39;square&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dilates a binary image using a specified kernel shape.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image to dilate.</span>
+<span class="sd">    n : int, optional</span>
+<span class="sd">        Number of times to apply the dilating kernel. The default is 1.</span>
+<span class="sd">    strel : str, optional</span>
+<span class="sd">        Kernel shape. Follows skimage&#39;s options, but only &#39;square&#39;, &#39;plus&#39;, and</span>
+<span class="sd">        &#39;disk&#39; are supported. The default is &#39;square&#39;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Id : np.array</span>
+<span class="sd">        Dilated binary image. Same shape as I.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">I</span>
@@ -648,20 +919,32 @@
     <span class="k">elif</span> <span class="n">strel</span> <span class="o">==</span> <span class="s1">&#39;disk&#39;</span><span class="p">:</span>
         <span class="n">selem</span> <span class="o">=</span> <span class="n">morphology</span><span class="o">.</span><span class="n">disk</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
+    <span class="n">Id</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">Id</span> <span class="o">=</span> <span class="n">morphology</span><span class="o">.</span><span class="n">dilation</span><span class="p">(</span><span class="n">Id</span><span class="p">,</span> <span class="n">selem</span><span class="p">)</span>
 
-        <span class="n">I</span> <span class="o">=</span> <span class="n">morphology</span><span class="o">.</span><span class="n">dilation</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">selem</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">I</span>
-
+    <span class="k">return</span> <span class="n">Id</span></div>
 
 
 <div class="viewcode-block" id="trim_idcs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.trim_idcs">[docs]</a><span class="k">def</span> <span class="nf">trim_idcs</span><span class="p">(</span><span class="n">imshape</span><span class="p">,</span> <span class="n">idcs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Trims a list of x,y indices by removing rows containing indices that cannot</span>
-<span class="sd">    fit within a raster of imshape</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Trims a list of indices by removing the indices that cannot fit within a </span>
+<span class="sd">    raster of imshape.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    imshape : tuple</span>
+<span class="sd">        Shape of image to filter idcs against.</span>
+<span class="sd">    idcs : np.array</span>
+<span class="sd">        Indices to ensure fit within an image of shape imshape.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    idcs : np.array</span>
+<span class="sd">        Indices that can fit within imshape.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">idcs</span> <span class="o">=</span> <span class="n">idcs</span><span class="p">[</span><span class="n">idcs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">imshape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span>
     <span class="n">idcs</span> <span class="o">=</span> <span class="n">idcs</span><span class="p">[</span><span class="n">idcs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">imshape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:]</span>
     <span class="n">idcs</span> <span class="o">=</span> <span class="n">idcs</span><span class="p">[</span><span class="n">idcs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
@@ -670,12 +953,25 @@
     <span class="k">return</span> <span class="n">idcs</span></div>
 
 
-<div class="viewcode-block" id="crop_binary_im"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.crop_binary_im">[docs]</a><span class="k">def</span> <span class="nf">crop_binary_im</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="crop_binary_im"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.crop_binary_im">[docs]</a><span class="k">def</span> <span class="nf">crop_binary_im</span><span class="p">(</span><span class="n">I</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Crops a binary image to the smallest bounding box containing all the blobs</span>
-<span class="sd">    in the image.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Crops a binary image to the smallest bounding box containing all the &quot;on&quot;</span>
+<span class="sd">    pixels in the image.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image to crop.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Icrop : np.array</span>
+<span class="sd">        The cropped binary image.</span>
+<span class="sd">    pads : list</span>
+<span class="sd">        Four element list containing the number of pixels that were cropped</span>
+<span class="sd">        from the [left, top, right, bottom] of I.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">I</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">uly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">ulx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -688,8 +984,27 @@
     <span class="k">return</span> <span class="n">Icrop</span><span class="p">,</span> <span class="n">pads</span></div>
 
 
-<span class="k">def</span> <span class="nf">crop_binary_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">npad</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="crop_binary_coords"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.crop_binary_coords">[docs]</a><span class="k">def</span> <span class="nf">crop_binary_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">npad</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Crops a set of (row, col) coordinates (e.g. blob indices) to the smallest</span>
+<span class="sd">    possible array.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coords : np.array</span>
+<span class="sd">        N x 2 array. First column are rows, second are columns of pixel coordinates.</span>
+<span class="sd">    npad : int, optional</span>
+<span class="sd">        Number of pixels to pad the cropped array by. The default is 0.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Image of the cropped coordinates, plus padding if desired.</span>
+<span class="sd">    pads : list</span>
+<span class="sd">        Number of pixels in [left, top, right, bottom] direction that were</span>
+<span class="sd">        cropped.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Coords are of format [row, col]</span>
 
     <span class="n">uly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">npad</span>
@@ -701,11 +1016,29 @@
     <span class="n">I</span><span class="p">[</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">uly</span><span class="p">,</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">ulx</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">pads</span> <span class="o">=</span> <span class="p">[</span><span class="n">ulx</span><span class="p">,</span> <span class="n">uly</span><span class="p">,</span> <span class="n">lrx</span><span class="p">,</span> <span class="n">lry</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">I</span><span class="p">,</span> <span class="n">pads</span>
+    <span class="k">return</span> <span class="n">I</span><span class="p">,</span> <span class="n">pads</span></div>
 
 
-<span class="k">def</span> <span class="nf">fill_holes</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">maxholesize</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="fill_holes"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.fill_holes">[docs]</a><span class="k">def</span> <span class="nf">fill_holes</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">maxholesize</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fills holes up to a specified size in a binary image. The boundary pixels</span>
+<span class="sd">    of the image are turned off before identifying holes so that holes created </span>
+<span class="sd">    by the edge of the image are not considered holes.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image.</span>
+<span class="sd">    maxholesize : int, optional</span>
+<span class="sd">        The maximum allowed hole size in pixels. The default is 0.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        The holes-filled image.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">maxholesize</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -732,25 +1065,36 @@
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keepidcs</span><span class="p">:</span>
             <span class="n">I</span><span class="p">[</span><span class="n">rp</span><span class="p">[</span><span class="s1">&#39;coords&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span><span class="n">rp</span><span class="p">[</span><span class="s1">&#39;coords&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">][:,</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
 
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
 
 
-<div class="viewcode-block" id="im_connectivity"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.im_connectivity">[docs]</a><span class="k">def</span> <span class="nf">im_connectivity</span><span class="p">(</span><span class="n">im</span><span class="p">):</span>
+<div class="viewcode-block" id="im_connectivity"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.im_connectivity">[docs]</a><span class="k">def</span> <span class="nf">im_connectivity</span><span class="p">(</span><span class="n">I</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns an image of 8-connectivity for an input image of all pixels in a</span>
 <span class="sd">    binary image.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Iret : np.array</span>
+<span class="sd">        Image of 8-connectivity count for each pixel in the input image.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Fix input</span>
-    <span class="n">im</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">im</span><span class="p">[</span><span class="n">im</span><span class="o">!=</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">im</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">I</span><span class="p">[</span><span class="n">I</span><span class="o">!=</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
 
     <span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
                        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
                        <span class="p">[</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
 
     <span class="n">src_depth</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="n">filtered</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">filter2D</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">src_depth</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="n">filtered</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">filter2D</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">src_depth</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
     <span class="n">Iret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">filtered</span><span class="p">),</span> <span class="n">dtype</span> <span class="o">=</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span>
     <span class="n">Iret</span><span class="p">[</span><span class="n">filtered</span><span class="o">&gt;</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered</span><span class="p">[</span><span class="n">filtered</span><span class="o">&gt;</span><span class="mi">10</span><span class="p">]</span><span class="o">-</span><span class="mi">10</span>
     <span class="k">return</span> <span class="n">Iret</span></div>
@@ -764,8 +1108,25 @@
 <span class="sd">    higher-res image. E.g. set &#39;thresh&#39; to zero if you want the output image</span>
 <span class="sd">    to be &quot;on&quot; everywhere at least a single pixel is &quot;on&quot; in the original</span>
 <span class="sd">    image.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image to downsample.</span>
+<span class="sd">    newsize : tuple</span>
+<span class="sd">        Two entry tuple (nrows, ncols) specifying the desired shape of the </span>
+<span class="sd">        image.</span>
+<span class="sd">    thresh : float, optional</span>
+<span class="sd">        The fraction of filled area that downsampled pixels must have to </span>
+<span class="sd">        consider them on. Setting to 0 is the equialent of &quot;all touched&quot;. </span>
+<span class="sd">        The default is 0.05.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Iout : np.array</span>
+<span class="sd">        The downsampled image.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get locations of all smaller pixels</span>
     <span class="n">row</span><span class="p">,</span><span class="n">col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">I</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span>
 
@@ -791,34 +1152,54 @@
     <span class="k">return</span> <span class="n">Iout</span></div>
 
 
-<div class="viewcode-block" id="skel_endpoints"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.skel_endpoints">[docs]</a><span class="k">def</span> <span class="nf">skel_endpoints</span><span class="p">(</span><span class="n">skel</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    For a given input skeleton image/array, returns the x,y coordinates of</span>
-<span class="sd">    the endpoints (eps).</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="skel_endpoints"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.skel_endpoints">[docs]</a><span class="k">def</span> <span class="nf">skel_endpoints</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds all the endpoints of a skeleton.</span>
 
-    <span class="n">Ic</span> <span class="o">=</span> <span class="n">im_connectivity</span><span class="p">(</span><span class="n">skel</span><span class="p">)</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Iskel : np.array</span>
+<span class="sd">        Binary skeleton image.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eps : np.array</span>
+<span class="sd">        Skeleton endpoint positions in (row, col) format.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Ic</span> <span class="o">=</span> <span class="n">im_connectivity</span><span class="p">(</span><span class="n">Iskel</span><span class="p">)</span>
     <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ic</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">eps</span></div>
 
 
 <div class="viewcode-block" id="skel_branchpoints"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.skel_branchpoints">[docs]</a><span class="k">def</span> <span class="nf">skel_branchpoints</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    For a given input skeleton image/array, returns the x,y coordinates of the</span>
-<span class="sd">    branchpoints.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds the branchpoints in a skeletonized image. Branchpoints are not simply</span>
+<span class="sd">    those with more than two neighbors; they are identified in a way that </span>
+<span class="sd">    minimizes the number of branchpoints required to resolve the skeleton</span>
+<span class="sd">    fully with the fewest number of branchpoints.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Iskel : np.array</span>
+<span class="sd">        Skeletonized image.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Ibps : np.array.</span>
+<span class="sd">        Binary image of shape Iskel where only branchpoints are on.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Ibps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">(</span><span class="n">im_connectivity</span><span class="p">(</span><span class="n">Iskel</span><span class="p">))</span>
 
     <span class="c1"># Initial branchpoints are defined by pixels with conn &gt; 2</span>
     <span class="n">Ibps</span><span class="p">[</span><span class="n">Ibps</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">Ibps</span><span class="p">[</span><span class="n">Ibps</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
-<span class="c1">#    Ibps_O = np.copy(Ibps)</span>
-
     <span class="c1"># Filter branchpoints using convolution kernel that results in a unique</span>
     <span class="c1"># value for each possible configuration</span>
-
     <span class="c1"># Create kernel</span>
     <span class="n">kern</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
 
@@ -991,36 +1372,27 @@
     <span class="n">Irm_flat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">Iconv</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">rmvals</span><span class="p">))</span>
     <span class="n">rmy</span><span class="p">,</span> <span class="n">rmx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Irm_flat</span><span class="o">==</span><span class="mi">1</span><span class="p">),</span> <span class="n">Iconv</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">Ibps</span><span class="p">[</span><span class="n">rmy</span><span class="p">,</span> <span class="n">rmx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-
-
-<span class="c1">#    plt.close(&#39;all&#39;)</span>
-<span class="c1">#    rgh.imshowpair(Iskel,Ibps)</span>
-<span class="c1">#    idcs = np.where(rp[&#39;area&#39;]&gt;2)</span>
-<span class="c1">#    for idx in range(0,len(rp[&#39;area&#39;])):</span>
-<span class="c1">#        plt.scatter(rp[&#39;coords&#39;][idcs[0][idx]][:,1],rp[&#39;coords&#39;][idcs[0][idx]][:,0])</span>
-
-
-<span class="c1">#    Iremove = np.zeros(np.shape(Ibps), dtype=&#39;uint8&#39;)</span>
-<span class="c1">#    src_depth = -1</span>
-<span class="c1">#    for caseno in np.arange(1,9):</span>
-<span class="c1">#        kern = rgh.bp_kernels(caseno)</span>
-<span class="c1">#        filtered = cv2.filter2D(Ibps,src_depth,kern)</span>
-<span class="c1">##        print(sum(sum(filtered)))</span>
-<span class="c1">#        Iremove[np.uint8(filtered)&gt;11] = 1</span>
-<span class="c1">#</span>
-<span class="c1">#    Ibps[Iremove &gt; 0] = 0</span>
-<span class="c1">#    bps = np.where(Ibps&gt;0)</span>
-
+    
     <span class="k">return</span> <span class="n">Ibps</span></div>
 
 
 <div class="viewcode-block" id="bp_kernels"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.bp_kernels">[docs]</a><span class="k">def</span> <span class="nf">bp_kernels</span><span class="p">(</span><span class="n">caseno</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides kernels for convolving with branchpoints image to remove special</span>
 <span class="sd">    cases (where three branchpoints make an &quot;L&quot; shape). There are 8 possible</span>
-<span class="sd">    orientations (or caseno&#39;s).</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    orientations (caseno&#39;s).</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    caseno : int</span>
+<span class="sd">         Identifier for specific kernel cases. Can be 1-8.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    kernel : np.array</span>
+<span class="sd">        3x3 kernel corresponding to the caseno.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
     <span class="n">kernel</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="k">if</span> <span class="n">caseno</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1040,11 +1412,12 @@
     <span class="k">elif</span> <span class="n">caseno</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
         <span class="n">kernel</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">kernel</span><span class="p">,(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)))</span></div>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">kernel</span><span class="p">,(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">kernel</span></div>
 
 
 <div class="viewcode-block" id="skel_kernels"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.skel_kernels">[docs]</a><span class="k">def</span> <span class="nf">skel_kernels</span><span class="p">(</span><span class="n">caseno</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides kernels for convolving with skeleton image to remove the following case:</span>
 
 <span class="sd">    0 0 0</span>
@@ -1052,9 +1425,19 @@
 <span class="sd">    0 1 0</span>
 
 <span class="sd">    and its rotations. The center pixel would be removed as doing so</span>
-<span class="sd">    does not break connectivity of the skeleton.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    does not break connectivity of the skeleton.  </span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    caseno : int</span>
+<span class="sd">         Identifier for specific kernel cases. Can be 1-4.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    kernel : np.array</span>
+<span class="sd">        3x3 kernel corresponding to the caseno.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
     <span class="n">kernel</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="c1"># &quot;T&quot; cases</span>
@@ -1067,33 +1450,49 @@
     <span class="k">elif</span> <span class="n">caseno</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> <span class="c1"># left</span>
         <span class="n">kernel</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">kernel</span><span class="p">,(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)))</span></div>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">kernel</span><span class="p">,(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)))</span>
+    
+    <span class="k">return</span> <span class="n">kernel</span></div>
 
 
-<span class="k">def</span> <span class="nf">skel_pixel_curvature</span><span class="p">(</span><span class="n">Iskel</span><span class="p">,</span> <span class="n">nwalk</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
+<div class="viewcode-block" id="skel_pixel_curvature"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.skel_pixel_curvature">[docs]</a><span class="k">def</span> <span class="nf">skel_pixel_curvature</span><span class="p">(</span><span class="n">Iskel</span><span class="p">,</span> <span class="n">nwalk</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides an estimate of the curvature at most pixels within a skeleton image. </span>
+<span class="sd">    Not all pixels are considered; some boundary pixels (i.e. those</span>
+<span class="sd">    near the end of the skeleton) will not be computed. The more pruned and</span>
+<span class="sd">    thinned the input skeleton, the less likely that any strange values will</span>
+<span class="sd">    be returned. This code was written so that strange cases are merely</span>
+<span class="sd">    skipped.</span>
+<span class="sd">    </span>
+<span class="sd">    Given an input skeleton image, the code looks at each pixel and fits a</span>
+<span class="sd">    trendline through npix pixels &quot;upstream&quot; and &quot;downstream&quot; of the pixel in</span>
+<span class="sd">    question. Scale is therefore set by npixels; larger will reduce</span>
+<span class="sd">    variability in the curvature estimates.</span>
+<span class="sd">    </span>
+<span class="sd">    INPUTS:      Iskel - binary image of skeleton whose pixels you want</span>
+<span class="sd">                          curvature values</span>
+<span class="sd">    </span>
+<span class="sd">    OUTPUTS:         I - image of skeleton with curvature values at pixels</span>
 
-<span class="c1"># Takes an input skeleton and provides an estimate of the curvature at each</span>
-<span class="c1"># pixel. Not all pixels are considered; some boundary pixels (i.e. those</span>
-<span class="c1"># near the end of the skeleton) will not be computed. The more pruned and</span>
-<span class="c1"># thinned the input skeleton, the less likely that any strange values will</span>
-<span class="c1"># be returned. This code was written so that strange cases are merely</span>
-<span class="c1"># skipped.</span>
-<span class="c1">#</span>
-<span class="c1"># Given an input skeleton image, the code looks at each pixel and fits a</span>
-<span class="c1"># trendline through npix pixels &quot;upstream&quot; and &quot;downstream&quot; of the pixel in</span>
-<span class="c1"># question. Scale is therefore set by npixels; larger will reduce</span>
-<span class="c1"># variability in the curvature estimates.</span>
-<span class="c1">#</span>
-<span class="c1"># INPUTS:      Iskel - binary image of skeleton whose pixels you want</span>
-<span class="c1">#                      curvature values</span>
-<span class="c1">#</span>
-<span class="c1"># OUTPUTS:         I - image of skeleton with curvature values at pixels</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Iskel : np.array</span>
+<span class="sd">        Binary skeleton image to compute curvatures.</span>
+<span class="sd">    nwalk : int, optional</span>
+<span class="sd">        Number of pixels to walk away, in each direction, to define the </span>
+<span class="sd">        curve to compute a pixel&#39;s curvature. Higher results in smoother</span>
+<span class="sd">        curvature values. The default is 4.</span>
 
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Image wherein pixel values represent the curvature of the skeleton.</span>
 
-    <span class="c1"># Pad the image to avoid boundary problems</span>
-    <span class="c1"># NOT DONE HERE</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1">## TODO: Pad the image to avoid boundary problems</span>
+    
     <span class="c1"># Get coordinates of skeleton pixels</span>
     <span class="n">skelpix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">Iskel</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">py</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">tolist</span><span class="p">(</span><span class="n">skelpix</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
@@ -1105,10 +1504,6 @@
 
     <span class="c1"># Loop through each pixel to compute its curvature</span>
     <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">px</span><span class="p">,</span><span class="n">py</span><span class="p">):</span>
-
-<span class="c1">#        j = 500</span>
-<span class="c1">#        x = px[j]</span>
-<span class="c1">#        y = py[j]</span>
 
         <span class="n">nvals</span> <span class="o">=</span> <span class="n">neighbor_vals</span><span class="p">(</span><span class="n">Iskel</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
@@ -1256,13 +1651,14 @@
         <span class="c1"># Store the curvature value</span>
         <span class="n">I</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">det</span><span class="p">,</span><span class="n">dot</span><span class="p">)</span><span class="o">*</span><span class="mi">360</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">I</span>
+    <span class="k">return</span> <span class="n">I</span></div>
 
 
 <div class="viewcode-block" id="hand_clean"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.hand_clean">[docs]</a><span class="k">def</span> <span class="nf">hand_clean</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;erase&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allows user to hand-draw regions of interest on a binary mask that can</span>
-<span class="sd">    either be filled (set to True) or erased (set to False).</span>
+<span class="sd">    either be filled (set to True) or erased (set to False). Only one polygon</span>
+<span class="sd">    can be drawn per call.</span>
 
 <span class="sd">    Interact with plot via the following:</span>
 <span class="sd">        left-click: save a vertex of the polygon</span>
@@ -1270,8 +1666,24 @@
 <span class="sd">        enter key: stop recording points</span>
 
 <span class="sd">    Possible actions are &#39;erase&#39; (default) and &#39;fill&#39;.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Requires matplotlib and Python Image Library (PIL), but they are imported</span>
+<span class="sd">    here so that this function can be imported independently of the script.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        Binary image to fill or erase with hand-drawn polygons.</span>
+<span class="sd">    action : str, optional</span>
+<span class="sd">        If ==&#39;fill&#39;, will fill the drawn region. If ==&#39;erase&#39;, will erase the</span>
+<span class="sd">        drawn region. The default is &#39;erase&#39;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    I : np.array</span>
+<span class="sd">        The image with the hand-drawn polygon either filled or erased.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 
     <span class="k">def</span> <span class="nf">make_mask</span><span class="p">(</span><span class="n">Ishape</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
