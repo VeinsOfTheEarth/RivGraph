@@ -120,20 +120,20 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props):
 
 def surrounding_link_properties(links, nodes, Imask, islands, Iislands, pixlen, pixarea):
 
-    obj = r
-    links = obj.links
-    nodes = obj.nodes
-    Imask = obj.Imask
-    pixlen = obj.pixlen
-    pixarea = obj.pixarea
-    gt = obj.gt
-    crs = obj.crs
-    props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length']
-    islands, Iislands = get_island_properties(obj.Imask, pixlen, pixarea, obj.crs, obj.gt, props)
+    # obj = r
+    # links = obj.links
+    # nodes = obj.nodes
+    # Imask = obj.Imask
+    # pixlen = obj.pixlen
+    # pixarea = obj.pixarea
+    # gt = obj.gt
+    # crs = obj.crs
+    # props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length']
+    # islands, Iislands = get_island_properties(obj.Imask, pixlen, pixarea, obj.crs, obj.gt, props)
     # islands.to_file(r"C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_islands.shp")
     # np.save(r'C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_Iislands.npy', Iislands)
-    islands = gpd.read_file(r"C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_islands.shp")
-    Iislands = np.load(r'C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_Iislands.npy')
+    # islands = gpd.read_file(r"C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_islands.shp")
+    # Iislands = np.load(r'C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_Iislands.npy')
 
     # Rasterize the links and nodes
     Iln = np.zeros(Imask.shape, dtype=np.int)
