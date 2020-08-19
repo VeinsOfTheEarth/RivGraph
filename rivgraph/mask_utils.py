@@ -176,8 +176,8 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands, pixlen, 
     # max_area = np.mean(links['wid_adj'])**2 * 20  
     
     for idx in range(len(islands)):
-        print(idx)
-        idx=25
+        # print(idx)
+        # idx=25
         
         # Identify the region associated with the island
         i_id = islands.id.values[idx]
