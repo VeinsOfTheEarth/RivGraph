@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-geo_utils
-=========
-
-Created on Tue Sep 11 11:24:42 2018
-
-@author: Jon
-
 Utilities for reading, writing, managing, processing, manipulating, etc.
 geographic data including tiffs, vrts, shapefiles, etc.
 
@@ -18,10 +11,7 @@ import gdal
 import numpy as np
 from pyproj import Transformer
 import warnings
-import os
-import sys
-sys.path.append(os.path.realpath(os.path.dirname(__file__)))
-import io_utils as io
+import rivgraph.io_utils as io
 
 
 def get_unit(crs):
@@ -39,6 +29,7 @@ def get_unit(crs):
     ----------
     unit : str
         The unit of the provided epsg code.
+
     """
     # The to_proj4() function generates a warning.
     warnings.simplefilter(action='ignore', category=UserWarning)

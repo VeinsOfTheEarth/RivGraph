@@ -10,9 +10,24 @@ import rivgraph.im_utils as iu
 import rivgraph.geo_utils as gu
 from scipy.ndimage.morphology import distance_transform_edt
 from shapely.geometry import Polygon
+from shapely.ops import cascaded_union
 from scipy import stats
 import rivgraph.im_utils as im
 import networkx as nx
+
+
+def pixagon(c_cent, r_cent, pixlen):
+    """
+    Returns a shapely polygon 
+    of a provided center coordinate given the pixel resolution (pixlen).
+    """
+    halflen = pixlen/2
+    c_corner = np.array([c_cent-halflen, c_cent+halflen, c_cent+halflen, c_cent-halflen, c_cent-halflen])
+    r_corner = np.array([r_cent+halflen, r_cent+halflen, r_cent-halflen, r_cent-halflen, r_cent+halflen])
+    
+    pixgon = Polygon(zip(c_corner, r_corner))
+    
+    return pixgon
 
 
 def get_island_properties(Imask, pixlen, pixarea, crs, gt, props):
@@ -39,12 +54,23 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props):
     # Also get ids to match the labeled image
     pgons = []
     ids = []
-    for p in rp_islands['perimeter']:
+    for ip, p in enumerate(rp_islands['perimeter']):
+        ids.append(Ilabeled[p[0][0], p[0][1]]) # Store the index
+
         p = np.vstack((p, p[0])) # Close the polygon
         # Adjust for the single-pixel padding we added to the image
         cr = gu.xy_to_coords(p[:,1] - 1, p[:,0] - 1, gt)
-        pgons.append(Polygon(zip(cr[0], cr[1])))
-        ids.append(Ilabeled[p[0][0], p[0][1]])
+        
+        # Special cases: where the island is two pixels or less, we use the
+        # corner coordinates rather than the center coordinates to define 
+        # the polygon.
+        if len(cr[0]) <= 2: 
+            pixgon = [pixagon(cc, rc, pixlen) for cc, rc, in zip(cr[0], cr[1])]
+            if len(pixgon) > 1:
+                pixgon = cascaded_union(pixgon)
+            pgons.append(pixgon)
+        else:            
+            pgons.append(Polygon(zip(cr[0], cr[1])))
 
     # Do maximum width if requested
     if do_maxwidth:
@@ -64,7 +90,11 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props):
         rp_islands['perim_len'] = rp_islands['perim_len'] * pixlen
     if 'convex_area' in props:
         rp_islands['convex_area'] = rp_islands['convex_area'] * pixarea
-                    
+        
+    # Need to change 'area' key as it's a function in geopandas
+    if 'area' in  rp_islands:
+        rp_islands['Area'] = rp_islands.pop('area')
+
     # Create islands geodataframe
     gdf_dict = {k:rp_islands[k] for k in rp_islands if k not in ['coords', 'perimeter', 'centroid']}
     gdf_dict['geometry'] = pgons
@@ -89,18 +119,21 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props):
 
 
 def surrounding_link_properties(links, nodes, Imask, islands, Iislands, pixlen, pixarea):
-    
-    # obj = d
-    # links = obj.links
-    # nodes = obj.nodes
-    # Imask = obj.Imask
-    # islands, Iislands = obj.get_islands(props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length'])   
-    # # islands.to_file(r"C:\Users\Jon\Desktop\Research\John Shaw\Deltas\Mackenzie\Mackenzie_islands.shp")
-    # # np.save(r"C:\Users\Jon\Desktop\Research\John Shaw\Deltas\Mackenzie\Mackenzie_islands.npy", Iislands)
-    # # islands = gpd.read_file(r"C:\Users\Jon\Desktop\Research\John Shaw\Deltas\Mackenzie\Mackenzie_islands.shp")
-    # # Iislands = np.load(r"C:\Users\Jon\Desktop\Research\John Shaw\Deltas\Mackenzie\Mackenzie_islands.npy")
-    # pixlen = obj.pixlen
-    # pixarea = obj.pixarea
+
+    obj = r
+    links = obj.links
+    nodes = obj.nodes
+    Imask = obj.Imask
+    pixlen = obj.pixlen
+    pixarea = obj.pixarea
+    gt = obj.gt
+    crs = obj.crs
+    props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length']
+    islands, Iislands = get_island_properties(obj.Imask, pixlen, pixarea, obj.crs, obj.gt, props)
+    # islands.to_file(r"C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_islands.shp")
+    # np.save(r'C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_Iislands.npy', Iislands)
+    islands = gpd.read_file(r"C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_islands.shp")
+    Iislands = np.load(r'C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_Iislands.npy')
 
     # Rasterize the links and nodes
     Iln = np.zeros(Imask.shape, dtype=np.int)
@@ -144,7 +177,7 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands, pixlen, 
     
     for idx in range(len(islands)):
         print(idx)
-        # idx=186
+        idx=25
         
         # Identify the region associated with the island
         i_id = islands.id.values[idx]

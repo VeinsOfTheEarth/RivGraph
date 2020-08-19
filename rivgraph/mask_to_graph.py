@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-mask_to_graph.py
-=============
 Functions for converting a binary channel mask to a graphical representation.
-
-Created on Tue Apr 10 14:29:01 2018
 """
 
 import cv2
@@ -18,28 +14,97 @@ from rivgraph.ordered_set import OrderedSet
 
 def skel_to_graph(Iskel):
     """
-    Breaks a skeletonized image into links and nodes; exports if desired.
-    """
+    Resolves a skeleton into its consitutent links and nodes.   
+    This function finds a starting point to walk along a skeleton, then begins
+    the walk. Rules are in place to ensure the network is fully resolved. One
+    of the key algorithms called by this function involves the identfication of
+    branchpoints in a way that eliminates unnecessary ones to create a parsimonious
+    network. Rules are baked in for how to walk along the skeleton in cases 
+    where multiple branchpoints are clustered or there are multiple possible
+    links to walk along.
+    
+    Note that some minor adjustments to the skeleton may be made in order to 
+    reduce the complexity of the network. For example, in the case of a "+" 
+    with a missing center pixel in the skeleton, this function will add the 
+    pixel to the center to enable the use of a single branchpoint as opposed to 
+    four.
+    
+    The takeaway is that there is no guarantee that the input skeleton will
+    be perfectly preserved when network-ifying. One possible workaround, if 
+    perfect preservation is required, is to resample the skeleton to double the
+    resolution.
 
+    Parameters
+    ----------
+    Iskel : np.ndarray
+        Binary image of a skeleton.
+
+    Returns
+    -------
+    links : dict
+        Links of the network with four properties: 
+            'id' - a list of unique ids for each link in the network
+            'idx' - a list containing the pixel indices within Iskel that 
+                    defines the link. These are ordered.
+            'conn' - a list of 2-element lists containing the node ids that
+                     the link is connected to.
+            'n_networks' - the number of disconnected networks found in the
+                           skeleton
+        
+    nodes : dict
+        Nodes of the network with four properties:
+            'id' - a list of unique ids for each node in the network
+            'idx' - the index within Iskel of the node location
+            'conn' - a list of lists containing the link ids connected to this
+                     node
+
+    """
+    
     def check_startpoint(spidx, Iskel):
         """
-        Returns True if a skeleton pixel's first neighbor is not a branchpoint (i.e.
-        the start pixel is valid), else returns False.
-        """
+        Returns True if a skeleton pixel's first neighbor is not a branchpoint 
+        (i.e. the start pixel is valid for a walk), else returns False.
+
+
+        Parameters
+        ----------
+        spidx : int
+            Index within Iskel of the point to check.
+        Iskel : np.array
+            Image of skeletonized mask.
+
+        Returns
+        -------
+        chk_sp : bool
+            True if the startpoint is valid; else False.
+
+        """        
         neighs = walk.walkable_neighbors([spidx], Iskel)
         isbp = walk.is_bp(neighs.pop(), Iskel)
 
         if isbp == 0:
-            return True
+            chk_sp = True
         else:
-            return False
+            chk_sp = False
+            
+        return chk_sp
 
 
     def find_starting_pixels(Iskel):
         """
-        Finds an endpoint pixel to begin network resolution
-        """
+        Finds an endpoint pixel to begin walking to resolve network.
 
+        Parameters
+        ----------
+        Iskel : np.array
+            Image of skeletonized mask.
+
+        Returns
+        -------
+        startpoints : list
+            Possible starting points for the walk.
+
+        """
         # Get skeleton connectivity
         eps = imu.skel_endpoints(Iskel)
         eps = set(np.ravel_multi_index(eps, Iskel.shape))
@@ -63,7 +128,6 @@ def skel_to_graph(Iskel):
     initial_dims = Iskel.shape
     npad = 20
     Iskel = np.pad(Iskel, npad, mode='constant', constant_values=0)
-
     dims = Iskel.shape
 
     # Find starting points of all the networks in Iskel
@@ -163,7 +227,7 @@ def skel_to_graph(Iskel):
                     # Else, shit. You've found a critical flaw in the algorithm.
                     else:
                         print('idx: {}, poss_steps: {}'.format(links['idx'][linkidx][-1], poss_steps))
-                        raise RuntimeError('Ambiguous which step to take next :(')
+                        raise RuntimeError('Ambiguous which step to take next :( Please raise issue at https://github.com/jonschwenk/RivGraph/issues.')
 
                 elif sum(isbp) == 1:
                     # If we've already accounted for this branchpoint, delete the link and halt
@@ -214,9 +278,21 @@ def skel_to_graph(Iskel):
 
 def skeletonize_mask(Imask):
     """
-    Skeletonize any input binary mask.
-    """
+    Skeletonizes an input binary image, typically a mask. Also performs some 
+    skeleton simplification by (1) removing pixels that don't alter connectivity,
+    and (2) filling small skeleton holes and reskeletonizing.
 
+    Parameters
+    ----------
+    Imask : np.array
+        Binary image to be skeletonized.
+
+    Returns
+    -------
+    Iskel : np.array
+        The skeletonization of Imask.
+
+    """
     # Create copy of mask to skeletonize
     Iskel = np.array(Imask, copy=True, dtype='bool')
 
@@ -239,8 +315,11 @@ def skeletonize_mask(Imask):
 
 def skeletonize_river_mask(I, es, padscale=2):
     """
-    Skeletonize a binary river mask. Crops mask to river extents, reflects the
-    mask at the appropriate borders, skeletonizes, then un-crops the mask.
+    Skeletonizes a binary mask of a river channel network. Differs from 
+    skeletonize mask above by using knowledge of the exit sides of the river
+    with respect to the mask (I) to avoid edge effects of skeletonization by
+    mirroring the mask at its ends, then trimming it after processing. As with
+    skeletonize_mask, skeleton simplification is performed.
 
     INPUTS:
         I - binary river mask to skeletonize
@@ -248,8 +327,27 @@ def skeletonize_river_mask(I, es, padscale=2):
              sides of the image that intersect the river. e.g. 'NS', 'EN', 'WS'
  padscale - (Optional) number of pixels to reflect I before skeletonization
                to remove edge effects of skeletonization
-    """
 
+
+    Parameters
+    ----------
+    I : np.array
+        Binary river mask to skeletonize.
+    es : str
+        A two-character string (from N, E, S, or W) that denotes which sides 
+        of the image the river intersects (upstream first) -- e.g. 'NS', 'EW', 
+        'NW', etc.
+    padscale : int, optional
+        Pad multiplier that sets the size of the padding. Multplies the blob
+        size along the axis of the image that the blob intersect to determine
+        the padding distance. The default is 2.
+
+    Returns
+    -------
+    Iskel : np.array
+        The skeletonization of I.
+
+    """
     # Crop image
     Ic, crop_pads = imu.crop_binary_im(I)
 
@@ -287,19 +385,27 @@ def skeletonize_river_mask(I, es, padscale=2):
 
 def simplify_skel(Iskel):
     """
-    This function iterates through all skeleton pixels
-    pixels that have connectivity > 2. It removes the pixel and checks if the
+    This function iterates through all skeleton pixels pixels that have 
+    connectivity > 2. It removes the pixel and checks if the
     number of blobs has changed after removal. If so, the pixel is necessary to
-    maintain connectivity. Otherwise the pixel is not retained.
-    It also adds pixels to the centers of "+" cases, as this reduces the number
+    maintain connectivity. Otherwise the pixel is not retained. It also adds 
+    pixels to the centers of "+" cases, as this reduces the number
     of branchpoints from 4 to 1.
+
+    Parameters
+    ----------
+    Iskel : np.array
+        Image of the skeleton to simplify.
+
+    Returns
+    -------
+    Iskel : np.array
+        The simplified skeleton.
+
     """
-
     Iskel = np.array(Iskel, dtype=np.uint8)
-
     Ic = imu.im_connectivity(Iskel)
     ypix, xpix = np.where(Ic > 2) # Get all pixels with connectivity > 2
-
 
     for y, x in zip(ypix, xpix):
         nv = imu.neighbor_vals(Iskel, x, y)
@@ -333,16 +439,28 @@ def pad_river_im(I, es, pm=2):
     rectangle. This simplifies skeletonization and interpretation in cases
     where the channel is complex near the boundaries.
 
-    INPUTS:
-        I - binary river mask to pad
-        es - NSEW "exit sides" corresponding to the upstream and downstream
-             sides of the image that intersect the river. e.g. 'NS', 'EN', 'WS'
-        pm - (Optional) "pad multiplier" that sets the size of the padding.
-    OUTPUTS:
-        Ip - padded version of I
-        pads - [n,s,e,w] padding values (number of pixels)
-    """
+    Parameters
+    ----------
+    I : np.array
+        Binary image to pad; typically a river channel network.
+    es : str
+        A two-character string (from N, E, S, or W) that denotes which sides 
+        of the image the river intersects (upstream first) -- e.g. 'NS', 'EW', 
+        'NW', etc.
+    pm : int, optional
+        Pad multiplier that sets the size of the padding. Multplies the blob
+        size along the axis of the image that the blob intersect to determine
+        the padding distance. The default is 2.
 
+    Returns
+    -------
+    Ip : np.array
+        The padded image..
+    pads : list
+        4 entry list containing the number of pixels padded on the [n, s, e, w]
+        edges of the image.
+
+    """
     Ip = I.copy() # so original array is not modified
     pads = [0, 0, 0, 0] # saves the number of pixels padded to each [n,s,e,w] edge
 
@@ -360,7 +478,7 @@ def pad_river_im(I, es, pm=2):
         Ip = np.concatenate((addpad, Ip))
 
     if 's' in es.lower():
-
+        
         rowidcs = np.where(Ip[-1,:]==True)[0]
         st = np.min(rowidcs)
         en = np.max(rowidcs)

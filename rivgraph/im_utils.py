@@ -2,32 +2,50 @@
 """
 im_utils
 ========
+Almost all the functions that manipulate images within this file require that
+the images be binary.
 
-Created on Mon Sep 10 10:21:35 2018
-
-@author: Jon
+Many of these functions are wrappers around functionality found in skimage or
+opencv that either add additonal functionality or provide convenience. 
 """
 import cv2
 import numpy as np
 from scipy import ndimage as nd
-import geopandas as gpd
-from shapely.geometry import Polygon
 from skimage import morphology, measure, util
-import rivgraph.geo_utils as gu
+# import geopandas as gpd
+# from shapely.geometry import Polygon
+# import rivgraph.geo_utils as gu
 
+## TODO: add checks for inputs to ensure proper types
 
 def get_array(idx, I, size):
+    """
+    Returns a sub-image of an input image, centered at a specified index within
+    the input image and a specified size.
+
+    Parameters
+    ----------
+    idx : int
+        Index within I on which to center the returned array. Can also be a
+        [row, col] list.
+    I : np.array
+        Image to pull from.
+    size : list
+        Two-entry list specifying the number of [rows, cols] to return from
+        I centered at idx.
+
+    Returns
+    -------
+    subimage : np.array
+        The sub-image of I, centered at idx with shape specified by size.
+    row : int
+        The first row within I that the sub-image is drawn from.
+    col : int
+        The first column within I that the sub-image is drawn from.
 
     """
-    Size is (nrows, ncols) corresponding to the number of rows, columns to return with
-    idx at the center. idx can be flattend index or [row, col]
-
-    ## Should add check for border cases so we don't query to raster
-    ## beyond its bounds
-
-    """
-
-    dims = I.shape
+    ## TODO: Should add check for border cases so we don't query to raster 
+    # beyond its bounds. Or add error handling for those cases.
 
     try:
         lidx = len(idx)
@@ -35,7 +53,7 @@ def get_array(idx, I, size):
         lidx = len([idx])
 
     if lidx == 1:
-        row, col = np.unravel_index(idx, dims)
+        row, col = np.unravel_index(idx, I.shape)
 
     else:
         row = idx[0]
@@ -45,19 +63,37 @@ def get_array(idx, I, size):
     row = int(row - (size[0]-1)/2)
     col = int(col - (size[1]-1)/2)
 
-    array = I[row:row+size[0], col:col+size[1]].copy()
+    subimage = I[row:row+size[0], col:col+size[1]].copy()
 
-    return array, row, col
+    return subimage, row, col
 
 
 def neighbors_flat(idx, imflat, ncols, filt='nonzero'):
-    '''
-    Given a flattened image (np.ravel) and an index, returns all the
-    neighboring indices and their values. Uses native python datatypes.
-    Set filt='nonzero' for returning only nonzero indices; otherwise set
-    filt='none' to return all indices and values.
-    '''
+    """
+    Returns all 8-neighbor pixel indices and values from an index of a 
+    flattened image. Can filter out zero values with the filt keyword. 
 
+    Parameters
+    ----------
+    idx : int
+        Index within imflat to return neighbors.
+    imflat : np.array
+        Flattened image (using np.ravel).
+    ncols : int
+        Number of columns in the un-flattened image.
+    filt : str, optional
+        If 'nonzero', only nonzero indices and values are returned. Else all
+        neighbors are returned.
+
+    Returns
+    -------
+    idcs : np.array
+        Indices within the flattened image of neighboring pixels.
+    vals : np.array
+        Values within the flattened image of neighboring pixels; matches idcs.
+
+    """
+    
     if isinstance(idx, np.generic):
         idx = idx.item()
     if isinstance(ncols, np.generic):
@@ -65,15 +101,9 @@ def neighbors_flat(idx, imflat, ncols, filt='nonzero'):
 
     dy = ncols
     dx = 1
-
-    possneighs = np.array([idx-dy-dx,
-                  idx-dy,
-                  idx-dy+dx,
-                  idx-dx,
-                  idx+dx,
-                  idx+dy-dx,
-                  idx+dy,
-                  idx+dy+dx])
+    possneighs = np.array([idx-dy-dx, idx-dy, idx-dy+dx,
+                           idx-dx,            idx+dx,
+                           idx+dy-dx, idx+dy, idx+dy+dx])
 
     # For handling edge cases
     if idx % ncols == 0: # first column of image
@@ -116,10 +146,34 @@ def neighbors_flat(idx, imflat, ncols, filt='nonzero'):
 
 def reglobalize_flat_idx(idxlist, idxlistdims, row_offset, col_offset, globaldims):
     """
+    Takes a list of indices from a subimage and returns their indices within
+    their parent image.
+    
     If idxlist is (x,y), then idxlistdims should be (dim_x, dim_y), etc.
-    """
-    convertflag = 0
 
+    Parameters
+    ----------
+    idxlist : np.array or list or set
+        List-like array of indices within the subimage.
+    idxlistdims : tuple
+        (nrows, ncols) of the subimage.
+    row_offset : int
+        The row in the parent image corresponding to the lowest row in the 
+        subimage.
+    col_offset : int
+        The column in the parent image corresponding to the left-most column
+        in the subimage.
+    globaldims : tuple
+        (nrows, ncols) of the parent image.
+
+    Returns
+    -------
+    idcsflat : list
+        The indices in indexlist in terms of the parent image.
+
+    """    
+    # Handle input
+    convertflag = 0
     if type(idxlist) is int:
         idxlist = [idxlist]
         convertflag = 'int'
@@ -142,12 +196,21 @@ def reglobalize_flat_idx(idxlist, idxlistdims, row_offset, col_offset, globaldim
 
 
 def nfour_connectivity(I):
-
     """
     Returns an image of four-connectivity for each pixel, where the pixel value
     is the number of 4-connected neighbors.
-    """
 
+    Parameters
+    ----------
+    I : np.array
+        Binary image.
+
+    Returns
+    -------
+    Infc : np.array
+        Image of 4-connectivity for each pixel. Same shape as I.
+
+    """
     Ir = np.ravel(I)
     edgeidcs = edge_coords(I.shape, dtype='flat')
 
@@ -168,10 +231,23 @@ def nfour_connectivity(I):
 
 def four_conn(idcs, I):
     """
-    Counts the number of 4-connected neighbors for a given flat index in I.
+    Returns the number of 4-connected neighbors for a given flat index in I.
     idcs must be a list, even if a single value.
-    """
 
+
+    Parameters
+    ----------
+    idcs : list
+        Indices within I to find 4-connected neighbors.
+    I : np.array
+        Binary image.
+
+    Returns
+    -------
+    fourconn : list
+        Number of four-connected neighbors for each index in idcs.
+    """
+    
     Iflat = np.ravel(np.array(I, dtype=np.bool))
 
     fourconn = []
@@ -186,7 +262,21 @@ def four_conn(idcs, I):
 def edge_coords(sizeI, dtype='flat'):
     """
     Given an image size, returns the coordinates of all the edge pixels (4 edges).
-    Can return as indices (dtype=flat) or x,y coordinates (dtyep='xy').
+    Can return as indices (dtype=flat) or x,y coordinates (dtype='xy').
+
+    Parameters
+    ----------
+    sizeI : tuple
+        Shape of the image.
+    dtype : str, optional
+        If 'flat', returns output as indices within I. If 'xy', returns (col, row)
+        of edge pixels.
+    Returns
+    -------
+    edgepts : set or list
+        Coordinates of the edge pixels. If dtype=='flat', returns a set. If
+        dtype=='xy', returns a list of [columns, rows].
+
     """
     # xs
     x_l = np.zeros(sizeI[0], dtype=np.int64)
@@ -210,100 +300,179 @@ def edge_coords(sizeI, dtype='flat'):
     return edgepts
 
 
-def neighbor_idcs(x, y):
+def neighbor_idcs(c, r):
     """
-    Input x,y coordinates and return all the neighbor indices.
+    Returns the column, row coordinats of all eight neighbors of a given
+    column and row.
+    
+    Returns are ordered as
+    [0 1 2
+     3   4
+     5 6 7]
+
+    Parameters
+    ----------
+    c : int
+        Column.
+    r : int
+        Row.
+
+    Returns
+    -------
+    cidcs : list
+        Columns of the eight neighbors.
+    ridcs : TYPE
+        Rows of the eight neighbors.
+
     """
-    xidcs = [x-1, x, x+1, x-1, x+1, x-1, x, x+1]
-    yidcs = [y-1, y-1, y-1, y, y, y+1, y+1, y+1]
+    cidcs = [c-1, c, c+1, c-1, c+1, c-1, c, c+1]
+    ridcs = [r-1, r-1, r-1, r, r, r+1, r+1, r+1]
 
-    return xidcs, yidcs
+    return cidcs, ridcs
 
 
-def neighbor_vals(im, x, y):
+def neighbor_vals(I, c, r):
+    """
+    Returns the neighbor values in I of a specified pixel coordinate. Handles
+    edge cases.
 
+    Parameters
+    ----------
+    I : np.array
+        Image to draw values from.
+    c : int
+        Column defining pixel to find neighbor values.
+    r : int
+        Row defining pixel to find neighbor values.
+
+    Returns
+    -------
+    vals : np.array
+        A flattened array of all the neighboring pixel values.
+
+    """
     vals = np.empty((8,1))
     vals[:] = np.NaN
 
-    if x == 0:
+    if c == 0:
 
-        if y == 0:
-            vals[4] = im[y,x+1]
-            vals[6] = im[y+1,x]
-            vals[7] = im[y+1,x+1]
-        elif y == np.shape(im)[0]-1:
-            vals[1] = im[y-1,x]
-            vals[2] = im[y-1,x+1]
-            vals[4] = im[y,x+1]
+        if r == 0:
+            vals[4] = I[r,c+1]
+            vals[6] = I[r+1,c]
+            vals[7] = I[r+1,c+1]
+        elif r == np.shape(I)[0]-1:
+            vals[1] = I[r-1,c]
+            vals[2] = I[r-1,c+1]
+            vals[4] = I[r,c+1]
         else:
-            vals[1] = im[y-1,x]
-            vals[2] = im[y-1,x+1]
-            vals[4] = im[y,x+1]
-            vals[6] = im[y+1,x]
-            vals[7] = im[y+1,x+1]
+            vals[1] = I[r-1,c]
+            vals[2] = I[r-1,c+1]
+            vals[4] = I[r,c+1]
+            vals[6] = I[r+1,c]
+            vals[7] = I[r+1,c+1]
 
-    elif x == np.shape(im)[1]-1:
+    elif c == I.shape[1]-1:
 
-        if y == 0:
-            vals[3] = im[y,x-1]
-            vals[5] = im[y+1,x-1]
-            vals[6] = im[y+1,x]
-        elif y == np.shape(im)[0]-1:
-            vals[0] = im[y-1,x-1]
-            vals[1] = im[y-1,x]
-            vals[3] = im[y,x-1]
+        if r == 0:
+            vals[3] = I[r,c-1]
+            vals[5] = I[r+1,c-1]
+            vals[6] = I[r+1,c]
+        elif r == I.shape[0]-1:
+            vals[0] = I[r-1,c-1]
+            vals[1] = I[r-1,c]
+            vals[3] = I[r,c-1]
         else:
-            vals[0] = im[y-1,x-1]
-            vals[1] = im[y-1,x]
-            vals[3] = im[y,x-1]
-            vals[5] = im[y+1,x-1]
-            vals[6] = im[y+1,x]
+            vals[0] = I[r-1,c-1]
+            vals[1] = I[r-1,c]
+            vals[3] = I[r,c-1]
+            vals[5] = I[r+1,c-1]
+            vals[6] = I[r+1,c]
 
-    elif y == 0:
-        vals[3] = im[y,x-1]
-        vals[4] = im[y,x+1]
-        vals[5] = im[y+1,x-1]
-        vals[6] = im[y+1,x]
-        vals[7] = im[y+1,x+1]
+    elif r == 0:
+        vals[3] = I[r,c-1]
+        vals[4] = I[r,c+1]
+        vals[5] = I[r+1,c-1]
+        vals[6] = I[r+1,c]
+        vals[7] = I[r+1,c+1]
 
-    elif y == np.shape(im)[0]-1:
-        vals[0] = im[y-1,x-1]
-        vals[1] = im[y-1,x]
-        vals[2] = im[y-1,x+1]
-        vals[3] = im[y,x-1]
-        vals[4] = im[y,x+1]
+    elif r == I.shape[0]-1:
+        vals[0] = I[r-1,c-1]
+        vals[1] = I[r-1,c]
+        vals[2] = I[r-1,c+1]
+        vals[3] = I[r,c-1]
+        vals[4] = I[r,c+1]
 
     else:
-        vals[0] = im[y-1,x-1]
-        vals[1] = im[y-1,x]
-        vals[2] = im[y-1,x+1]
-        vals[3] = im[y,x-1]
-        vals[4] = im[y,x+1]
-        vals[5] = im[y+1,x-1]
-        vals[6] = im[y+1,x]
-        vals[7] = im[y+1,x+1]
+        vals[0] = I[r-1,c-1]
+        vals[1] = I[r-1,c]
+        vals[2] = I[r-1,c+1]
+        vals[3] = I[r,c-1]
+        vals[4] = I[r,c+1]
+        vals[5] = I[r+1,c-1]
+        vals[6] = I[r+1,c]
+        vals[7] = I[r+1,c+1]
+        
+    vals = np.ndarray.flatten(vals)
 
-    return np.ndarray.flatten(vals)
+    return vals
 
 
-def neighbor_xy(x, y, idx):
-    # Feed in x, y location and a neighbor index
-    # Return the x, y location of the neighbor
-    xs = np.array([-1, 0, 1, -1, 1 ,-1, 0, 1], dtype=np.int)
-    ys = np.array([-1, -1, -1, 0, 0 ,1, 1, 1], dtype=np.int)
+def neighbor_xy(c, r, idx):
+    """
+    Returns the coordinates of a neighbor of a pixel given the index of the
+    desired neighbor. Indices should be provided according to 
+    [0 1 2
+     3   4
+     5 6 7].
 
-    x = x + xs[idx]
-    y = y + ys[idx]
+    Parameters
+    ----------
+    c : int
+        Column of the pixel to find the neighbor.
+    r : int
+        Row of the pixel to find the neighbor.
+    idx : int
+        Index of the neighbor position.
 
-    return x, y
+    Returns
+    -------
+    c : int
+        Column of the neighbor pixel.
+    r : int
+        Row of the neighbor pixel.
+
+    """
+    cs = np.array([-1, 0, 1, -1, 1 ,-1, 0, 1], dtype=np.int)
+    rs = np.array([-1, -1, -1, 0, 0 ,1, 1, 1], dtype=np.int)
+
+    c = c + cs[idx]
+    r = r + rs[idx]
+
+    return c, r
 
 
 def remove_blobs(I, blobthresh, connectivity=2):
     """
-    Returns a binary image with blobs less than size blobthresh removed from
-    the input binary image.
-    """
+    Remove blobs of a binary image that are smaller than blobthresh. A blob is
+    simply a set of connected "on" pixels.
 
+    Parameters
+    ----------
+    I : np.array
+        Binary image to remove blobs from.
+    blobthresh : int
+        Minimum number of pixels a blob must contain for it to be kept.
+    connectivity : int, optional
+        If 1, 4-connectivity will be used to determine connected blobs. If 
+        2, 8-connectivity will be used. The default is 2. 
+
+    Returns
+    -------
+    Ic : np.array
+        Binary image with blobs filetered. Same shape as I.
+
+    """
+    
     props = ['area', 'coords']
     rp, _ = regionprops(I, props, connectivity=connectivity)
     areas = np.array(rp['area'])
@@ -319,6 +488,26 @@ def remove_blobs(I, blobthresh, connectivity=2):
 
 
 def imshowpair(I1, I2):
+    """
+    Overlays two binary images with a color scheme that shows their differences
+    and overlaps. Provides similar functionality to matlab's imshowpair. Useful
+    for quick diagnostic of differences between two binary images.
+    
+    This function will plot on current figure if it exists, else it will create
+    a new one.
+
+    Parameters
+    ----------
+    I1 : np.array
+        The first binary image.
+    I2 : np.array
+        The second binary image.
+
+    Returns
+    -------
+    None.
+
+    """
 
     from matplotlib import colors
     from matplotlib import pyplot as plt
@@ -331,33 +520,32 @@ def imshowpair(I1, I2):
     bounds=[-1,0.5,1.5,2.5,3.5]
     norm = colors.BoundaryNorm(bounds, cmap.N)
 
-    # tell imshow about color map so that only set colors are used
     plt.imshow(Ip, origin='upper', cmap=cmap, norm=norm)
-
-#    img = plt.imshow(Ip, origin='upper',
-#                        cmap=cmap, norm=norm)
-#    # make a color bar
-#    plt.colorbar(img, cmap=cmap, norm=norm, boundaries=bounds, ticks=[0, 5, 10])
-
-
-#def fill_islands(I, min_n_island_pixels=20):
-#
-#    # Invert binary image
-#    Icomp = util.invert(I)
-#
-#    # Compute region props
-#    props = ['coords','area']
-#    rp = regionprops(Icomp, props, connectivity=1)
-#    for a, c in zip(rp['area'], rp['coords']):
-#        if a < min_n_island_pixels:
-#            I[c[:,0], c[:,1]] = True
-#    return I
-
+    
 
 def largest_blobs(I, nlargest=1, action='remove', connectivity=2):
     """
-    Returns a binary image with the nlargest blobs removed from the input
-    binary image.
+    Provides filtering for the largest blobs in a binary image. Can choose to 
+    either keep or remove them.
+
+    Parameters
+    ----------
+    I : np.array
+        Binary image to filter.
+    nlargest : int, optional
+        Number of blobs to filter. The default is 1.
+    action : str, optional
+        If 'keep', will keep the nlargest blobs. If 'remove', will remove the 
+        nlargest blobs. The default is 'remove'.
+    connectivity : int, optional
+        If 1, 4-connectivity will be used to determine connected blobs. If 
+        2, 8-connectivity will be used. The default is 2. 
+
+    Returns
+    -------
+    Ic : np.array
+        The filtered image. Same shape as I.
+
     """
     props = ['area', 'coords']
     rp, _ = regionprops(I, props, connectivity=connectivity)
@@ -383,9 +571,22 @@ def largest_blobs(I, nlargest=1, action='remove', connectivity=2):
 
 def blob_idcs(I, connectivity=2):
     """
-    Returns a list where each entry contains a set of all indices within each
-    connected blob. Indices are returned as single-index coordinates, rather
-    than x,y.
+    Finds all the indices for each blob within I.
+
+    Parameters
+    ----------
+    I : np.array
+        Binary image containing blobs.
+    connectivity : int, optional
+        If 1, 4-connectivity will be used to determine connected blobs. If 
+        2, 8-connectivity will be used. The default is 2. 
+
+    Returns
+    -------
+    idcs : list
+        An n-element list of sets, where n is the number of blobs in I, and
+        each set contains the pixel indices within I of a blob.
+
     """
     props = ['coords']
     rp, _ = regionprops(I, props, connectivity=connectivity)
@@ -398,9 +599,40 @@ def blob_idcs(I, connectivity=2):
 
 
 def regionprops(I, props, connectivity=2):
+    """
+    Finds blobs within a binary image and returns requested properties of
+    each blob.
+    
+    This function was modeled after matlab's regionprops and is essentially
+    a wrapper for skimage's regionprops. Not all of skimage's available blob
+    properties are available here, but they can easily be added.
+
+    Parameters
+    ----------
+    I : np.array
+        Binary image containing blobs.
+    props : list
+        Properties to compute for each blob. Can include 'area', 'coords', 
+        'perimeter', 'centroid', 'mean', 'perimeter', 'perim_len', 'convex_area',
+        'eccentricity', 'convex_area', 'major_axis_length', 'minor_axis_length',
+        'label'.
+    connectivity : int, optional
+        If 1, 4-connectivity will be used to determine connected blobs. If 
+        2, 8-connectivity will be used. The default is 2. 
+
+    Returns
+    -------
+    out : dict
+        Keys of the dictionary correspond to the requested properties. Values
+        for each key are lists of that property, in order such that, e.g., the
+        first entry of each property's list corresponds to the same blob.
+    Ilabeled : np.array
+        Image where each pixel's value corresponds to its blob label. Labels
+        can be returned by specifying 'label' as a property.
+
+    """
     
     ### TODO: Add a check that appropriate props are requested
-
     Ilabeled = measure.label(I, background=0, connectivity=connectivity)
     properties = measure.regionprops(Ilabeled, intensity_image=I)
 
@@ -428,7 +660,7 @@ def regionprops(I, props, connectivity=2):
                 Ip = np.array(Ip, dtype='uint8')
 
                 contours, _ = cv2.findContours(Ip, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-                # IMPORTANT: findContours returns points as (x,y) rather than (row, col)
+                # IMPORTANT: findContours returns points as (col, row) rather than (row, col)
                 contours = contours[0]
                 crows = []
                 ccols = []
@@ -459,6 +691,25 @@ def regionprops(I, props, connectivity=2):
 
 
 def erode(I, n=1, strel='square'):
+    """
+    Erodes a binary image using a specified kernel shape.
+
+    Parameters
+    ----------
+    I : np.array
+        Binary image to erode.
+    n : int, optional
+        Number of times to apply the eroding kernel. The default is 1.
+    strel : str, optional
+        Kernel shape. Follows skimage's options, but only 'square', 'plus', and
+        'disk' are supported. The default is 'square'.
+
+    Returns
+    -------
+    Ie : np.array
+        Eroded binary image. Same shape as I.
+
+    """
 
     if n == 0:
         return I
@@ -470,13 +721,33 @@ def erode(I, n=1, strel='square'):
     elif strel == 'disk':
         selem = morphology.disk(3)
 
+    Ie = I.copy()
     for i in np.arange(0,n):
-        I = morphology.erosion(I, selem)
+        Ie = morphology.erosion(Ie, selem)
 
-    return I
+    return Ie
 
 
 def dilate(I, n=1, strel='square'):
+    """
+    Dilates a binary image using a specified kernel shape.
+
+    Parameters
+    ----------
+    I : np.array
+        Binary image to dilate.
+    n : int, optional
+        Number of times to apply the dilating kernel. The default is 1.
+    strel : str, optional
+        Kernel shape. Follows skimage's options, but only 'square', 'plus', and
+        'disk' are supported. The default is 'square'.
+
+    Returns
+    -------
+    Id : np.array
+        Dilated binary image. Same shape as I.
+
+    """
 
     if n == 0:
         return I
@@ -488,20 +759,32 @@ def dilate(I, n=1, strel='square'):
     elif strel == 'disk':
         selem = morphology.disk(3)
 
+    Id = I.copy()
     for i in np.arange(0,n):
+        Id = morphology.dilation(Id, selem)
 
-        I = morphology.dilation(I, selem)
-
-    return I
-
+    return Id
 
 
 def trim_idcs(imshape, idcs):
     """
-    Trims a list of x,y indices by removing rows containing indices that cannot
-    fit within a raster of imshape
-    """
+    Trims a list of indices by removing the indices that cannot fit within a 
+    raster of imshape.
 
+    Parameters
+    ----------
+    imshape : tuple
+        Shape of image to filter idcs against.
+    idcs : np.array
+        Indices to ensure fit within an image of shape imshape.
+
+    Returns
+    -------
+    idcs : np.array
+        Indices that can fit within imshape.
+
+    """
+    
     idcs = idcs[idcs[:, 0] < imshape[0], :]
     idcs = idcs[idcs[:, 1] < imshape[1], :]
     idcs = idcs[idcs[:, 0] >= 0, :]
@@ -510,12 +793,25 @@ def trim_idcs(imshape, idcs):
     return idcs
 
 
-def crop_binary_im(I, connectivity=2):
+def crop_binary_im(I):
     """
-    Crops a binary image to the smallest bounding box containing all the blobs
-    in the image.
-    """
+    Crops a binary image to the smallest bounding box containing all the "on"
+    pixels in the image.
 
+    Parameters
+    ----------
+    I : np.array
+        Binary image to crop.
+
+    Returns
+    -------
+    Icrop : np.array
+        The cropped binary image.
+    pads : list
+        Four element list containing the number of pixels that were cropped
+        from the [left, top, right, bottom] of I.
+
+    """
     coords = np.where(I==1)
     uly = np.min(coords[0])
     ulx = np.min(coords[1])
@@ -529,7 +825,26 @@ def crop_binary_im(I, connectivity=2):
 
 
 def crop_binary_coords(coords, npad=0):
+    """
+    Crops a set of (row, col) coordinates (e.g. blob indices) to the smallest
+    possible array.
 
+    Parameters
+    ----------
+    coords : np.array
+        N x 2 array. First column are rows, second are columns of pixel coordinates.
+    npad : int, optional
+        Number of pixels to pad the cropped array by. The default is 0.
+
+    Returns
+    -------
+    I : np.array
+        Image of the cropped coordinates, plus padding if desired.
+    pads : list
+        Number of pixels in [left, top, right, bottom] direction that were
+        cropped.
+
+    """
     # Coords are of format [row, col]
 
     uly = np.min(coords[:,0]) - npad
@@ -545,7 +860,25 @@ def crop_binary_coords(coords, npad=0):
 
 
 def fill_holes(I, maxholesize=0):
+    """
+    Fills holes up to a specified size in a binary image. The boundary pixels
+    of the image are turned off before identifying holes so that holes created 
+    by the edge of the image are not considered holes.
 
+    Parameters
+    ----------
+    I : np.array
+        Binary image.
+    maxholesize : int, optional
+        The maximum allowed hole size in pixels. The default is 0.
+
+    Returns
+    -------
+    I : np.array
+        The holes-filled image.
+
+    """
+    
     I = np.array(I, dtype=np.bool)
 
     if maxholesize == 0:
@@ -575,22 +908,33 @@ def fill_holes(I, maxholesize=0):
         return I
 
 
-def im_connectivity(im):
+def im_connectivity(I):
     """
     Returns an image of 8-connectivity for an input image of all pixels in a
     binary image.
+
+    Parameters
+    ----------
+    I : np.array
+        Binary image.
+
+    Returns
+    -------
+    Iret : np.array
+        Image of 8-connectivity count for each pixel in the input image.
+
     """
     # Fix input
-    im = im.copy()
-    im[im!=0] = 1
-    im = np.uint8(im)
+    I = I.copy()
+    I[I!=0] = 1
+    I = np.uint8(I)
 
     kernel = np.uint8([[1,  1, 1],
                        [1, 10, 1],
                        [1,  1, 1]])
 
     src_depth = -1
-    filtered = cv2.filter2D(im, src_depth, kernel)
+    filtered = cv2.filter2D(I, src_depth, kernel)
     Iret = np.zeros(np.shape(filtered), dtype ='uint8')
     Iret[filtered>10] = filtered[filtered>10]-10
     return Iret
@@ -604,8 +948,25 @@ def downsample_binary_image(I, newsize, thresh=0.05):
     higher-res image. E.g. set 'thresh' to zero if you want the output image
     to be "on" everywhere at least a single pixel is "on" in the original
     image.
-    """
 
+    Parameters
+    ----------
+    I : np.array
+        Binary image to downsample.
+    newsize : tuple
+        Two entry tuple (nrows, ncols) specifying the desired shape of the 
+        image.
+    thresh : float, optional
+        The fraction of filled area that downsampled pixels must have to 
+        consider them on. Setting to 0 is the equialent of "all touched". 
+        The default is 0.05.
+
+    Returns
+    -------
+    Iout : np.array
+        The downsampled image.
+
+    """
     # Get locations of all smaller pixels
     row,col = np.where(I>0)
 
@@ -631,34 +992,54 @@ def downsample_binary_image(I, newsize, thresh=0.05):
     return Iout
 
 
-def skel_endpoints(skel):
-    '''
-    For a given input skeleton image/array, returns the x,y coordinates of
-    the endpoints (eps).
-    '''
+def skel_endpoints(Iskel):
+    """
+    Finds all the endpoints of a skeleton.
 
-    Ic = im_connectivity(skel)
+    Parameters
+    ----------
+    Iskel : np.array
+        Binary skeleton image.
+
+    Returns
+    -------
+    eps : np.array
+        Skeleton endpoint positions in (row, col) format.
+
+    """
+
+    Ic = im_connectivity(Iskel)
     eps = np.where(Ic==1)
 
     return eps
 
 
 def skel_branchpoints(Iskel):
-    '''
-    For a given input skeleton image/array, returns the x,y coordinates of the
-    branchpoints.
-    '''
+    """
+    Finds the branchpoints in a skeletonized image. Branchpoints are not simply
+    those with more than two neighbors; they are identified in a way that 
+    minimizes the number of branchpoints required to resolve the skeleton
+    fully with the fewest number of branchpoints.
+
+    Parameters
+    ----------
+    Iskel : np.array
+        Skeletonized image.
+
+    Returns
+    -------
+    Ibps : np.array.
+        Binary image of shape Iskel where only branchpoints are on.
+
+    """
     Ibps = np.uint16(im_connectivity(Iskel))
 
     # Initial branchpoints are defined by pixels with conn > 2
     Ibps[Ibps<3] = 0
     Ibps[Ibps>0] = 1
 
-#    Ibps_O = np.copy(Ibps)
-
     # Filter branchpoints using convolution kernel that results in a unique
     # value for each possible configuration
-
     # Create kernel
     kern = np.array([[256, 32, 4], [128, 16, 2], [64, 8, 1]], dtype=np.uint16)
 
@@ -831,36 +1212,27 @@ def skel_branchpoints(Iskel):
     Irm_flat = np.in1d(Iconv, list(rmvals))
     rmy, rmx = np.unravel_index(np.where(Irm_flat==1), Iconv.shape)
     Ibps[rmy, rmx] = 0
-
-
-#    plt.close('all')
-#    rgh.imshowpair(Iskel,Ibps)
-#    idcs = np.where(rp['area']>2)
-#    for idx in range(0,len(rp['area'])):
-#        plt.scatter(rp['coords'][idcs[0][idx]][:,1],rp['coords'][idcs[0][idx]][:,0])
-
-
-#    Iremove = np.zeros(np.shape(Ibps), dtype='uint8')
-#    src_depth = -1
-#    for caseno in np.arange(1,9):
-#        kern = rgh.bp_kernels(caseno)
-#        filtered = cv2.filter2D(Ibps,src_depth,kern)
-##        print(sum(sum(filtered)))
-#        Iremove[np.uint8(filtered)>11] = 1
-#
-#    Ibps[Iremove > 0] = 0
-#    bps = np.where(Ibps>0)
-
+    
     return Ibps
 
 
 def bp_kernels(caseno):
-    '''
+    """
     Provides kernels for convolving with branchpoints image to remove special
     cases (where three branchpoints make an "L" shape). There are 8 possible
-    orientations (or caseno's).
-    '''
+    orientations (caseno's).
 
+    Parameters
+    ----------
+    caseno : int
+         Identifier for specific kernel cases. Can be 1-8.
+
+    Returns
+    -------
+    kernel : np.array
+        3x3 kernel corresponding to the caseno.
+
+    """
     kernel = np.zeros(9, np.uint8)
     kernel[4] = 10
     if caseno == 1:
@@ -880,11 +1252,12 @@ def bp_kernels(caseno):
     elif caseno == 8:
         kernel[[0,3]] = 1
 
-    return np.int8(np.reshape(kernel,(3,3)))
+    kernel = np.int8(np.reshape(kernel,(3,3)))
+    return kernel
 
 
 def skel_kernels(caseno):
-    '''
+    """
     Provides kernels for convolving with skeleton image to remove the following case:
 
     0 0 0
@@ -892,9 +1265,19 @@ def skel_kernels(caseno):
     0 1 0
 
     and its rotations. The center pixel would be removed as doing so
-    does not break connectivity of the skeleton.
-    '''
+    does not break connectivity of the skeleton.  
 
+    Parameters
+    ----------
+    caseno : int
+         Identifier for specific kernel cases. Can be 1-4.
+
+    Returns
+    -------
+    kernel : np.array
+        3x3 kernel corresponding to the caseno.
+
+    """
     kernel = np.zeros(9, np.uint8)
     kernel[4] = 1
     # "T" cases
@@ -907,33 +1290,49 @@ def skel_kernels(caseno):
     elif caseno == 4: # left
         kernel[[1,3,7]] = 1
 
-    return np.int8(np.reshape(kernel,(3,3)))
+    kernel = np.int8(np.reshape(kernel,(3,3)))
+    
+    return kernel
 
 
 def skel_pixel_curvature(Iskel, nwalk = 4):
+    """
+    Provides an estimate of the curvature at most pixels within a skeleton image. 
+    Not all pixels are considered; some boundary pixels (i.e. those
+    near the end of the skeleton) will not be computed. The more pruned and
+    thinned the input skeleton, the less likely that any strange values will
+    be returned. This code was written so that strange cases are merely
+    skipped.
+    
+    Given an input skeleton image, the code looks at each pixel and fits a
+    trendline through npix pixels "upstream" and "downstream" of the pixel in
+    question. Scale is therefore set by npixels; larger will reduce
+    variability in the curvature estimates.
+    
+    INPUTS:      Iskel - binary image of skeleton whose pixels you want
+                          curvature values
+    
+    OUTPUTS:         I - image of skeleton with curvature values at pixels
 
-# Takes an input skeleton and provides an estimate of the curvature at each
-# pixel. Not all pixels are considered; some boundary pixels (i.e. those
-# near the end of the skeleton) will not be computed. The more pruned and
-# thinned the input skeleton, the less likely that any strange values will
-# be returned. This code was written so that strange cases are merely
-# skipped.
-#
-# Given an input skeleton image, the code looks at each pixel and fits a
-# trendline through npix pixels "upstream" and "downstream" of the pixel in
-# question. Scale is therefore set by npixels; larger will reduce
-# variability in the curvature estimates.
-#
-# INPUTS:      Iskel - binary image of skeleton whose pixels you want
-#                      curvature values
-#
-# OUTPUTS:         I - image of skeleton with curvature values at pixels
 
+    Parameters
+    ----------
+    Iskel : np.array
+        Binary skeleton image to compute curvatures.
+    nwalk : int, optional
+        Number of pixels to walk away, in each direction, to define the 
+        curve to compute a pixel's curvature. Higher results in smoother
+        curvature values. The default is 4.
 
+    Returns
+    -------
+    I : np.array
+        Image wherein pixel values represent the curvature of the skeleton.
 
-    # Pad the image to avoid boundary problems
-    # NOT DONE HERE
+    """
 
+    ## TODO: Pad the image to avoid boundary problems
+    
     # Get coordinates of skeleton pixels
     skelpix = np.argwhere(Iskel==1)
     py = np.ndarray.tolist(skelpix[:,0])
@@ -945,10 +1344,6 @@ def skel_pixel_curvature(Iskel, nwalk = 4):
 
     # Loop through each pixel to compute its curvature
     for x, y in zip(px,py):
-
-#        j = 500
-#        x = px[j]
-#        y = py[j]
 
         nvals = neighbor_vals(Iskel, x, y)
 
@@ -1102,7 +1497,8 @@ def skel_pixel_curvature(Iskel, nwalk = 4):
 def hand_clean(I, action='erase'):
     """
     Allows user to hand-draw regions of interest on a binary mask that can
-    either be filled (set to True) or erased (set to False).
+    either be filled (set to True) or erased (set to False). Only one polygon
+    can be drawn per call.
 
     Interact with plot via the following:
         left-click: save a vertex of the polygon
@@ -1110,8 +1506,24 @@ def hand_clean(I, action='erase'):
         enter key: stop recording points
 
     Possible actions are 'erase' (default) and 'fill'.
-    """
+    
+    Requires matplotlib and Python Image Library (PIL), but they are imported
+    here so that this function can be imported independently of the script.
 
+    Parameters
+    ----------
+    I : np.array
+        Binary image to fill or erase with hand-drawn polygons.
+    action : str, optional
+        If =='fill', will fill the drawn region. If =='erase', will erase the
+        drawn region. The default is 'erase'.
+
+    Returns
+    -------
+    I : np.array
+        The image with the hand-drawn polygon either filled or erased.
+
+    """
     from matplotlib import pyplot as plt
 
     def make_mask(Ishape, coords):

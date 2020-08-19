@@ -2,18 +2,15 @@
 """
 directionality
 ==============
-
 Created on Wed Nov  7 11:38:16 2018
-
 @author: Jon
 """
+import os
 import numpy as np
 import networkx as nx
 import itertools
 import pandas as pd
 from scipy.stats import mode
-import os
-import sys
 from rivgraph import ln_utils as lnu
 
 
@@ -22,7 +19,6 @@ def add_directionality_trackers(links, nodes, ntype):
     Adds fields to the links and nodes dictionaries that are required for 
     setting and diagnosing directionality. Nodes are not altered in this 
     function, but passed for consistency and generalizability.
-
     Parameters
     ----------
     links : dict
@@ -31,14 +27,12 @@ def add_directionality_trackers(links, nodes, ntype):
         Network nodes and associated properties.
     ntype : str
         Network type. Choose either 'delta' or 'river'.
-
     Returns
     -------
     links : dict
         Network links with added directionality properties.
     nodes : dict
         Network nodes and associated properties.
-
     """
     
     # Add a 'certain' entry to the links dict to keep track of links whose directions have been set
@@ -63,17 +57,14 @@ def algmap(key):
     set link directionality. These numbers are found in links['guess_alg'] and
     links['certain_alg'] and are useful for diagnosing issues in setting
     directionality.
-
     Parameters
     ----------
     key : str
         See the mapper below for the possible keywords.
-
     Returns
     -------
     algno : float or int
         Numeric representation of direction-setting algorithm.
-
     """
 
     mapper = {'sourcesinkfix' : -2,
@@ -116,7 +107,6 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
     endpoints to the nearest nodes of the nearest main channel. If the nearest
     nodes of the main channel include more than 2 + nodethresh nodes, the
     direction of the main channel is used to set the unknown link.
-
     Parameters
     ----------
     links : dict
@@ -129,7 +119,6 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
         Threshold for the number of nodes along the nearest main channel that
         must be encompassed by the unknown link's endnodes to confidently
         set the unknown link's direction. The default is 0.
-
     Returns
     -------
     links : dict
@@ -138,7 +127,6 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
     nodes : dict
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
-
     """
     
     # alg = 3 # identifier for diagnostics
@@ -228,7 +216,6 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
 def nodepath_to_links(path, links, nodes):
     """
     Converts a path defined by node ids to a path defined by link ids. 
-
     Parameters
     ----------
     path : list
@@ -237,12 +224,10 @@ def nodepath_to_links(path, links, nodes):
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-
     Returns
     -------
     linkpath : list
         Link ids comprising the path defined by the given node ids.
-
     """
 
     linkpath = []
@@ -258,19 +243,16 @@ def widest_inlet_index(links, nodes):
     """
     Finds the index of the inlet occurring at the widest link. Index is with
     respect to the nodes['id'] list.
-
     Parameters
     ----------
     links : dict
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-
     Returns
     -------
     inlet_idx : int
         Index of the inlet node of the widest link.
-
     """
 
     # Find apex node, assuming it's connected to the widest channel(s)
@@ -291,15 +273,12 @@ def dir_main_channel(links, nodes):
     Guesses directionality of links based on shortest paths from widest inlet
     link to all the outlet links. Links are also weighted by width, such that
     deviations from the "main channel" width cost more to traverse.
-
-
     Parameters
     ----------
     links : dict
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-
     Returns
     -------
     links : dict
@@ -308,7 +287,6 @@ def dir_main_channel(links, nodes):
     nodes : dict
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
-
     """
     # alg = 4 # identifier for diagnostics
     alg = algmap('main_chans')
@@ -353,15 +331,12 @@ def dir_shortest_paths_nodes(links, nodes):
     path flows through the link attached to the node (as opposed to immediately)
     away from the link), its directionality is set; otherwise nothing
     is done. Note that this will not set all links' directionalities.
-
-
     Parameters
     ----------
     links : dict
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-
     Returns
     -------
     links : dict
@@ -370,7 +345,6 @@ def dir_shortest_paths_nodes(links, nodes):
     nodes : dict
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
-
     """
     
     # alg = 12 # identifier for diagnostics
@@ -431,8 +405,6 @@ def dir_shortest_paths_links(links, nodes, difthresh = 0):
     closer to the nearest outlet (or preoutlet). "difthresh" refers to the 
     difference in distances between endpoint nodes; higher means directionality 
     is less likely to be ascertained.
-
-
     Parameters
     ----------
     links : dict
@@ -444,7 +416,6 @@ def dir_shortest_paths_links(links, nodes, difthresh = 0):
         between an unknown link's endpoints for directionality to be set. 
         Lengths are measured from the link's endpoints to the nearest 
         outlet (or preoutlet). The default is 0.
-
     Returns
     -------
     links : dict
@@ -453,7 +424,6 @@ def dir_shortest_paths_links(links, nodes, difthresh = 0):
     nodes : dict
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
-
     """
     # alg = 11 # identifier for diagnostics
     alg = algmap('sp_links')
@@ -509,7 +479,6 @@ def dir_known_link_angles(links, nodes, dims, checklinks='all'):
     such that its orientation minimizes the error between its neighbors and
     itself.
     
-
     Parameters
     ----------
     links : dict
@@ -521,7 +490,6 @@ def dir_known_link_angles(links, nodes, dims, checklinks='all'):
     checklinks : list OR str, optional
         A list of link ids can be provided to check only specific links.
         Otherwise, the default is 'all' which checks all links.
-
     Returns
     -------
     links : dict
@@ -530,7 +498,6 @@ def dir_known_link_angles(links, nodes, dims, checklinks='all'):
     nodes : dict
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
-
     """
 
     def angle_between(v1, v2):
@@ -614,15 +581,12 @@ def dir_bridges(links, nodes):
     removed from the network, there will no longer be just one connected 
     network. Directionality is inferred by consideration of which subnetwork 
     (after removing the bridge link) contains inlet and outlet nodes.
-
-
     Parameters
     ----------
     links : dict
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-
     Returns
     -------
     links : dict
@@ -631,7 +595,6 @@ def dir_bridges(links, nodes):
     nodes : dict
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
-
     """
     # alg = 5 # identifier for diagnostic
     alg = algmap('bridges')
@@ -712,20 +675,17 @@ def cycle_get_original_orientation(links, lids):
     Saves the orientation of a set of links. Used before attempting to fix
     cycles. Properties besides 'conn' must also be reversed, so their original
     orientations are also stored.
-
     Parameters
     ----------
     links : dict
         Network links and associated properties.
     lids : list
         Link ids whose orientations should be saved.
-
     Returns
     -------
     orig : dict
         A subset of the links dictionary containing the orientations of each
         link in lids.
-
     """
 
     lidx = [links['id'].index(l) for l in lids]
@@ -744,7 +704,6 @@ def cycle_return_to_original_orientation(links, orig):
     """
     Returns a set of links to its original orientation.
     
-
     Parameters
     ----------
     links : dict
@@ -752,12 +711,10 @@ def cycle_return_to_original_orientation(links, orig):
     orig : dict
         Network links and associated properties to return to original
         orientations.
-
     Returns
     -------
     links : dict
         Network links and associated properties in their original orientations.
-
     """
 
     for i, oid in enumerate(orig['id']):
@@ -775,18 +732,15 @@ def merge_list_of_lists(inlist):
     """
     Merges a list of lists into a single list, but removes duplicates. 
     Uses networkx and itertools for a fun solution.
-
     Parameters
     ----------
     inlist : list of lists
         List of lists to merge without dulplicates.
-
     Returns
     -------
     merged : list
         List of length equal to number of unique entries across all lists of
         inlist.
-
     """
     
     # Combine overlapping cycles (where cycles share the same nodes, join them)
@@ -804,7 +758,6 @@ def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True):
     """
     Sets a link directionality. Option to check for continuity (including 
     parallel links) after setting.
-
     Parameters
     ----------
     links : dict
@@ -822,14 +775,12 @@ def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True):
     checkcontinuity : bool, optional
         If True, checks nearby links for continuity and parallel links after
         setting the link's direction. The default is True.
-
     Returns
     -------
     links : dict
         Network links and associated properties with updated link direction.
     nodes : dict
         Network nodes and associated properties with updated link direction.
-
     """
     links['conn'][linkidx].remove(usnode)
     links['conn'][linkidx].insert(0,usnode)
@@ -860,15 +811,12 @@ def fix_sources_and_sinks(links, nodes):
     not create a cycle; if multiple links can be flipped, the shortest one is 
     chosen. If no solution is found, links are returned to their original
     orientation.
-
-
     Parameters
     ----------
     links : dict
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-
     Returns
     -------
     links : dict
@@ -877,7 +825,6 @@ def fix_sources_and_sinks(links, nodes):
     nodes : dict
         Network links and associated properties with sources/sinks fixed if
         possible.
-
     """
     badnodes = check_continuity(links, nodes)
 
@@ -938,20 +885,16 @@ def check_continuity(links, nodes):
     Finds all sinks or sources within the network, excluding inlets and outlets.
     Returns any nodes where continuity is violated. Only checks nodes for whom
     all attached links are certain.
-
-
     Parameters
     ----------
     links : dict
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-
     Returns
     -------
     problem_nodes : list
         Node ids corresponding to nodes['id'] where continuity is violated.
-
     """
     problem_nodes = []
     for nid, nidx, nconn in zip(nodes['id'], nodes['idx'], nodes['conn']):
@@ -983,21 +926,18 @@ def find_a_cycle(links, nodes):
     Finds a single cycle in the network. Multiple cycles may exist; this 
     function returns only the first one encountered.
     
-
     Parameters
     ----------
     links : dict
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-
     Returns
     -------
     cycle_nodes : list
         Node ids comprising the cycle. Arranged in order of cycle.
     cycle_links : list
         Link ids comprising the cycle. Arranged in order of cycle.
-
     """
     
     G = nx.DiGraph()
@@ -1024,8 +964,6 @@ def get_cycles(links, nodes, checknode='all'):
     """
     Finds either all cycles in the network or cycles containing the checknode'th
     node. Cycles are returned as both nodes and links.
-
-
     Parameters
     ----------
     links : dict
@@ -1035,7 +973,6 @@ def get_cycles(links, nodes, checknode='all'):
     checknode : int OR str, optional
         ID of node to check for its inclusion in any cycles. If the default 
         value 'all' is selected, all cycles will be returned.
-
     Returns
     -------
     cycle_nodes : list of lists
@@ -1085,8 +1022,6 @@ def get_cycles(links, nodes, checknode='all'):
 def flip_links_in_G(G, links2flip):
     """
     Flips the directionality of links in a networkx graph object.
-
-
     Parameters
     ----------
     G : networkx.Graph or similar
@@ -1094,12 +1029,10 @@ def flip_links_in_G(G, links2flip):
     links2flip : tuple or 
         An Nx2 tuple containing the US and DS node ids of the edge (link) to 
         flip.
-
     Returns
     -------
     G : networkx.Graph or similar
         Graph object representing the network with the requested links flipped.
-
     """
     if links2flip == 'all':
         links2flip = list(G.edges)
@@ -1120,15 +1053,12 @@ def fix_cycles(links, nodes):
     are tried, and if any of them result in a source/sink node or a cycle, 
     another approach is attempted until the cycle is resolved or we run out
     of approaches.
-
-
     Parameters
     ----------
     links : dict
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-
     Returns
     -------
     links : dict
@@ -1139,7 +1069,6 @@ def fix_cycles(links, nodes):
         resolved
     n_cycles_remaining : int
         Number of cycles that were unresolvable.
-
     """
     # Create networkx graph object
     G = nx.DiGraph()
@@ -1326,8 +1255,6 @@ def dir_set_manually(links, nodes, manual_set_csv):
     exactly two columns; one called 'link_id', and one called 'usnode'.
     This file can be created automatically by the function 
     io_utils.create_manual_dir_csv().
-
-
     Parameters
     ----------
     links : dict
@@ -1336,7 +1263,6 @@ def dir_set_manually(links, nodes, manual_set_csv):
         Network nodes and associated properties.
     manual_set_csv : str
         Path to csv defining which links have which upstream nodes.
-
     Returns
     -------
     links : dict
@@ -1345,7 +1271,6 @@ def dir_set_manually(links, nodes, manual_set_csv):
     nodes : dict
         Network nodes and associated properties with specified links set
         manually.
-
     """
     # alg = -1 
     alg = algmap('manual_set')
@@ -1373,14 +1298,12 @@ def dir_set_manually(links, nodes, manual_set_csv):
 def set_inletoutlet(links, nodes):
     """
     Sets directions of links that are connected to inlets and outlets.
-
     Parameters
     ----------
     links : dict
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-
     Returns
     -------
     links : dict
@@ -1389,7 +1312,6 @@ def set_inletoutlet(links, nodes):
     nodes : dict
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
-
     """
     # alg = 0
     alg = algmap('inletoutlet')
@@ -1430,7 +1352,6 @@ def set_continuity(links, nodes, checknodes='all'):
     are no sources or sinks within the network. Iterates until no more links 
     directions can be set.
     
-
     Parameters
     ----------
     links : dict
@@ -1440,7 +1361,6 @@ def set_continuity(links, nodes, checknodes='all'):
     checknodes : list OR str, optional
         Each link connected to each node id in this list will be checked for
         continuity. All nodes will be checked if using the default value 'all'.
-
     Returns
     -------
     links : dict
@@ -1449,7 +1369,6 @@ def set_continuity(links, nodes, checknodes='all'):
     nodes : dict
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
-
     """
     # alg = 1
     alg = algmap('continuity')
@@ -1509,7 +1428,6 @@ def set_parallel_links(links, nodes, knownlink):
     the graph. This function thus prevents cycles from being created and in
     general should be run after any link direction is set.
     
-
     Parameters
     ----------
     links : dict
@@ -1519,7 +1437,6 @@ def set_parallel_links(links, nodes, knownlink):
     knownlink : int
         Link id of link whose direction has been set to check for parallel
         links.
-
     Returns
     -------
     links : dict
@@ -1528,7 +1445,6 @@ def set_parallel_links(links, nodes, knownlink):
     nodes : dict
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
-
     """
     # alg = 2
     alg = algmap('parallels')
@@ -1573,8 +1489,6 @@ def get_link_vector(links, nodes, linkid, imshape, pixlen=1, normalized=True, tr
     channels are connected to narrow channels.
     
     Requires a link contain at least min_len_for_trim pixels post-trimming.
-
-
     Parameters
     ----------
     links : dict
@@ -1593,13 +1507,11 @@ def get_link_vector(links, nodes, linkid, imshape, pixlen=1, normalized=True, tr
         If True, links will be trimmed to remove possibly direction-biasing
         end segments. If False, the untrimmed link endpoints will define the
         vector direction. The default is False.
-
     Returns
     -------
     link_vec : np.array
         Two-element array describing the x and y components of the direction
         vector describing the link.
-
     """
     
     min_len_for_trim = 3 # number of pixels remaining after trim to use trimmed version; else defaults to using endpoints
@@ -1680,7 +1592,6 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2, lenthresh=0
         set the unknown link's directionality. The default is 1.
     alg : float, optional
         Algorithm ID to assign to the set link. The default is 6.
-
     Returns
     -------
     links : dict
@@ -1689,7 +1600,6 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2, lenthresh=0
     nodes : dict
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
-
     """
     
     def get_candidates(links, nodes, lenthresh, nknown_thresh):
@@ -1961,8 +1871,6 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
     Method 1 sets a broken link if its counterpart is known.
     Method 2 sets a side of the loop if the other side is known.
     Method 3 sets both sides if the input to one of the end nodes is known.
-
-
     Parameters
     ----------
     links : dict
@@ -1972,7 +1880,6 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
     checknodes : int or str, optional
         Node ids to check for presence of settable artificial links. If 'all',
         all nodes in the network are checked.
-
     Returns
     -------
     links : dict
@@ -1981,7 +1888,6 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
     nodes : dict
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
-
     """
     
     alg = 2.1
@@ -2070,4 +1976,3 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
         links, nodes = set_continuity(links, nodes, checknodes=endnodes)
 
     return links, nodes
-
