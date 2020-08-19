@@ -35,7 +35,7 @@ def test_get_islands(synthetic_cycles):
     assert islands[1].shape == (15, 10)
     # make it into a dictionary for easier testing
     idict = islands[0].to_dict()
-    assert idict['area'] == {1: 8.0}
+    assert idict['Area'] == {1: 8.0}
     assert ('major_axis_length' in idict.keys()) is True
     assert ('minor_axis_length' in idict.keys()) is True
     assert ('geometry' in idict.keys()) is True
