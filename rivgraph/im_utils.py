@@ -633,7 +633,7 @@ def regionprops(I, props, connectivity=2):
     """    
     ### TODO: Add a check that appropriate props are requested
     Ilabeled = measure.label(I, background=0, connectivity=connectivity)
-    properties = measure.regionprops(Ilabeled)
+    properties = measure.regionprops(Ilabeled, intensity_image=I)
 
     out = {}
     # Get the coordinates of each blob in case we need them later
