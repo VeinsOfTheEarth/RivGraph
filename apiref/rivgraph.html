@@ -1078,21 +1078,19 @@ orientations (caseno’s).</p>
 
 <dl class="function">
 <dt id="rivgraph.im_utils.crop_binary_coords">
-<code class="descclassname">rivgraph.im_utils.</code><code class="descname">crop_binary_coords</code><span class="sig-paren">(</span><em>coords</em>, <em>npad=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#crop_binary_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.crop_binary_coords" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crops a set of (row, col) coordinates (e.g. blob indices) to the smallest
+<code class="descclassname">rivgraph.im_utils.</code><code class="descname">crop_binary_coords</code><span class="sig-paren">(</span><em>coords</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#crop_binary_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.crop_binary_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crops an array of (row, col) coordinates (e.g. blob indices) to the smallest
 possible array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>coords</strong> (<em>np.array</em>) – N x 2 array. First column are rows, second are columns of pixel coordinates.</p></li>
-<li><p><strong>npad</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of pixels to pad the cropped array by. The default is 0.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>coords</strong> (<em>np.array</em>) – N x 2 array. First column are rows, second are columns of pixel coordinates.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>I</strong> (<em>np.array</em>) – Image of the cropped coordinates, plus padding if desired.</p></li>
-<li><p><strong>pads</strong> (<em>list</em>) – Number of pixels in [left, top, right, bottom] direction that were
-cropped.</p></li>
+<li><p><strong>clipped</strong> (<em>list</em>) – Number of pixels in [left, top, right, bottom] direction that were
+clipped.  Clipped returns the indices within the original coords image
+that define where I should be positioned within the original image.</p></li>
 </ul>
 </p>
 </dd>

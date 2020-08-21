@@ -790,11 +790,10 @@
 <span class="sd">        Image where each pixel&#39;s value corresponds to its blob label. Labels</span>
 <span class="sd">        can be returned by specifying &#39;label&#39; as a property.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    
+<span class="sd">    &quot;&quot;&quot;</span>    
     <span class="c1">### TODO: Add a check that appropriate props are requested</span>
     <span class="n">Ilabeled</span> <span class="o">=</span> <span class="n">measure</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="n">connectivity</span><span class="p">)</span>
-    <span class="n">properties</span> <span class="o">=</span> <span class="n">measure</span><span class="o">.</span><span class="n">regionprops</span><span class="p">(</span><span class="n">Ilabeled</span><span class="p">,</span> <span class="n">intensity_image</span><span class="o">=</span><span class="n">I</span><span class="p">)</span>
+    <span class="n">properties</span> <span class="o">=</span> <span class="n">measure</span><span class="o">.</span><span class="n">regionprops</span><span class="p">(</span><span class="n">Ilabeled</span><span class="p">)</span>
 
     <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="c1"># Get the coordinates of each blob in case we need them later</span>
@@ -816,17 +815,22 @@
             <span class="n">perim</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">blob</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
                 <span class="c1"># Crop to blob to reduce cv2 computation time and save memory</span>
-                <span class="n">Ip</span><span class="p">,</span> <span class="n">pads</span> <span class="o">=</span> <span class="n">crop_binary_coords</span><span class="p">(</span><span class="n">blob</span><span class="p">,</span> <span class="n">npad</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">Ip</span><span class="p">,</span> <span class="n">cropped</span> <span class="o">=</span> <span class="n">crop_binary_coords</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
+                
+                <span class="c1"># Pad cropped image to avoid edge effects</span>
+                <span class="n">Ip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">Ip</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span>
+                
+                <span class="c1"># Convert to cv2-ingestable data type</span>
                 <span class="n">Ip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Ip</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span>
 
                 <span class="n">contours</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">findContours</span><span class="p">(</span><span class="n">Ip</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">RETR_TREE</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CHAIN_APPROX_NONE</span><span class="p">)</span>
-                <span class="c1"># IMPORTANT: findContours returns points as (col, row) rather than (row, col)</span>
+                <span class="c1"># IMPORTANT: findContours returns points as (x,y) rather than (row, col)</span>
                 <span class="n">contours</span> <span class="o">=</span> <span class="n">contours</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">crows</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">ccols</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">contours</span><span class="p">:</span>
-                    <span class="n">crows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">pads</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># must add back the cropped rows and columns</span>
-                    <span class="n">ccols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">pads</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">crows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">cropped</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># must add back the cropped rows and columns, as well as the single-pixel pad</span>
+                    <span class="n">ccols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">cropped</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="n">cont_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">crows</span><span class="p">,</span><span class="n">ccols</span><span class="p">)))</span> <span class="c1"># format the output</span>
                 <span class="n">perim</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cont_np</span><span class="p">)</span>
             <span class="n">allprop</span> <span class="o">=</span> <span class="n">perim</span>
@@ -984,39 +988,37 @@
     <span class="k">return</span> <span class="n">Icrop</span><span class="p">,</span> <span class="n">pads</span></div>
 
 
-<div class="viewcode-block" id="crop_binary_coords"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.crop_binary_coords">[docs]</a><span class="k">def</span> <span class="nf">crop_binary_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">npad</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="crop_binary_coords"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.crop_binary_coords">[docs]</a><span class="k">def</span> <span class="nf">crop_binary_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Crops a set of (row, col) coordinates (e.g. blob indices) to the smallest</span>
+<span class="sd">    Crops an array of (row, col) coordinates (e.g. blob indices) to the smallest</span>
 <span class="sd">    possible array.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    coords : np.array</span>
 <span class="sd">        N x 2 array. First column are rows, second are columns of pixel coordinates.</span>
-<span class="sd">    npad : int, optional</span>
-<span class="sd">        Number of pixels to pad the cropped array by. The default is 0.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    I : np.array</span>
 <span class="sd">        Image of the cropped coordinates, plus padding if desired.</span>
-<span class="sd">    pads : list</span>
+<span class="sd">    clipped : list</span>
 <span class="sd">        Number of pixels in [left, top, right, bottom] direction that were</span>
-<span class="sd">        cropped.</span>
+<span class="sd">        clipped.  Clipped returns the indices within the original coords image </span>
+<span class="sd">        that define where I should be positioned within the original image.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Coords are of format [row, col]</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">bottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">right</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="n">uly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">npad</span>
-    <span class="n">ulx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">npad</span>
-    <span class="n">lry</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">npad</span>
-    <span class="n">lrx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">npad</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">bottom</span><span class="o">-</span><span class="n">top</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">right</span><span class="o">-</span><span class="n">left</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">I</span><span class="p">[</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">top</span><span class="p">,</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">left</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="n">clipped</span> <span class="o">=</span> <span class="p">[</span><span class="n">left</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">]</span>
 
-    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">lry</span><span class="o">-</span><span class="n">uly</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">lrx</span><span class="o">-</span><span class="n">ulx</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">I</span><span class="p">[</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">uly</span><span class="p">,</span><span class="n">coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">ulx</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="n">pads</span> <span class="o">=</span> <span class="p">[</span><span class="n">ulx</span><span class="p">,</span> <span class="n">uly</span><span class="p">,</span> <span class="n">lrx</span><span class="p">,</span> <span class="n">lry</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">I</span><span class="p">,</span> <span class="n">pads</span></div>
+    <span class="k">return</span> <span class="n">I</span><span class="p">,</span> <span class="n">clipped</span></div>
 
 
 <div class="viewcode-block" id="fill_holes"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.fill_holes">[docs]</a><span class="k">def</span> <span class="nf">fill_holes</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">maxholesize</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
