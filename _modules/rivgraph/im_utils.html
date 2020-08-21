@@ -793,7 +793,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="c1">### TODO: Add a check that appropriate props are requested</span>
     <span class="n">Ilabeled</span> <span class="o">=</span> <span class="n">measure</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="n">connectivity</span><span class="p">)</span>
-    <span class="n">properties</span> <span class="o">=</span> <span class="n">measure</span><span class="o">.</span><span class="n">regionprops</span><span class="p">(</span><span class="n">Ilabeled</span><span class="p">)</span>
+    <span class="n">properties</span> <span class="o">=</span> <span class="n">measure</span><span class="o">.</span><span class="n">regionprops</span><span class="p">(</span><span class="n">Ilabeled</span><span class="p">,</span> <span class="n">intensity_image</span><span class="o">=</span><span class="n">I</span><span class="p">)</span>
 
     <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="c1"># Get the coordinates of each blob in case we need them later</span>
