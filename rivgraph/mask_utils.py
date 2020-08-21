@@ -31,7 +31,7 @@ def pixagon(c_cent, r_cent, pixlen):
 
 
 def get_island_properties(Imask, pixlen, pixarea, crs, gt, props):
-    # maxwidth is an additional property    
+    # maxwidth is an additional property       
     
     if 'maxwidth' in props:
         props.remove('maxwidth')
@@ -120,7 +120,7 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props):
 
 def surrounding_link_properties(links, nodes, Imask, islands, Iislands, pixlen, pixarea):
 
-    # obj = r
+    # obj = d
     # links = obj.links
     # nodes = obj.nodes
     # Imask = obj.Imask
@@ -130,10 +130,10 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands, pixlen, 
     # crs = obj.crs
     # props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length']
     # islands, Iislands = get_island_properties(obj.Imask, pixlen, pixarea, obj.crs, obj.gt, props)
-    # islands.to_file(r"C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_islands.shp")
-    # np.save(r'C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_Iislands.npy', Iislands)
-    # islands = gpd.read_file(r"C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_islands.shp")
-    # Iislands = np.load(r'C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_Iislands.npy')
+    # islands.to_file(r"C:\Users\Jon\Desktop\Research\John Shaw\Deltas\GBM\GBM_islands.shp")
+    # np.save(r'C:\Users\Jon\Desktop\Research\John Shaw\Deltas\GBM\GBM_Iislands.npy', Iislands)
+    # # islands = gpd.read_file(r"C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_islands.shp")
+    # # Iislands = np.load(r'C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_Iislands.npy')
 
     # Rasterize the links and nodes
     Iln = np.zeros(Imask.shape, dtype=np.int)
@@ -175,13 +175,19 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands, pixlen, 
     # # Can speed up the calculation by skipping huge regions
     # max_area = np.mean(links['wid_adj'])**2 * 20  
     
+    imshape = Ireg.shape
     for idx in range(len(islands)):
-        # print(idx)
-        # idx=25
+        print(idx)
         
         # Identify the region associated with the island
         i_id = islands.id.values[idx]
         r_id = stats.mode(Ireg[Iislands==i_id])[0][0]
+        
+        # It is possible that the corresponding region is a 0 pixel, or one 
+        # that comprises the network. This usually happens only when the island
+        # is one or two pixels. Skip these islands
+        if r_id == 0:
+            continue
         r_idx = np.where(regions['label'] == r_id)[0][0]
         
         # Get the region's properties
@@ -192,12 +198,40 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands, pixlen, 
         #     continue
                 
         # Make region blob
-        Irblob, pads = im.crop_binary_coords(rc, npad=npad)
-        # Dilate region blob
+        Irblob, cropped = im.crop_binary_coords(rc)
+        
+        # Pad and dilate the blob
+        Irblob = np.pad(Irblob, npad, mode='constant')
         Irblob = np.array(im.dilate(Irblob, n=2, strel='disk'), dtype=np.bool)
-            
+        
+        # Adjust padded image in case pads extend beyond original image boundary
+        if cropped[0] - npad < 0:
+            remove = npad - cropped[0]
+            Irblob = Irblob[:, remove:]
+            cropped[0] = 0
+        else:
+            cropped[0] = cropped[0] - npad
+        if cropped[1] - npad < 0:
+            remove = npad - cropped[1]
+            Irblob = Irblob[abs(remove):, :]
+            cropped[1] = 0
+        else:
+            cropped[1] = cropped[1] - npad
+        if cropped[2] + npad > imshape[1]:
+            remove = (cropped[2] + npad) - imshape[1] 
+            Irblob = Irblob[:, :(-remove-1)]
+            cropped[2] = imshape[1]
+        else:
+            cropped[2] = cropped[2] + npad
+        if cropped[3] + npad > imshape[0]:
+            remove = (cropped[3] + npad) - imshape[0]
+            Irblob = Irblob[:(-remove-1), :]
+            cropped[3] = imshape[0]
+        else:
+            cropped[3] = cropped[3] + npad
+                    
         # Get node ids that overlap the dilated blob
-        Iln_crop = Iln[pads[1]:pads[3]+1, pads[0]:pads[2]+1]    
+        Iln_crop = Iln[cropped[1]:cropped[3]+1, cropped[0]:cropped[2]+1]    
         lids = Iln_crop[Irblob]
         overlap_nodes = -np.unique(lids[lids<0])
         
@@ -252,6 +286,9 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands, pixlen, 
             surrounding_nodes = [surrounding_nodes[fracs.index(max(fracs))]]
     
         # At this point, only one loop should be present
+        # if len(surrounding_nodes) != 1:
+        #     import pdb
+        #     pdb.set_trace()
         assert(len(surrounding_nodes)==1)
         surrounding_nodes = surrounding_nodes[0]
         surrounding_nodes.append(surrounding_nodes[0])
@@ -289,7 +326,7 @@ def thresholding_set1(islands, apex_width):
     remove = set()
     # Global thresholding -- islands smaller than 1/10 the apex_wid^2
     area_thresh = (1/10 * apex_width)**2
-    remove.update(np.where(islands.area.values<area_thresh)[0].tolist())
+    remove.update(np.where(islands.Area.values<area_thresh)[0].tolist())
     
     # Threshold islands whose major axis length is less than 1/3 of the apex width
     maj_axis_thresh = apex_width/4
@@ -297,11 +334,13 @@ def thresholding_set1(islands, apex_width):
     
     # Threshold island area/surrounding area
     area_rat_thresh = 0.01
-    remove.update(np.where(islands.area.values/islands.sur_area.values < area_rat_thresh)[0].tolist())
+    remove.update(np.where(islands.Area.values/islands.sur_area.values < area_rat_thresh)[0].tolist())
     
     # # Threshold average island width as a fraction of surrounding channel widths
     avgwid_ratio_thresh = 0.1
-    avg_island_wid = islands.area.values / islands.major_axis_length.values
+    imal = islands.major_axis_length.values
+    imal[imal==0] = np.nan
+    avg_island_wid = islands.Area.values / imal
     remove.update(np.where(avg_island_wid/islands.sur_avg_wid.values < avgwid_ratio_thresh)[0].tolist())
     
     # Keep islands with a major axis length greater than the apex width
