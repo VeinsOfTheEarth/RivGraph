@@ -630,11 +630,10 @@ def regionprops(I, props, connectivity=2):
         Image where each pixel's value corresponds to its blob label. Labels
         can be returned by specifying 'label' as a property.
 
-    """
-    
+    """    
     ### TODO: Add a check that appropriate props are requested
     Ilabeled = measure.label(I, background=0, connectivity=connectivity)
-    properties = measure.regionprops(Ilabeled, intensity_image=I)
+    properties = measure.regionprops(Ilabeled)
 
     out = {}
     # Get the coordinates of each blob in case we need them later
@@ -656,17 +655,22 @@ def regionprops(I, props, connectivity=2):
             perim = []
             for blob in coords:
                 # Crop to blob to reduce cv2 computation time and save memory
-                Ip, pads = crop_binary_coords(blob, npad=1)
+                Ip, cropped = crop_binary_coords(blob)
+                
+                # Pad cropped image to avoid edge effects
+                Ip = np.pad(Ip, 1, mode='constant')
+                
+                # Convert to cv2-ingestable data type
                 Ip = np.array(Ip, dtype='uint8')
 
                 contours, _ = cv2.findContours(Ip, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-                # IMPORTANT: findContours returns points as (col, row) rather than (row, col)
+                # IMPORTANT: findContours returns points as (x,y) rather than (row, col)
                 contours = contours[0]
                 crows = []
                 ccols = []
                 for c in contours:
-                    crows.append(c[0][1] + pads[1]) # must add back the cropped rows and columns
-                    ccols.append(c[0][0] + pads[0])
+                    crows.append(c[0][1] + cropped[1] - 1) # must add back the cropped rows and columns, as well as the single-pixel pad
+                    ccols.append(c[0][0] + cropped[0] - 1)
                 cont_np = np.transpose(np.array((crows,ccols))) # format the output
                 perim.append(cont_np)
             allprop = perim
@@ -824,39 +828,37 @@ def crop_binary_im(I):
     return Icrop, pads
 
 
-def crop_binary_coords(coords, npad=0):
+def crop_binary_coords(coords):
     """
-    Crops a set of (row, col) coordinates (e.g. blob indices) to the smallest
+    Crops an array of (row, col) coordinates (e.g. blob indices) to the smallest
     possible array.
 
     Parameters
     ----------
     coords : np.array
         N x 2 array. First column are rows, second are columns of pixel coordinates.
-    npad : int, optional
-        Number of pixels to pad the cropped array by. The default is 0.
 
     Returns
     -------
     I : np.array
         Image of the cropped coordinates, plus padding if desired.
-    pads : list
+    clipped : list
         Number of pixels in [left, top, right, bottom] direction that were
-        cropped.
+        clipped.  Clipped returns the indices within the original coords image 
+        that define where I should be positioned within the original image.
 
     """
-    # Coords are of format [row, col]
+    top = np.min(coords[:,0])
+    bottom = np.max(coords[:,0])
+    left = np.min(coords[:,1])
+    right = np.max(coords[:,1])
 
-    uly = np.min(coords[:,0]) - npad
-    ulx = np.min(coords[:,1]) - npad
-    lry = np.max(coords[:,0]) + npad
-    lrx = np.max(coords[:,1]) + npad
+    I = np.zeros((bottom-top+1,right-left+1))
+    I[coords[:,0]-top,coords[:,1]-left] = True
+    
+    clipped = [left, top, right, bottom]
 
-    I = np.zeros((lry-uly+1,lrx-ulx+1))
-    I[coords[:,0]-uly,coords[:,1]-ulx] = True
-
-    pads = [ulx, uly, lrx, lry]
-    return I, pads
+    return I, clipped
 
 
 def fill_holes(I, maxholesize=0):
