@@ -2,7 +2,11 @@
 
 ========
 rivgraph
-======== 
+========
+
+.. automodule:: rivgraph.classes
+   :members:
+   :special-members:
 
 .. automodule:: rivgraph.directionality
    :members:
@@ -28,11 +32,11 @@ rivgraph
    :members:
    :special-members:
 
-.. automodule:: rivgraph.ordered_set
+.. automodule:: rivgraph.mask_utils
    :members:
    :special-members:
 
-.. automodule:: rivgraph.rivgraph
+.. automodule:: rivgraph.ordered_set
    :members:
    :special-members:
 

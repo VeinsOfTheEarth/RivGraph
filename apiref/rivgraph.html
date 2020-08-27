@@ -97,6 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">rivgraph</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#classes-py">classes.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#directionality">directionality</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#im-utils">im_utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#io-utils">io_utils</a></li>
@@ -178,6 +179,874 @@
             
   <div class="section" id="rivgraph">
 <span id="id1"></span><h1>rivgraph<a class="headerlink" href="#rivgraph" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-rivgraph.classes"></span><div class="section" id="classes-py">
+<h2>classes.py<a class="headerlink" href="#classes-py" title="Permalink to this headline">¶</a></h2>
+<p>Classes for running rivgraph commands on your channel network.</p>
+<dl class="class">
+<dt id="rivgraph.classes.delta">
+<em class="property">class </em><code class="descclassname">rivgraph.classes.</code><code class="descname">delta</code><span class="sig-paren">(</span><em>name</em>, <em>path_to_mask</em>, <em>results_folder=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#delta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.delta" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to manage and organize data and methods for analyzing a delta channel network.
+This class inherets all the attributes and methods of the rivnetwork class,
+but also includes delta-specific attributes and methods.</p>
+<dl class="attribute">
+<dt id="rivgraph.classes.delta.Iskel">
+<code class="descname">Iskel</code><a class="headerlink" href="#rivgraph.classes.delta.Iskel" title="Permalink to this definition">¶</a></dt>
+<dd><p>image of the skeletonized binary mask</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.delta.topo_metrics">
+<code class="descname">topo_metrics</code><a class="headerlink" href="#rivgraph.classes.delta.topo_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains a number of connectivity and network metrics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.delta.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name</em>, <em>path_to_mask</em>, <em>results_folder=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#delta.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.delta.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the delta channel network; also defines the folder name for storing results.</p></li>
+<li><p><strong>path_to_mask</strong> (<em>str</em>) – Points to the channel network mask file path</p></li>
+<li><p><strong>results_folder</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies a directory where results should be stored</p></li>
+<li><p><strong>verbose</strong> (<em>str</em><em>, </em><em>optional</em>) – RivGraph will output processing progress if ‘True’. Default is ‘False’.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.delta.assign_flow_directions">
+<code class="descname">assign_flow_directions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#delta.assign_flow_directions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.delta.assign_flow_directions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes flow directions for each link in the delta channel network.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.delta.compute_topologic_metrics">
+<code class="descname">compute_topologic_metrics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#delta.compute_topologic_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.delta.compute_topologic_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a suite of connectivity and network metrics for a delta channel network.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.delta.prune_network">
+<code class="descname">prune_network</code><span class="sig-paren">(</span><em>path_shoreline=None</em>, <em>path_inletnodes=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#delta.prune_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.delta.prune_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prunes the delta by removing spurs and links beyond the provided shoreline.
+Paths may be provided to shoreline and inlet nodes shapefiles, otherwise
+their location is specified by paths dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_shoreline</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to shoreline shapefile/geosjon. The default is None but will
+check for the file at paths[‘shoreline’].</p></li>
+<li><p><strong>path_inletnodes</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to inlet nodes shapefile/geojson. The default is None but will
+check for the file at paths[‘inlet_nodes’].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None, but saves pruned links and nodes dictionaries to class object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.delta.skeletonize">
+<code class="descname">skeletonize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#delta.skeletonize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.delta.skeletonize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skeletonizes the delta binary mask.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rivgraph.classes.river">
+<em class="property">class </em><code class="descclassname">rivgraph.classes.</code><code class="descname">river</code><span class="sig-paren">(</span><em>name</em>, <em>path_to_mask</em>, <em>results_folder=None</em>, <em>exit_sides=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.river" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to manage and organize data and methods for analyzing a braided river channel network.
+This class inherets all the attributes and methods of the rivnewtwork class, but also includes delta-specific attributes and methods.</p>
+<p>…</p>
+<dl class="attribute">
+<dt id="rivgraph.classes.river.Iskel">
+<code class="descname">Iskel</code><a class="headerlink" href="#rivgraph.classes.river.Iskel" title="Permalink to this definition">¶</a></dt>
+<dd><p>image of the skeletonized binary mask</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.topo_metrics">
+<code class="descname">topo_metrics</code><a class="headerlink" href="#rivgraph.classes.river.topo_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains a number of connectivity and network metrics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.centerline">
+<code class="descname">centerline</code><a class="headerlink" href="#rivgraph.classes.river.centerline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Centerline of the holes-filled river channel network mask. First element in tuple are x-coordinates; second are y-coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>tuple of two numpy.ndarrays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.centerline_smooth">
+<code class="descname">centerline_smooth</code><a class="headerlink" href="#rivgraph.classes.river.centerline_smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>A smooth version of centerline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>shapely.geometry.LineString</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.max_valley_width_pixels">
+<code class="descname">max_valley_width_pixels</code><a class="headerlink" href="#rivgraph.classes.river.max_valley_width_pixels" title="Permalink to this definition">¶</a></dt>
+<dd><p>The maximum valley width in pixels, defined by widths along the centerline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>np.int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.width_chans">
+<code class="descname">width_chans</code><a class="headerlink" href="#rivgraph.classes.river.width_chans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Average channel width</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.width_extent">
+<code class="descname">width_extent</code><a class="headerlink" href="#rivgraph.classes.river.width_extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Average width of the holes-filled channel mask</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.meshlines">
+<code class="descname">meshlines</code><a class="headerlink" href="#rivgraph.classes.river.meshlines" title="Permalink to this definition">¶</a></dt>
+<dd><p>The lines of the mesh that are perpendicular to the local river direction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of shapely.geometry.LineString</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.meshpolys">
+<code class="descname">meshpolys</code><a class="headerlink" href="#rivgraph.classes.river.meshpolys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Polygons comprising the along-channel mesh</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of shapely.geometry.Polygon</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.river.skeletonize">
+<code class="descname">skeletonize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river.skeletonize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.river.skeletonize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skeletonizes the river binary mask; uses a different method than for deltas.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.river.prune_network">
+<code class="descname">prune_network</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river.prune_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.river.prune_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prunes the river channel network by removing spurs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.river.compute_centerline">
+<code class="descname">compute_centerline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river.compute_centerline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.river.compute_centerline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the centerline of the holes-filled river channel network mask.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.river.compute_mesh">
+<code class="descname">compute_mesh</code><span class="sig-paren">(</span><em>grid_spacing=None</em>, <em>smoothing=0.1</em>, <em>bufferdist=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river.compute_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.river.compute_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a mesh that follows the channel centerline; grid_spacing sets the length of each grid cell; bufferdist sets the width of each grid cell.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.river.assign_flow_direcions">
+<code class="descname">assign_flow_direcions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivgraph.classes.river.assign_flow_direcions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes flow directions for each link in the delta channel network.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.river.set_flow_dirs_manually">
+<code class="descname">set_flow_dirs_manually</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivgraph.classes.river.set_flow_dirs_manually" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a user-created .csv file found at paths[‘fixlinks_csv’] to set flow directions of specified liks.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.river.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name</em>, <em>path_to_mask</em>, <em>results_folder=None</em>, <em>exit_sides=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.river.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a channelnetwork class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the channel network; also defines the folder name for storing results.</p></li>
+<li><p><strong>path_to_mask</strong> (<em>str</em>) – Points to the channel network mask file path</p></li>
+<li><p><strong>results_folder</strong> (<em>str</em>) – Specifies a directory where results should be stored</p></li>
+<li><p><strong>exit_sides</strong> (<em>str</em>) – Only required for river channel netowrks. A two-character string (from N, E, S, or W) that denotes which sides of the image the river intersects (upstream first) – e.g. ‘NS’, ‘EW’, ‘NW’, etc.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="rivgraph.classes.river.name">
+<code class="descname">name</code><a class="headerlink" href="#rivgraph.classes.river.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>the name of the channel network, usually the river or delta’s name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.verbose">
+<code class="descname">verbose</code><a class="headerlink" href="#rivgraph.classes.river.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>[True] or False to specify if processing updates should be printed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.d">
+<code class="descname">d</code><a class="headerlink" href="#rivgraph.classes.river.d" title="Permalink to this definition">¶</a></dt>
+<dd><p>object created by gdal.Open() that provides access to geotiff metadata</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>osgeo.gdal.Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.mask_path">
+<code class="descname">mask_path</code><a class="headerlink" href="#rivgraph.classes.river.mask_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>filepath to the input binary channel network mask</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.imshape">
+<code class="descname">imshape</code><a class="headerlink" href="#rivgraph.classes.river.imshape" title="Permalink to this definition">¶</a></dt>
+<dd><p>dimensions of the image (rows, cols)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.gt">
+<code class="descname">gt</code><a class="headerlink" href="#rivgraph.classes.river.gt" title="Permalink to this definition">¶</a></dt>
+<dd><p>gdal-type Geotransform of the input mask geotiff</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.wkt">
+<code class="descname">wkt</code><a class="headerlink" href="#rivgraph.classes.river.wkt" title="Permalink to this definition">¶</a></dt>
+<dd><p>well known text representation of coordinate reference system of input mask geotiff</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.epsg">
+<code class="descname">epsg</code><a class="headerlink" href="#rivgraph.classes.river.epsg" title="Permalink to this definition">¶</a></dt>
+<dd><p>epsg code of the coordinate reference system of input mask geotiff</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.unit">
+<code class="descname">unit</code><a class="headerlink" href="#rivgraph.classes.river.unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>units of the coordinate reference system; typically ‘degree’ or ‘meter’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.pixarea">
+<code class="descname">pixarea</code><a class="headerlink" href="#rivgraph.classes.river.pixarea" title="Permalink to this definition">¶</a></dt>
+<dd><p>area of each pixel, in units of ‘unit’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.pixlen">
+<code class="descname">pixlen</code><a class="headerlink" href="#rivgraph.classes.river.pixlen" title="Permalink to this definition">¶</a></dt>
+<dd><p>length of each pixel, assumes sides are equal-length</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.paths">
+<code class="descname">paths</code><a class="headerlink" href="#rivgraph.classes.river.paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>dictionary of strings for managing where files should be read/written</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.exit_sides">
+<code class="descname">exit_sides</code><a class="headerlink" href="#rivgraph.classes.river.exit_sides" title="Permalink to this definition">¶</a></dt>
+<dd><p>two-character string denoting which sides of the image the channel network intersects (N,E,S, and/or W). Upstream side should be given first.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.Imask">
+<code class="descname">Imask</code><a class="headerlink" href="#rivgraph.classes.river.Imask" title="Permalink to this definition">¶</a></dt>
+<dd><p>binary mask found at mask_path loaded into a numpy array via gdal.Open().ReadAsArray(), dtype=np.bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.links">
+<code class="descname">links</code><a class="headerlink" href="#rivgraph.classes.river.links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores the links of the network and associated properties</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.nodes">
+<code class="descname">nodes</code><a class="headerlink" href="#rivgraph.classes.river.nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores the nodes of the network and associated properties</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.river.Idist">
+<code class="descname">Idist</code><a class="headerlink" href="#rivgraph.classes.river.Idist" title="Permalink to this definition">¶</a></dt>
+<dd><p>image of the distance transform of the binary mask, dtype=np.float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.river.assign_flow_directions">
+<code class="descname">assign_flow_directions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river.assign_flow_directions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.river.assign_flow_directions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatically sets flow directions for each link in a braided river
+channel network.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">compute_centerline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river.compute_centerline"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Computes the centerline of the holes-filled river binary image.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">compute_mesh</code><span class="sig-paren">(</span><em>grid_spacing=None</em>, <em>smoothing=0.1</em>, <em>buf_halfwidth=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river.compute_mesh"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Generates an along-centerline mesh that indicates a valley-direction
+of sorts. The mesh is useful for computing spatial statistics as a function
+of downstream distance. The resulting mesh captures the low-frequency
+characteristic of the river corridor.</p>
+<p>This tool is tricky to fully automate, and the user may need to play
+with the smoothing and bufferdist parameters if errors are thrown or
+the result is not satisfying.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid_spacing</strong> (<em>float</em>) – Defines the distance between perpendicular-to-centerline transects.
+Units are defined by input mask CRS.</p></li>
+<li><p><strong>smoothing</strong> (<em>float</em>) – Defines the smoothing window of the left- and right-valleylines as a fraction
+of the total centerline length. Range is [0, 1].</p></li>
+<li><p><strong>buf_halfwidth</strong> (<em>float</em>) – Defines the offset distance of the left- and right-valleylines from
+from the centerline. Units correspond to those of the CRS of the
+input mask.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">prune_network</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river.prune_network"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Prunes the computed river network.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">skeletonize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river.skeletonize"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Skeletonizes the river binary mask.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rivgraph.classes.rivnetwork">
+<em class="property">class </em><code class="descclassname">rivgraph.classes.</code><code class="descname">rivnetwork</code><span class="sig-paren">(</span><em>name</em>, <em>path_to_mask</em>, <em>results_folder=None</em>, <em>exit_sides=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>The rivnetwork class organizes data and methods for channel networks. This is
+a parent class to the delta and river classes which inherit rivnetwork methods and
+attributes. This class thus represents the common elements of river and delta
+channel networks.</p>
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name</em>, <em>path_to_mask</em>, <em>results_folder=None</em>, <em>exit_sides=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a channelnetwork class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the channel network; also defines the folder name for storing results.</p></li>
+<li><p><strong>path_to_mask</strong> (<em>str</em>) – Points to the channel network mask file path</p></li>
+<li><p><strong>results_folder</strong> (<em>str</em>) – Specifies a directory where results should be stored</p></li>
+<li><p><strong>exit_sides</strong> (<em>str</em>) – Only required for river channel netowrks. A two-character string (from N, E, S, or W) that denotes which sides of the image the river intersects (upstream first) – e.g. ‘NS’, ‘EW’, ‘NW’, etc.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.name">
+<code class="descname">name</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>the name of the channel network, usually the river or delta’s name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.verbose">
+<code class="descname">verbose</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>[True] or False to specify if processing updates should be printed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.d">
+<code class="descname">d</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.d" title="Permalink to this definition">¶</a></dt>
+<dd><p>object created by gdal.Open() that provides access to geotiff metadata</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>osgeo.gdal.Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.mask_path">
+<code class="descname">mask_path</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.mask_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>filepath to the input binary channel network mask</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.imshape">
+<code class="descname">imshape</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.imshape" title="Permalink to this definition">¶</a></dt>
+<dd><p>dimensions of the image (rows, cols)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.gt">
+<code class="descname">gt</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.gt" title="Permalink to this definition">¶</a></dt>
+<dd><p>gdal-type Geotransform of the input mask geotiff</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.wkt">
+<code class="descname">wkt</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.wkt" title="Permalink to this definition">¶</a></dt>
+<dd><p>well known text representation of coordinate reference system of input mask geotiff</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.epsg">
+<code class="descname">epsg</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.epsg" title="Permalink to this definition">¶</a></dt>
+<dd><p>epsg code of the coordinate reference system of input mask geotiff</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.unit">
+<code class="descname">unit</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>units of the coordinate reference system; typically ‘degree’ or ‘meter’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.pixarea">
+<code class="descname">pixarea</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.pixarea" title="Permalink to this definition">¶</a></dt>
+<dd><p>area of each pixel, in units of ‘unit’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.pixlen">
+<code class="descname">pixlen</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.pixlen" title="Permalink to this definition">¶</a></dt>
+<dd><p>length of each pixel, assumes sides are equal-length</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.paths">
+<code class="descname">paths</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>dictionary of strings for managing where files should be read/written</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.exit_sides">
+<code class="descname">exit_sides</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.exit_sides" title="Permalink to this definition">¶</a></dt>
+<dd><p>two-character string denoting which sides of the image the channel network intersects (N,E,S, and/or W). Upstream side should be given first.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.Imask">
+<code class="descname">Imask</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.Imask" title="Permalink to this definition">¶</a></dt>
+<dd><p>binary mask found at mask_path loaded into a numpy array via gdal.Open().ReadAsArray(), dtype=np.bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.links">
+<code class="descname">links</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores the links of the network and associated properties</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.nodes">
+<code class="descname">nodes</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores the nodes of the network and associated properties</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.Idist">
+<code class="descname">Idist</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.Idist" title="Permalink to this definition">¶</a></dt>
+<dd><p>image of the distance transform of the binary mask, dtype=np.float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rivgraph.classes.rivnetwork.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.adjacency_matrix">
+<code class="descname">adjacency_matrix</code><span class="sig-paren">(</span><em>weight=None</em>, <em>normalized=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.adjacency_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.adjacency_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the adjacency matrix for a graph defined by links and nodes
+dictionaries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>weight</strong> (<em>str</em><em>, </em><em>optional</em>) – [None] or the attribute in the links dictionary to use for weighting links. Typically ‘wid_adj’ or ‘len’.</p></li>
+<li><p><strong>normalized</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, each row in the adjacency matrix will sum to one. [False] by default.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>A</strong> – an NxN matrix representing the connectivity of the graph, where N is the
+number of nodes in the network. See adjacency matrix for more details.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.compute_distance_transform">
+<code class="descname">compute_distance_transform</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.compute_distance_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.compute_distance_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the distance transform of the channel network mask.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.compute_junction_angles">
+<code class="descname">compute_junction_angles</code><span class="sig-paren">(</span><em>weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.compute_junction_angles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.compute_junction_angles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the angle at nodes where only three links are connected. Directions
+must be assigned before angles can be computed. Also defines each 3-link
+node as ‘confluence’ or ‘bifurcation’ and appends this designation to
+the nodes dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>weight</strong> (<em>str</em>) – [None], ‘exp’ (exponential), or ‘lin’ (linear) to determine the decay
+of the weights the contributions of pixels as we move away from the
+junction node.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.compute_link_width_and_length">
+<code class="descname">compute_link_width_and_length</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.compute_link_width_and_length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.compute_link_width_and_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes widths and lengths of each link in the links dictionary and
+appends them as dictionary attributes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.compute_network">
+<code class="descname">compute_network</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.compute_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.compute_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the links and nodes of the channel network mask.  First skeletonizes
+the mask if not already done, then resolves the skeleton’s graph.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.get_islands">
+<code class="descname">get_islands</code><span class="sig-paren">(</span><em>props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length', 'surrounding_links']</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.get_islands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.get_islands" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds all the islands in the binary mask and computes their morphological
+properties. Can be used to help “clean” masks of small islands.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>props</strong> (<em>list</em><em>, </em><em>optional</em>) – Properties to compute for each island. Properties can be any of those
+provided by rivgraph.im_utils.regionprops.
+The default is [‘area’, ‘maxwidth’, ‘major_axis_length’, ‘minor_axis_length’].</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>islands</strong> – Contains the polygons of each island with the requested property
+attributes as columns. An additional ‘remove’ attribute is
+initialized to make thresholding easier.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geopandas GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.load_network">
+<code class="descname">load_network</code><span class="sig-paren">(</span><em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.load_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.load_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the link and nodes dictionaries from a .pkl file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – path–including extension–to network .pkl file. If [None], file
+is loaded from path found in paths[‘network_pickle’]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>*kwargs</em>, <em>axis=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates matplotlib plots of the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>*kwargs</strong> (<em>str</em>) – If [None], both of the following plots will be generated:
+‘network’: links and nodes are plotted, labeled with their ids
+‘directions’: links are plotted with their directionality indicated</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.save_network">
+<code class="descname">save_network</code><span class="sig-paren">(</span><em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.save_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.save_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the link and nodes dictionaries to a .pkl file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – path–including extension–to network .pkl file. If [None], file
+written to path found in paths[‘network_pickle’]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.to_geotiff">
+<code class="descname">to_geotiff</code><span class="sig-paren">(</span><em>export</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.to_geotiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.to_geotiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes geotiffs to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>export</strong> (<em>str</em>) – <dl class="simple">
+<dt>Select a raster to write to geotiff. Choose from:</dt><dd><p>’directions’ - network burned into a raster with link directions from 0 (upstream) to 1 (downstream))
+‘skeleton’  - skeletonized mask
+‘distance’ - distance-transformed mask</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rivgraph.classes.rivnetwork.to_geovectors">
+<code class="descname">to_geovectors</code><span class="sig-paren">(</span><em>export='network'</em>, <em>ftype='json'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.to_geovectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.to_geovectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the links and nodes of the network to geovectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>export</strong> (<em>str</em>) – <dl class="simple">
+<dt>Determines which features to export. Choose from:</dt><dd><p>all (exports all available vector data)
+network (links and nodes)
+links
+nodes
+centerline (river classes only)
+mesh (centerline mesh, river classes only)
+centerline_smooth (river classes only)</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>ftype</strong> (<em>str</em>) – <dl class="simple">
+<dt>Sets the output file format. Choose from:</dt><dd><p>json (GeoJSON)
+shp  (ESRI Shapefile)</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <span class="target" id="module-rivgraph.directionality"></span><div class="section" id="directionality">
 <h2>directionality<a class="headerlink" href="#directionality" title="Permalink to this headline">¶</a></h2>
 <p>Created on Wed Nov  7 11:38:16 2018
@@ -2084,6 +2953,15 @@ the padding distance. The default is 2.</p>
 </dl>
 </dd></dl>
 
+<span class="target" id="module-rivgraph.mask_utils"></span><p>Created on Mon Jul  6 18:29:23 2020</p>
+<p>&#64;author: Jon</p>
+<dl class="function">
+<dt id="rivgraph.mask_utils.pixagon">
+<code class="descclassname">rivgraph.mask_utils.</code><code class="descname">pixagon</code><span class="sig-paren">(</span><em>c_cent</em>, <em>r_cent</em>, <em>pixlen</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_utils.html#pixagon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_utils.pixagon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a shapely polygon
+of a provided center coordinate given the pixel resolution (pixlen).</p>
+</dd></dl>
+
 <span class="target" id="module-rivgraph.ordered_set"></span><div class="section" id="ordered-set">
 <h2>ordered_set<a class="headerlink" href="#ordered-set" title="Permalink to this headline">¶</a></h2>
 <p>An OrderedSet is a custom MutableSet that remembers its order, so that every
@@ -2466,7 +3344,7 @@ have an <cite>__iter__</cite> attribute anyway.</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.rivgraph"></span><span class="target" id="module-rivgraph.walk"></span><div class="section" id="walk-py">
+<span class="target" id="module-rivgraph.walk"></span><div class="section" id="walk-py">
 <h2>walk.py<a class="headerlink" href="#walk-py" title="Permalink to this headline">¶</a></h2>
 <p>Functions for walking along skeletons and finding branchpoints.</p>
 <p>Created on Mon Sep 10 09:39:19 2018</p>
