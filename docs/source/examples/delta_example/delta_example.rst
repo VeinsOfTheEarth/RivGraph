@@ -444,10 +444,9 @@ junction angles at each node.
 
 RivGraph will compute a number of topologic metrics for your delta
 channel network. These metrics are explained and demonstrated in Tejedor
-et. al
-`2015a <https://doi.org/10.1002/2014WR016577>`__
+et. al 2015a (https://doi.org/10.1002/2014WR016577)
 and
-`2015b <https://doi.org/10.1002/2014WR016604>`__.
+2015b (https://doi.org/10.1002/2014WR016604).
 Note that some pre-processing is done to the topology to compute these
 metrics; it is highly recommended that you understand these
 preprocessing steps and/or compute the metrics yourself.
