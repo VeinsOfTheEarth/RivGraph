@@ -4,12 +4,18 @@
 Examples
 ========
 
-Delta Example
--------------
+Delta Examples
+--------------
 
-.. todo:: add delta example 
+.. toctree::
+   :maxdepth: 1
 
-River Example
--------------
+   delta_example/delta_example
 
-.. todo:: add river example
+River Examples
+--------------
+
+.. toctree::
+   :maxdepth: 1
+
+   braided_river_example/braided_river_example

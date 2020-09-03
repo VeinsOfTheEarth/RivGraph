@@ -1,9 +1,12 @@
-[![Build Status](https://api.travis-ci.org/jonschwenk/rivgraph.svg?branch=master)](https://api.travis-ci.org/jonschwenk/rivgraph) 
+[![Build Status](https://api.travis-ci.org/jonschwenk/rivgraph.svg?branch=master)](https://api.travis-ci.org/jonschwenk/rivgraph)
 [![Coverage Status](https://coveralls.io/repos/github/jonschwenk/RivGraph/badge.svg?branch=master)](https://coveralls.io/github/jonschwenk/RivGraph?branch=master)
+![docs](https://github.com/jonschwenk/RivGraph/workflows/docs/badge.svg)
 <br />
 About
 -----
-RivGraph is a python package that provides tools for converting a binary mask of a channel network into a graph (i.e. a set of connected links and nodes). One major component of RivGraph is its ability to automatically set flow directions in each link of the network. It also computes morphologic metrics (lengths, widths, branching angles, etc.) and topologic metrics. RivGraph also contains a smattering of other tools and features, including some functions for helping clean and prepare your binary mask. 
+RivGraph is a python package that provides tools for converting a binary mask of a channel network into a graph (i.e. a set of connected links and nodes). One major component of RivGraph is its ability to automatically set flow directions in each link of the network. It also computes morphologic metrics (lengths, widths, branching angles, etc.) and topologic metrics. RivGraph also contains a smattering of other tools and features, including some functions for helping clean and prepare your binary mask.
+
+Check out the [documentation](https://jonschwenk.github.io/RivGraph/).
 
 You can see some of RivGraph's functionality via this [AGU poster](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph), and the flow directionality logic and validation is described in our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html).
 
@@ -35,7 +38,7 @@ Task list
 These tasks represent what is needed before we "officially" release RivGraph via publication in the [Journal of Open Source Software](https://joss.theoj.org/).
 
 3/29/2020 - Task list created
-- [x] [Conda Packaging](anaconda.org/jschwenk/rivgraph) - Updates 5/25/2020 
+- [x] [Conda Packaging](anaconda.org/jschwenk/rivgraph) - Updates 5/25/2020
 - [x] [Delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb)
 - [x] Braided river example
 - [x] How to fix flow directions (shown in braided river example, section 7.1)
