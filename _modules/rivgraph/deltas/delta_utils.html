@@ -169,12 +169,17 @@
 <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 <span class="kn">from</span> <span class="nn">pyproj.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 
 <span class="kn">import</span> <span class="nn">rivgraph.geo_utils</span> <span class="k">as</span> <span class="nn">gu</span>
 <span class="kn">import</span> <span class="nn">rivgraph.ln_utils</span> <span class="k">as</span> <span class="nn">lnu</span>
 <span class="kn">import</span> <span class="nn">rivgraph.im_utils</span> <span class="k">as</span> <span class="nn">iu</span>
 
+<span class="c1">#ir.load_network()</span>
+<span class="c1">#links = ir.links.copy()</span>
+<span class="c1">#nodes = ir.nodes.copy()</span>
+<span class="c1">#shoreline_shp = ir.paths[&#39;shoreline&#39;]</span>
+<span class="c1">#inlets_shp = ir.paths[&#39;inlet_nodes&#39;]</span>
+<span class="c1">#gdobj = ir.gdobj</span>
 
 <div class="viewcode-block" id="prune_delta"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_utils.prune_delta">[docs]</a><span class="k">def</span> <span class="nf">prune_delta</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">shoreline_shp</span><span class="p">,</span> <span class="n">inlets_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -205,11 +210,11 @@
     <span class="c1"># Get inlet nodes</span>
     <span class="n">nodes</span> <span class="o">=</span> <span class="n">find_inlet_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">inlets_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">)</span>
 
+    <span class="c1"># Remove spurs from network (this includes valid inlets and outlets)</span>
+    <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">dontremove</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]))</span>
+
     <span class="c1"># Clip the network with a shoreline polyline, adding outlet nodes</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">clip_by_shoreline</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">shoreline_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">)</span>
-
-    <span class="c1"># Remove spurs from network (this includes valid inlets and outlets)</span>
-    <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">dontremove</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]))</span>
 
     <span class="c1"># Remove sets of links that are disconnected from inlets/outlets except for a single bridge link (effectively re-pruning the network)</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_disconnected_bridge_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
@@ -298,10 +303,6 @@
 
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># links = d.links</span>
-    <span class="c1"># gdobj = d.gdobj</span>
-    <span class="c1"># nodes = d.nodes</span>
-    <span class="c1"># shoreline_shp = d.paths[&#39;shoreline&#39;]</span>
 
     <span class="c1"># Get links as geopandas dataframe</span>
     <span class="n">links_gdf</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">links_to_gpd</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">)</span>
@@ -325,7 +326,6 @@
 
     <span class="c1"># Loop through each cut link and truncate it near the intersection point;</span>
     <span class="c1"># add endpoint nodes; adjust connectivities</span>
-    <span class="n">newlink_ids</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">clid</span> <span class="ow">in</span> <span class="n">cut_link_ids</span><span class="p">:</span>
 
         <span class="c1"># Remove the pixel that represents the intersection between the outlet links</span>
@@ -374,103 +374,63 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Check link-breaking.&#39;</span><span class="p">)</span>
 
-            <span class="c1"># Only add new link if it contains indices</span>
+            <span class="c1"># Only add new link if it contains and indices</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">newlink_idcs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">add_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">newlink_idcs</span><span class="p">)</span>
-                <span class="n">newlink_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="c1"># Now delete the old link</span>
         <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">delete_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">clid</span><span class="p">)</span>
 
     <span class="c1"># Now that the links have been clipped, remove the links that are not</span>
     <span class="c1"># part of the delta network</span>
-    
-    <span class="c1"># Use networkx graph to determine which links to keep</span>
-    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
-    <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
-    <span class="k">for</span> <span class="n">lc</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]:</span>
-        <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">lc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        
-    <span class="c1"># Find the network containing the inlet(s)</span>
-    <span class="n">main_net</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">node_connected_component</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-    
-    <span class="c1"># Ensure all inlets are contained in this network</span>
-    <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">main_net</span> <span class="o">-</span> <span class="n">nx</span><span class="o">.</span><span class="n">node_connected_component</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">nid</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Not all inlets found in main connected component.&#39;</span><span class="p">)</span>
-            
-    <span class="c1"># Remove all nodes not in the main network</span>
-    <span class="n">remove_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">main_net</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">rn</span> <span class="ow">in</span> <span class="n">remove_nodes</span><span class="p">:</span>
-        <span class="n">G</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">rn</span><span class="p">)</span>
-            
-    <span class="c1"># Get ids of the remaining links</span>
-    <span class="n">link_ids</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
-        <span class="n">ulinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
-        <span class="n">vlinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
-        <span class="n">link_ids</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ul</span> <span class="k">for</span> <span class="n">ul</span> <span class="ow">in</span> <span class="n">ulinks</span> <span class="k">if</span> <span class="n">ul</span> <span class="ow">in</span> <span class="n">vlinks</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-    
-    <span class="c1"># Get ids to remove from network</span>
-    <span class="n">remove_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">l</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">link_ids</span><span class="p">]</span>
-    
-    <span class="c1"># Remove the links</span>
-    <span class="k">for</span> <span class="n">rl</span> <span class="ow">in</span> <span class="n">remove_links</span><span class="p">:</span>
-        <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">delete_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">rl</span><span class="p">)</span>
-   
-    <span class="c1"># Identify the outlet nodes and add to nodes dictionary</span>
-    <span class="n">outlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">ncon</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ncon</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">ncon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">newlink_ids</span><span class="p">]</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">gdobj</span><span class="o">.</span><span class="n">RasterYSize</span><span class="p">,</span> <span class="n">gdobj</span><span class="o">.</span><span class="n">RasterXSize</span><span class="p">)</span>
+
+    <span class="c1"># Burn links to grid where value is link ID</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="c1"># 2-pixel links can be overwritten and disappear, so redo them at the end</span>
+    <span class="n">twopix</span> <span class="o">=</span> <span class="p">[</span><span class="n">lid</span> <span class="k">for</span> <span class="n">lid</span><span class="p">,</span> <span class="n">idcs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idcs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">lidx</span><span class="p">,</span> <span class="n">lid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">],</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]):</span>
+        <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">lidx</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+        <span class="n">I</span><span class="p">[</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">lid</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">twopix</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">tpl</span> <span class="ow">in</span> <span class="n">twopix</span><span class="p">:</span>
+            <span class="n">lindex</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tpl</span><span class="p">)</span>
+            <span class="n">lidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">lindex</span><span class="p">]</span>
+            <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">lidx</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+            <span class="n">I</span><span class="p">[</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">tpl</span>
+
+    <span class="c1"># Binarize</span>
+    <span class="n">I_bin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">I</span><span class="o">&gt;-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="c1"># Keep the blob that contains the inlet nodes</span>
+    <span class="c1"># Get the pixel indices of the different connected blobs</span>
+    <span class="n">blobidcs</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">blob_idcs</span><span class="p">(</span><span class="n">I_bin</span><span class="p">)</span>
+    <span class="c1"># Find the blob that contains the inlets</span>
+    <span class="n">inlet_coords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]:</span>
+        <span class="n">inlet_coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)])</span>
+    <span class="n">i_contains_inlets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">bi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">blobidcs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">inlet_coords</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">bi</span><span class="p">):</span>
+            <span class="n">i_contains_inlets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="c1"># Error checking</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i_contains_inlets</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Inlets not contained in any portion of the skeleton.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Keep only the pixels in the blob containing the inlets</span>
+    <span class="n">keeppix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">blobidcs</span><span class="p">[</span><span class="n">i_contains_inlets</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="n">I_bin</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">Itemp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="n">Itemp</span><span class="p">[</span><span class="n">keeppix</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">keeppix</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">I</span><span class="p">[</span><span class="o">~</span><span class="n">Itemp</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">keep_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+    <span class="n">unwanted_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">lid</span> <span class="k">for</span> <span class="n">lid</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">lid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep_ids</span><span class="p">]</span>
+
+    <span class="c1"># Delete all the unwanted links</span>
+    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">unwanted_ids</span><span class="p">:</span>
+        <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">delete_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+    <span class="c1"># Store outlets in nodes dict</span>
+    <span class="n">outlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">ncon</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ncon</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">nid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]]</span>
     <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlets</span>
-    
-    <span class="c1"># # Old method below here</span>
-    <span class="c1"># shape = (gdobj.RasterYSize, gdobj.RasterXSize)</span>
-
-    <span class="c1"># # Burn links to grid where value is link ID</span>
-    <span class="c1"># I = np.ones(shape, dtype=np.int64) * -1</span>
-    <span class="c1"># # 2-pixel links can be overwritten and disappear, so redo them at the end</span>
-    <span class="c1"># twopix = [lid for lid, idcs in zip(links[&#39;id&#39;], links[&#39;idx&#39;]) if len(idcs) &lt; 3]</span>
-    <span class="c1"># for lidx, lid in zip(links[&#39;idx&#39;], links[&#39;id&#39;]):</span>
-    <span class="c1">#     xy = np.unravel_index(lidx, shape)</span>
-    <span class="c1">#     I[xy[0], xy[1]] = lid</span>
-    <span class="c1"># if len(twopix) &gt; 0:</span>
-    <span class="c1">#     for tpl in twopix:</span>
-    <span class="c1">#         lindex = links[&#39;id&#39;].index(tpl)</span>
-    <span class="c1">#         lidx = links[&#39;idx&#39;][lindex]</span>
-    <span class="c1">#         xy = np.unravel_index(lidx, shape)</span>
-    <span class="c1">#         I[xy[0], xy[1]] = tpl</span>
-
-    <span class="c1"># # Binarize</span>
-    <span class="c1"># I_bin = np.array(I&gt;-1, dtype=np.bool)</span>
-    <span class="c1"># # Keep the blob that contains the inlet nodes</span>
-    <span class="c1"># # Get the pixel indices of the different connected blobs</span>
-    <span class="c1"># blobidcs = iu.blob_idcs(I_bin)</span>
-    <span class="c1"># # Find the blob that contains the inlets</span>
-    <span class="c1"># inlet_coords = []</span>
-    <span class="c1"># for i in nodes[&#39;inlets&#39;]:</span>
-    <span class="c1">#     inlet_coords.append(nodes[&#39;idx&#39;][nodes[&#39;id&#39;].index(i)])</span>
-    <span class="c1"># i_contains_inlets = []</span>
-    <span class="c1"># for i, bi in enumerate(blobidcs):</span>
-    <span class="c1">#     if set(inlet_coords).issubset(bi):</span>
-    <span class="c1">#         i_contains_inlets.append(i)</span>
-    <span class="c1"># # Error checking</span>
-    <span class="c1"># if len(i_contains_inlets) != 1:</span>
-    <span class="c1">#     raise RuntimeError(&#39;Inlets not contained in any portion of the skeleton.&#39;)</span>
-
-    <span class="c1"># # Keep only the pixels in the blob that contains the inlets</span>
-    <span class="c1"># keeppix = np.unravel_index(list(blobidcs[i_contains_inlets[0]]), I_bin.shape)</span>
-    <span class="c1"># Itemp = np.zeros(I.shape, dtype=np.bool)</span>
-    <span class="c1"># Itemp[keeppix[0], keeppix[1]] = True</span>
-    <span class="c1"># I[~Itemp] = -1</span>
-    <span class="c1"># keep_ids = set(np.unique(I))</span>
-    <span class="c1"># unwanted_ids = [lid for lid in links[&#39;id&#39;] if lid not in keep_ids]</span>
-
-    <span class="c1"># # Delete all the unwanted links</span>
-    <span class="c1"># for b in unwanted_ids:</span>
-    <span class="c1">#     links, nodes = lnu.delete_link(links, nodes, b)</span>
-
-    <span class="c1"># # Store outlets in nodes dict</span>
-    <span class="c1"># outlets = [nid for nid, ncon in zip(nodes[&#39;id&#39;], nodes[&#39;conn&#39;]) if len(ncon) == 1 and nid not in nodes[&#39;inlets&#39;]]</span>
-    <span class="c1"># nodes[&#39;outlets&#39;] = outlets</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 </pre></div>
