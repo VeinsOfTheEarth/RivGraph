@@ -29,7 +29,7 @@ Savvy users have been able to install RivGraph from this Github repo, but usuall
 
 How to use?
 -----
-We are working on documentation and examples. Your best bet for getting started is to reproduce the [Colville delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb) or the[Brahmaputra river example](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb). Otherwise, use RivGraph by creating either a delta or a river class, then applying the associated methods. Look at the [classes.py](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/classes.py) script to get a sense for what methods are available, and what they're actually doing.
+We are working on documentation and examples. Your best bet for getting started is to reproduce the [Colville delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb) or the [Brahmaputra river example](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb). Otherwise, use RivGraph by creating either a delta or a river class, then applying the associated methods. Look at the [classes.py](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/classes.py) script to get a sense for what methods are available, and what they're actually doing.
 
 **Note**: there are many functions under the hood that may be useful to you. Check out the [im_utils script](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py) (image utilities) in particular for functions to help whip your mask into shape!
 
@@ -40,10 +40,10 @@ These tasks represent what is needed before we "officially" release RivGraph via
 3/29/2020 - Task list created
 - [x] [Conda Packaging](anaconda.org/jschwenk/rivgraph) - Updates 5/25/2020
 - [x] [Delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb)
-- [x] Braided river example
+- [x] [Braided river example](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb)
 - [x] How to fix flow directions (shown in braided river example, section 7.1)
-- [x] Function for removing artificial nodes - 6/10/2020
-- [x] Unit testing
+- [x] Function for removing artificial nodes. Restructured code to not add these automatically, but can be added with a [function](https://github.com/jonschwenk/RivGraph/blob/9bc320239443ea7b1673307f77f4edb86251aaf9/rivgraph/ln_utils.py#L724).
+- [x] [Unit testing](https://github.com/jonschwenk/RivGraph/tree/master/tests)
 - [ ] How to prepare masks for inputs
 - [ ] Where to get masks
 - [ ] How to draw shorelines
