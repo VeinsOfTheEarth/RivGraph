@@ -8,3 +8,4 @@ pyproj
 Shapely
 Fiona
 matplotlib
+fastdtw
