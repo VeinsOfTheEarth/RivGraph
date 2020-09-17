@@ -187,10 +187,10 @@
 <span class="sd">    calls a number of helping functions and uses a somewhat-complicated logic</span>
 <span class="sd">    to achieve this. The algorithms and logic is described in this open-access</span>
 <span class="sd">    paper: https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf</span>
-
-<span class="sd">    Every time this is run, all directionality information is reset and</span>
+<span class="sd">        </span>
+<span class="sd">    Every time this is run, all directionality information is reset and </span>
 <span class="sd">    recomputed. This includes checking for manually set links via the provided</span>
-<span class="sd">    csv.</span>
+<span class="sd">    csv. </span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -201,7 +201,7 @@
 <span class="sd">    imshape : tuple</span>
 <span class="sd">        Shape of binary mask as (nrows, ncols).</span>
 <span class="sd">    manual_set_csv : str, optional</span>
-<span class="sd">        Path to a user-provided csv file of known link directions. The default</span>
+<span class="sd">        Path to a user-provided csv file of known link directions. The default </span>
 <span class="sd">        is None.</span>
 
 <span class="sd">    Returns</span>
@@ -211,10 +211,10 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties with all directions set.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
     <span class="c1"># Add fields to links dict for tracking and setting directionality</span>
-    <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">dy</span><span class="o">.</span><span class="n">add_directionality_trackers</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="s1">&#39;delta&#39;</span><span class="p">)</span>
-
+    <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">dy</span><span class="o">.</span><span class="n">add_directionality_trackers</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="s1">&#39;delta&#39;</span><span class="p">)</span>    
+    
     <span class="c1"># If a manual fix csv has been provided, set those links first</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">dy</span><span class="o">.</span><span class="n">dir_set_manually</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">manual_set_csv</span><span class="p">)</span>
 
@@ -255,8 +255,8 @@
 <span class="sd">    This represents the core of the &quot;delta recipe&quot; described in the following</span>
 <span class="sd">    open access paper: https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf</span>
 <span class="sd">    However, note that as RivGraph develops, this recipe may no longer match</span>
-<span class="sd">    the one presented in that paper. The recipe chains together a number of</span>
-<span class="sd">    exploitative algorithms to iteratively set flow directions for the most</span>
+<span class="sd">    the one presented in that paper. The recipe chains together a number of </span>
+<span class="sd">    exploitative algorithms to iteratively set flow directions for the most </span>
 <span class="sd">    certain links first.</span>
 
 
@@ -277,7 +277,7 @@
 <span class="sd">        Network nodes and associated properties with initial directions set.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    
     <span class="c1"># Compute all the &quot;guesses&quot;</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">dy</span><span class="o">.</span><span class="n">dir_main_channel</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">dir_synthetic_DEM</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">imshape</span><span class="p">)</span>
@@ -415,8 +415,8 @@
 <div class="viewcode-block" id="fix_delta_cycles"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_directionality.fix_delta_cycles">[docs]</a><span class="k">def</span> <span class="nf">fix_delta_cycles</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">imshape</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempts to resolve all cycles within the delta network. This function</span>
-<span class="sd">    is essentially a wrapper for fix_delta_cycle(), which is where the</span>
-<span class="sd">    heavy lifting is actually done. This function finds cycles, calls</span>
+<span class="sd">    is essentially a wrapper for fix_delta_cycle(), which is where the </span>
+<span class="sd">    heavy lifting is actually done. This function finds cycles, calls </span>
 <span class="sd">    fix_delta_cycle() on each one, then aggregates the results.</span>
 
 <span class="sd">    Parameters</span>
@@ -447,7 +447,7 @@
     <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">lc</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]:</span>
         <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">lc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-
+        
 
     <span class="c1"># Check for cycles</span>
     <span class="n">cantfix_links</span> <span class="o">=</span> <span class="p">[]</span>
@@ -486,13 +486,13 @@
 
 <div class="viewcode-block" id="fix_delta_cycle"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_directionality.fix_delta_cycle">[docs]</a><span class="k">def</span> <span class="nf">fix_delta_cycle</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">cyc_links</span><span class="p">,</span> <span class="n">imshape</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Attempts to resolve a single cycle within a delta network. The general</span>
-<span class="sd">    logic is that all link directions of the cycle are un-set except for those</span>
-<span class="sd">    set by highly-reliable algorithms, and a modified direction-setting</span>
-<span class="sd">    recipe is implemented to re-set these algorithms. This was developed</span>
+<span class="sd">    Attempts to resolve a single cycle within a delta network. The general </span>
+<span class="sd">    logic is that all link directions of the cycle are un-set except for those </span>
+<span class="sd">    set by highly-reliable algorithms, and a modified direction-setting </span>
+<span class="sd">    recipe is implemented to re-set these algorithms. This was developed </span>
 <span class="sd">    according to the most commonly-encountered cases for real deltas, but could</span>
 <span class="sd">    certainly be improved.</span>
-
+<span class="sd">    </span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -595,7 +595,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    xy : np.array</span>
-<span class="sd">        Two element array. First element contains x coordinates, second</span>
+<span class="sd">        Two element array. First element contains x coordinates, second </span>
 <span class="sd">        contains y coordinates of points to compute a convex hull around.</span>
 
 <span class="sd">    Returns</span>
@@ -610,7 +610,7 @@
     <span class="n">hull_verts</span> <span class="o">=</span> <span class="n">ConvexHull</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]))))</span><span class="o">.</span><span class="n">vertices</span>
     <span class="n">hull_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">hull_verts</span><span class="p">],</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">hull_verts</span><span class="p">])))</span>
     <span class="n">hull_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hull_coords</span><span class="p">,</span> <span class="p">[</span><span class="n">hull_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]]),</span> <span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">hull_coords</span><span class="o">.</span><span class="n">size</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
-
+    
     <span class="c1"># Find the biggest gap between hull points</span>
     <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">hull_coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">hull_coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">maxdist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
@@ -628,7 +628,7 @@
 
 <div class="viewcode-block" id="dir_synthetic_DEM"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_directionality.dir_synthetic_DEM">[docs]</a><span class="k">def</span> <span class="nf">dir_synthetic_DEM</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">imshape</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Builds a synthetic DEM by considering inlets as &quot;hills&quot; and outlets as</span>
+<span class="sd">    Builds a synthetic DEM by considering inlets as &quot;hills&quot; and outlets as </span>
 <span class="sd">    &quot;depressions.&quot; This synthetic is then used to compute the &quot;slope&quot;</span>
 <span class="sd">    of each link, which is added to the links dictionary. Additionally,</span>
 <span class="sd">    direction guesses for each link&#39;s flow are computed.</span>

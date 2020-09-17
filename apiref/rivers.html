@@ -403,23 +403,6 @@ grid_spacing: how far apart should mesh cells be, in same units of coords</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="rivgraph.rivers.river_utils.chan_width">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">chan_width</code><span class="sig-paren">(</span><em>coords</em>, <em>Imask</em>, <em>pixarea=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#chan_width"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.chan_width" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns two estimates of channel width: width_channels is the average
-width of just the channels, and width_extent is the average width of the
-extent of the river (includes islands).</p>
-<dl>
-<dt>Inputs:</dt><dd><p>coords - Nx2 list of (x,y) coordinates defining the centerline of the input mask
-Imask - binary mask on which the centerline was computed
-pixarea - (Optional, float) area of each pixel in the mask. If none is</p>
-<blockquote>
-<div><p>provided, widths will be in units of pixels.</p>
-</div></blockquote>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
 <dt id="rivgraph.rivers.river_utils.compute_eBI">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">compute_eBI</code><span class="sig-paren">(</span><em>path_meshlines</em>, <em>path_links</em>, <em>method='local'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#compute_eBI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.compute_eBI" title="Permalink to this definition">¶</a></dt>
 <dd><p>method can be ‘local’ or ‘avg’</p>
@@ -504,6 +487,26 @@ cl.pkl: pickle file containing centerline coords, EPSG, and paths dictionary</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="rivgraph.rivers.river_utils.max_valley_width">
+<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">max_valley_width</code><span class="sig-paren">(</span><em>Imask</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#max_valley_width"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.max_valley_width" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the maximum valley width of the input mask. Finds the single
+largest blob in the mask, fills its holes, then uses the distance transform
+to find the largest width.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Imask</strong> (<em>np.array</em>) – Binary mask from which the centerline was computed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>max_valley_width</strong> – Maximum width of the channel belt, useful for computing a mesh. Units
+are pixels, so be careful to re-convert.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="rivgraph.rivers.river_utils.mirror_line_ends">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">mirror_line_ends</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>npad</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#mirror_line_ends"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.mirror_line_ends" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reflects both ends of a line defined by x and y coordinates. The mirrored
@@ -542,7 +545,7 @@ curvatures is within tolerance percent.</p>
 
 <dl class="function">
 <dt id="rivgraph.rivers.river_utils.valleyline_mesh">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">valleyline_mesh</code><span class="sig-paren">(</span><em>coords</em>, <em>width_chan</em>, <em>bufferdist</em>, <em>grid_spacing</em>, <em>smoothing=0.15</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#valleyline_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.valleyline_mesh" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">valleyline_mesh</code><span class="sig-paren">(</span><em>coords</em>, <em>avg_chan_width</em>, <em>buf_halfwidth</em>, <em>grid_spacing</em>, <em>smoothing=0.15</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#valleyline_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.valleyline_mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function generates a mesh over an input river centerline. The mesh
 is generated across the valley, not just the channel width, in order to
 perform larger-scale spatial analyses. With the correct parameter
@@ -553,7 +556,7 @@ still somewhat in beta mode.</p>
 <dl class="simple">
 <dt>INPUTS:</dt><dd><p>coords: Nx2 list, tuple, or np.array of x,y coordinates. Coordinates MUST be in projected CRS for viable results.
 width_chan: estimated width. Units MUST correspond to those of the input coordinates
-bufferdist: distance between centerline and left or right bufferline, in units of coords
+buf_width: distance between centerline and left or right bufferline, in units of coords
 grid_spacing: fraction of input centerline length that should be used for smoothing to create the valley centerline  (between 0 and 1)
 smoothing: fraction of centerline length to use for smoothing window</p>
 </dd>

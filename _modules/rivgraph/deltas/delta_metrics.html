@@ -162,7 +162,6 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">delta_metrics</span>
 <span class="sd">=============</span>
-
 <span class="sd">Created on Mon May 21 09:00:01 2018</span>
 
 <span class="sd">@author: Jon</span>
@@ -174,15 +173,13 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This script contains algorithms that were ported from Matlab scripts provided</span>
-<span class="sd">by Alej Tejedor to compute topologic and dynamic metrics on deltas. The provided</span>
+<span class="sd">by Alejandro Tejedor to compute topologic and dynamic metrics on deltas. The provided</span>
 <span class="sd">Matlab script required the bioinformatics toolbox; here we use networkx to</span>
 <span class="sd">achieve the same result. Ported by Jon Schwenk.</span>
-
 <span class="sd">The conversion was tested by computing metrics for the Wax Lake Delta</span>
 <span class="sd">(provided by AT) and the Yenesei Delta (provided by JS)--perfect agreement</span>
 <span class="sd">was found for all metrics, for both deltas, using both the original Matlab</span>
 <span class="sd">scripts and the Python functions provided here.</span>
-
 <span class="sd">JS has made some efficiency improvments to the code; otherwise most variable</span>
 <span class="sd">names and code structure was matched to the original Matlab scripts.</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -303,10 +300,8 @@
 <span class="sd">    All the delta metrics here require a single apex node, and that that node</span>
 <span class="sd">    be connected to at least two downstream links. This function ensures these</span>
 <span class="sd">    conditions are met; where there are multiple inlets, the widest is chosen.</span>
-
 <span class="sd">    This function also ensures that the inlet node is attached to at least two</span>
 <span class="sd">    links--this is important for computing un-biased delta metrics.</span>
-
 <span class="sd">    The links and nodes dicts are copied so they remain unaltered; the altered</span>
 <span class="sd">    copies are returned.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -379,7 +374,6 @@
 <span class="sd">    Computes the steady state flux distribution in the delta nodes when the</span>
 <span class="sd">    system is fed with a constant unity influx from the Apex. Also defines the</span>
 <span class="sd">    subnetworks apex-to-outlet.</span>
-
 <span class="sd">    The SubN is an NxM matrix, where N is number of nodes and M is the number</span>
 <span class="sd">    of outlets. For each mth outlet, its contributing subnetwork is given by</span>
 <span class="sd">    the nonzero entries in SubN. The values in SubN are the degree of</span>
@@ -388,7 +382,6 @@
 <span class="sd">    node belongs *only* to the n&#39;th subnetwork. The values in SubN may be</span>
 <span class="sd">    interpreted as the percentage of tracers that pass through node m that</span>
 <span class="sd">    eventually make their way to the outlet of subnetwork n.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ApexID</span><span class="p">,</span> <span class="n">OutletsID</span> <span class="o">=</span> <span class="n">find_inlet_outlet_nodes</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
@@ -459,7 +452,6 @@
 <span class="sd">    Compute the nonlocal entrop rate (nER) corresponding to the delta</span>
 <span class="sd">    (including flux partition) represented by adjacency matrix A, and compares</span>
 <span class="sd">    its value with the nER resulting from randomizing the flux partition.</span>
-
 <span class="sd">    OUTPUTS:</span>
 <span class="sd">        pExc: the probability that the value of nER for a randomization of the fluxes</span>
 <span class="sd">              on the topology dictated by A exceeds the actual value of nER. If the</span>
@@ -618,7 +610,6 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    NOTE! TopoDist was not supplied with this function--can use networkX to compute shortest path but need to know what &quot;shortest&quot; means</span>
 <span class="sd">    This function will not work until TopoDist is resolved.</span>
-
 <span class="sd">    Computes the resistance distance (RD) from the Apex to each of the</span>
 <span class="sd">    shoreline outlets. The value of RD between two nodes is the effective</span>
 <span class="sd">    resistance between the two nodes when each link in the network is replaced</span>

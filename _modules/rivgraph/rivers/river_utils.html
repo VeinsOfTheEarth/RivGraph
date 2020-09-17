@@ -169,14 +169,16 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">from</span> <span class="nn">fastdtw</span> <span class="kn">import</span> <span class="n">fastdtw</span>
 <span class="kn">from</span> <span class="nn">scipy.ndimage.morphology</span> <span class="kn">import</span> <span class="n">distance_transform_edt</span>
 <span class="kn">import</span> <span class="nn">shapely</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Polygon</span>
 <span class="kn">import</span> <span class="nn">scipy.interpolate</span> <span class="k">as</span> <span class="nn">si</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
-<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">cdist</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">cdist</span><span class="p">,</span> <span class="n">euclidean</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+
 
 <span class="kn">from</span> <span class="nn">rivgraph.ordered_set</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
 <span class="kn">import</span> <span class="nn">rivgraph.im_utils</span> <span class="k">as</span> <span class="nn">iu</span>
@@ -712,10 +714,10 @@
     <span class="n">xs_sm</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">xs_m</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window_len</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
     <span class="n">ys_sm</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">ys_m</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window_len</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs_m</span><span class="p">,</span> <span class="n">ys_m</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+    <span class="c1"># plt.close(&#39;all&#39;)</span>
+    <span class="c1"># plt.plot(xs_sm, ys_sm)</span>
+    <span class="c1"># plt.plot(xs_m, ys_m)</span>
+    <span class="c1"># plt.axis(&#39;equal&#39;)</span>
 
     <span class="c1"># Re-sample centerline to even spacing</span>
     <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">s_ds</span><span class="p">(</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">)</span>
@@ -770,12 +772,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">perp_aligned</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p1</span><span class="p">,</span> <span class="n">p0</span><span class="p">))</span>
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs_rs</span><span class="p">,</span> <span class="n">ys_rs</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">perp_aligned</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k.&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;r.&#39;</span><span class="p">)</span>
+    <span class="c1"># plt.close(&#39;all&#39;)</span>
+    <span class="c1"># plt.plot(xs_rs, ys_rs,&#39;.&#39;)</span>
+    <span class="c1"># plt.axis(&#39;equal&#39;)</span>
+    <span class="c1"># for p in perp_aligned:</span>
+    <span class="c1">#     plt.plot(p[0][0], p[0][1], &#39;k.&#39;)</span>
+    <span class="c1">#     plt.plot(p[1][0], p[1][1], &#39;r.&#39;)</span>
 
 
     <span class="c1"># Trim the centerline to remove the mirrored portions</span>
@@ -818,7 +820,7 @@
     <span class="k">return</span> <span class="n">xs_m</span><span class="p">,</span> <span class="n">ys_m</span></div>
 
 
-<div class="viewcode-block" id="valleyline_mesh"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.valleyline_mesh">[docs]</a><span class="k">def</span> <span class="nf">valleyline_mesh</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">width_chan</span><span class="p">,</span> <span class="n">bufferdist</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">0.15</span><span class="p">):</span>
+<div class="viewcode-block" id="valleyline_mesh"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.valleyline_mesh">[docs]</a><span class="k">def</span> <span class="nf">valleyline_mesh</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">avg_chan_width</span><span class="p">,</span> <span class="n">buf_halfwidth</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">0.15</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function generates a mesh over an input river centerline. The mesh</span>
 <span class="sd">    is generated across the valley, not just the channel width, in order to</span>
@@ -832,7 +834,7 @@
 <span class="sd">    INPUTS:</span>
 <span class="sd">        coords: Nx2 list, tuple, or np.array of x,y coordinates. Coordinates MUST be in projected CRS for viable results.</span>
 <span class="sd">        width_chan: estimated width. Units MUST correspond to those of the input coordinates</span>
-<span class="sd">        bufferdist: distance between centerline and left or right bufferline, in units of coords</span>
+<span class="sd">        buf_width: distance between centerline and left or right bufferline, in units of coords</span>
 <span class="sd">        grid_spacing: fraction of input centerline length that should be used for smoothing to create the valley centerline  (between 0 and 1)</span>
 <span class="sd">        smoothing: fraction of centerline length to use for smoothing window</span>
 
@@ -853,14 +855,14 @@
 <span class="sd">        the centerline to the first and last transect intersections.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
-        <span class="n">int_pts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># int_pts = []</span>
         <span class="n">dist_to_int</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ie</span><span class="p">,</span> <span class="n">eps</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">endpts</span><span class="p">):</span>
             <span class="n">tsect</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">eps</span><span class="p">)</span>
             <span class="n">int_pt</span> <span class="o">=</span> <span class="n">tsect</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
             
             <span class="k">if</span> <span class="n">int_pt</span><span class="o">.</span><span class="n">coords</span> <span class="o">==</span> <span class="p">[]:</span> <span class="c1"># There is no intersection</span>
-                <span class="n">int_pts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="c1"># int_pts.append(None)</span>
                 <span class="n">dist_to_int</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
                 <span class="k">continue</span>
             
@@ -868,15 +870,14 @@
             <span class="c1"># the along-centerline distance of this point</span>
             <span class="n">dist_to_int</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">int_pt</span><span class="p">)))</span>
             
-            <span class="n">int_pts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">int_pt</span><span class="p">)</span>
+            <span class="c1"># int_pts.append(int_pt)</span>
             
         <span class="n">dist_to_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dist_to_int</span><span class="p">)</span>
-        <span class="n">int_pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">int_pts</span><span class="p">)</span>
             
         <span class="c1"># Now clip the distances, centerline, and endpoints where there were no intersections</span>
         <span class="n">no_ints</span> <span class="o">=</span> <span class="n">dist_to_int</span><span class="o">==</span><span class="kc">None</span>
         <span class="n">dist_to_int</span> <span class="o">=</span> <span class="n">dist_to_int</span><span class="p">[</span><span class="o">~</span><span class="n">no_ints</span><span class="p">]</span>
-        <span class="n">int_pts</span> <span class="o">=</span> <span class="n">int_pts</span><span class="p">[</span><span class="o">~</span><span class="n">no_ints</span><span class="p">]</span>
+        <span class="c1"># int_pts = [ip for i, ip in enumerate(int_pts) if no_ints[i] == False]</span>
         <span class="n">cl_clip</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="o">~</span><span class="n">no_ints</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="o">~</span><span class="n">no_ints</span><span class="p">]))</span>
         <span class="n">ep_clip</span> <span class="o">=</span> <span class="p">[</span><span class="n">ep</span> <span class="k">for</span> <span class="n">iep</span><span class="p">,</span> <span class="n">ep</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">endpts</span><span class="p">)</span> <span class="k">if</span> <span class="n">no_ints</span><span class="p">[</span><span class="n">iep</span><span class="p">]</span><span class="o">==</span><span class="kc">False</span><span class="p">]</span>        
        
@@ -888,8 +889,6 @@
             
     
     <span class="k">def</span> <span class="nf">iterative_cl_pt_mapping</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">bufdists</span><span class="p">,</span> <span class="n">side</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">fastdtw</span> <span class="kn">import</span> <span class="n">fastdtw</span>
-        <span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">euclidean</span>
 
         <span class="n">mapper</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1019,11 +1018,12 @@
 
 
     <span class="sd">&quot;&quot;&quot; Function code begins here &quot;&quot;&quot;</span>
-    <span class="c1"># coords = process_river.centerline</span>
-    <span class="c1"># width_chan = process_river.width_chans</span>
-    <span class="c1"># bufferdist = 0.5 #process_river.max_valley_width_pixels * process_river.pixlen * 1.1</span>
-    <span class="c1"># grid_spacing = 0.25# np.percentile(process_river.links[&#39;len&#39;],25)</span>
-    <span class="c1"># smoothing = 0.5</span>
+    <span class="c1"># obj = ind</span>
+    <span class="c1"># coords = obj.centerline</span>
+    <span class="c1"># avg_chan_width = obj.avg_chan_width</span>
+    <span class="c1"># buf_halfwidth = obj.max_valley_width_pixels * obj.pixlen * 1.1</span>
+    <span class="c1"># grid_spacing = avg_chan_width</span>
+    <span class="c1"># smoothing = 0.1</span>
 
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">coords</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
@@ -1050,8 +1050,8 @@
     <span class="n">cl</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">)])</span>
     
     <span class="c1"># Simplify the linestring</span>
-    <span class="n">npts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">length</span><span class="o">/</span><span class="n">width_chan</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
-    <span class="n">tol</span> <span class="o">=</span> <span class="n">width_chan</span><span class="o">/</span><span class="mi">100</span>
+    <span class="n">npts</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">length</span><span class="o">/</span><span class="n">avg_chan_width</span><span class="o">/</span><span class="mi">20</span><span class="p">),</span> <span class="mi">25</span><span class="p">)</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="n">avg_chan_width</span><span class="o">/</span><span class="mi">100</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">cl2</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cl2</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">npts</span><span class="p">:</span>
@@ -1060,7 +1060,7 @@
             <span class="k">break</span>
 
     <span class="c1"># Offset valley centerline for left and right valleylines    </span>
-    <span class="n">bdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">bufferdist</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bufferdist</span><span class="o">/</span><span class="n">width_chan</span><span class="o">/</span><span class="mi">10</span><span class="p">),</span> <span class="mi">25</span><span class="p">))</span>   
+    <span class="n">bdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">buf_halfwidth</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">buf_halfwidth</span><span class="o">/</span><span class="n">avg_chan_width</span><span class="p">),</span> <span class="mi">25</span><span class="p">))</span>   
     <span class="n">bdists</span> <span class="o">=</span> <span class="n">bdists</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
 
     <span class="c1"># Iteratively create offset lines and map each centerline index    </span>
@@ -1076,7 +1076,7 @@
     <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dists</span><span class="p">])</span> <span class="c1"># avoid dtype(&#39;O&#39;) error in numpy.interp</span>
     
     <span class="c1"># Now build the interpolating functions</span>
-    <span class="n">dists_to_interpolate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dists</span><span class="p">),</span> <span class="mi">200</span><span class="p">)</span>
+    <span class="n">dists_to_interpolate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dists</span><span class="p">),</span> <span class="n">grid_spacing</span><span class="p">)</span>
     <span class="n">xp_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ep</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">ep_clip</span><span class="p">])</span>
     <span class="n">yp_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ep</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">ep_clip</span><span class="p">])</span>
     <span class="n">xp_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ep</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">ep_clip</span><span class="p">])</span>
@@ -1127,35 +1127,30 @@
     <span class="k">return</span> <span class="n">transects</span><span class="p">,</span> <span class="n">polys</span><span class="p">,</span> <span class="n">cl_smooth</span></div>
 
 
-<div class="viewcode-block" id="chan_width"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.chan_width">[docs]</a><span class="k">def</span> <span class="nf">chan_width</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">Imask</span><span class="p">,</span> <span class="n">pixarea</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-
+<div class="viewcode-block" id="max_valley_width"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.max_valley_width">[docs]</a><span class="k">def</span> <span class="nf">max_valley_width</span><span class="p">(</span><span class="n">Imask</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns two estimates of channel width: width_channels is the average</span>
-<span class="sd">    width of just the channels, and width_extent is the average width of the</span>
-<span class="sd">    extent of the river (includes islands).</span>
+<span class="sd">    Computes the maximum valley width of the input mask. Finds the single</span>
+<span class="sd">    largest blob in the mask, fills its holes, then uses the distance transform</span>
+<span class="sd">    to find the largest width.     </span>
 
-<span class="sd">    Inputs:</span>
-<span class="sd">        coords - Nx2 list of (x,y) coordinates defining the centerline of the input mask</span>
-<span class="sd">        Imask - binary mask on which the centerline was computed</span>
-<span class="sd">        pixarea - (Optional, float) area of each pixel in the mask. If none is</span>
-<span class="sd">                  provided, widths will be in units of pixels.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Imask : np.array</span>
+<span class="sd">        Binary mask from which the centerline was computed.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    max_valley_width : float</span>
+<span class="sd">        Maximum width of the channel belt, useful for computing a mesh. Units</span>
+<span class="sd">        are pixels, so be careful to re-convert.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Estimate length from coodinates</span>
-    <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">s_ds</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">len_est</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="c1"># Estimate unfilled channel width (average widths of actual channels)</span>
+    
     <span class="n">Imask</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">largest_blobs</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="n">nlargest</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;keep&#39;</span><span class="p">)</span>
-    <span class="n">area_est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">))</span> <span class="o">*</span> <span class="n">pixarea</span>
-    <span class="n">width_channels</span> <span class="o">=</span> <span class="n">area_est</span><span class="o">/</span><span class="n">len_est</span>
-
-    <span class="c1"># Estimate filled channel width (average width of entire channel extents i.e. including islands)</span>
     <span class="n">Imask</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">fill_holes</span><span class="p">(</span><span class="n">Imask</span><span class="p">)</span>
-    <span class="n">area_est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">))</span> <span class="o">*</span> <span class="n">pixarea</span>
-    <span class="n">width_extent</span> <span class="o">=</span> <span class="n">area_est</span><span class="o">/</span><span class="n">len_est</span>
-
-    <span class="k">return</span> <span class="n">width_channels</span><span class="p">,</span> <span class="n">width_extent</span></div>
+    <span class="n">Idist</span> <span class="o">=</span> <span class="n">distance_transform_edt</span><span class="p">(</span><span class="n">Imask</span><span class="p">)</span>
+    <span class="n">max_valley_width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Idist</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+    
+    <span class="k">return</span> <span class="n">max_valley_width</span></div>
 
 
 <div class="viewcode-block" id="curvars"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.curvars">[docs]</a><span class="k">def</span> <span class="nf">curvars</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">unwrap</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -1657,8 +1652,11 @@
     <span class="n">mesh_index</span> <span class="o">=</span> <span class="n">meshline_gdf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
     <span class="n">eBI</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># entropic braided index</span>
     <span class="n">BI</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># braided index</span>
-    <span class="k">for</span> <span class="n">mi</span> <span class="ow">in</span> <span class="n">mesh_index</span><span class="p">:</span>
-        <span class="c1"># First see if the mesh intersects the centerlines</span>
+    <span class="k">for</span> <span class="n">mi</span> <span class="ow">in</span> <span class="n">mesh_index</span><span class="p">:</span> <span class="c1">#1585</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">mi</span><span class="p">)</span>
+        <span class="c1"># if mi == 1584:</span>
+        <span class="c1">#     import pdb; pdb.set_trace()</span>
+        <span class="c1"># First see if the mesh intersects the centerline</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">int_links</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">inter</span><span class="p">[</span><span class="s1">&#39;index_right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">inter</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">mi</span><span class="p">)])</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -1686,6 +1684,7 @@
             <span class="c1"># Method 2: use the local channel width</span>
             <span class="n">ws</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">il</span> <span class="ow">in</span> <span class="n">int_links</span><span class="p">:</span>
+                <span class="c1"># print(links_gdf.id.values[il])</span>
                 <span class="n">meshline</span> <span class="o">=</span> <span class="n">meshline_gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">mi</span><span class="p">]</span>
                 <span class="n">rivline</span> <span class="o">=</span> <span class="n">links_gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">il</span><span class="p">]</span>
                 <span class="n">int_pt</span> <span class="o">=</span> <span class="n">rivline</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">meshline</span><span class="p">)</span>
@@ -1704,7 +1703,8 @@
         <span class="n">ws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ws</span> <span class="k">if</span> <span class="n">w</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span> <span class="c1"># Remove links of 0 width -- should determine why these are zero, probably due to computing widths on the original mask instead of the pre-processed one...</span>
         <span class="n">probs</span> <span class="o">=</span> <span class="n">ws</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">probs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="k">break</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Transect </span><span class="si">{}</span><span class="s1"> intersects a link of width 0.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mi</span><span class="p">))</span>
+
         <span class="n">H</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">probs</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">probs</span><span class="p">))</span>
         <span class="n">ebi_section</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">H</span>
         <span class="n">eBI</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ebi_section</span><span class="p">)</span>

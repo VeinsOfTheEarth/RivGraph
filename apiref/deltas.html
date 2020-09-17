@@ -347,9 +347,10 @@ is None.</p></li>
 <code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">delta_nER</code><span class="sig-paren">(</span><em>deltavars</em>, <em>N=500</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#delta_nER"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.delta_nER" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the nonlocal entrop rate (nER) corresponding to the delta
 (including flux partition) represented by adjacency matrix A, and compares
-its value with the nER resulting from randomizing the flux partition.</p>
-<dl>
-<dt>OUTPUTS:</dt><dd><blockquote>
+its value with the nER resulting from randomizing the flux partition.
+OUTPUTS:</p>
+<blockquote>
+<div><blockquote>
 <div><dl class="simple">
 <dt>pExc: the probability that the value of nER for a randomization of the fluxes</dt><dd><p>on the topology dictated by A exceeds the actual value of nER. If the
 value of pExc is lower than 0.10, we considered that the actual partition
@@ -359,8 +360,7 @@ of fluxes is an extreme value of nER</p>
 </div></blockquote>
 <p>nER_Delta: the nonlinear entropy rate for the provided adjacency matrix
 nER_randA: the nonlinear entropy rates for the N randomized deltas</p>
-</dd>
-</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="function">
@@ -368,8 +368,8 @@ nER_randA: the nonlinear entropy rates for the N randomized deltas</p>
 <code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">delta_subN_F</code><span class="sig-paren">(</span><em>A</em>, <em>epsilon=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#delta_subN_F"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.delta_subN_F" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the steady state flux distribution in the delta nodes when the
 system is fed with a constant unity influx from the Apex. Also defines the
-subnetworks apex-to-outlet.</p>
-<p>The SubN is an NxM matrix, where N is number of nodes and M is the number
+subnetworks apex-to-outlet.
+The SubN is an NxM matrix, where N is number of nodes and M is the number
 of outlets. For each mth outlet, its contributing subnetwork is given by
 the nonzero entries in SubN. The values in SubN are the degree of
 “belongingness” of each node to its subnetwork. If SubN(m,n) = 0, the m’th
@@ -414,10 +414,10 @@ flux.</p>
 <code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">ensure_single_inlet</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#ensure_single_inlet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.ensure_single_inlet" title="Permalink to this definition">¶</a></dt>
 <dd><p>All the delta metrics here require a single apex node, and that that node
 be connected to at least two downstream links. This function ensures these
-conditions are met; where there are multiple inlets, the widest is chosen.</p>
-<p>This function also ensures that the inlet node is attached to at least two
-links–this is important for computing un-biased delta metrics.</p>
-<p>The links and nodes dicts are copied so they remain unaltered; the altered
+conditions are met; where there are multiple inlets, the widest is chosen.
+This function also ensures that the inlet node is attached to at least two
+links–this is important for computing un-biased delta metrics.
+The links and nodes dicts are copied so they remain unaltered; the altered
 copies are returned.</p>
 </dd></dl>
 
@@ -484,8 +484,8 @@ from the Apex to each of the shoreline outlets.</p>
 <dt id="rivgraph.deltas.delta_metrics.top_resistance_distance">
 <code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">top_resistance_distance</code><span class="sig-paren">(</span><em>deltavars</em>, <em>epsilon=1e-15</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#top_resistance_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.top_resistance_distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>NOTE! TopoDist was not supplied with this function–can use networkX to compute shortest path but need to know what “shortest” means
-This function will not work until TopoDist is resolved.</p>
-<p>Computes the resistance distance (RD) from the Apex to each of the
+This function will not work until TopoDist is resolved.
+Computes the resistance distance (RD) from the Apex to each of the
 shoreline outlets. The value of RD between two nodes is the effective
 resistance between the two nodes when each link in the network is replaced
 by a 1 ohm resistor.</p>
