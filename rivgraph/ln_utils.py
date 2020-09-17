@@ -1000,6 +1000,8 @@ def plot_dirlinks(links, dims):
     ax.set_ylim(miny, maxy)
     ax.set_facecolor("black")
     plt.axis('equal')
+    
+    plt.show(block=False)
 
     return
 
@@ -1039,6 +1041,8 @@ def plot_network(links, nodes, Imask, name, axis=None):
 
     plt.axis('equal')
     axis.set_title(name)
+    
+    plt.show(block=False)
 
     return
 

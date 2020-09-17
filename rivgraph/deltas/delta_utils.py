@@ -9,17 +9,17 @@ A collection of functions for pruning a delta channel network.
 import geopandas as gpd
 from pyproj.crs import CRS
 import numpy as np
+import networkx as nx
 
 import rivgraph.geo_utils as gu
 import rivgraph.ln_utils as lnu
-import rivgraph.im_utils as iu
 
-#ir.load_network()
-#links = ir.links.copy()
-#nodes = ir.nodes.copy()
-#shoreline_shp = ir.paths['shoreline']
-#inlets_shp = ir.paths['inlet_nodes']
-#gdobj = ir.gdobj
+# obj = c
+# links = obj.links
+# nodes = obj.nodes
+# shoreline_shp = r"C:\Users\Jon\Anaconda3\envs\rivgraph\Lib\site-packages\rivgraph\tests\data\Colville\Colville_shoreline.shp"
+# inlets_shp = r"C:\Users\Jon\Anaconda3\envs\rivgraph\Lib\site-packages\rivgraph\tests\data\Colville\Colville_inlet_nodes.shp"
+# gdobj = obj.gdobj
 
 def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
     """
@@ -55,6 +55,9 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
 
     # Clip the network with a shoreline polyline, adding outlet nodes
     links, nodes = clip_by_shoreline(links, nodes, shoreline_shp, gdobj)
+
+    # Remove spurs from network (this includes valid inlets and outlets)
+    links, nodes = lnu.remove_all_spurs(links, nodes, dontremove=list(nodes['inlets']) + list(nodes['outlets']))
 
     # Remove sets of links that are disconnected from inlets/outlets except for a single bridge link (effectively re-pruning the network)
     links, nodes = lnu.remove_disconnected_bridge_links(links, nodes)
@@ -143,6 +146,10 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
 
 
     """
+    # links = d.links
+    # gdobj = d.gdobj
+    # nodes = d.nodes
+    # shoreline_shp = d.paths['shoreline']
 
     # Get links as geopandas dataframe
     links_gdf = lnu.links_to_gpd(links, gdobj)
@@ -166,6 +173,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
 
     # Loop through each cut link and truncate it near the intersection point;
     # add endpoint nodes; adjust connectivities
+    newlink_ids = []
     for clid in cut_link_ids:
 
         # Remove the pixel that represents the intersection between the outlet links
@@ -214,62 +222,98 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
             else:
                 RuntimeError('Check link-breaking.')
 
-            # Only add new link if it contains and indices
+            # Only add new link if it contains indices
             if len(newlink_idcs) > 0:
                 links, nodes = lnu.add_link(links, nodes, newlink_idcs)
+                newlink_ids.append(links['id'][-1])
 
         # Now delete the old link
         links, nodes = lnu.delete_link(links, nodes, clid)
 
     # Now that the links have been clipped, remove the links that are not
     # part of the delta network
-    shape = (gdobj.RasterYSize, gdobj.RasterXSize)
-
-    # Burn links to grid where value is link ID
-    I = np.ones(shape, dtype=np.int64) * -1
-    # 2-pixel links can be overwritten and disappear, so redo them at the end
-    twopix = [lid for lid, idcs in zip(links['id'], links['idx']) if len(idcs) < 3]
-    for lidx, lid in zip(links['idx'], links['id']):
-        xy = np.unravel_index(lidx, shape)
-        I[xy[0], xy[1]] = lid
-    if len(twopix) > 0:
-        for tpl in twopix:
-            lindex = links['id'].index(tpl)
-            lidx = links['idx'][lindex]
-            xy = np.unravel_index(lidx, shape)
-            I[xy[0], xy[1]] = tpl
-
-    # Binarize
-    I_bin = np.array(I>-1, dtype=np.bool)
-    # Keep the blob that contains the inlet nodes
-    # Get the pixel indices of the different connected blobs
-    blobidcs = iu.blob_idcs(I_bin)
-    # Find the blob that contains the inlets
-    inlet_coords = []
-    for i in nodes['inlets']:
-        inlet_coords.append(nodes['idx'][nodes['id'].index(i)])
-    i_contains_inlets = []
-    for i, bi in enumerate(blobidcs):
-        if set(inlet_coords).issubset(bi):
-            i_contains_inlets.append(i)
-    # Error checking
-    if len(i_contains_inlets) != 1:
-        raise RuntimeError('Inlets not contained in any portion of the skeleton.')
-
-    # Keep only the pixels in the blob containing the inlets
-    keeppix = np.unravel_index(list(blobidcs[i_contains_inlets[0]]), I_bin.shape)
-    Itemp = np.zeros(I.shape, dtype=np.bool)
-    Itemp[keeppix[0], keeppix[1]] = True
-    I[~Itemp] = -1
-    keep_ids = set(np.unique(I))
-    unwanted_ids = [lid for lid in links['id'] if lid not in keep_ids]
-
-    # Delete all the unwanted links
-    for b in unwanted_ids:
-        links, nodes = lnu.delete_link(links, nodes, b)
-
-    # Store outlets in nodes dict
-    outlets = [nid for nid, ncon in zip(nodes['id'], nodes['conn']) if len(ncon) == 1 and nid not in nodes['inlets']]
+    
+    # Use networkx graph to determine which links to keep
+    G = nx.MultiGraph()
+    G.add_nodes_from(nodes['id'])
+    for lk, lc in zip(links['id'], links['conn']):
+        G.add_edge(lc[0], lc[1], key=lk)
+        
+    # Find the network containing the inlet(s)
+    main_net = nx.node_connected_component(G, nodes['inlets'][0])
+    
+    # Ensure all inlets are contained in this network
+    for nid in nodes['inlets']:
+        if len(main_net - nx.node_connected_component(G, nid)) > 0:
+            print('Not all inlets found in main connected component.')
+            
+    # Remove all nodes not in the main network
+    remove_nodes = [n for n in G.nodes if n not in main_net]
+    for rn in remove_nodes:
+        G.remove_node(rn)
+            
+    # Get ids of the remaining links
+    link_ids = [e[2] for e in G.edges]
+        
+    # Get ids to remove from network
+    remove_links = [l for l in links['id'] if l not in link_ids]
+    
+    # Remove the links
+    for rl in remove_links:
+        links, nodes = lnu.delete_link(links, nodes, rl)
+   
+    # Identify the outlet nodes and add to nodes dictionary
+    outlets = [nid for nid, ncon in zip(nodes['id'], nodes['conn']) if len(ncon)==1 and ncon[0] in newlink_ids]
     nodes['outlets'] = outlets
+    
+    # # Old method below here
+    # shape = (gdobj.RasterYSize, gdobj.RasterXSize)
+
+    # # Burn links to grid where value is link ID
+    # I = np.ones(shape, dtype=np.int64) * -1
+    # # 2-pixel links can be overwritten and disappear, so redo them at the end
+    # twopix = [lid for lid, idcs in zip(links['id'], links['idx']) if len(idcs) < 3]
+    # for lidx, lid in zip(links['idx'], links['id']):
+    #     xy = np.unravel_index(lidx, shape)
+    #     I[xy[0], xy[1]] = lid
+    # if len(twopix) > 0:
+    #     for tpl in twopix:
+    #         lindex = links['id'].index(tpl)
+    #         lidx = links['idx'][lindex]
+    #         xy = np.unravel_index(lidx, shape)
+    #         I[xy[0], xy[1]] = tpl
+
+    # # Binarize
+    # I_bin = np.array(I>-1, dtype=np.bool)
+    # # Keep the blob that contains the inlet nodes
+    # # Get the pixel indices of the different connected blobs
+    # blobidcs = iu.blob_idcs(I_bin)
+    # # Find the blob that contains the inlets
+    # inlet_coords = []
+    # for i in nodes['inlets']:
+    #     inlet_coords.append(nodes['idx'][nodes['id'].index(i)])
+    # i_contains_inlets = []
+    # for i, bi in enumerate(blobidcs):
+    #     if set(inlet_coords).issubset(bi):
+    #         i_contains_inlets.append(i)
+    # # Error checking
+    # if len(i_contains_inlets) != 1:
+    #     raise RuntimeError('Inlets not contained in any portion of the skeleton.')
+
+    # # Keep only the pixels in the blob that contains the inlets
+    # keeppix = np.unravel_index(list(blobidcs[i_contains_inlets[0]]), I_bin.shape)
+    # Itemp = np.zeros(I.shape, dtype=np.bool)
+    # Itemp[keeppix[0], keeppix[1]] = True
+    # I[~Itemp] = -1
+    # keep_ids = set(np.unique(I))
+    # unwanted_ids = [lid for lid in links['id'] if lid not in keep_ids]
+
+    # # Delete all the unwanted links
+    # for b in unwanted_ids:
+    #     links, nodes = lnu.delete_link(links, nodes, b)
+
+    # # Store outlets in nodes dict
+    # outlets = [nid for nid, ncon in zip(nodes['id'], nodes['conn']) if len(ncon) == 1 and nid not in nodes['inlets']]
+    # nodes['outlets'] = outlets
 
     return links, nodes

@@ -329,7 +329,6 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
     # If an artifical node triad is present, flip its direction and see if the
     # cycle is resolved.
     # See if any links are part of an artificial triad
-    # import pdb; pdb.set_trace()
     clset = set(cyclelinks)
     all_pars = []
     for i, pl in enumerate(links['parallels']):

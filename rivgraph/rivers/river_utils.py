@@ -9,14 +9,16 @@ Created on Tue Nov  6 14:29:10 2018
 """
 import numpy as np
 import networkx as nx
+from fastdtw import fastdtw
 from scipy.ndimage.morphology import distance_transform_edt
 import shapely
 from shapely.geometry import LineString, Polygon
 import scipy.interpolate as si
 from scipy import signal
-from scipy.spatial.distance import cdist
+from scipy.spatial.distance import cdist, euclidean
 from matplotlib import pyplot as plt
 import geopandas as gpd
+
 
 from rivgraph.ordered_set import OrderedSet
 import rivgraph.im_utils as iu
@@ -552,10 +554,10 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
     xs_sm = signal.savgol_filter(xs_m, window_length=window_len, polyorder=3, mode='interp')
     ys_sm = signal.savgol_filter(ys_m, window_length=window_len, polyorder=3, mode='interp')
 
-    plt.close('all')
-    plt.plot(xs_sm, ys_sm)
-    plt.plot(xs_m, ys_m)
-    plt.axis('equal')
+    # plt.close('all')
+    # plt.plot(xs_sm, ys_sm)
+    # plt.plot(xs_m, ys_m)
+    # plt.axis('equal')
 
     # Re-sample centerline to even spacing
     s, _ = s_ds(xs_sm, ys_sm)
@@ -610,12 +612,12 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
         else:
             perp_aligned.append((p1, p0))
 
-    plt.close('all')
-    plt.plot(xs_rs, ys_rs,'.')
-    plt.axis('equal')
-    for p in perp_aligned:
-        plt.plot(p[0][0], p[0][1], 'k.')
-        plt.plot(p[1][0], p[1][1], 'r.')
+    # plt.close('all')
+    # plt.plot(xs_rs, ys_rs,'.')
+    # plt.axis('equal')
+    # for p in perp_aligned:
+    #     plt.plot(p[0][0], p[0][1], 'k.')
+    #     plt.plot(p[1][0], p[1][1], 'r.')
 
 
     # Trim the centerline to remove the mirrored portions
@@ -658,7 +660,7 @@ def mirror_line_ends(xs, ys, npad):
     return xs_m, ys_m
 
 
-def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15):
+def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing, smoothing=0.15):
     """
     This function generates a mesh over an input river centerline. The mesh
     is generated across the valley, not just the channel width, in order to
@@ -672,7 +674,7 @@ def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15
     INPUTS:
         coords: Nx2 list, tuple, or np.array of x,y coordinates. Coordinates MUST be in projected CRS for viable results.
         width_chan: estimated width. Units MUST correspond to those of the input coordinates
-        bufferdist: distance between centerline and left or right bufferline, in units of coords
+        buf_width: distance between centerline and left or right bufferline, in units of coords
         grid_spacing: fraction of input centerline length that should be used for smoothing to create the valley centerline  (between 0 and 1)
         smoothing: fraction of centerline length to use for smoothing window
 
@@ -693,14 +695,14 @@ def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15
         the centerline to the first and last transect intersections.
         """
         
-        int_pts = []
+        # int_pts = []
         dist_to_int = []
         for ie, eps in enumerate(endpts):
             tsect = LineString(eps)
             int_pt = tsect.intersection(cl)
             
             if int_pt.coords == []: # There is no intersection
-                int_pts.append(None)
+                # int_pts.append(None)
                 dist_to_int.append(None)
                 continue
             
@@ -708,15 +710,14 @@ def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15
             # the along-centerline distance of this point
             dist_to_int.append(float(cl.project(int_pt)))
             
-            int_pts.append(int_pt)
+            # int_pts.append(int_pt)
             
         dist_to_int = np.array(dist_to_int)
-        int_pts = np.array(int_pts)
             
         # Now clip the distances, centerline, and endpoints where there were no intersections
         no_ints = dist_to_int==None
         dist_to_int = dist_to_int[~no_ints]
-        int_pts = int_pts[~no_ints]
+        # int_pts = [ip for i, ip in enumerate(int_pts) if no_ints[i] == False]
         cl_clip = LineString(zip(np.array(cl.coords.xy[0])[~no_ints], np.array(cl.coords.xy[1])[~no_ints]))
         ep_clip = [ep for iep, ep in enumerate(endpts) if no_ints[iep]==False]        
        
@@ -728,8 +729,6 @@ def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15
             
     
     def iterative_cl_pt_mapping(cl, bufdists, side):
-        from fastdtw import fastdtw
-        from scipy.spatial.distance import euclidean
 
         mapper = []
         lines = []
@@ -859,11 +858,12 @@ def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15
 
 
     """ Function code begins here """
-    # coords = process_river.centerline
-    # width_chan = process_river.width_chans
-    # bufferdist = 0.5 #process_river.max_valley_width_pixels * process_river.pixlen * 1.1
-    # grid_spacing = 0.25# np.percentile(process_river.links['len'],25)
-    # smoothing = 0.5
+    # obj = ind
+    # coords = obj.centerline
+    # avg_chan_width = obj.avg_chan_width
+    # buf_halfwidth = obj.max_valley_width_pixels * obj.pixlen * 1.1
+    # grid_spacing = avg_chan_width
+    # smoothing = 0.1
 
     if np.shape(coords)[0] == 2 and np.size(coords) != 4:
         coords = np.transpose(coords)
@@ -890,8 +890,8 @@ def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15
     cl = LineString([(x,y) for x, y in zip(xs_sm, ys_sm)])
     
     # Simplify the linestring
-    npts = int(cl.length/width_chan/4)
-    tol = width_chan/100
+    npts = max(int(cl.length/avg_chan_width/20), 25)
+    tol = avg_chan_width/100
     while True:
         cl2 = cl.simplify(tol)
         if len(cl2.coords) > npts:
@@ -900,7 +900,7 @@ def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15
             break
 
     # Offset valley centerline for left and right valleylines    
-    bdists = np.linspace(0, bufferdist, min(int(bufferdist/width_chan/10), 25))   
+    bdists = np.linspace(0, buf_halfwidth, min(int(buf_halfwidth/avg_chan_width), 25))   
     bdists = bdists[1:]
 
     # Iteratively create offset lines and map each centerline index    
@@ -916,7 +916,7 @@ def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15
     dists = np.array([float(d) for d in dists]) # avoid dtype('O') error in numpy.interp
     
     # Now build the interpolating functions
-    dists_to_interpolate = np.linspace(0, np.max(dists), 200)
+    dists_to_interpolate = np.arange(0, np.max(dists), grid_spacing)
     xp_l = np.array([ep[0][0] for ep in ep_clip])
     yp_l = np.array([ep[0][1] for ep in ep_clip])
     xp_r = np.array([ep[1][0] for ep in ep_clip])
@@ -967,35 +967,30 @@ def valleyline_mesh(coords, width_chan, bufferdist, grid_spacing, smoothing=0.15
     return transects, polys, cl_smooth
 
 
-def chan_width(coords, Imask, pixarea=1):
-
+def max_valley_width(Imask):
     """
-    Returns two estimates of channel width: width_channels is the average
-    width of just the channels, and width_extent is the average width of the
-    extent of the river (includes islands).
+    Computes the maximum valley width of the input mask. Finds the single
+    largest blob in the mask, fills its holes, then uses the distance transform
+    to find the largest width.     
 
-    Inputs:
-        coords - Nx2 list of (x,y) coordinates defining the centerline of the input mask
-        Imask - binary mask on which the centerline was computed
-        pixarea - (Optional, float) area of each pixel in the mask. If none is
-                  provided, widths will be in units of pixels.
+    Parameters
+    ----------
+    Imask : np.array
+        Binary mask from which the centerline was computed.
+
+    Returns
+    -------
+    max_valley_width : float
+        Maximum width of the channel belt, useful for computing a mesh. Units
+        are pixels, so be careful to re-convert.
     """
-
-    # Estimate length from coodinates
-    s, _ = s_ds(coords[0], coords[1])
-    len_est = s[-1]
-
-    # Estimate unfilled channel width (average widths of actual channels)
+    
     Imask = iu.largest_blobs(Imask, nlargest=1, action='keep')
-    area_est = np.sum(np.array(Imask, dtype=np.bool)) * pixarea
-    width_channels = area_est/len_est
-
-    # Estimate filled channel width (average width of entire channel extents i.e. including islands)
     Imask = iu.fill_holes(Imask)
-    area_est = np.sum(np.array(Imask, dtype=np.bool)) * pixarea
-    width_extent = area_est/len_est
-
-    return width_channels, width_extent
+    Idist = distance_transform_edt(Imask)
+    max_valley_width = np.max(Idist) * 2
+    
+    return max_valley_width
 
 
 def curvars(xs, ys, unwrap=True):
@@ -1497,8 +1492,11 @@ def compute_eBI(path_meshlines, path_links, method='local'):
     mesh_index = meshline_gdf.index.values
     eBI = [] # entropic braided index
     BI = [] # braided index
-    for mi in mesh_index:
-        # First see if the mesh intersects the centerlines
+    for mi in mesh_index: #1585
+        print(mi)
+        # if mi == 1584:
+        #     import pdb; pdb.set_trace()
+        # First see if the mesh intersects the centerline
         try:
             int_links = np.array(inter['index_right'].values[inter.index.get_loc(mi)])
         except KeyError:
@@ -1526,6 +1524,7 @@ def compute_eBI(path_meshlines, path_links, method='local'):
             # Method 2: use the local channel width
             ws = []
             for il in int_links:
+                # print(links_gdf.id.values[il])
                 meshline = meshline_gdf.geometry.values[mi]
                 rivline = links_gdf.geometry.values[il]
                 int_pt = rivline.intersection(meshline)
@@ -1544,7 +1543,8 @@ def compute_eBI(path_meshlines, path_links, method='local'):
         ws = np.array([w for w in ws if w > 0]) # Remove links of 0 width -- should determine why these are zero, probably due to computing widths on the original mask instead of the pre-processed one...
         probs = ws / np.sum(ws)
         if any(probs == 0):
-            break
+            raise RuntimeError('Transect {} intersects a link of width 0.'.format(mi))
+
         H = -np.sum(probs*np.log2(probs))
         ebi_section = 2**H
         eBI.append(ebi_section)

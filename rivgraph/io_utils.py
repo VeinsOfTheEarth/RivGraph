@@ -12,12 +12,10 @@ import pickle
 import ogr, osr
 import gdal
 import numpy as np
-import geopandas as gpd
 import pandas as pd
-from shapely.geometry import Point, LineString, Polygon
-import sys
-sys.path.append(os.path.realpath(os.path.dirname(__file__)))
-import geo_utils as gu
+import geopandas as gpd
+import rivgraph.geo_utils as gu
+from shapely.geometry import Point, LineString
 
 
 def prepare_paths(resultsfolder, name, basetiff):

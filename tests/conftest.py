@@ -18,8 +18,8 @@ from rivgraph.classes import river
 def test_net():
     """Define the test network."""
     np.random.seed(1)
-    return delta('colville', 'tests/data/Colville/Colville_islands_filled.tif',
-                 'tests/results/colville/')
+    return delta('colville', os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'),
+                 os.path.normpath('tests/results/colville/'))
 
 
 @pytest.fixture(scope="module")
@@ -27,9 +27,9 @@ def known_net():
     """Define the known network to test against."""
     np.random.seed(1)
     known_net = delta('known',
-                      'tests/data/Colville/Colville_islands_filled.tif',
-                      'tests/results/known/')
-    known_net.load_network(path='tests/data/Colville/Colville_network.pkl')
+                      os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'),
+                      os.path.normpath('tests/results/known/'))
+    known_net.load_network(path=os.path.normpath('tests/data/Colville/Colville_network.pkl'))
     return known_net
 
 
@@ -37,17 +37,17 @@ def known_net():
 def test_river():
     """Define the test river network."""
     np.random.seed(1)
-    return river('Brahmclip', 'tests/data/Brahma/brahma_mask_clip.tif',
-                 'tests/results/brahma/', exit_sides='ns')
+    return river('Brahmclip', os.path.normpath('tests/data/Brahma/brahma_mask_clip.tif'),
+                 os.path.normpath('tests/results/brahma/'), exit_sides='ns')
 
 
 @pytest.fixture(scope="module")
 def known_river():
     """Define the known river network."""
     np.random.seed(1)
-    known_river = river('Brahmclip', 'tests/data/Brahma/brahma_mask_clip.tif',
-                        'tests/results/brahma/', exit_sides='ns')
-    known_river.load_network(path='tests/data/Brahma/Brahmclip_network.pkl')
+    known_river = river('Brahmclip', os.path.normpath('tests/data/Brahma/brahma_mask_clip.tif'),
+                        os.path.normpath('tests/results/brahma/'), exit_sides='ns')
+    known_river.load_network(path=os.path.normpath('tests/data/Brahma/Brahmclip_network.pkl'))
     return known_river
 
 

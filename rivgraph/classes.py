@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-classes.py
+rivgraph.py
 ====================================
 Classes for running rivgraph commands on your channel network.
 
@@ -204,12 +204,12 @@ class rivnetwork:
             print('Junction angles cannot be computed before link directions are set.')
         else:
             self.nodes = lnu.junction_angles(self.links, self.nodes, self.imshape, self.pixlen, weight=weight)
-
-
+            
+            
     def get_islands(self, props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length', 'surrounding_links']):
         """
         Finds all the islands in the binary mask and computes their morphological
-        properties. Can be used to help "clean" masks of small islands.
+        properties. Can be used to help "clean" masks of small islands. 
 
         Parameters
         ----------
@@ -217,15 +217,15 @@ class rivnetwork:
             Properties to compute for each island. Properties can be any of those
             provided by rivgraph.im_utils.regionprops.
             The default is ['area', 'maxwidth', 'major_axis_length', 'minor_axis_length'].
-
+       
         Returns
         -------
         islands : geopandas GeoDataFrame
              Contains the polygons of each island with the requested property
-             attributes as columns. An additional 'remove' attribute is
-             initialized to make thresholding easier.
+             attributes as columns. An additional 'remove' attribute is 
+             initialized to make thresholding easier. 
         """
-
+        
         do_surr = False
         if 'surrounding_links' in props:
             props.remove('surrounding_links')
@@ -236,30 +236,30 @@ class rivnetwork:
 
         if self.verbose is True:
             print('Getting island properties...', end='')
-
+        
         islands, Iislands = mu.get_island_properties(self.Imask, self.pixlen, self.pixarea, self.crs, self.gt, props)
-
+        
         if self.verbose is True:
             print('done.')
-
+        
         if do_surr is True:
             if hasattr(self.links, 'wid_adj') is False:
                 self.compute_link_width_and_length()
-
+            
             if self.verbose is True:
                 print('Computing surrounding links for each island...', end='')
 
             islands = mu.surrounding_link_properties(self.links, self.nodes, self.Imask, islands, Iislands, self.pixlen, self.pixarea)
-
+        
             if self.verbose is True:
                 print('done.')
 
         # Add a column to be used for thresholding
         islands['remove'] = [False for i in range(len(islands))]
-
+        
         return islands, Iislands
-
-
+        
+        
     def plot(self, *kwargs, axis=None):
         """
         Generates matplotlib plots of the network.
@@ -727,11 +727,11 @@ class river(rivnetwork):
         of sorts. The mesh is useful for computing spatial statistics as a function
         of downstream distance. The resulting mesh captures the low-frequency
         characteristic of the river corridor.
-
+        
         This tool is tricky to fully automate, and the user may need to play
         with the smoothing and bufferdist parameters if errors are thrown or
         the result is not satisfying.
-
+        
         Parameters
         ----------
         grid_spacing : float
@@ -745,7 +745,7 @@ class river(rivnetwork):
             from the centerline. Units correspond to those of the CRS of the
             input mask.
         """
-
+        
         # Need a centerline
         if hasattr(self, 'centerline') is False:
             self.compute_centerline()
@@ -756,7 +756,7 @@ class river(rivnetwork):
                 self.compute_network()
             if hasattr(self.links, 'wid_adj') is False:
                 self.compute_link_width_and_length()
-
+           
             # self.avg_chan_width = np.mean(self.links['wid_a1dj'])
             self.avg_chan_width = np.sum(self.Imask) * self.pixarea / np.sum(self.links['len_adj'])
 
@@ -768,12 +768,12 @@ class river(rivnetwork):
         if buf_halfwidth is None:
             # Compute the maximum valley width in pixels
             if hasattr(self, 'max_valley_width_pixels') is False:
-
+                
                 if self.verbose is True:
                     print('Computing maximum valley width...', end='')
-
+               
                 self.max_valley_width_pixels = ru.max_valley_width(self.Imask)
-
+                
                 if self.verbose is True:
                     print('done.')
 
@@ -814,3 +814,7 @@ class river(rivnetwork):
 
         if self.verbose is True:
             print('done.')
+
+
+
+

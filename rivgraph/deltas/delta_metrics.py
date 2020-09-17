@@ -2,7 +2,6 @@
 """
 delta_metrics
 =============
-
 Created on Mon May 21 09:00:01 2018
 
 @author: Jon
@@ -14,15 +13,13 @@ import rivgraph.ln_utils as lnu
 
 """
 This script contains algorithms that were ported from Matlab scripts provided
-by Alej Tejedor to compute topologic and dynamic metrics on deltas. The provided
+by Alejandro Tejedor to compute topologic and dynamic metrics on deltas. The provided
 Matlab script required the bioinformatics toolbox; here we use networkx to
 achieve the same result. Ported by Jon Schwenk.
-
 The conversion was tested by computing metrics for the Wax Lake Delta
 (provided by AT) and the Yenesei Delta (provided by JS)--perfect agreement
 was found for all metrics, for both deltas, using both the original Matlab
 scripts and the Python functions provided here.
-
 JS has made some efficiency improvments to the code; otherwise most variable
 names and code structure was matched to the original Matlab scripts.
 """
@@ -143,10 +140,8 @@ def ensure_single_inlet(links, nodes):
     All the delta metrics here require a single apex node, and that that node
     be connected to at least two downstream links. This function ensures these
     conditions are met; where there are multiple inlets, the widest is chosen.
-
     This function also ensures that the inlet node is attached to at least two
     links--this is important for computing un-biased delta metrics.
-
     The links and nodes dicts are copied so they remain unaltered; the altered
     copies are returned.
     """
@@ -219,7 +214,6 @@ def delta_subN_F(A, epsilon = 10**-10):
     Computes the steady state flux distribution in the delta nodes when the
     system is fed with a constant unity influx from the Apex. Also defines the
     subnetworks apex-to-outlet.
-
     The SubN is an NxM matrix, where N is number of nodes and M is the number
     of outlets. For each mth outlet, its contributing subnetwork is given by
     the nonzero entries in SubN. The values in SubN are the degree of
@@ -228,7 +222,6 @@ def delta_subN_F(A, epsilon = 10**-10):
     node belongs *only* to the n'th subnetwork. The values in SubN may be
     interpreted as the percentage of tracers that pass through node m that
     eventually make their way to the outlet of subnetwork n.
-
     """
 
     ApexID, OutletsID = find_inlet_outlet_nodes(A)
@@ -299,7 +292,6 @@ def delta_nER(deltavars, N=500):
     Compute the nonlocal entrop rate (nER) corresponding to the delta
     (including flux partition) represented by adjacency matrix A, and compares
     its value with the nER resulting from randomizing the flux partition.
-
     OUTPUTS:
         pExc: the probability that the value of nER for a randomization of the fluxes
               on the topology dictated by A exceeds the actual value of nER. If the
@@ -458,7 +450,6 @@ def top_resistance_distance(deltavars, epsilon=10**-15):
     """
     NOTE! TopoDist was not supplied with this function--can use networkX to compute shortest path but need to know what "shortest" means
     This function will not work until TopoDist is resolved.
-
     Computes the resistance distance (RD) from the Apex to each of the
     shoreline outlets. The value of RD between two nodes is the effective
     resistance between the two nodes when each link in the network is replaced
