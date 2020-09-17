@@ -43,11 +43,11 @@ These tasks represent what is needed before we "officially" release RivGraph via
 - [x] Braided river example
 - [x] How to fix flow directions (shown in braided river example, section 7.1)
 - [x] Function for removing artificial nodes - 6/10/2020
-- [ ] Unit testing - in progress (5/11/2020)
+- [x] Unit testing
 - [ ] How to prepare masks for inputs
 - [ ] Where to get masks
 - [ ] How to draw shorelines
-- [ ] Function documentation
+- [ ] Function documentation - nearing completion 9/16/2020
 
 
 Contacting us
