@@ -56,6 +56,10 @@ def pickle_links_and_nodes(links, nodes, outpath):
 
 def unpickle_links_and_nodes(lnpath):
 
+    import sys
+    from rivgraph import ordered_set    
+    sys.modules['ordered_set'] = ordered_set
+
     with open(lnpath, 'rb') as f:
         links, nodes = pickle.load(f)
 
