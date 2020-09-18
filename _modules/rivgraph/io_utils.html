@@ -216,6 +216,10 @@
 
 <span class="k">def</span> <span class="nf">unpickle_links_and_nodes</span><span class="p">(</span><span class="n">lnpath</span><span class="p">):</span>
 
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">from</span> <span class="nn">rivgraph</span> <span class="kn">import</span> <span class="n">ordered_set</span>    
+    <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="s1">&#39;ordered_set&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ordered_set</span>
+
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">lnpath</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
