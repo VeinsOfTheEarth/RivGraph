@@ -1,5 +1,5 @@
 """
-mask_to_graph.py
+Mask to Graph Utilities (mask_to_graph.py)
 =============
 
 Functions for converting a binary channel mask to a graphical representation.

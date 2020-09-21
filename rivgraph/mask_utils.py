@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-mask_utils.py
+Mask Filtering Utils (mask_utils.py)
 =============
 
 Functions for filtering islands from channel masks. Currently in beta.

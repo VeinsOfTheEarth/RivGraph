@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-directionality.py
+Directionality Utils (directionality.py)
 =============
 
 Created on Wed Nov  7 11:38:16 2018

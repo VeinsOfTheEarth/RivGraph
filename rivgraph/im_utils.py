@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-im_utils
+Image Utilities (im_utils.py)
 ========
 Almost all the functions that manipulate images within this file require that
 the images be binary.

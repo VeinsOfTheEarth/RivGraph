@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-ln_utils - link and node utilities
+Network Utilities (ln_utils.py)
 ========
 
 Created on Mon Sep 10 09:59:52 2018

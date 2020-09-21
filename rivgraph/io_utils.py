@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-io_utils.py
+Input/Output Utilities (io_utils.py)
 ========
 
 Functions for input/output.

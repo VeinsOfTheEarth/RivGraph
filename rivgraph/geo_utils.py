@@ -1,5 +1,7 @@
-# -*- coding: utf-8 -*-
 """
+Georeferencing Utilities (geo_utils.py)
+========
+
 Utilities for reading, writing, managing, processing, manipulating, etc.
 geographic data including tiffs, vrts, shapefiles, etc.
 

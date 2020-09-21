@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-classes.py
+RivGraph (classes.py)
 =============
 Classes for running rivgraph commands on your channel network.
 
