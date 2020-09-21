@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-ln_utils
+ln_utils - link and node utilities
 ========
 
 Created on Mon Sep 10 09:59:52 2018
 
 @author: Jon
 """
+import shapely
 import numpy as np
 from scipy.stats import mode
 import geopandas as gpd
@@ -15,125 +16,77 @@ from copy import deepcopy
 from matplotlib import pyplot as plt
 from matplotlib import colors
 import matplotlib.collections as mcoll
-import sys
-import os
 from pyproj.crs import CRS
 import rivgraph.geo_utils as gu
 from rivgraph.ordered_set import OrderedSet
 
 
-def node_updater(nodes, idx, conn):
+def add_node(nodes, idx, linkconn):
+    """
+    Adds a new node to the network. Connectivity is updated in links to account
+    for the added node. No node properties (e.g. juncation angle) are updated.
+
+    Parameters
+    ----------
+    nodes : dict
+        Network nodes and associated properties.
+    idx : int
+        Pixel index within the original mask of the node to add.
+    linkconn : list or int
+        ID(s) of the link that the node is connected to.
+
+    Returns
+    -------
+    nodes : dict
+        Network nodes with the node added.
 
     """
-    Updates node dictionary. Supply index of node and connected link.
-    """
+    if type(linkconn) is not list:
+        linkconn = [linkconn]
 
-    if idx not in nodes['idx']:
-        nodes['idx'].append(idx)
+    if idx in nodes['idx']:
+        print('Node already in set; returning unchanged.')
+        return nodes
 
-    if len(nodes['conn']) < len(nodes['idx']):
-        nodes['conn'].append([])
+    # Find new node ID
+    new_id = max(nodes['id']) + 1
 
-    nodeid = nodes['idx'].index(idx)
-    nodes['conn'][nodeid] = nodes['conn'][nodeid] + [conn]
-
-    return nodes
-
-
-def link_updater(links, linkid, idx=-1, conn=-1):
-
-    if linkid not in links['id']:
-        links['id'].append(linkid)
-
-    linkidx = links['id'].index(linkid)
-
-    if idx != -1 :
-        if type(idx) is not list:
-            idx = [idx]
-
-        if len(links['idx']) < len(links['id']):
-            links['idx'].append([])
-            links['conn'].append([])
-
-        links['idx'][linkidx] = links['idx'][linkidx] + idx
-
-    if conn != -1:
-        if len(links['conn']) < len(links['id']):
-            links['conn'].append([])
-            links['idx'].append([])
-
-        links['conn'][linkidx] = links['conn'][linkidx] + [conn]
-
-    return links
-
-
-def delete_link(links, nodes, linkid):
-
-    # Deletes linkid from links, updates nodes accordingly
-
-    linkkeys = [lk for lk in links.keys() if type(links[lk]) is not int and len(links[lk]) == len(links['id'])]
-
-#    linkkeys = links.keys() - set(['len', 'wid', 'wid_avg', 'n_networks'])
-
-    lidx = links['id'].index(linkid)
-
-    # Save the connecting nodes so we can update their connectivity ([:] makes a copy, not a view)
-    connected_node_ids = links['conn'][lidx][:]
-
-    # Remove the link and its properties
-    for lk in linkkeys:
-        if lk == 'id': # have to treat orderedset differently
-            links[lk].remove(linkid)
-        else:
-            try:
-                links[lk].pop(lidx)
-            except:
-                links[lk] = np.delete(links[lk], lidx)
-
-    # Remove the link from node connectivity; delete nodes if there are no longer links connected
-    for cni in connected_node_ids:
-        cnodeidx = nodes['id'].index(cni)
-        nodes['conn'][cnodeidx].remove(linkid)
-        if len(nodes['conn'][cnodeidx]) == 0: # If there are no connections to the node, remove it
-            nodes = delete_node(nodes, cni)
-
-#    # Ensure that connectivity is preserved
-#    if links['conn'][links['id'].index(linkid)]
-
-    return links, nodes
-
-
-def delete_node(nodes, nodeid, warn=True):
-    # nodeid is the node ID, not 'idx'
-    # A node should only be deleted after it no longer has any connected links
-    # Delete a node and its properties
-
-    # Get keys that have removable elements
-    nodekeys = [nk for nk in nodes.keys() if type(nodes[nk]) is not int and len(nodes[nk]) == len(nodes['id'])]
-
-    # Check that the node has no connectivity
-    nodeidx = nodes['id'].index(nodeid)
-    if len(nodes['conn'][nodeidx]) != 0 and warn==True:
-        print('You are deleting node {} which still has connections to links.'.format(nodeid))
-
-    # Remove the node and its properties
-    for nk in nodekeys:
-        if nk == 'id': # have to treat orderedset differently
-            nodes[nk].remove(nodeid)
-        elif nk == 'idx':
-            nodes[nk].remove(nodes[nk][nodeidx])
-        else:
-            nodes[nk].pop(nodeidx)
+    # Append new node
+    nodes['id'].append(new_id)
+    nodes['idx'].append(idx)
+    nodes['conn'].append(linkconn)
 
     return nodes
 
 
 def add_link(links, nodes, idcs):
+    """
+    Adds a new link to the network. Connectivity is updated in nodes to account
+    for the added link. Attributes such as link width, length are not 
+    recomputed here; must be recomputed for the entire network.  
 
-    # Adds a new link using the indices found in idcs; nodes and connectivity
-    # are also updated accordingly. Widths and lengths are not computed for
-    # new links; must be recomputed for entire network
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    idcs : list
+        Pixel indices comprising the link.
 
+    Raises
+    ------
+    RuntimeError
+        Raised if the added link isn't connected to existing nodes at both ends.
+
+    Returns
+    -------
+    links : dict
+        Network links with the link added.
+    nodes : dict
+        Network nodes with the link added.
+
+    """
     # Find new link ID
     new_id = max(links['id']) + 1
 
@@ -159,12 +112,195 @@ def add_link(links, nodes, idcs):
     return links, nodes
 
 
+def node_updater(nodes, idx, conn):
+    """
+    Updates node dictionary by adding connectivity and idx information
+    to an existing node. The function cannot add a node to the network.
+
+    Parameters
+    ----------
+    nodes : dict
+        Network nodes and associated properties Should contain 'id', 'idx',
+        and 'conn' keys at a minimum.
+    idx : int
+        The index of the node, as found in nodes['idx'].
+    conn : int
+        Link id (as found in links['id']) connected to the node.
+
+    Returns
+    -------
+    nodes : dict
+        Network nodes with node updated.
+
+    """
+    if idx not in nodes['idx']:
+        nodes['idx'].append(idx)
+
+    if len(nodes['conn']) < len(nodes['idx']):
+        nodes['conn'].append([])
+
+    nodeid = nodes['idx'].index(idx)
+    nodes['conn'][nodeid] = nodes['conn'][nodeid] + [conn]
+
+    return nodes
+
+
+def link_updater(links, linkid, idx=-1, conn=-1):
+    """
+    Updates link dictionary by appending a new link or adding connectivity
+    to an existing link. This function cannot add a new link.
+    
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties. Should contain 'id', 'idx', 
+        and 'conn' at a minimum. 
+    linkid : int
+        ID of the link to update.
+    idx : list or int, optional
+        Pixel indices of the link to update. The default is -1, which effectively
+        skips updating the idx field.
+    conn : int, optional
+        Node id (as found in nodes['id']) connected to the link. The default is -1,
+        which effectively skips updating the 'id' field.
+
+    Returns
+    -------
+    links : dict
+        Network links with link updated.
+
+    """
+    if linkid not in links['id']:
+        links['id'].append(linkid)
+
+    linkidx = links['id'].index(linkid)
+
+    if idx != -1 :
+        if type(idx) is not list:
+            idx = [idx]
+
+        if len(links['idx']) < len(links['id']):
+            links['idx'].append([])
+            links['conn'].append([])
+
+        links['idx'][linkidx] = links['idx'][linkidx] + idx
+
+    if conn != -1:
+        if len(links['conn']) < len(links['id']):
+            links['conn'].append([])
+            links['idx'].append([])
+
+        links['conn'][linkidx] = links['conn'][linkidx] + [conn]
+
+    return links
+
+
+def delete_node(nodes, nodeid, warn=True):
+    """
+    Deletes a node from the network. Assumes that the node's connected links have
+    already been deleted, and hence does not update the links dictionary.
+
+    Parameters
+    ----------
+    nodes : dict
+        Network nodes and associated properties.
+    nodeid : int
+        ID of the node (as found in nodes['id']) to delete.
+    warn : bool, optional
+        If True, will print a warning if a node is being deleted that is still
+        connected to links in the network. The default is True.
+
+    Returns
+    -------
+    nodes : dict
+        Network nodes with the node deleted.
+
+    """
+    # Get keys that have removable elements
+    nodekeys = [nk for nk in nodes.keys() if type(nodes[nk]) is not int and len(nodes[nk]) == len(nodes['id'])]
+
+    # Check that the node has no connectivity
+    nodeidx = nodes['id'].index(nodeid)
+    if len(nodes['conn'][nodeidx]) != 0 and warn==True:
+        print('You are deleting node {} which still has connections to links.'.format(nodeid))
+
+    # Remove the node and its properties
+    for nk in nodekeys:
+        if nk == 'id': # have to treat orderedset differently
+            nodes[nk].remove(nodeid)
+        elif nk == 'idx':
+            nodes[nk].remove(nodes[nk][nodeidx])
+        else:
+            nodes[nk].pop(nodeidx)
+
+    return nodes
+
+
+def delete_link(links, nodes, linkid):
+    """
+    Deletes a link from the network.
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    linkid : int
+        ID of link (as found in links['id']) to delete.
+
+    Returns
+    -------
+    links : dict
+        Network links with link updated.
+    nodes: dict
+        Network nodes with node updated.
+
+    """
+    linkkeys = [lk for lk in links.keys() if type(links[lk]) is not int and len(links[lk]) == len(links['id'])]
+    lidx = links['id'].index(linkid)
+
+    # Save the connecting nodes so we can update their connectivity ([:] makes a copy, not a view)
+    connected_node_ids = links['conn'][lidx][:]
+
+    # Remove the link and its properties
+    for lk in linkkeys:
+        if lk == 'id': # have to treat orderedset differently
+            links[lk].remove(linkid)
+        else:
+            try:
+                links[lk].pop(lidx)
+            except:
+                links[lk] = np.delete(links[lk], lidx)
+
+    # Remove the link from node connectivity; delete nodes if there are no longer links connected
+    for cni in connected_node_ids:
+        cnodeidx = nodes['id'].index(cni)
+        nodes['conn'][cnodeidx].remove(linkid)
+        if len(nodes['conn'][cnodeidx]) == 0: # If there are no connections to the node, remove it
+            nodes = delete_node(nodes, cni)
+
+    return links, nodes
+
+
 def flip_link(links, linkid):
     """
-    Flips a link's direction and updates corresponding connectivity and other
-    attributes.
-    """
+    Reverses a link's direction by flipping the ordering of its comprising
+    pixels, as well as any ordered attributes.
 
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    linkid : int
+        ID of the link to flip (within links['id']).
+
+    Returns
+    -------
+    links : dict
+        Network links with the link flipped.
+
+    """
     # Get index of link
     lidx = links['id'].index(linkid)
 
@@ -179,45 +315,50 @@ def flip_link(links, linkid):
     return links
 
 
-def add_node(nodes, idx, linkconn):
-
-    # Add a node to a set of links and nodes. Must provide the link ids connected
-    # to the node (linkconn). Linkconn must be a list, even if only has one
-    # entry.
-
-    if type(linkconn) is not list:
-        linkconn = [linkconn]
-
-    if idx in nodes['idx']:
-        print('Node already in set; returning unchanged.')
-        return nodes
-
-    # Find new node ID
-    new_id = max(nodes['id']) + 1
-
-    # Append new node
-    nodes['id'].append(new_id)
-    nodes['idx'].append(idx)
-    nodes['conn'].append(linkconn)
-
-    return nodes
-
-
 def link_widths_and_lengths(links, Idt, pixlen=1):
     """
-    Appends link widths and lengths to the links dictionary.
+    Computes link widths and lengths for all links in the network. A 
+    distance transform approach is used where the width of a pixel is its
+    distance to the nearest non-max pixel times two.
+    
     There is a slight twist. When a skeleton is computed for a very wide
     channel with a narrow tributary, there is a very straight section of the
     skeleton as it leaves the wide channel to go into the tributary; this
-    straight section should not be used to compute average link width, as it's
-    technically part of the wide channel. The twist here accounts for that by
-    elminating the ends of the each link from computing widths and lengths,
-    where the distance along each end is equal to the half-width of the endmost
-    pixels.
-    ##TODO: add median width OR just change wid_adj to be median?
-    """
+    straight section (so-called "false" pixels) should not be used to compute 
+    average link width, as it's technically part of the wide channel. The twist 
+    here accounts for that by elminating the ends of the each link from computing 
+    widths and lengths, where the distance along each end is equal to the 
+    half-width of the endmost pixels. Adjusted link widths and lengths are also 
+    computed that account for this effect.
+    
+    The following new attributes are added to the links dictionary:
+        'len' - the length of the full link
+        'wid_pix' - the width of each pixel in the link
+        'wid' - the average width of all pixels of the link
+        'wid_adj' - the "adjusted" average width of all link pixels excluding "false" pixels
+        'len_adj' - the "adjusted" length of the link after excluding "false" pixels
 
-    # Compute and append link widths
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    Idt : np.array
+        Distance transform of the original mask.
+    pixlen : float or int, optional
+        Length (or resolution) of the pixel. If provided, assumes that the
+        pixel resolution is the same in the horizontal and vertical directions.
+        The default is 1, which corresponds to computing widths and lengths 
+        in units of pixels.
+
+    Returns
+    -------
+    links : dict
+        Network links with width and length properties appended.
+
+    """
+    ##TODO: add median width OR just change wid_adj to be median?
+
+    # Initialize attribute storage
     links['wid_pix'] = [] # width at each pixel
     links['len'] = []
     links['wid'] = []
@@ -268,14 +409,63 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
 
 def junction_angles(links, nodes, imshape, pixlen, weight=None):
     """
-    Computes junction angles between links in a directed graph. Only junctions
-    with three joining links are considered for simplicity. Also computes
-    the ratio of link widths at junctions, and determines whether the junction
-    is a confluence (joining) or a bifurcation (diverging). These attributes
-    are appended to the provided nodes dictionary.
-    'weight' can be 'None', 'exp' (exponential), or 'lin' (linear)
-    """
+    Computes junction angles between links in a network with directions set. 
+    Only nodes of degree three are considered for simplicity. Angles are only 
+    computed between the two links that share a common flow directions. The
+    acute-most angle between these two links is returned.
+    
+    The direction of an individual link is poorly constrained. The number of 
+    pixels along the link to consider for computing its direction can result
+    in vastly different directions depending on the link's morphology. The
+    weight argument above allows a degree of control over how to weight the
+    contribution of pixels to a link's direction vector.
+    
+    Also computes the ratio of link widths (max/min) at junctions, and
+    determines whether the junction is a confluence (joining) or a bifurcation 
+    (diverging).
+    
+    The following attributes are appended to the ndoes dictionary:
+        'int_ang' - the interior angle between the two links in the 
+        'width_ratio' - the ratio of the maximum/minimum link widths for the 
+                        two links whose directions agree
+        'jtype' - the junction type, either 'b'ifurcation or 'c'onfluence
 
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        (nrows, ncols) of the original mask.
+    pixlen : numeric
+        Resolution of the image; assumes same resolution in the horizontal and
+        vertical.
+    weight : str, optional
+        How to weight pixel contributions to a link's direction vector as we
+        move away from the joining node. Choose from
+        None - all pixels are weighted equally
+        'lin' - the contribution of pixels decreases linearly as we move away 
+                from the joining node.
+        'exp' - the contribution of  pixels decreases exponentially as we move
+                away from the joining node.    
+        The default is None.
+
+    Raises
+    ------
+    KeyError
+        Ensures that flow directions have been computed before running this 
+        function.
+    RuntimeError
+        Catches any strange cases where a junction is neither a bifurcation 
+        nor junction. Have not encountered this yet, please report if triggered.
+
+    Returns
+    -------
+    nodes : dict
+        Network nodes and associated properties.
+
+    """
     # Enusre directions have been computed
     if 'certain' not in links.keys():
         raise KeyError('Cannot compute junction angles until link flow directions have been computed.')
@@ -407,9 +597,25 @@ def junction_angles(links, nodes, imshape, pixlen, weight=None):
 
 def conn_links(nodes, links, node_idx):
     """
-    Returns the first and last pixels of links connected to node_idx.
-    """
+    Finds the first and last pixels of all links connected to the node specified
+    by node_idx.
 
+    Parameters
+    ----------
+    nodes : dict
+        Network nodes and associated properties.
+    links : dict
+        Network links and associated properties.
+    node_idx : int
+        Index of the node (not its id) to query.
+
+    Returns
+    -------
+    link_pix : list of lists
+        A list of [first pixel, last pixel] for each link connected to the
+        node specified by node_idx.
+
+    """
     link_ids = nodes['conn'][nodes['idx'].index(node_idx)]
     link_pix = []
     for l in link_ids:
@@ -420,10 +626,33 @@ def conn_links(nodes, links, node_idx):
 
 def adjust_for_padding(links, nodes, npad, dims, initial_dims):
     """
-    Adjusts links['idx'] and nodes['idx'] values back to original image
-    dimensions, effectively removing the padding.
-    """
+    In some cases, a mask is padded before extracting the network. In order
+    to ensure the extracted network maps to the original mask, the padding must
+    be stripped away from all the coordinates of the network. The function
+    achieves this by adjusting the ['idx'] attributes of the links and nodes.
 
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    npad : int
+        Pad width to remove. Assumes padding was performed on all four edges
+        of image.
+    dims : tuple
+        (nrows, ncols) of the padded image.
+    initial_dims : tuple
+        (nrows, ncols) of the original (unpadded) image.
+
+    Returns
+    -------
+    links : dict
+        Network links adjusted to remove padding.
+    nodes : dict
+        Network nodes adjusted to remove padding.
+
+    """
     # Adjust the link indices
     adjusted_lidx = []
     for lidx in links['idx']:
@@ -446,7 +675,39 @@ def adjust_for_padding(links, nodes, npad, dims, initial_dims):
 
 
 def remove_disconnected_bridge_links(links, nodes):
+    """
+    When simplifying a channel network, there are often tributaries joining
+    the network further downstream. These tributaries may have loops, which
+    prevents their automatic removal by simple pruning. 
+    
+    This function helps prune these cases by removing bridge links that are 
+    not integral to the network. A bridge link is one whose removal results 
+    in an increase in the number of connected components in the network. Each
+    bridge link is temporarily removed from the network. This leaves two 
+    end nodes which were connected by the bridge link. A bridge link is
+    integral if a path can be found from the end nodes to inlets and 
+    outlets (if one end node is connected to an inlet(s), the other must
+    be connected to an outlet(s)). 
+    
+    After all non-integral bridge links are removed, the connected component
+    network that contains the inlet and outlets is returned; all other 
+    subnetworks are removed.
+    
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
 
+    Returns
+    -------
+    links : dict
+        Pruned network links.
+    nodes : dict
+        Pruned network nodes.
+
+    """
     G = nx.Graph()
     G.add_nodes_from(nodes['id'])
     for lc in links['conn']:
@@ -532,11 +793,29 @@ def remove_disconnected_bridge_links(links, nodes):
 
 
 def remove_all_spurs(links, nodes, dontremove=[]):
-    # Remove links connected to nodes that have only one connection; this is
-    # performed iteratively until all spurs are removed. Spurs with inlet
-    # nodes as endpoints are ignored. Also removes redundant nodes (i.e. nodes
-    # with only two links attached.)
+    """
+    Removes all links who have a node of degree one. This is performed iteratively 
+    until all spurs are removed. Also removes redundant nodes (i.e. nodes
+    with degree two.)
 
+    Parameters
+    ----------
+    links : dict
+        Network link and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    dontremove : list, optional
+        Node IDs not to remove (e.g. inlet and/or outlet nodes). 
+        The default is [].
+
+    Returns
+    -------
+    links : dict
+        Network links with spurs removed.
+    nodes : dict
+        Network nodes with spurs removed.
+
+    """
     stopflag = 0
     while stopflag == 0:
         ct = 0
@@ -569,9 +848,27 @@ def remove_all_spurs(links, nodes, dontremove=[]):
 
 
 def remove_two_link_nodes(links, nodes, dontremove):
-    # dontremove includes nodeids that should not be removed (inlets, outlets)
+    """
+    Removes superfluous nodes from the network; i.e. nodes with degree two.
+    Is called by remove_all_spurs().
 
-    # Removes unnecessary nodes
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    dontremove : list
+        Node IDs that should not be removed (e.g. inlets or outlets).
+
+    Returns
+    -------
+    links : dict
+        Network links with superfluous nodes removed.
+    nodes : dict
+        Network nodes with superfluous nodes removed.
+
+    """
     linkkeys = [lk for lk in links.keys() if type(links[lk]) is not int and len(links[lk]) == len(links['id'])]
 
     ct = 1
@@ -647,8 +944,22 @@ def remove_two_link_nodes(links, nodes, dontremove):
 
 def remove_single_pixel_links(links, nodes):
     """
-    Thanks to the Lena for finding this bug. In very rare cases, we can end
-    up with a link of one pixel. This function removes those.
+    RivGraph's resolving of the network can result in single-pixel links that
+    can be removed without altering connectivity. This function removes those.
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+
+    Returns
+    -------
+    links : dict
+        Network links with single pixel links removed.
+    nodes : dict
+        Network nodes with single pixel links removed.
     """
     # Find links to remove
     linkidx_remove = [lid for lidx, lid in zip(links['idx'], links['id']) if len(lidx) == 1]
@@ -660,22 +971,31 @@ def remove_single_pixel_links(links, nodes):
     return links, nodes
 
 
-def append_link_lengths(links, gd_obj):
+def append_link_lengths(links, gdobj):
     """
-    Appends link lengths to each link. 
+    Appends link lengths to each link. Lengths are computed in the units of
+    the coordinate reference system of the original mask. 
     
-    5/27/2020 Due to dummy projection problems, removing the transformation
-    of coordinates to 4087. Lengths and widths will be computed in units of
-    the provided CRS. If you want to change this in the future, will need
-    to pass a dummy flag to notify that coordinates should not be transformed
-    for those cases.
-    """
+    This function provides a subset of the functionality of link_widths_and_lengths().
+    It is used when only link lengths are needed for, e.g. finding shortest
+    paths.
 
-    # Compute and append link lengths -- assumes the CRS is in a projection that
-    # respects distances
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    gdobj : osgeo.gdal.Dataset
+        GDAL dataset of the original mask, created via gdal.Open().
+
+    Returns
+    -------
+    links : dict
+        Network links with length attribute appended.
+
+    """
     links['len'] = []
     for idcs in links['idx']:
-        link_coords = gu.idx_to_coords(idcs, gd_obj)
+        link_coords = gu.idx_to_coords(idcs, gdobj)
         dists = np.sqrt(np.diff(link_coords[0])**2 + np.diff(link_coords[1])**2)
         links['len'].append(np.sum(dists))
 
@@ -685,22 +1005,26 @@ def append_link_lengths(links, gd_obj):
 def find_parallel_links(links, nodes):
     """
     Finds all parallel links within the graph. A set of parallel links all have
-    the same start and end node. Parallel links are added as an attribute to
-    the links dictionary.
+    the same start and end node. A new attribute called 'parallels' is added
+    to the links dictionary.
     
     Parameters
     ----------
-    links : TYPE
-        DESCRIPTION.
-    nodes : TYPE
-        DESCRIPTION.
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
 
     Returns
     -------
-    None.
+    links : dict
+        Network links with parallel attribute appended.
+    nodes : dict
+        Network nodes and associated properties.
 
     """
     ## TODO: test this implementation against triplet-parallel links.
+    ## TODO: nodes do not need to be returned
     
     # Find parallel edge pairs/triplets/etc that require aritifical nodes
     G = nx.MultiGraph()
@@ -723,39 +1047,40 @@ def find_parallel_links(links, nodes):
 
 def add_artificial_nodes(links, nodes, gd_obj):
     """
-    Some graphical metrics fail for graphs that contain parallel links, or
+    Some topologic metrics fail for graphs that contain parallel links, or
     links that share the same end nodes. This function alleviates that issue
     by inserting artificial nodes into all but one of the parallel links. The
     shortest link of the parallel set will not receive an artificial node.
-    
     For simplicity of coding, when a node is added, the old link is deleted and
     two new links are put in its place.
     
-    If flow directions have been set for links, the properties of the link that
+    A new attribute is appended to the nodes dictionary called 'arts' that 
+    contains the node IDs of artifical nodes.    
+    
+    If flow directions are needed, this function should be run after setting
+    them. If flow directions have been set for links, the properties of the link that
     is broken into two are appended to the two parts. This may result in some
     properties that are no longer correct, e.g. slope. 
-    
-    This function should not be run prior to setting flow directions.
-    
-    The 'guess' attribute of the links where artificial nodes are added 
+        
+    Additionally, the 'guess' attribute of the links where artificial nodes are added 
     will be incorrect as it doesn't account for the artificial node, but 
     references the original end nodes.
 
     Parameters
     ----------
-    links : TYPE
-        DESCRIPTION.
-    nodes : TYPE
-        DESCRIPTION.
-    gd_obj : TYPE
-        DESCRIPTION.
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    gdobj : osgeo.gdal.Dataset
+        GDAL dataset of the original mask, created via gdal.Open().
 
     Returns
     -------
-    links : TYPE
-        DESCRIPTION.
-    nodes : TYPE
-        DESCRIPTION.
+    links : dict
+        Network links with aritifical nodes added.
+    nodes : dict
+        Network nodes with artificial nodes added as a new 'arts' attribute.
     """
     # Links dictionary keys to copy to new links
     keys_to_copy = ['certain', 'certain_order', 'certain_alg', 'guess', 'guess_alg', 'slope']
@@ -770,7 +1095,7 @@ def add_artificial_nodes(links, nodes, gd_obj):
         links = append_link_lengths(links, gd_obj)
 
     arts = []
-    # Step 2. Add the aritifical node to the proper links
+    # Add the aritifical node to the proper links
     for p in pairs: # Note that pairs can be triplets etc. as well
 
         # Choose the longest link(s) to add the artificial node
@@ -853,8 +1178,28 @@ def add_artificial_nodes(links, nodes, gd_obj):
 
 def find_art_links(links, nodes):
     """
-    Finds the triplet of links corresponding to each artificial nodes in
-    nodes['arts'].
+    Finds the triad links corresponding to each artificial node. The triad
+    links are the two links connected to the artifical node, and the link
+    parallel to these two links.
+    
+    Adds a new 'arts' property to the links dictionary that contains the triad
+    set for each artificial node in nodes['arts'].
+    
+    This function has little use after changing how RivGraph considers
+    parallel links.
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+
+    Returns
+    -------
+    links : dict
+        Network link with 'arts' attribute.
+
     """
     triad_links = []
     for an in nodes['arts']:
@@ -877,10 +1222,23 @@ def find_art_links(links, nodes):
 
 def remove_duplicate_links(links, nodes):
     """
-    Checks links for duplicates and removes any found. They are rare but some
-    have appeared in one-pixel-long links.
-    """
+    Eliminates any duplicate links in the network. 
 
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+
+    Returns
+    -------
+    links : dict
+        Network links with duplicate links removed.
+    nodes : dict
+        Network nodes with duplicate nodes removed.
+
+    """
     import networkx as nx
     from itertools import combinations, chain
 
@@ -915,6 +1273,21 @@ def remove_duplicate_links(links, nodes):
 
 
 def plot_dirlinks(links, dims):
+    """
+    Plots the network links with flow direction denoted.
+
+    Parameters
+    ----------
+    links : dict
+        Network links with flow directions set.
+    dims : tuple
+        (nrows, ncols) of original mask that links were derived from.
+
+    Returns
+    -------
+    None.
+    
+    """
 
     def colorline(
         x, y, z=None, cmap=plt.get_cmap('copper'), norm=plt.Normalize(0.0, 1.0),
@@ -1008,9 +1381,29 @@ def plot_dirlinks(links, dims):
 
 
 def plot_network(links, nodes, Imask, name, axis=None):
+    """
+    Plots the network with labeled link and node IDs.
 
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    Imask : np.array
+        The original binary mask.
+    name : str
+        Name of the channel network for labeling the plot.
+    axis : matplotlib.axex._subplots.AxesSubplot, optional
+        If provided, plotting will occur within the provided axis. Can be created
+        with matplotlib.pyplot.subplots(). The default is None.
+
+    Returns
+    -------
+    None.
+
+    """
     ## TODO: add legend for link and node ids
-
     imshape = Imask.shape
 
     # Colormap for binary mask
@@ -1049,10 +1442,21 @@ def plot_network(links, nodes, Imask, name, axis=None):
 
 def links_to_gpd(links, gdobj):
     """
-    Converts links dictionary to a geopandas dataframe.
-    """
-    import shapely as shp
+    Converts the links dictionary to a GeoPandas GeoDataFrame.
 
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    gdobj : osgeo.gdal.Dataset
+        DESCRIPTION.
+
+    Returns
+    -------
+    links_gpd : TYPE
+        GDAL dataset of the original mask, created via gdal.Open().
+
+    """
     # Create geodataframe
     links_gpd = gpd.GeoDataFrame()
 
@@ -1063,7 +1467,7 @@ def links_to_gpd(links, gdobj):
     geoms = []
     for i, lidx in enumerate(links['idx']):
         coords = gu.idx_to_coords(lidx, gdobj)
-        geoms.append(shp.geometry.LineString(zip(coords[0], coords[1])))
+        geoms.append(shapely.geometry.LineString(zip(coords[0], coords[1])))
     links_gpd['geometry'] = geoms
 
     # Append ids and connectivity

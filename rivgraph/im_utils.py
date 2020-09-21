@@ -12,9 +12,6 @@ import cv2
 import numpy as np
 from scipy import ndimage as nd
 from skimage import morphology, measure, util
-# import geopandas as gpd
-# from shapely.geometry import Polygon
-# import rivgraph.geo_utils as gu
 
 ## TODO: add checks for inputs to ensure proper types
 

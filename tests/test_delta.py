@@ -1,11 +1,11 @@
 """Tests for broader `rivgraph.classes.delta` functions."""
 import pytest
-import sys
-import os
 import numpy as np
-sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
-# from rivgraph.classes import delta
-# from rivgraph import directionality
+from inspect import getsourcefile
+import sys, os
+basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
+sys.path.insert(0, basepath)
+
 
 def test_skeletonize(test_net):
     """Test skeletonization."""
@@ -51,14 +51,12 @@ def test_compute_network(test_net, known_net):
     assert len(test_net.links['id']) >= len(known_net.links['id'])
 
 
-@pytest.mark.xfail
 def test_prune_network(test_net, known_net):
     """Test network pruning."""
     # prune the network
-    test_net.prune_network(path_shoreline='tests/data/Colville/Colville_shoreline.shp',
-                           path_inletnodes='tests/data/Colville/Colville_inlet_nodes.shp')
-    # test_net.prune_network(path_shoreline=r"C:\Users\Jon\Anaconda3\envs\rivgraph\Lib\site-packages\rivgraph\tests\data\Colville\Colville_shoreline.shp",
-    #                        path_inletnodes=r"C:\Users\Jon\Anaconda3\envs\rivgraph\Lib\site-packages\rivgraph\tests\data\Colville\Colville_inlet_nodes.shp")
+    test_net.prune_network(path_shoreline=os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_shoreline.shp')),
+                            path_inletnodes=os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_inlet_nodes.shp')))
+
     # now the number of nodes and links should be exactly the same
     # Currently x-failing because changes in directionality computation altered the number of nodes/links identified
     assert len(test_net.nodes['id']) == len(known_net.nodes['id'])

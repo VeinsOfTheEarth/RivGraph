@@ -1,6 +1,8 @@
 """
-ordered_set
+ordered_set.py
 ===========
+This script is copied from the ordered_set package, but is included as a
+separate .py file in RivGraph due to packaging issues.
 
 An OrderedSet is a custom MutableSet that remembers its order, so that every
 entry has an index that can be looked up.

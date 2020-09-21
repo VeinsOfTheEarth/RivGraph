@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jul  6 18:29:23 2020
+mask_utils.py
+=============
+
+Functions for filtering islands from channel masks. Currently in beta.
+Also see im_utils.py for morphologic operations that could be useful.
+
+Created on Mon Jul 6 18:29:23 2020
 
 @author: Jon
 """

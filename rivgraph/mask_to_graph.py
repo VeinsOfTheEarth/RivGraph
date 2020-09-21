@@ -1,5 +1,7 @@
-# -*- coding: utf-8 -*-
 """
+mask_to_graph.py
+=============
+
 Functions for converting a binary channel mask to a graphical representation.
 """
 

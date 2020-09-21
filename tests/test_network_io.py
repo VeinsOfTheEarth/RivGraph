@@ -1,10 +1,13 @@
 """Unit tests to check Input/Output functionality."""
-import pytest
 import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
+
+from inspect import getsourcefile
+basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
+sys.path.insert(0, basepath)
+
 from rivgraph import io_utils as iu
 
 # Testing of functions that do I/O within the rivgraph.classes.delta class
@@ -14,7 +17,7 @@ def test_save(known_net):
     """Test saving functionality."""
     known_net.save_network()
     # assert that the file now exists
-    assert os.path.isfile(os.path.normpath('tests/results/known/known_network.pkl')) == True
+    assert os.path.isfile(os.path.join(basepath, os.path.normpath('tests/results/known/known_network.pkl'))) == True
 
 
 def test_load(known_net):
@@ -111,9 +114,9 @@ class TestColortable:
         assert np.all(color_table.GetColorEntry(0)==(0, 0, 0, 0))
         assert np.all(color_table.GetColorEntry(1)==(0, 0, 255, 100))
 
-    def test_JRCmo(self):
-        """Test JRCmo."""
-        color_table = iu.colortable('JRCmo')
+    def test_GSW(self):
+        """Test GSW."""
+        color_table = iu.colortable('GSW')
         assert np.all(color_table.GetColorEntry(0)==(0, 0, 0, 0))
         assert np.all(color_table.GetColorEntry(1)==(0, 0, 0, 0))
         assert np.all(color_table.GetColorEntry(2)==(176, 224, 230, 100))

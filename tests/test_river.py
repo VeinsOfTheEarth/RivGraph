@@ -4,7 +4,10 @@ import sys
 import os
 import io
 import numpy as np
-sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
+
+from inspect import getsourcefile
+basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
+sys.path.insert(0, basepath)
 from rivgraph.classes import river
 from rivgraph import geo_utils
 from rivgraph.rivers import river_utils as ru
@@ -107,11 +110,12 @@ def test_assign_flow_directions_verbose(test_river):
 
 def test_river_ne():
     """Test river with exit sides 'ne'."""
-    img_path = 'tests/data/Brahma/brahma_mask_clip.tif'
-    out_path = 'tests/results/brahma/cropped.tif'
+    img_path = os.path.join(basepath, os.path.normpath('tests/data/Brahma/brahma_mask_clip.tif'))
+    out_path = os.path.join(basepath, os.path.normpath('tests/results/brahma/cropped.tif'))
     geo_utils.crop_geotif(img_path, npad=10, outpath=out_path)
     test_ne = river('Brahmclip', out_path,
-                    'tests/results/brahma/', exit_sides='ne')
+                    os.path.join(basepath, os.path.normpath('tests/results/brahma/')), 
+                    exit_sides='ne')
     test_ne.compute_network()
     test_ne.compute_mesh()
     test_ne.prune_network()
@@ -124,8 +128,10 @@ def test_river_ne():
 
 def test_river_sw():
     """Test river with exit sides 'sw'."""
-    test_sw = river('Brahmclip', 'tests/data/Brahma/brahma_mask_clip.tif',
-                    'tests/results/brahma/', exit_sides='sw')
+    test_sw = river('Brahmclip', 
+                    os.path.join(basepath, os.path.normpath('tests/data/Brahma/brahma_mask_clip.tif')),
+                    os.path.join(basepath, os.path.normpath('tests/results/brahma/')), 
+                    exit_sides='sw')
     test_sw.compute_network()
     test_sw.compute_mesh()
     test_sw.prune_network()

@@ -6,9 +6,10 @@ import io
 import numpy as np
 import matplotlib.pyplot as plt
 import shapely
-from shapely.geometry import MultiLineString
-from shapely.geometry import LineString
-sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
+
+from inspect import getsourcefile
+basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
+sys.path.insert(0, basepath)
 from rivgraph.rivers import river_utils as ru
 
 
@@ -134,8 +135,8 @@ def test_inflection_pts():
 
 def test_eBI_avg():
     """Test compute_eBI() with method='avg'."""
-    path_meshlines = 'tests/data/Brahma/Brahmclip_meshlines.json'
-    path_links = 'tests/data/Brahma/Brahmclip_links.json'
+    path_meshlines = os.path.join(basepath, os.path.normpath('tests/data/Brahma/Brahmclip_meshlines.json'))
+    path_links = os.path.join(basepath, os.path.normpath('tests/data/Brahma/Brahmclip_links.json'))
     eBI, BI = ru.compute_eBI(path_meshlines, path_links, method='avg')
 
     # make assertions
@@ -343,10 +344,10 @@ def test_sine_plot():
     ys = np.sin(xs) + 5
     CL = ru.centerline(xs, ys)
     CL.plot()
-    plt.savefig('tests/results/synthetic_cycles/sinewave.png')
+    plt.savefig(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/sinewave.png')))
     plt.close()
     # assert file exists now
-    assert os.path.isfile('tests/results/synthetic_cycles/sinewave.png') == True
+    assert os.path.isfile(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/sinewave.png'))) == True
 
 
 def test_long_sine():
@@ -378,10 +379,10 @@ def test_plot_withattrs():
     CL.ints_all = [1]
     CL.ints = [2]
     CL.plot()
-    plt.savefig('tests/results/synthetic_cycles/sinewaveattrs.png')
+    plt.savefig(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/sinewaveattrs.png')))
     plt.close()
     # assert file exists now
-    assert os.path.isfile('tests/results/synthetic_cycles/sinewaveattrs.png') == True
+    assert os.path.isfile(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/sinewaveattrs.png'))) == True
 
 
 def test_zs_noinflection():
@@ -439,7 +440,7 @@ def test_zs_nomigrates():
 
 def test_delete_files():
     """Delete created files at the end."""
-    for i in os.listdir('tests/results/synthetic_cycles/'):
-        os.remove('tests/results/synthetic_cycles/'+i)
+    for i in os.listdir(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/'))):
+        os.remove(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/'+i)))
     # check directory is empty
-    assert os.listdir('tests/results/synthetic_cycles/') == []
+    assert os.listdir(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/'))) == []

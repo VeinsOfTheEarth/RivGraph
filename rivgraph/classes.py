@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-rivgraph.py
-====================================
+classes.py
+=============
 Classes for running rivgraph commands on your channel network.
 
 """
@@ -97,6 +97,7 @@ class rivnetwork:
         self.paths['input_mask'] = os.path.normpath(path_to_mask)
 
         # Handle georeferencing
+        print(self.paths['input_mask'])
         self.gdobj = gdal.Open(self.paths['input_mask'], gdal.GA_Update) # GA_Update required for setting dummy projection/geotransform
         self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
 
@@ -428,8 +429,8 @@ class rivnetwork:
                 if hasattr(self, 'meshlines') is True and type(self) is river:
                     self.paths['meshlines'] = os.path.join(self.paths['basepath'], self.name + '_meshlines.' + ext)
                     self.paths['meshpolys'] = os.path.join(self.paths['basepath'], self.name + '_meshpolys.' + ext)
-                    io.meshlines_to_geovectors(self.meshlines, self.crs, self.paths['meshlines'])
-                    io.meshpolys_to_geovectors(self.meshpolys, self.crs, self.paths['meshpolys'])
+                    io.shapely_list_to_geovectors(self.meshlines, self.crs, self.paths['meshlines'])
+                    io.shapely_list_to_geovectors(self.meshpolys, self.crs, self.paths['meshpolys'])
                 else:
                     print('Mesh has not been computed and thus cannot be exported.')
             if te == 'centerline':
