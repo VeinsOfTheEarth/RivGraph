@@ -160,13 +160,14 @@
   <h1>Source code for rivgraph.ln_utils</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">ln_utils</span>
+<span class="sd">ln_utils - link and node utilities</span>
 <span class="sd">========</span>
 
 <span class="sd">Created on Mon Sep 10 09:59:52 2018</span>
 
 <span class="sd">@author: Jon</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">shapely</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">mode</span>
 <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
@@ -175,125 +176,77 @@
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span>
 <span class="kn">import</span> <span class="nn">matplotlib.collections</span> <span class="k">as</span> <span class="nn">mcoll</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pyproj.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">import</span> <span class="nn">rivgraph.geo_utils</span> <span class="k">as</span> <span class="nn">gu</span>
 <span class="kn">from</span> <span class="nn">rivgraph.ordered_set</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
 
 
-<div class="viewcode-block" id="node_updater"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.node_updater">[docs]</a><span class="k">def</span> <span class="nf">node_updater</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">conn</span><span class="p">):</span>
-
+<div class="viewcode-block" id="add_node"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.add_node">[docs]</a><span class="k">def</span> <span class="nf">add_node</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">linkconn</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Updates node dictionary. Supply index of node and connected link.</span>
+<span class="sd">    Adds a new node to the network. Connectivity is updated in links to account</span>
+<span class="sd">    for the added node. No node properties (e.g. juncation angle) are updated.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+<span class="sd">    idx : int</span>
+<span class="sd">        Pixel index within the original mask of the node to add.</span>
+<span class="sd">    linkconn : list or int</span>
+<span class="sd">        ID(s) of the link that the node is connected to.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes with the node added.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">linkconn</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">linkconn</span> <span class="o">=</span> <span class="p">[</span><span class="n">linkconn</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">idx</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]:</span>
-        <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Node already in set; returning unchanged.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nodes</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]):</span>
-        <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+    <span class="c1"># Find new node ID</span>
+    <span class="n">new_id</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
 
-    <span class="n">nodeid</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-    <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodeid</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodeid</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">conn</span><span class="p">]</span>
+    <span class="c1"># Append new node</span>
+    <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_id</span><span class="p">)</span>
+    <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+    <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">linkconn</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">nodes</span></div>
 
 
-<span class="k">def</span> <span class="nf">link_updater</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">idx</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">conn</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="add_link"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.add_link">[docs]</a><span class="k">def</span> <span class="nf">add_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">idcs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a new link to the network. Connectivity is updated in nodes to account</span>
+<span class="sd">    for the added link. Attributes such as link width, length are not </span>
+<span class="sd">    recomputed here; must be recomputed for the entire network.  </span>
 
-    <span class="k">if</span> <span class="n">linkid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]:</span>
-        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+<span class="sd">    idcs : list</span>
+<span class="sd">        Pixel indices comprising the link.</span>
 
-    <span class="n">linkidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    RuntimeError</span>
+<span class="sd">        Raised if the added link isn&#39;t connected to existing nodes at both ends.</span>
 
-    <span class="k">if</span> <span class="n">idx</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="p">:</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with the link added.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes with the link added.</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]):</span>
-            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-
-        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span> <span class="o">+</span> <span class="n">idx</span>
-
-    <span class="k">if</span> <span class="n">conn</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]):</span>
-            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-
-        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">conn</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">links</span>
-
-
-<span class="k">def</span> <span class="nf">delete_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">linkid</span><span class="p">):</span>
-
-    <span class="c1"># Deletes linkid from links, updates nodes accordingly</span>
-
-    <span class="n">linkkeys</span> <span class="o">=</span> <span class="p">[</span><span class="n">lk</span> <span class="k">for</span> <span class="n">lk</span> <span class="ow">in</span> <span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">int</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])]</span>
-
-<span class="c1">#    linkkeys = links.keys() - set([&#39;len&#39;, &#39;wid&#39;, &#39;wid_avg&#39;, &#39;n_networks&#39;])</span>
-
-    <span class="n">lidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
-
-    <span class="c1"># Save the connecting nodes so we can update their connectivity ([:] makes a copy, not a view)</span>
-    <span class="n">connected_node_ids</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][:]</span>
-
-    <span class="c1"># Remove the link and its properties</span>
-    <span class="k">for</span> <span class="n">lk</span> <span class="ow">in</span> <span class="n">linkkeys</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">lk</span> <span class="o">==</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="c1"># have to treat orderedset differently</span>
-            <span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">lidx</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">],</span> <span class="n">lidx</span><span class="p">)</span>
-
-    <span class="c1"># Remove the link from node connectivity; delete nodes if there are no longer links connected</span>
-    <span class="k">for</span> <span class="n">cni</span> <span class="ow">in</span> <span class="n">connected_node_ids</span><span class="p">:</span>
-        <span class="n">cnodeidx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">cni</span><span class="p">)</span>
-        <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">cnodeidx</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">cnodeidx</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># If there are no connections to the node, remove it</span>
-            <span class="n">nodes</span> <span class="o">=</span> <span class="n">delete_node</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">cni</span><span class="p">)</span>
-
-<span class="c1">#    # Ensure that connectivity is preserved</span>
-<span class="c1">#    if links[&#39;conn&#39;][links[&#39;id&#39;].index(linkid)]</span>
-
-    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span>
-
-
-<span class="k">def</span> <span class="nf">delete_node</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">nodeid</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="c1"># nodeid is the node ID, not &#39;idx&#39;</span>
-    <span class="c1"># A node should only be deleted after it no longer has any connected links</span>
-    <span class="c1"># Delete a node and its properties</span>
-
-    <span class="c1"># Get keys that have removable elements</span>
-    <span class="n">nodekeys</span> <span class="o">=</span> <span class="p">[</span><span class="n">nk</span> <span class="k">for</span> <span class="n">nk</span> <span class="ow">in</span> <span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">int</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])]</span>
-
-    <span class="c1"># Check that the node has no connectivity</span>
-    <span class="n">nodeidx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">nodeid</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodeidx</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">warn</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;You are deleting node </span><span class="si">{}</span><span class="s1"> which still has connections to links.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nodeid</span><span class="p">))</span>
-
-    <span class="c1"># Remove the node and its properties</span>
-    <span class="k">for</span> <span class="n">nk</span> <span class="ow">in</span> <span class="n">nodekeys</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">nk</span> <span class="o">==</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="c1"># have to treat orderedset differently</span>
-            <span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">nodeid</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">nk</span> <span class="o">==</span> <span class="s1">&#39;idx&#39;</span><span class="p">:</span>
-            <span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">][</span><span class="n">nodeidx</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">nodeidx</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">nodes</span>
-
-
-<span class="k">def</span> <span class="nf">add_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">idcs</span><span class="p">):</span>
-
-    <span class="c1"># Adds a new link using the indices found in idcs; nodes and connectivity</span>
-    <span class="c1"># are also updated accordingly. Widths and lengths are not computed for</span>
-    <span class="c1"># new links; must be recomputed for entire network</span>
-
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Find new link ID</span>
     <span class="n">new_id</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
 
@@ -316,15 +269,198 @@
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_id</span><span class="p">)</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idcs</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span>
+    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
+
+
+<div class="viewcode-block" id="node_updater"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.node_updater">[docs]</a><span class="k">def</span> <span class="nf">node_updater</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">conn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Updates node dictionary by adding connectivity and idx information</span>
+<span class="sd">    to an existing node. The function cannot add a node to the network.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties Should contain &#39;id&#39;, &#39;idx&#39;,</span>
+<span class="sd">        and &#39;conn&#39; keys at a minimum.</span>
+<span class="sd">    idx : int</span>
+<span class="sd">        The index of the node, as found in nodes[&#39;idx&#39;].</span>
+<span class="sd">    conn : int</span>
+<span class="sd">        Link id (as found in links[&#39;id&#39;]) connected to the node.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes with node updated.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">idx</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]:</span>
+        <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]):</span>
+        <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+
+    <span class="n">nodeid</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+    <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodeid</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodeid</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">conn</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">nodes</span></div>
+
+
+<div class="viewcode-block" id="link_updater"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.link_updater">[docs]</a><span class="k">def</span> <span class="nf">link_updater</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">idx</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">conn</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Updates link dictionary by appending a new link or adding connectivity</span>
+<span class="sd">    to an existing link. This function cannot add a new link.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties. Should contain &#39;id&#39;, &#39;idx&#39;, </span>
+<span class="sd">        and &#39;conn&#39; at a minimum. </span>
+<span class="sd">    linkid : int</span>
+<span class="sd">        ID of the link to update.</span>
+<span class="sd">    idx : list or int, optional</span>
+<span class="sd">        Pixel indices of the link to update. The default is -1, which effectively</span>
+<span class="sd">        skips updating the idx field.</span>
+<span class="sd">    conn : int, optional</span>
+<span class="sd">        Node id (as found in nodes[&#39;id&#39;]) connected to the link. The default is -1,</span>
+<span class="sd">        which effectively skips updating the &#39;id&#39; field.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with link updated.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">linkid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]:</span>
+        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
+
+    <span class="n">linkidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]):</span>
+            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+
+        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span> <span class="o">+</span> <span class="n">idx</span>
+
+    <span class="k">if</span> <span class="n">conn</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]):</span>
+            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+
+        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">conn</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">links</span></div>
+
+
+<div class="viewcode-block" id="delete_node"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.delete_node">[docs]</a><span class="k">def</span> <span class="nf">delete_node</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">nodeid</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Deletes a node from the network. Assumes that the node&#39;s connected links have</span>
+<span class="sd">    already been deleted, and hence does not update the links dictionary.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+<span class="sd">    nodeid : int</span>
+<span class="sd">        ID of the node (as found in nodes[&#39;id&#39;]) to delete.</span>
+<span class="sd">    warn : bool, optional</span>
+<span class="sd">        If True, will print a warning if a node is being deleted that is still</span>
+<span class="sd">        connected to links in the network. The default is True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes with the node deleted.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get keys that have removable elements</span>
+    <span class="n">nodekeys</span> <span class="o">=</span> <span class="p">[</span><span class="n">nk</span> <span class="k">for</span> <span class="n">nk</span> <span class="ow">in</span> <span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">int</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])]</span>
+
+    <span class="c1"># Check that the node has no connectivity</span>
+    <span class="n">nodeidx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">nodeid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodeidx</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">warn</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;You are deleting node </span><span class="si">{}</span><span class="s1"> which still has connections to links.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nodeid</span><span class="p">))</span>
+
+    <span class="c1"># Remove the node and its properties</span>
+    <span class="k">for</span> <span class="n">nk</span> <span class="ow">in</span> <span class="n">nodekeys</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nk</span> <span class="o">==</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="c1"># have to treat orderedset differently</span>
+            <span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">nodeid</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">nk</span> <span class="o">==</span> <span class="s1">&#39;idx&#39;</span><span class="p">:</span>
+            <span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">][</span><span class="n">nodeidx</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nodes</span><span class="p">[</span><span class="n">nk</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">nodeidx</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">nodes</span></div>
+
+
+<div class="viewcode-block" id="delete_link"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.delete_link">[docs]</a><span class="k">def</span> <span class="nf">delete_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">linkid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Deletes a link from the network.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+<span class="sd">    linkid : int</span>
+<span class="sd">        ID of link (as found in links[&#39;id&#39;]) to delete.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with link updated.</span>
+<span class="sd">    nodes: dict</span>
+<span class="sd">        Network nodes with node updated.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">linkkeys</span> <span class="o">=</span> <span class="p">[</span><span class="n">lk</span> <span class="k">for</span> <span class="n">lk</span> <span class="ow">in</span> <span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">int</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])]</span>
+    <span class="n">lidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
+
+    <span class="c1"># Save the connecting nodes so we can update their connectivity ([:] makes a copy, not a view)</span>
+    <span class="n">connected_node_ids</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][:]</span>
+
+    <span class="c1"># Remove the link and its properties</span>
+    <span class="k">for</span> <span class="n">lk</span> <span class="ow">in</span> <span class="n">linkkeys</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lk</span> <span class="o">==</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="c1"># have to treat orderedset differently</span>
+            <span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">lidx</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">],</span> <span class="n">lidx</span><span class="p">)</span>
+
+    <span class="c1"># Remove the link from node connectivity; delete nodes if there are no longer links connected</span>
+    <span class="k">for</span> <span class="n">cni</span> <span class="ow">in</span> <span class="n">connected_node_ids</span><span class="p">:</span>
+        <span class="n">cnodeidx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">cni</span><span class="p">)</span>
+        <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">cnodeidx</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">cnodeidx</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># If there are no connections to the node, remove it</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="n">delete_node</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">cni</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 
 <div class="viewcode-block" id="flip_link"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.flip_link">[docs]</a><span class="k">def</span> <span class="nf">flip_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Flips a link&#39;s direction and updates corresponding connectivity and other</span>
-<span class="sd">    attributes.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Reverses a link&#39;s direction by flipping the ordering of its comprising</span>
+<span class="sd">    pixels, as well as any ordered attributes.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    linkid : int</span>
+<span class="sd">        ID of the link to flip (within links[&#39;id&#39;]).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with the link flipped.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get index of link</span>
     <span class="n">lidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
 
@@ -339,45 +475,50 @@
     <span class="k">return</span> <span class="n">links</span></div>
 
 
-<span class="k">def</span> <span class="nf">add_node</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">linkconn</span><span class="p">):</span>
-
-    <span class="c1"># Add a node to a set of links and nodes. Must provide the link ids connected</span>
-    <span class="c1"># to the node (linkconn). Linkconn must be a list, even if only has one</span>
-    <span class="c1"># entry.</span>
-
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">linkconn</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="n">linkconn</span> <span class="o">=</span> <span class="p">[</span><span class="n">linkconn</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Node already in set; returning unchanged.&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">nodes</span>
-
-    <span class="c1"># Find new node ID</span>
-    <span class="n">new_id</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
-
-    <span class="c1"># Append new node</span>
-    <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_id</span><span class="p">)</span>
-    <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-    <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">linkconn</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">nodes</span>
-
-
 <div class="viewcode-block" id="link_widths_and_lengths"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.link_widths_and_lengths">[docs]</a><span class="k">def</span> <span class="nf">link_widths_and_lengths</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">Idt</span><span class="p">,</span> <span class="n">pixlen</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Appends link widths and lengths to the links dictionary.</span>
+<span class="sd">    Computes link widths and lengths for all links in the network. A </span>
+<span class="sd">    distance transform approach is used where the width of a pixel is its</span>
+<span class="sd">    distance to the nearest non-max pixel times two.</span>
+<span class="sd">    </span>
 <span class="sd">    There is a slight twist. When a skeleton is computed for a very wide</span>
 <span class="sd">    channel with a narrow tributary, there is a very straight section of the</span>
 <span class="sd">    skeleton as it leaves the wide channel to go into the tributary; this</span>
-<span class="sd">    straight section should not be used to compute average link width, as it&#39;s</span>
-<span class="sd">    technically part of the wide channel. The twist here accounts for that by</span>
-<span class="sd">    elminating the ends of the each link from computing widths and lengths,</span>
-<span class="sd">    where the distance along each end is equal to the half-width of the endmost</span>
-<span class="sd">    pixels.</span>
-<span class="sd">    ##TODO: add median width OR just change wid_adj to be median?</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    straight section (so-called &quot;false&quot; pixels) should not be used to compute </span>
+<span class="sd">    average link width, as it&#39;s technically part of the wide channel. The twist </span>
+<span class="sd">    here accounts for that by elminating the ends of the each link from computing </span>
+<span class="sd">    widths and lengths, where the distance along each end is equal to the </span>
+<span class="sd">    half-width of the endmost pixels. Adjusted link widths and lengths are also </span>
+<span class="sd">    computed that account for this effect.</span>
+<span class="sd">    </span>
+<span class="sd">    The following new attributes are added to the links dictionary:</span>
+<span class="sd">        &#39;len&#39; - the length of the full link</span>
+<span class="sd">        &#39;wid_pix&#39; - the width of each pixel in the link</span>
+<span class="sd">        &#39;wid&#39; - the average width of all pixels of the link</span>
+<span class="sd">        &#39;wid_adj&#39; - the &quot;adjusted&quot; average width of all link pixels excluding &quot;false&quot; pixels</span>
+<span class="sd">        &#39;len_adj&#39; - the &quot;adjusted&quot; length of the link after excluding &quot;false&quot; pixels</span>
 
-    <span class="c1"># Compute and append link widths</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    Idt : np.array</span>
+<span class="sd">        Distance transform of the original mask.</span>
+<span class="sd">    pixlen : float or int, optional</span>
+<span class="sd">        Length (or resolution) of the pixel. If provided, assumes that the</span>
+<span class="sd">        pixel resolution is the same in the horizontal and vertical directions.</span>
+<span class="sd">        The default is 1, which corresponds to computing widths and lengths </span>
+<span class="sd">        in units of pixels.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with width and length properties appended.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">##TODO: add median width OR just change wid_adj to be median?</span>
+
+    <span class="c1"># Initialize attribute storage</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_pix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># width at each pixel</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -428,14 +569,63 @@
 
 <div class="viewcode-block" id="junction_angles"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.junction_angles">[docs]</a><span class="k">def</span> <span class="nf">junction_angles</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">imshape</span><span class="p">,</span> <span class="n">pixlen</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Computes junction angles between links in a directed graph. Only junctions</span>
-<span class="sd">    with three joining links are considered for simplicity. Also computes</span>
-<span class="sd">    the ratio of link widths at junctions, and determines whether the junction</span>
-<span class="sd">    is a confluence (joining) or a bifurcation (diverging). These attributes</span>
-<span class="sd">    are appended to the provided nodes dictionary.</span>
-<span class="sd">    &#39;weight&#39; can be &#39;None&#39;, &#39;exp&#39; (exponential), or &#39;lin&#39; (linear)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Computes junction angles between links in a network with directions set. </span>
+<span class="sd">    Only nodes of degree three are considered for simplicity. Angles are only </span>
+<span class="sd">    computed between the two links that share a common flow directions. The</span>
+<span class="sd">    acute-most angle between these two links is returned.</span>
+<span class="sd">    </span>
+<span class="sd">    The direction of an individual link is poorly constrained. The number of </span>
+<span class="sd">    pixels along the link to consider for computing its direction can result</span>
+<span class="sd">    in vastly different directions depending on the link&#39;s morphology. The</span>
+<span class="sd">    weight argument above allows a degree of control over how to weight the</span>
+<span class="sd">    contribution of pixels to a link&#39;s direction vector.</span>
+<span class="sd">    </span>
+<span class="sd">    Also computes the ratio of link widths (max/min) at junctions, and</span>
+<span class="sd">    determines whether the junction is a confluence (joining) or a bifurcation </span>
+<span class="sd">    (diverging).</span>
+<span class="sd">    </span>
+<span class="sd">    The following attributes are appended to the ndoes dictionary:</span>
+<span class="sd">        &#39;int_ang&#39; - the interior angle between the two links in the </span>
+<span class="sd">        &#39;width_ratio&#39; - the ratio of the maximum/minimum link widths for the </span>
+<span class="sd">                        two links whose directions agree</span>
+<span class="sd">        &#39;jtype&#39; - the junction type, either &#39;b&#39;ifurcation or &#39;c&#39;onfluence</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+<span class="sd">    imshape : tuple</span>
+<span class="sd">        (nrows, ncols) of the original mask.</span>
+<span class="sd">    pixlen : numeric</span>
+<span class="sd">        Resolution of the image; assumes same resolution in the horizontal and</span>
+<span class="sd">        vertical.</span>
+<span class="sd">    weight : str, optional</span>
+<span class="sd">        How to weight pixel contributions to a link&#39;s direction vector as we</span>
+<span class="sd">        move away from the joining node. Choose from</span>
+<span class="sd">        None - all pixels are weighted equally</span>
+<span class="sd">        &#39;lin&#39; - the contribution of pixels decreases linearly as we move away </span>
+<span class="sd">                from the joining node.</span>
+<span class="sd">        &#39;exp&#39; - the contribution of  pixels decreases exponentially as we move</span>
+<span class="sd">                away from the joining node.    </span>
+<span class="sd">        The default is None.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    KeyError</span>
+<span class="sd">        Ensures that flow directions have been computed before running this </span>
+<span class="sd">        function.</span>
+<span class="sd">    RuntimeError</span>
+<span class="sd">        Catches any strange cases where a junction is neither a bifurcation </span>
+<span class="sd">        nor junction. Have not encountered this yet, please report if triggered.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Enusre directions have been computed</span>
     <span class="k">if</span> <span class="s1">&#39;certain&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Cannot compute junction angles until link flow directions have been computed.&#39;</span><span class="p">)</span>
@@ -567,9 +757,25 @@
 
 <div class="viewcode-block" id="conn_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.conn_links">[docs]</a><span class="k">def</span> <span class="nf">conn_links</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">node_idx</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns the first and last pixels of links connected to node_idx.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Finds the first and last pixels of all links connected to the node specified</span>
+<span class="sd">    by node_idx.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    node_idx : int</span>
+<span class="sd">        Index of the node (not its id) to query.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    link_pix : list of lists</span>
+<span class="sd">        A list of [first pixel, last pixel] for each link connected to the</span>
+<span class="sd">        node specified by node_idx.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">link_ids</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">node_idx</span><span class="p">)]</span>
     <span class="n">link_pix</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">link_ids</span><span class="p">:</span>
@@ -580,10 +786,33 @@
 
 <div class="viewcode-block" id="adjust_for_padding"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.adjust_for_padding">[docs]</a><span class="k">def</span> <span class="nf">adjust_for_padding</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">npad</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">initial_dims</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Adjusts links[&#39;idx&#39;] and nodes[&#39;idx&#39;] values back to original image</span>
-<span class="sd">    dimensions, effectively removing the padding.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    In some cases, a mask is padded before extracting the network. In order</span>
+<span class="sd">    to ensure the extracted network maps to the original mask, the padding must</span>
+<span class="sd">    be stripped away from all the coordinates of the network. The function</span>
+<span class="sd">    achieves this by adjusting the [&#39;idx&#39;] attributes of the links and nodes.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+<span class="sd">    npad : int</span>
+<span class="sd">        Pad width to remove. Assumes padding was performed on all four edges</span>
+<span class="sd">        of image.</span>
+<span class="sd">    dims : tuple</span>
+<span class="sd">        (nrows, ncols) of the padded image.</span>
+<span class="sd">    initial_dims : tuple</span>
+<span class="sd">        (nrows, ncols) of the original (unpadded) image.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links adjusted to remove padding.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes adjusted to remove padding.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Adjust the link indices</span>
     <span class="n">adjusted_lidx</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">lidx</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]:</span>
@@ -605,8 +834,40 @@
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 
-<span class="k">def</span> <span class="nf">remove_disconnected_bridge_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
+<div class="viewcode-block" id="remove_disconnected_bridge_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.remove_disconnected_bridge_links">[docs]</a><span class="k">def</span> <span class="nf">remove_disconnected_bridge_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    When simplifying a channel network, there are often tributaries joining</span>
+<span class="sd">    the network further downstream. These tributaries may have loops, which</span>
+<span class="sd">    prevents their automatic removal by simple pruning. </span>
+<span class="sd">    </span>
+<span class="sd">    This function helps prune these cases by removing bridge links that are </span>
+<span class="sd">    not integral to the network. A bridge link is one whose removal results </span>
+<span class="sd">    in an increase in the number of connected components in the network. Each</span>
+<span class="sd">    bridge link is temporarily removed from the network. This leaves two </span>
+<span class="sd">    end nodes which were connected by the bridge link. A bridge link is</span>
+<span class="sd">    integral if a path can be found from the end nodes to inlets and </span>
+<span class="sd">    outlets (if one end node is connected to an inlet(s), the other must</span>
+<span class="sd">    be connected to an outlet(s)). </span>
+<span class="sd">    </span>
+<span class="sd">    After all non-integral bridge links are removed, the connected component</span>
+<span class="sd">    network that contains the inlet and outlets is returned; all other </span>
+<span class="sd">    subnetworks are removed.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
 
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Pruned network links.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Pruned network nodes.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
     <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">lc</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]:</span>
@@ -688,15 +949,33 @@
 
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">remove_two_link_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">dontremove</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span>
+    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 
-<span class="k">def</span> <span class="nf">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">dontremove</span><span class="o">=</span><span class="p">[]):</span>
-    <span class="c1"># Remove links connected to nodes that have only one connection; this is</span>
-    <span class="c1"># performed iteratively until all spurs are removed. Spurs with inlet</span>
-    <span class="c1"># nodes as endpoints are ignored. Also removes redundant nodes (i.e. nodes</span>
-    <span class="c1"># with only two links attached.)</span>
+<div class="viewcode-block" id="remove_all_spurs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.remove_all_spurs">[docs]</a><span class="k">def</span> <span class="nf">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">dontremove</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes all links who have a node of degree one. This is performed iteratively </span>
+<span class="sd">    until all spurs are removed. Also removes redundant nodes (i.e. nodes</span>
+<span class="sd">    with degree two.)</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network link and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+<span class="sd">    dontremove : list, optional</span>
+<span class="sd">        Node IDs not to remove (e.g. inlet and/or outlet nodes). </span>
+<span class="sd">        The default is [].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with spurs removed.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes with spurs removed.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">stopflag</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="n">stopflag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">ct</span> <span class="o">=</span> <span class="mi">0</span>
@@ -725,13 +1004,31 @@
         <span class="k">if</span> <span class="n">ct</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">stopflag</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span>
+    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 
-<span class="k">def</span> <span class="nf">remove_two_link_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">dontremove</span><span class="p">):</span>
-    <span class="c1"># dontremove includes nodeids that should not be removed (inlets, outlets)</span>
+<div class="viewcode-block" id="remove_two_link_nodes"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.remove_two_link_nodes">[docs]</a><span class="k">def</span> <span class="nf">remove_two_link_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">dontremove</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes superfluous nodes from the network; i.e. nodes with degree two.</span>
+<span class="sd">    Is called by remove_all_spurs().</span>
 
-    <span class="c1"># Removes unnecessary nodes</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+<span class="sd">    dontremove : list</span>
+<span class="sd">        Node IDs that should not be removed (e.g. inlets or outlets).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with superfluous nodes removed.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes with superfluous nodes removed.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">linkkeys</span> <span class="o">=</span> <span class="p">[</span><span class="n">lk</span> <span class="k">for</span> <span class="n">lk</span> <span class="ow">in</span> <span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">int</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])]</span>
 
     <span class="n">ct</span> <span class="o">=</span> <span class="mi">1</span>
@@ -802,13 +1099,27 @@
             <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">lid</span><span class="p">)]</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">lid</span><span class="p">)][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
 
-    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span>
+    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 
 <div class="viewcode-block" id="remove_single_pixel_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.remove_single_pixel_links">[docs]</a><span class="k">def</span> <span class="nf">remove_single_pixel_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Thanks to the Lena for finding this bug. In very rare cases, we can end</span>
-<span class="sd">    up with a link of one pixel. This function removes those.</span>
+<span class="sd">    RivGraph&#39;s resolving of the network can result in single-pixel links that</span>
+<span class="sd">    can be removed without altering connectivity. This function removes those.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with single pixel links removed.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes with single pixel links removed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Find links to remove</span>
     <span class="n">linkidx_remove</span> <span class="o">=</span> <span class="p">[</span><span class="n">lid</span> <span class="k">for</span> <span class="n">lidx</span><span class="p">,</span> <span class="n">lid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">],</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lidx</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
@@ -820,22 +1131,31 @@
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 
-<div class="viewcode-block" id="append_link_lengths"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.append_link_lengths">[docs]</a><span class="k">def</span> <span class="nf">append_link_lengths</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">gd_obj</span><span class="p">):</span>
+<div class="viewcode-block" id="append_link_lengths"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.append_link_lengths">[docs]</a><span class="k">def</span> <span class="nf">append_link_lengths</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Appends link lengths to each link. </span>
+<span class="sd">    Appends link lengths to each link. Lengths are computed in the units of</span>
+<span class="sd">    the coordinate reference system of the original mask. </span>
 <span class="sd">    </span>
-<span class="sd">    5/27/2020 Due to dummy projection problems, removing the transformation</span>
-<span class="sd">    of coordinates to 4087. Lengths and widths will be computed in units of</span>
-<span class="sd">    the provided CRS. If you want to change this in the future, will need</span>
-<span class="sd">    to pass a dummy flag to notify that coordinates should not be transformed</span>
-<span class="sd">    for those cases.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    This function provides a subset of the functionality of link_widths_and_lengths().</span>
+<span class="sd">    It is used when only link lengths are needed for, e.g. finding shortest</span>
+<span class="sd">    paths.</span>
 
-    <span class="c1"># Compute and append link lengths -- assumes the CRS is in a projection that</span>
-    <span class="c1"># respects distances</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    gdobj : osgeo.gdal.Dataset</span>
+<span class="sd">        GDAL dataset of the original mask, created via gdal.Open().</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with length attribute appended.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">idcs</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]:</span>
-        <span class="n">link_coords</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">idx_to_coords</span><span class="p">(</span><span class="n">idcs</span><span class="p">,</span> <span class="n">gd_obj</span><span class="p">)</span>
+        <span class="n">link_coords</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">idx_to_coords</span><span class="p">(</span><span class="n">idcs</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">)</span>
         <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">link_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">link_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dists</span><span class="p">))</span>
 
@@ -845,22 +1165,26 @@
 <div class="viewcode-block" id="find_parallel_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.find_parallel_links">[docs]</a><span class="k">def</span> <span class="nf">find_parallel_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds all parallel links within the graph. A set of parallel links all have</span>
-<span class="sd">    the same start and end node. Parallel links are added as an attribute to</span>
-<span class="sd">    the links dictionary.</span>
+<span class="sd">    the same start and end node. A new attribute called &#39;parallels&#39; is added</span>
+<span class="sd">    to the links dictionary.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    links : TYPE</span>
-<span class="sd">        DESCRIPTION.</span>
-<span class="sd">    nodes : TYPE</span>
-<span class="sd">        DESCRIPTION.</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    None.</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with parallel attribute appended.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">## TODO: test this implementation against triplet-parallel links.</span>
+    <span class="c1">## TODO: nodes do not need to be returned</span>
     
     <span class="c1"># Find parallel edge pairs/triplets/etc that require aritifical nodes</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiGraph</span><span class="p">()</span>
@@ -883,39 +1207,40 @@
 
 <div class="viewcode-block" id="add_artificial_nodes"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.add_artificial_nodes">[docs]</a><span class="k">def</span> <span class="nf">add_artificial_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">gd_obj</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Some graphical metrics fail for graphs that contain parallel links, or</span>
+<span class="sd">    Some topologic metrics fail for graphs that contain parallel links, or</span>
 <span class="sd">    links that share the same end nodes. This function alleviates that issue</span>
 <span class="sd">    by inserting artificial nodes into all but one of the parallel links. The</span>
 <span class="sd">    shortest link of the parallel set will not receive an artificial node.</span>
-<span class="sd">    </span>
 <span class="sd">    For simplicity of coding, when a node is added, the old link is deleted and</span>
 <span class="sd">    two new links are put in its place.</span>
 <span class="sd">    </span>
-<span class="sd">    If flow directions have been set for links, the properties of the link that</span>
+<span class="sd">    A new attribute is appended to the nodes dictionary called &#39;arts&#39; that </span>
+<span class="sd">    contains the node IDs of artifical nodes.    </span>
+<span class="sd">    </span>
+<span class="sd">    If flow directions are needed, this function should be run after setting</span>
+<span class="sd">    them. If flow directions have been set for links, the properties of the link that</span>
 <span class="sd">    is broken into two are appended to the two parts. This may result in some</span>
 <span class="sd">    properties that are no longer correct, e.g. slope. </span>
-<span class="sd">    </span>
-<span class="sd">    This function should not be run prior to setting flow directions.</span>
-<span class="sd">    </span>
-<span class="sd">    The &#39;guess&#39; attribute of the links where artificial nodes are added </span>
+<span class="sd">        </span>
+<span class="sd">    Additionally, the &#39;guess&#39; attribute of the links where artificial nodes are added </span>
 <span class="sd">    will be incorrect as it doesn&#39;t account for the artificial node, but </span>
 <span class="sd">    references the original end nodes.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    links : TYPE</span>
-<span class="sd">        DESCRIPTION.</span>
-<span class="sd">    nodes : TYPE</span>
-<span class="sd">        DESCRIPTION.</span>
-<span class="sd">    gd_obj : TYPE</span>
-<span class="sd">        DESCRIPTION.</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+<span class="sd">    gdobj : osgeo.gdal.Dataset</span>
+<span class="sd">        GDAL dataset of the original mask, created via gdal.Open().</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    links : TYPE</span>
-<span class="sd">        DESCRIPTION.</span>
-<span class="sd">    nodes : TYPE</span>
-<span class="sd">        DESCRIPTION.</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with aritifical nodes added.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes with artificial nodes added as a new &#39;arts&#39; attribute.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Links dictionary keys to copy to new links</span>
     <span class="n">keys_to_copy</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">,</span> <span class="s1">&#39;certain_order&#39;</span><span class="p">,</span> <span class="s1">&#39;certain_alg&#39;</span><span class="p">,</span> <span class="s1">&#39;guess&#39;</span><span class="p">,</span> <span class="s1">&#39;guess_alg&#39;</span><span class="p">,</span> <span class="s1">&#39;slope&#39;</span><span class="p">]</span>
@@ -930,7 +1255,7 @@
         <span class="n">links</span> <span class="o">=</span> <span class="n">append_link_lengths</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">gd_obj</span><span class="p">)</span>
 
     <span class="n">arts</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="c1"># Step 2. Add the aritifical node to the proper links</span>
+    <span class="c1"># Add the aritifical node to the proper links</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span> <span class="c1"># Note that pairs can be triplets etc. as well</span>
 
         <span class="c1"># Choose the longest link(s) to add the artificial node</span>
@@ -1013,8 +1338,28 @@
 
 <div class="viewcode-block" id="find_art_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.find_art_links">[docs]</a><span class="k">def</span> <span class="nf">find_art_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Finds the triplet of links corresponding to each artificial nodes in</span>
-<span class="sd">    nodes[&#39;arts&#39;].</span>
+<span class="sd">    Finds the triad links corresponding to each artificial node. The triad</span>
+<span class="sd">    links are the two links connected to the artifical node, and the link</span>
+<span class="sd">    parallel to these two links.</span>
+<span class="sd">    </span>
+<span class="sd">    Adds a new &#39;arts&#39; property to the links dictionary that contains the triad</span>
+<span class="sd">    set for each artificial node in nodes[&#39;arts&#39;].</span>
+<span class="sd">    </span>
+<span class="sd">    This function has little use after changing how RivGraph considers</span>
+<span class="sd">    parallel links.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network link with &#39;arts&#39; attribute.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">triad_links</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">an</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;arts&#39;</span><span class="p">]:</span>
@@ -1037,10 +1382,23 @@
 
 <div class="viewcode-block" id="remove_duplicate_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.remove_duplicate_links">[docs]</a><span class="k">def</span> <span class="nf">remove_duplicate_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Checks links for duplicates and removes any found. They are rare but some</span>
-<span class="sd">    have appeared in one-pixel-long links.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Eliminates any duplicate links in the network. </span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with duplicate links removed.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes with duplicate nodes removed.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
     <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span><span class="p">,</span> <span class="n">chain</span>
 
@@ -1074,7 +1432,22 @@
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 
-<span class="k">def</span> <span class="nf">plot_dirlinks</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">dims</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_dirlinks"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.plot_dirlinks">[docs]</a><span class="k">def</span> <span class="nf">plot_dirlinks</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">dims</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots the network links with flow direction denoted.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links with flow directions set.</span>
+<span class="sd">    dims : tuple</span>
+<span class="sd">        (nrows, ncols) of original mask that links were derived from.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">colorline</span><span class="p">(</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;copper&#39;</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
@@ -1163,14 +1536,34 @@
     
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-    <span class="k">return</span>
+    <span class="k">return</span></div>
 
 
 
-<span class="k">def</span> <span class="nf">plot_network</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">Imask</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.plot_network">[docs]</a><span class="k">def</span> <span class="nf">plot_network</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">Imask</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots the network with labeled link and node IDs.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes and associated properties.</span>
+<span class="sd">    Imask : np.array</span>
+<span class="sd">        The original binary mask.</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the channel network for labeling the plot.</span>
+<span class="sd">    axis : matplotlib.axex._subplots.AxesSubplot, optional</span>
+<span class="sd">        If provided, plotting will occur within the provided axis. Can be created</span>
+<span class="sd">        with matplotlib.pyplot.subplots(). The default is None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">## TODO: add legend for link and node ids</span>
-
     <span class="n">imshape</span> <span class="o">=</span> <span class="n">Imask</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="c1"># Colormap for binary mask</span>
@@ -1204,15 +1597,26 @@
     
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-    <span class="k">return</span>
+    <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="links_to_gpd"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.ln_utils.links_to_gpd">[docs]</a><span class="k">def</span> <span class="nf">links_to_gpd</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts links dictionary to a geopandas dataframe.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">shapely</span> <span class="k">as</span> <span class="nn">shp</span>
+<span class="sd">    Converts the links dictionary to a GeoPandas GeoDataFrame.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links and associated properties.</span>
+<span class="sd">    gdobj : osgeo.gdal.Dataset</span>
+<span class="sd">        DESCRIPTION.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links_gpd : TYPE</span>
+<span class="sd">        GDAL dataset of the original mask, created via gdal.Open().</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Create geodataframe</span>
     <span class="n">links_gpd</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">()</span>
 
@@ -1223,7 +1627,7 @@
     <span class="n">geoms</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">lidx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]):</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">idx_to_coords</span><span class="p">(</span><span class="n">lidx</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">)</span>
-        <span class="n">geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shp</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">LineString</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+        <span class="n">geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">LineString</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
     <span class="n">links_gpd</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geoms</span>
 
     <span class="c1"># Append ids and connectivity</span>

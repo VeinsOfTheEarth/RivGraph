@@ -97,12 +97,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">rivgraph</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#rivgraph-py">rivgraph.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#directionality">directionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#classes-py">classes.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#directionality-py">directionality.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#im-utils">im_utils</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#io-utils">io_utils</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ln-utils">ln_utils</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ordered-set">ordered_set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#io-utils-py">io_utils.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ln-utils-link-and-node-utilities">ln_utils - link and node utilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mask-to-graph-py">mask_to_graph.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mask-utils-py">mask_utils.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ordered-set-py">ordered_set.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#walk-py">walk.py</a></li>
 </ul>
 </li>
@@ -179,8 +181,8 @@
             
   <div class="section" id="rivgraph">
 <span id="id1"></span><h1>rivgraph<a class="headerlink" href="#rivgraph" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-rivgraph.classes"></span><div class="section" id="rivgraph-py">
-<h2>rivgraph.py<a class="headerlink" href="#rivgraph-py" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.classes"></span><div class="section" id="classes-py">
+<h2>classes.py<a class="headerlink" href="#classes-py" title="Permalink to this headline">¶</a></h2>
 <p>Classes for running rivgraph commands on your channel network.</p>
 <dl class="class">
 <dt id="rivgraph.classes.delta">
@@ -1047,8 +1049,8 @@ shp  (ESRI Shapefile)</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.directionality"></span><div class="section" id="directionality">
-<h2>directionality<a class="headerlink" href="#directionality" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.directionality"></span><div class="section" id="directionality-py">
+<h2>directionality.py<a class="headerlink" href="#directionality-py" title="Permalink to this headline">¶</a></h2>
 <p>Created on Wed Nov  7 11:38:16 2018
 &#64;author: Jon</p>
 <dl class="function">
@@ -2571,142 +2573,24 @@ raster of imshape.</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.io_utils"></span><div class="section" id="io-utils">
-<h2>io_utils<a class="headerlink" href="#io-utils" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.io_utils"></span><div class="section" id="io-utils-py">
+<h2>io_utils.py<a class="headerlink" href="#io-utils-py" title="Permalink to this headline">¶</a></h2>
+<p>Functions for input/output.</p>
 <p>Created on Sun Sep 16 15:15:18 2018</p>
 <p>&#64;author: Jon</p>
 <dl class="function">
 <dt id="rivgraph.io_utils.centerline_to_geovector">
-<code class="descclassname">rivgraph.io_utils.</code><code class="descname">centerline_to_geovector</code><span class="sig-paren">(</span><em>cl</em>, <em>crs</em>, <em>outpath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#centerline_to_geovector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.centerline_to_geovector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Centerline is already-projected Nx2 numpy array.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.io_utils.coords_from_geovector">
-<code class="descclassname">rivgraph.io_utils.</code><code class="descname">coords_from_geovector</code><span class="sig-paren">(</span><em>coordspath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#coords_from_geovector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.coords_from_geovector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Not called in classes.py</p>
-<p>Retrieves centerline coordinates from shapefile.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.io_utils.coords_to_geovector">
-<code class="descclassname">rivgraph.io_utils.</code><code class="descname">coords_to_geovector</code><span class="sig-paren">(</span><em>coords</em>, <em>epsg</em>, <em>outpath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#coords_to_geovector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.coords_to_geovector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Not called in classes.py</p>
-<p>Given a list or tuple of (x,y) coordinates and the EPSG code, writes the
-coordinates to a shapefile.</p>
-<p>This should be replaced by a geodataframe creation, but no use cases
-yet…</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.io_utils.create_manual_dir_csv">
-<code class="descclassname">rivgraph.io_utils.</code><code class="descname">create_manual_dir_csv</code><span class="sig-paren">(</span><em>csvpath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#create_manual_dir_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.create_manual_dir_csv" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a csv file for fixing links manually.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.io_utils.meshpolys_to_geovectors">
-<code class="descclassname">rivgraph.io_utils.</code><code class="descname">meshpolys_to_geovectors</code><span class="sig-paren">(</span><em>meshpolys</em>, <em>crs</em>, <em>outpath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#meshpolys_to_geovectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.meshpolys_to_geovectors" title="Permalink to this definition">¶</a></dt>
-<dd><p>Exports the meshpolys returned by centerline_mesh as a shapefile.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.io_utils.prepare_paths">
-<code class="descclassname">rivgraph.io_utils.</code><code class="descname">prepare_paths</code><span class="sig-paren">(</span><em>resultsfolder</em>, <em>name</em>, <em>basetiff</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#prepare_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.prepare_paths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a results folder, a delta or river name, and a filetype, generates
-paths for saving results or intermediate files.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.io_utils.write_linkdirs_geotiff">
-<code class="descclassname">rivgraph.io_utils.</code><code class="descname">write_linkdirs_geotiff</code><span class="sig-paren">(</span><em>links</em>, <em>gd_obj</em>, <em>writepath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#write_linkdirs_geotiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.write_linkdirs_geotiff" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a geotiff where links are colored according to their directionality.
-Pixels in each link are interpolated between 0 and 1 such that the upstream
-pixel is 0 and the downstream-most pixel is 1. In a GIS, color can then
-be set to see directionality.</p>
-</dd></dl>
-
-</div>
-<span class="target" id="module-rivgraph.ln_utils"></span><div class="section" id="ln-utils">
-<h2>ln_utils<a class="headerlink" href="#ln-utils" title="Permalink to this headline">¶</a></h2>
-<p>Created on Mon Sep 10 09:59:52 2018</p>
-<p>&#64;author: Jon</p>
-<dl class="function">
-<dt id="rivgraph.ln_utils.add_artificial_nodes">
-<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">add_artificial_nodes</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>gd_obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#add_artificial_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.add_artificial_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Some graphical metrics fail for graphs that contain parallel links, or
-links that share the same end nodes. This function alleviates that issue
-by inserting artificial nodes into all but one of the parallel links. The
-shortest link of the parallel set will not receive an artificial node.</p>
-<p>For simplicity of coding, when a node is added, the old link is deleted and
-two new links are put in its place.</p>
-<p>If flow directions have been set for links, the properties of the link that
-is broken into two are appended to the two parts. This may result in some
-properties that are no longer correct, e.g. slope.</p>
-<p>This function should not be run prior to setting flow directions.</p>
-<p>The ‘guess’ attribute of the links where artificial nodes are added
-will be incorrect as it doesn’t account for the artificial node, but
-references the original end nodes.</p>
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">centerline_to_geovector</code><span class="sig-paren">(</span><em>cl</em>, <em>crs</em>, <em>path_export</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#centerline_to_geovector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.centerline_to_geovector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exports centerline coordinates as a georeferenced linestring. Can be used
+with any set of coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>nodes</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>gd_obj</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>links</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>nodes</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.ln_utils.adjust_for_padding">
-<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">adjust_for_padding</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>npad</em>, <em>dims</em>, <em>initial_dims</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#adjust_for_padding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.adjust_for_padding" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adjusts links[‘idx’] and nodes[‘idx’] values back to original image
-dimensions, effectively removing the padding.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.ln_utils.append_link_lengths">
-<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">append_link_lengths</code><span class="sig-paren">(</span><em>links</em>, <em>gd_obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#append_link_lengths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.append_link_lengths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Appends link lengths to each link.</p>
-<p>5/27/2020 Due to dummy projection problems, removing the transformation
-of coordinates to 4087. Lengths and widths will be computed in units of
-the provided CRS. If you want to change this in the future, will need
-to pass a dummy flag to notify that coordinates should not be transformed
-for those cases.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.ln_utils.conn_links">
-<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">conn_links</code><span class="sig-paren">(</span><em>nodes</em>, <em>links</em>, <em>node_idx</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#conn_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.conn_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the first and last pixels of links connected to node_idx.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.ln_utils.find_art_links">
-<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">find_art_links</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#find_art_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.find_art_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds the triplet of links corresponding to each artificial nodes in
-nodes[‘arts’].</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.ln_utils.find_parallel_links">
-<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">find_parallel_links</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#find_parallel_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.find_parallel_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds all parallel links within the graph. A set of parallel links all have
-the same start and end node. Parallel links are added as an attribute to
-the links dictionary.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>links</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>nodes</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>cl</strong> (<em>np.array</em>) – ((xs), (ys)) array of coordinates to write. The coordinates should already be
+in terms of the provided crs.</p></li>
+<li><p><strong>crs</strong> (<em>pyproj.CRS</em>) – CRS object specifying the coordinate reference system of the provided
+coordinates</p></li>
+<li><p><strong>path_export</strong> (<em>str</em>) – Path, including extension, specifying where to save the coordinates export.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -2719,66 +2603,936 @@ the links dictionary.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="rivgraph.io_utils.colortable">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">colortable</code><span class="sig-paren">(</span><em>ctype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#colortable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.colortable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a gdal-ingestible color table for a set of pre-defined options.
+Can add your own colortable options. See <a class="reference external" href="https://gdal.org/doxygen/structGDALColorEntry.html">https://gdal.org/doxygen/structGDALColorEntry.html</a>
+and <a class="reference external" href="https://gis.stackexchange.com/questions/158195/python-gdal-create-geotiff-from-array-with-colormapping">https://gis.stackexchange.com/questions/158195/python-gdal-create-geotiff-from-array-with-colormapping</a>
+for guidance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ctype</strong> (<em>str</em>) – Specifies the type of colortable to return. Choose from
+{‘binary’, ‘skel’, ‘mask’, ‘tile’, or ‘GSW’}.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>color_table</strong> – Color table that can be supplied to gdal when creating a raster.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>gdal.ColorTable()</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.coords_from_geovector">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">coords_from_geovector</code><span class="sig-paren">(</span><em>path_geovector</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#coords_from_geovector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.coords_from_geovector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retreives coordinates from a shapefile containing a LineString or Points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path_geovector</strong> (<em>str</em>) – Path, including .shp extension, of the file containing coordinates.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>coords</strong> – Coordinates (x, y) of the vertices in the provided geovector.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of tuples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.coords_to_geovector">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">coords_to_geovector</code><span class="sig-paren">(</span><em>coords</em>, <em>epsg</em>, <em>path_export</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#coords_to_geovector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.coords_to_geovector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exports coordinates to a Point shapefile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> (<em>list-like of list-likes</em>) – List or tuple of (x, y) coordinates to export.</p></li>
+<li><p><strong>epsg</strong> (<em>int</em>) – EPSG code of the coordinate reference system of the coordinates.</p></li>
+<li><p><strong>path_export</strong> (<em>str</em>) – Path with .shp extension where the shapefile should be saved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.create_manual_dir_csv">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">create_manual_dir_csv</code><span class="sig-paren">(</span><em>path_csv</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#create_manual_dir_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.create_manual_dir_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a .csv file for fixing links manually.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path_csv</strong> (<em>str</em>) – Path, including .csv extension, where the .csv is written.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.get_driver">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">get_driver</code><span class="sig-paren">(</span><em>path_file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#get_driver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.get_driver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the proper geopandas driver for saving a geodataframe. Keys off the
+extension in the filename, and supports either shapefiles or geojsons.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path_file</strong> (<em>str</em>) – Where the file will be saved.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>driver</strong> – Driver string specifying file format when using geopandas’ to_file().</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.links_to_geofile">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">links_to_geofile</code><span class="sig-paren">(</span><em>links</em>, <em>dims</em>, <em>gt</em>, <em>crs</em>, <em>path_export</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#links_to_geofile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.links_to_geofile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the links of the network to a georeferencedshapefile or geojson.
+Computed link properties are saved as attributes when available. Note that
+the ‘wid_pix’ property, which stores the width at each pixel along the
+link, may be truncated depending on its length and the filetype.
+The filetype is specified by the export path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>dims</strong> (<em>tuple</em>) – (nrows, ncols) of the original mask from which links were derived.</p></li>
+<li><p><strong>gt</strong> (<em>tuple</em>) – GDAL geotransform of the original mask from which links were derived.</p></li>
+<li><p><strong>crs</strong> (<em>pyrpoj.CRS</em>) – CRS object specifying the coordinate reference system of the original
+mask from which links were derived.</p></li>
+<li><p><strong>path_export</strong> (<em>str</em>) – Path, including extension, specifying where to save the links export.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.nodes_to_geofile">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">nodes_to_geofile</code><span class="sig-paren">(</span><em>nodes</em>, <em>dims</em>, <em>gt</em>, <em>crs</em>, <em>path_export</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#nodes_to_geofile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.nodes_to_geofile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the nodes of the network to a georeferencedshapefile or geojson.
+Computed node properties are appended as attributes when available.
+The filetype is specified by the export path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>dims</strong> (<em>tuple</em>) – (nrows, ncols) of the original mask from which nodes were derived.</p></li>
+<li><p><strong>gt</strong> (<em>tuple</em>) – GDAL geotransform of the original mask from which nodes were derived.</p></li>
+<li><p><strong>crs</strong> (<em>pyrpoj.CRS</em>) – CRS object specifying the coordinate reference system of the original
+mask from which nodes were derived.</p></li>
+<li><p><strong>path_export</strong> (<em>str</em>) – Path, including extension, where to save the nodes export.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.pickle_links_and_nodes">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">pickle_links_and_nodes</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>path_out</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#pickle_links_and_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.pickle_links_and_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the links and nodes dictionaries to a pickle file for easy loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>path_out</strong> (<em>str</em>) – Where to save the pickle.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.prepare_paths">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">prepare_paths</code><span class="sig-paren">(</span><em>path_results</em>, <em>name</em>, <em>path_mask</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#prepare_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.prepare_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a dictionary of paths for most of the RivGraph-exportable files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_results</strong> (<em>str</em>) – The directory of the path where results are exported. Will be created
+if it does not exist.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of the analysis that is prepended to exported results.</p></li>
+<li><p><strong>path_mask</strong> (<em>str</em>) – Path to the mask geotiff, including extension.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>paths</strong> – Contains all the export paths. Not all will be necessarily used, but
+all possible exports’ paths are contained.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.shapely_list_to_geovectors">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">shapely_list_to_geovectors</code><span class="sig-paren">(</span><em>shplist</em>, <em>crs</em>, <em>path_export</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#shapely_list_to_geovectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.shapely_list_to_geovectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exports a list of shapely geometries to a GIS-ingestilbe format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shplist</strong> (<em>list</em>) – A list of shapely.geometry objects defining components of the mesh.</p></li>
+<li><p><strong>crs</strong> (<em>pyproj.CRS</em>) – CRS object specifying the coordinate reference system of the geometries
+to export.</p></li>
+<li><p><strong>path_export</strong> (<em>str</em>) – Path, including extension, where the geovector data should be written.
+Extensions can be either ‘.shp’ or ‘.geojson’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.unpickle_links_and_nodes">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">unpickle_links_and_nodes</code><span class="sig-paren">(</span><em>path_pickle</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#unpickle_links_and_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.unpickle_links_and_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpickles a previously pickled network. Note that ordered_set is reloaded
+within this function so that pickle can interpret OrderedSet object fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path_pickle</strong> (<em>str</em>) – Path to the pickled network.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.write_geotiff">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">write_geotiff</code><span class="sig-paren">(</span><em>raster, gt, wkt, path_export, dtype=&lt;Mock name='mock.GDT_UInt16' id='140019053510960'&gt;, options=['COMPRESS=LZW'], nbands=1, nodata=None, color_table=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#write_geotiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.write_geotiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a georeferenced raster to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raster</strong> (<em>np.array</em>) – Image to be written. Shape is (nrows, ncols, nbands), although if only
+one band is present the shape can be just (nrows, ncols).</p></li>
+<li><p><strong>gt</strong> (<em>tuple</em>) – GDAL geotransform for the raster. Often this can simply be copied from
+another geotiff via gdal.Open(path_to_geotiff).GetGeoTransform(). Can
+also be constructed following the gdal convention of
+(leftmost coordinate, pixel width, xskew, uppermost coordinate, pixel height, yskew).
+For non-rotated images, the skews will be zero.</p></li>
+<li><p><strong>wkt</strong> (<em>str</em>) – Well-known text describing the coordinate reference system of the raster.
+Can be copied from another geotiff with gdal.Open(path_to_geotiff).GetProjection().</p></li>
+<li><p><strong>path_export</strong> (<em>str</em>) – Path with extension of the geotiff to export.</p></li>
+<li><p><strong>dtype</strong> (<em>gdal.GDT_XXX</em><em>, </em><em>optional</em>) – Gdal data type. Options for XXX include Byte, UInt16, UInt32, Int32,
+Float32, Float64 and complex types CInt16, Cint32, CFloat32 and CFloat64.
+If storing decimal data, use a Float type, binary data use Byte type.
+The default is gdal.GDT_UInt16 (non-float).</p></li>
+<li><p><strong>options</strong> (<em>list of strings</em><em>, </em><em>optional</em>) – Options that can be fed to gdal dataset creator. See YYY for what
+can be specified by options.
+The default is [‘COMPRESS=LZW’].</p></li>
+<li><p><strong>nbands</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of bands of the raster. The default is 1.</p></li>
+<li><p><strong>nodata</strong> (<em>numeric</em><em>, </em><em>optional</em>) – Pixels with this value will be written as nodata. If None, no nodata
+value will be considered. The default is None.</p></li>
+<li><p><strong>color_table</strong> (<em>gdal.ColorTable</em><em>, </em><em>optional</em>) – Color table to append to the geotiff. Can use colortable() function
+to create, or create a custom type with gdal.ColorTable().
+Note that color_tables can only be specified for Byte and UInt16 datatypes.
+The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.io_utils.write_linkdirs_geotiff">
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">write_linkdirs_geotiff</code><span class="sig-paren">(</span><em>links</em>, <em>gdobj</em>, <em>path_export</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#write_linkdirs_geotiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.write_linkdirs_geotiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a geotiff where links are colored according to their directionality.
+Pixels in each link are interpolated between 0 and 1 such that the upstream
+pixel is 0 and the downstream-most pixel is 1. In a GIS, color can then
+be set to visualize flow directionality.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>gdobj</strong> (<em>osgeo.gdal.Dataset</em>) – GDAL object correspondng to the original mask from which links were
+derived.</p></li>
+<li><p><strong>path_export</strong> (<em>str</em>) – Path, including .tif extension, where the directions geotiff is
+written.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<span class="target" id="module-rivgraph.ln_utils"></span><div class="section" id="ln-utils-link-and-node-utilities">
+<h2>ln_utils - link and node utilities<a class="headerlink" href="#ln-utils-link-and-node-utilities" title="Permalink to this headline">¶</a></h2>
+<p>Created on Mon Sep 10 09:59:52 2018</p>
+<p>&#64;author: Jon</p>
+<dl class="function">
+<dt id="rivgraph.ln_utils.add_artificial_nodes">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">add_artificial_nodes</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>gd_obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#add_artificial_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.add_artificial_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Some topologic metrics fail for graphs that contain parallel links, or
+links that share the same end nodes. This function alleviates that issue
+by inserting artificial nodes into all but one of the parallel links. The
+shortest link of the parallel set will not receive an artificial node.
+For simplicity of coding, when a node is added, the old link is deleted and
+two new links are put in its place.</p>
+<p>A new attribute is appended to the nodes dictionary called ‘arts’ that
+contains the node IDs of artifical nodes.</p>
+<p>If flow directions are needed, this function should be run after setting
+them. If flow directions have been set for links, the properties of the link that
+is broken into two are appended to the two parts. This may result in some
+properties that are no longer correct, e.g. slope.</p>
+<p>Additionally, the ‘guess’ attribute of the links where artificial nodes are added
+will be incorrect as it doesn’t account for the artificial node, but
+references the original end nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>gdobj</strong> (<em>osgeo.gdal.Dataset</em>) – GDAL dataset of the original mask, created via gdal.Open().</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links with aritifical nodes added.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes with artificial nodes added as a new ‘arts’ attribute.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.add_link">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">add_link</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>idcs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#add_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.add_link" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new link to the network. Connectivity is updated in nodes to account
+for the added link. Attributes such as link width, length are not
+recomputed here; must be recomputed for the entire network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>idcs</strong> (<em>list</em>) – Pixel indices comprising the link.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – Raised if the added link isn’t connected to existing nodes at both ends.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links with the link added.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes with the link added.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.add_node">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">add_node</code><span class="sig-paren">(</span><em>nodes</em>, <em>idx</em>, <em>linkconn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#add_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.add_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new node to the network. Connectivity is updated in links to account
+for the added node. No node properties (e.g. juncation angle) are updated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>idx</strong> (<em>int</em>) – Pixel index within the original mask of the node to add.</p></li>
+<li><p><strong>linkconn</strong> (<em>list</em><em> or </em><em>int</em>) – ID(s) of the link that the node is connected to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>nodes</strong> – Network nodes with the node added.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.adjust_for_padding">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">adjust_for_padding</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>npad</em>, <em>dims</em>, <em>initial_dims</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#adjust_for_padding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.adjust_for_padding" title="Permalink to this definition">¶</a></dt>
+<dd><p>In some cases, a mask is padded before extracting the network. In order
+to ensure the extracted network maps to the original mask, the padding must
+be stripped away from all the coordinates of the network. The function
+achieves this by adjusting the [‘idx’] attributes of the links and nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>npad</strong> (<em>int</em>) – Pad width to remove. Assumes padding was performed on all four edges
+of image.</p></li>
+<li><p><strong>dims</strong> (<em>tuple</em>) – (nrows, ncols) of the padded image.</p></li>
+<li><p><strong>initial_dims</strong> (<em>tuple</em>) – (nrows, ncols) of the original (unpadded) image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links adjusted to remove padding.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes adjusted to remove padding.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.append_link_lengths">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">append_link_lengths</code><span class="sig-paren">(</span><em>links</em>, <em>gdobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#append_link_lengths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.append_link_lengths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends link lengths to each link. Lengths are computed in the units of
+the coordinate reference system of the original mask.</p>
+<p>This function provides a subset of the functionality of link_widths_and_lengths().
+It is used when only link lengths are needed for, e.g. finding shortest
+paths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>gdobj</strong> (<em>osgeo.gdal.Dataset</em>) – GDAL dataset of the original mask, created via gdal.Open().</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>links</strong> – Network links with length attribute appended.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.conn_links">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">conn_links</code><span class="sig-paren">(</span><em>nodes</em>, <em>links</em>, <em>node_idx</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#conn_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.conn_links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the first and last pixels of all links connected to the node specified
+by node_idx.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>node_idx</strong> (<em>int</em>) – Index of the node (not its id) to query.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>link_pix</strong> – A list of [first pixel, last pixel] for each link connected to the
+node specified by node_idx.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of lists</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.delete_link">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">delete_link</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>linkid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#delete_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.delete_link" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes a link from the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>linkid</strong> (<em>int</em>) – ID of link (as found in links[‘id’]) to delete.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links with link updated.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes with node updated.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.delete_node">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">delete_node</code><span class="sig-paren">(</span><em>nodes</em>, <em>nodeid</em>, <em>warn=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#delete_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.delete_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes a node from the network. Assumes that the node’s connected links have
+already been deleted, and hence does not update the links dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>nodeid</strong> (<em>int</em>) – ID of the node (as found in nodes[‘id’]) to delete.</p></li>
+<li><p><strong>warn</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, will print a warning if a node is being deleted that is still
+connected to links in the network. The default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>nodes</strong> – Network nodes with the node deleted.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.find_art_links">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">find_art_links</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#find_art_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.find_art_links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the triad links corresponding to each artificial node. The triad
+links are the two links connected to the artifical node, and the link
+parallel to these two links.</p>
+<p>Adds a new ‘arts’ property to the links dictionary that contains the triad
+set for each artificial node in nodes[‘arts’].</p>
+<p>This function has little use after changing how RivGraph considers
+parallel links.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>links</strong> – Network link with ‘arts’ attribute.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.find_parallel_links">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">find_parallel_links</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#find_parallel_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.find_parallel_links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds all parallel links within the graph. A set of parallel links all have
+the same start and end node. A new attribute called ‘parallels’ is added
+to the links dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links with parallel attribute appended.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="rivgraph.ln_utils.flip_link">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">flip_link</code><span class="sig-paren">(</span><em>links</em>, <em>linkid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#flip_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.flip_link" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flips a link’s direction and updates corresponding connectivity and other
-attributes.</p>
+<dd><p>Reverses a link’s direction by flipping the ordering of its comprising
+pixels, as well as any ordered attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>linkid</strong> (<em>int</em>) – ID of the link to flip (within links[‘id’]).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>links</strong> – Network links with the link flipped.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.ln_utils.junction_angles">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">junction_angles</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>imshape</em>, <em>pixlen</em>, <em>weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#junction_angles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.junction_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes junction angles between links in a directed graph. Only junctions
-with three joining links are considered for simplicity. Also computes
-the ratio of link widths at junctions, and determines whether the junction
-is a confluence (joining) or a bifurcation (diverging). These attributes
-are appended to the provided nodes dictionary.
-‘weight’ can be ‘None’, ‘exp’ (exponential), or ‘lin’ (linear)</p>
+<dd><p>Computes junction angles between links in a network with directions set.
+Only nodes of degree three are considered for simplicity. Angles are only
+computed between the two links that share a common flow directions. The
+acute-most angle between these two links is returned.</p>
+<p>The direction of an individual link is poorly constrained. The number of
+pixels along the link to consider for computing its direction can result
+in vastly different directions depending on the link’s morphology. The
+weight argument above allows a degree of control over how to weight the
+contribution of pixels to a link’s direction vector.</p>
+<p>Also computes the ratio of link widths (max/min) at junctions, and
+determines whether the junction is a confluence (joining) or a bifurcation
+(diverging).</p>
+<dl>
+<dt>The following attributes are appended to the ndoes dictionary:</dt><dd><p>‘int_ang’ - the interior angle between the two links in the
+‘width_ratio’ - the ratio of the maximum/minimum link widths for the</p>
+<blockquote>
+<div><p>two links whose directions agree</p>
+</div></blockquote>
+<p>‘jtype’ - the junction type, either ‘b’ifurcation or ‘c’onfluence</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>imshape</strong> (<em>tuple</em>) – (nrows, ncols) of the original mask.</p></li>
+<li><p><strong>pixlen</strong> (<em>numeric</em>) – Resolution of the image; assumes same resolution in the horizontal and
+vertical.</p></li>
+<li><p><strong>weight</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>How to weight pixel contributions to a link’s direction vector as we
+move away from the joining node. Choose from
+None - all pixels are weighted equally
+‘lin’ - the contribution of pixels decreases linearly as we move away</p>
+<blockquote>
+<div><p>from the joining node.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>’exp’ - the contribution of  pixels decreases exponentially as we move</dt><dd><p>away from the joining node.</p>
+</dd>
+</dl>
+<p>The default is None.</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>KeyError</strong> – Ensures that flow directions have been computed before running this
+    function.</p></li>
+<li><p><strong>RuntimeError</strong> – Catches any strange cases where a junction is neither a bifurcation
+    nor junction. Have not encountered this yet, please report if triggered.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>nodes</strong> – Network nodes and associated properties.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.link_updater">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">link_updater</code><span class="sig-paren">(</span><em>links</em>, <em>linkid</em>, <em>idx=-1</em>, <em>conn=-1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#link_updater"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.link_updater" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates link dictionary by appending a new link or adding connectivity
+to an existing link. This function cannot add a new link.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties. Should contain ‘id’, ‘idx’,
+and ‘conn’ at a minimum.</p></li>
+<li><p><strong>linkid</strong> (<em>int</em>) – ID of the link to update.</p></li>
+<li><p><strong>idx</strong> (<em>list</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – Pixel indices of the link to update. The default is -1, which effectively
+skips updating the idx field.</p></li>
+<li><p><strong>conn</strong> (<em>int</em><em>, </em><em>optional</em>) – Node id (as found in nodes[‘id’]) connected to the link. The default is -1,
+which effectively skips updating the ‘id’ field.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>links</strong> – Network links with link updated.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.ln_utils.link_widths_and_lengths">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">link_widths_and_lengths</code><span class="sig-paren">(</span><em>links</em>, <em>Idt</em>, <em>pixlen=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#link_widths_and_lengths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.link_widths_and_lengths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Appends link widths and lengths to the links dictionary.
-There is a slight twist. When a skeleton is computed for a very wide
+<dd><p>Computes link widths and lengths for all links in the network. A
+distance transform approach is used where the width of a pixel is its
+distance to the nearest non-max pixel times two.</p>
+<p>There is a slight twist. When a skeleton is computed for a very wide
 channel with a narrow tributary, there is a very straight section of the
 skeleton as it leaves the wide channel to go into the tributary; this
-straight section should not be used to compute average link width, as it’s
-technically part of the wide channel. The twist here accounts for that by
-elminating the ends of the each link from computing widths and lengths,
-where the distance along each end is equal to the half-width of the endmost
-pixels.
-##TODO: add median width OR just change wid_adj to be median?</p>
+straight section (so-called “false” pixels) should not be used to compute
+average link width, as it’s technically part of the wide channel. The twist
+here accounts for that by elminating the ends of the each link from computing
+widths and lengths, where the distance along each end is equal to the
+half-width of the endmost pixels. Adjusted link widths and lengths are also
+computed that account for this effect.</p>
+<dl class="simple">
+<dt>The following new attributes are added to the links dictionary:</dt><dd><p>‘len’ - the length of the full link
+‘wid_pix’ - the width of each pixel in the link
+‘wid’ - the average width of all pixels of the link
+‘wid_adj’ - the “adjusted” average width of all link pixels excluding “false” pixels
+‘len_adj’ - the “adjusted” length of the link after excluding “false” pixels</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>Idt</strong> (<em>np.array</em>) – Distance transform of the original mask.</p></li>
+<li><p><strong>pixlen</strong> (<em>float</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – Length (or resolution) of the pixel. If provided, assumes that the
+pixel resolution is the same in the horizontal and vertical directions.
+The default is 1, which corresponds to computing widths and lengths
+in units of pixels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>links</strong> – Network links with width and length properties appended.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.ln_utils.links_to_gpd">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">links_to_gpd</code><span class="sig-paren">(</span><em>links</em>, <em>gdobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#links_to_gpd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.links_to_gpd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts links dictionary to a geopandas dataframe.</p>
+<dd><p>Converts the links dictionary to a GeoPandas GeoDataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>gdobj</strong> (<em>osgeo.gdal.Dataset</em>) – DESCRIPTION.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>links_gpd</strong> – GDAL dataset of the original mask, created via gdal.Open().</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.ln_utils.node_updater">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">node_updater</code><span class="sig-paren">(</span><em>nodes</em>, <em>idx</em>, <em>conn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#node_updater"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.node_updater" title="Permalink to this definition">¶</a></dt>
-<dd><p>Updates node dictionary. Supply index of node and connected link.</p>
+<dd><p>Updates node dictionary by adding connectivity and idx information
+to an existing node. The function cannot add a node to the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties Should contain ‘id’, ‘idx’,
+and ‘conn’ keys at a minimum.</p></li>
+<li><p><strong>idx</strong> (<em>int</em>) – The index of the node, as found in nodes[‘idx’].</p></li>
+<li><p><strong>conn</strong> (<em>int</em>) – Link id (as found in links[‘id’]) connected to the node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>nodes</strong> – Network nodes with node updated.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.plot_dirlinks">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">plot_dirlinks</code><span class="sig-paren">(</span><em>links</em>, <em>dims</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#plot_dirlinks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.plot_dirlinks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the network links with flow direction denoted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links with flow directions set.</p></li>
+<li><p><strong>dims</strong> (<em>tuple</em>) – (nrows, ncols) of original mask that links were derived from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.plot_network">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">plot_network</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>Imask</em>, <em>name</em>, <em>axis=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#plot_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.plot_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the network with labeled link and node IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>Imask</strong> (<em>np.array</em>) – The original binary mask.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of the channel network for labeling the plot.</p></li>
+<li><p><strong>axis</strong> (<em>matplotlib.axex._subplots.AxesSubplot</em><em>, </em><em>optional</em>) – If provided, plotting will occur within the provided axis. Can be created
+with matplotlib.pyplot.subplots(). The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.remove_all_spurs">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">remove_all_spurs</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>dontremove=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#remove_all_spurs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.remove_all_spurs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all links who have a node of degree one. This is performed iteratively
+until all spurs are removed. Also removes redundant nodes (i.e. nodes
+with degree two.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network link and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>dontremove</strong> (<em>list</em><em>, </em><em>optional</em>) – Node IDs not to remove (e.g. inlet and/or outlet nodes).
+The default is [].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links with spurs removed.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes with spurs removed.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.remove_disconnected_bridge_links">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">remove_disconnected_bridge_links</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#remove_disconnected_bridge_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.remove_disconnected_bridge_links" title="Permalink to this definition">¶</a></dt>
+<dd><p>When simplifying a channel network, there are often tributaries joining
+the network further downstream. These tributaries may have loops, which
+prevents their automatic removal by simple pruning.</p>
+<p>This function helps prune these cases by removing bridge links that are
+not integral to the network. A bridge link is one whose removal results
+in an increase in the number of connected components in the network. Each
+bridge link is temporarily removed from the network. This leaves two
+end nodes which were connected by the bridge link. A bridge link is
+integral if a path can be found from the end nodes to inlets and
+outlets (if one end node is connected to an inlet(s), the other must
+be connected to an outlet(s)).</p>
+<p>After all non-integral bridge links are removed, the connected component
+network that contains the inlet and outlets is returned; all other
+subnetworks are removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Pruned network links.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Pruned network nodes.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.ln_utils.remove_duplicate_links">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">remove_duplicate_links</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#remove_duplicate_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.remove_duplicate_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks links for duplicates and removes any found. They are rare but some
-have appeared in one-pixel-long links.</p>
+<dd><p>Eliminates any duplicate links in the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links with duplicate links removed.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes with duplicate nodes removed.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.ln_utils.remove_single_pixel_links">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">remove_single_pixel_links</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#remove_single_pixel_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.remove_single_pixel_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Thanks to the Lena for finding this bug. In very rare cases, we can end
-up with a link of one pixel. This function removes those.</p>
+<dd><p>RivGraph’s resolving of the network can result in single-pixel links that
+can be removed without altering connectivity. This function removes those.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links with single pixel links removed.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes with single pixel links removed.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.ln_utils.remove_two_link_nodes">
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">remove_two_link_nodes</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>dontremove</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#remove_two_link_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.remove_two_link_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes superfluous nodes from the network; i.e. nodes with degree two.
+Is called by remove_all_spurs().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>dontremove</strong> (<em>list</em>) – Node IDs that should not be removed (e.g. inlets or outlets).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links with superfluous nodes removed.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes with superfluous nodes removed.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.mask_to_graph"></span><p>Functions for converting a binary channel mask to a graphical representation.</p>
+<span class="target" id="module-rivgraph.mask_to_graph"></span><div class="section" id="mask-to-graph-py">
+<h2>mask_to_graph.py<a class="headerlink" href="#mask-to-graph-py" title="Permalink to this headline">¶</a></h2>
+<p>Functions for converting a binary channel mask to a graphical representation.</p>
 <dl class="function">
 <dt id="rivgraph.mask_to_graph.pad_river_im">
 <code class="descclassname">rivgraph.mask_to_graph.</code><code class="descname">pad_river_im</code><span class="sig-paren">(</span><em>I</em>, <em>es</em>, <em>pm=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_to_graph.html#pad_river_im"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_to_graph.pad_river_im" title="Permalink to this definition">¶</a></dt>
@@ -2953,7 +3707,12 @@ the padding distance. The default is 2.</p>
 </dl>
 </dd></dl>
 
-<span class="target" id="module-rivgraph.mask_utils"></span><p>Created on Mon Jul  6 18:29:23 2020</p>
+</div>
+<span class="target" id="module-rivgraph.mask_utils"></span><div class="section" id="mask-utils-py">
+<h2>mask_utils.py<a class="headerlink" href="#mask-utils-py" title="Permalink to this headline">¶</a></h2>
+<p>Functions for filtering islands from channel masks. Currently in beta.
+Also see im_utils.py for morphologic operations that could be useful.</p>
+<p>Created on Mon Jul 6 18:29:23 2020</p>
 <p>&#64;author: Jon</p>
 <dl class="function">
 <dt id="rivgraph.mask_utils.pixagon">
@@ -2962,8 +3721,11 @@ the padding distance. The default is 2.</p>
 of a provided center coordinate given the pixel resolution (pixlen).</p>
 </dd></dl>
 
-<span class="target" id="module-rivgraph.ordered_set"></span><div class="section" id="ordered-set">
-<h2>ordered_set<a class="headerlink" href="#ordered-set" title="Permalink to this headline">¶</a></h2>
+</div>
+<span class="target" id="module-rivgraph.ordered_set"></span><div class="section" id="ordered-set-py">
+<h2>ordered_set.py<a class="headerlink" href="#ordered-set-py" title="Permalink to this headline">¶</a></h2>
+<p>This script is copied from the ordered_set package, but is included as a
+separate .py file in RivGraph due to packaging issues.</p>
 <p>An OrderedSet is a custom MutableSet that remembers its order, so that every
 entry has an index that can be looked up.</p>
 <p>Based on a recipe originally posted to ActiveState Recipes by Raymond Hettiger,
