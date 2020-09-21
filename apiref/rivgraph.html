@@ -97,15 +97,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">rivgraph</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#classes-py">classes.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#directionality-py">directionality.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#im-utils">im_utils</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#io-utils-py">io_utils.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ln-utils-link-and-node-utilities">ln_utils - link and node utilities</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mask-to-graph-py">mask_to_graph.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mask-utils-py">mask_utils.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rivgraph-classes-py">RivGraph (classes.py)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#directionality-utils-directionality-py">Directionality Utils (directionality.py)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#georeferencing-utilities-geo-utils-py">Georeferencing Utilities (geo_utils.py)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#image-utilities-im-utils-py">Image Utilities (im_utils.py)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input-output-utilities-io-utils-py">Input/Output Utilities (io_utils.py)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#network-utilities-ln-utils-py">Network Utilities (ln_utils.py)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mask-to-graph-utilities-mask-to-graph-py">Mask to Graph Utilities (mask_to_graph.py)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mask-filtering-utils-mask-utils-py">Mask Filtering Utils (mask_utils.py)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ordered-set-py">ordered_set.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#walk-py">walk.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skelton-walking-utils-walk-py">Skelton Walking Utils (walk.py)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="deltas.html">deltas</a></li>
@@ -181,8 +182,8 @@
             
   <div class="section" id="rivgraph">
 <span id="id1"></span><h1>rivgraph<a class="headerlink" href="#rivgraph" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-rivgraph.classes"></span><div class="section" id="classes-py">
-<h2>classes.py<a class="headerlink" href="#classes-py" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.classes"></span><div class="section" id="rivgraph-classes-py">
+<h2>RivGraph (classes.py)<a class="headerlink" href="#rivgraph-classes-py" title="Permalink to this headline">¶</a></h2>
 <p>Classes for running rivgraph commands on your channel network.</p>
 <dl class="class">
 <dt id="rivgraph.classes.delta">
@@ -1049,8 +1050,8 @@ shp  (ESRI Shapefile)</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.directionality"></span><div class="section" id="directionality-py">
-<h2>directionality.py<a class="headerlink" href="#directionality-py" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.directionality"></span><div class="section" id="directionality-utils-directionality-py">
+<h2>Directionality Utils (directionality.py)<a class="headerlink" href="#directionality-utils-directionality-py" title="Permalink to this headline">¶</a></h2>
 <p>Created on Wed Nov  7 11:38:16 2018
 &#64;author: Jon</p>
 <dl class="function">
@@ -1742,7 +1743,9 @@ respect to the nodes[‘id’] list.
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.geo_utils"></span><p>Utilities for reading, writing, managing, processing, manipulating, etc.
+<span class="target" id="module-rivgraph.geo_utils"></span><div class="section" id="georeferencing-utilities-geo-utils-py">
+<h2>Georeferencing Utilities (geo_utils.py)<a class="headerlink" href="#georeferencing-utilities-geo-utils-py" title="Permalink to this headline">¶</a></h2>
+<p>Utilities for reading, writing, managing, processing, manipulating, etc.
 geographic data including tiffs, vrts, shapefiles, etc.</p>
 <p>6/2/2020 - Consider merging this into io_utils and im_utils. Not much actual
 functionality here, and some of these functions are simply unused.</p>
@@ -1900,8 +1903,9 @@ Automatically created by gdal’s GetGeoTransform() method.</p></li>
 </dl>
 </dd></dl>
 
-<span class="target" id="module-rivgraph.im_utils"></span><div class="section" id="im-utils">
-<h2>im_utils<a class="headerlink" href="#im-utils" title="Permalink to this headline">¶</a></h2>
+</div>
+<span class="target" id="module-rivgraph.im_utils"></span><div class="section" id="image-utilities-im-utils-py">
+<h2>Image Utilities (im_utils.py)<a class="headerlink" href="#image-utilities-im-utils-py" title="Permalink to this headline">¶</a></h2>
 <p>Almost all the functions that manipulate images within this file require that
 the images be binary.</p>
 <p>Many of these functions are wrappers around functionality found in skimage or
@@ -2573,8 +2577,8 @@ raster of imshape.</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.io_utils"></span><div class="section" id="io-utils-py">
-<h2>io_utils.py<a class="headerlink" href="#io-utils-py" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.io_utils"></span><div class="section" id="input-output-utilities-io-utils-py">
+<h2>Input/Output Utilities (io_utils.py)<a class="headerlink" href="#input-output-utilities-io-utils-py" title="Permalink to this headline">¶</a></h2>
 <p>Functions for input/output.</p>
 <p>Created on Sun Sep 16 15:15:18 2018</p>
 <p>&#64;author: Jon</p>
@@ -2838,7 +2842,7 @@ within this function so that pickle can interpret OrderedSet object fields.</p>
 
 <dl class="function">
 <dt id="rivgraph.io_utils.write_geotiff">
-<code class="descclassname">rivgraph.io_utils.</code><code class="descname">write_geotiff</code><span class="sig-paren">(</span><em>raster, gt, wkt, path_export, dtype=&lt;Mock name='mock.GDT_UInt16' id='140019053510960'&gt;, options=['COMPRESS=LZW'], nbands=1, nodata=None, color_table=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#write_geotiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.write_geotiff" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">write_geotiff</code><span class="sig-paren">(</span><em>raster, gt, wkt, path_export, dtype=&lt;Mock name='mock.GDT_UInt16' id='140211938246960'&gt;, options=['COMPRESS=LZW'], nbands=1, nodata=None, color_table=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#write_geotiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.write_geotiff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes a georeferenced raster to disk.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2905,8 +2909,8 @@ written.</p></li>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.ln_utils"></span><div class="section" id="ln-utils-link-and-node-utilities">
-<h2>ln_utils - link and node utilities<a class="headerlink" href="#ln-utils-link-and-node-utilities" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.ln_utils"></span><div class="section" id="network-utilities-ln-utils-py">
+<h2>Network Utilities (ln_utils.py)<a class="headerlink" href="#network-utilities-ln-utils-py" title="Permalink to this headline">¶</a></h2>
 <p>Created on Mon Sep 10 09:59:52 2018</p>
 <p>&#64;author: Jon</p>
 <dl class="function">
@@ -3530,8 +3534,8 @@ Is called by remove_all_spurs().</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.mask_to_graph"></span><div class="section" id="mask-to-graph-py">
-<h2>mask_to_graph.py<a class="headerlink" href="#mask-to-graph-py" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.mask_to_graph"></span><div class="section" id="mask-to-graph-utilities-mask-to-graph-py">
+<h2>Mask to Graph Utilities (mask_to_graph.py)<a class="headerlink" href="#mask-to-graph-utilities-mask-to-graph-py" title="Permalink to this headline">¶</a></h2>
 <p>Functions for converting a binary channel mask to a graphical representation.</p>
 <dl class="function">
 <dt id="rivgraph.mask_to_graph.pad_river_im">
@@ -3708,8 +3712,8 @@ the padding distance. The default is 2.</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.mask_utils"></span><div class="section" id="mask-utils-py">
-<h2>mask_utils.py<a class="headerlink" href="#mask-utils-py" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.mask_utils"></span><div class="section" id="mask-filtering-utils-mask-utils-py">
+<h2>Mask Filtering Utils (mask_utils.py)<a class="headerlink" href="#mask-filtering-utils-mask-utils-py" title="Permalink to this headline">¶</a></h2>
 <p>Functions for filtering islands from channel masks. Currently in beta.
 Also see im_utils.py for morphologic operations that could be useful.</p>
 <p>Created on Mon Jul 6 18:29:23 2020</p>
@@ -4106,8 +4110,8 @@ have an <cite>__iter__</cite> attribute anyway.</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.walk"></span><div class="section" id="walk-py">
-<h2>walk.py<a class="headerlink" href="#walk-py" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.walk"></span><div class="section" id="skelton-walking-utils-walk-py">
+<h2>Skelton Walking Utils (walk.py)<a class="headerlink" href="#skelton-walking-utils-walk-py" title="Permalink to this headline">¶</a></h2>
 <p>Functions for walking along skeletons and finding branchpoints.</p>
 <p>Created on Mon Sep 10 09:39:19 2018</p>
 <dl class="function">
