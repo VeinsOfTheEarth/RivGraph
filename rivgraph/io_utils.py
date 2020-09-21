@@ -365,7 +365,7 @@ def write_geotiff(raster, gt, wkt, path_export, dtype=gdal.GDT_UInt16, options=[
 def colortable(ctype):
     """
     Generates a gdal-ingestible color table for a set of pre-defined options.
-    Can add your own colortable options. See See http://www.gdal.org/structGDALColorEntry.html
+    Can add your own colortable options. See https://gdal.org/doxygen/structGDALColorEntry.html
     and https://gis.stackexchange.com/questions/158195/python-gdal-create-geotiff-from-array-with-colormapping
     for guidance.
 
