@@ -161,7 +161,7 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Skelton Walking Utils (walk.py)</span>
-<span class="sd">=============</span>
+<span class="sd">===============================</span>
 <span class="sd">Functions for walking along skeletons and finding branchpoints.</span>
 
 <span class="sd">Created on Mon Sep 10 09:39:19 2018</span>
@@ -175,11 +175,12 @@
 
 <div class="viewcode-block" id="handle_bp"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.handle_bp">[docs]</a><span class="k">def</span> <span class="nf">handle_bp</span><span class="p">(</span><span class="n">linkid</span><span class="p">,</span> <span class="n">bpnode</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">links2do</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle branchpoints.</span>
+
 <span class="sd">    When walking along a skeleton and encountering a branchpoint, we want to</span>
 <span class="sd">    initialize all un-done links emanating from the branchpoint. Each new link</span>
 <span class="sd">    contains the branchpoint as the first index, and this function also takes</span>
 <span class="sd">    the first step of the link.</span>
-
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -208,11 +209,11 @@
 <span class="sd">    links2do : OrderedSet</span>
 <span class="sd">        Same as input, but with new link emanators added and linkid removed.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>    
-    
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">links2do</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
 
-    <span class="c1"># If the branchpoint has already been visited, we don&#39;t need to re-initialize emanating links</span>
+    <span class="c1"># If the branchpoint has already been visited, we don&#39;t need to</span>
+    <span class="c1"># re-initialize emanating links</span>
     <span class="k">if</span> <span class="n">bpnode</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]:</span>
         <span class="n">doneflag</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
@@ -237,15 +238,16 @@
     <span class="n">bp</span> <span class="o">=</span> <span class="n">bp_cluster</span><span class="p">([</span><span class="n">bpnode</span><span class="p">],</span> <span class="n">Iskel</span><span class="p">)</span>
 
     <span class="c1"># Find the pixels emanating from the cluster</span>
-    <span class="n">emanators</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">find_emanators</span><span class="p">(</span><span class="n">bpnode</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">bp</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">])))</span>
+    <span class="n">emanators</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">find_emanators</span><span class="p">(</span><span class="n">bpnode</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">bp</span><span class="p">)</span> <span class="o">-</span>
+                              <span class="nb">set</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">])))</span>
 
     <span class="c1"># For each branchpoint, separate emanators into 4-connected neighbors and</span>
     <span class="c1"># diagonally-connected neighbors</span>
     <span class="n">fourconn</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">emremove</span> <span class="o">=</span><span class="p">[]</span>
+    <span class="n">emremove</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bp</span><span class="p">:</span>
         <span class="n">abdif</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">emanators</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">abdif</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">abdif</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">a</span> <span class="o">==</span> <span class="n">Iskel</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
                 <span class="n">fourconn</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">b</span><span class="p">,</span> <span class="n">emanators</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
                 <span class="n">emremove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">emanators</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
@@ -256,7 +258,7 @@
     <span class="n">diagconn</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bp</span><span class="p">:</span>
         <span class="n">abdif</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">emanators</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">abdif</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">abdif</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">Iskel</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">a</span> <span class="o">==</span> <span class="n">Iskel</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">diagconn</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">b</span><span class="p">,</span> <span class="n">emanators</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
 
@@ -277,7 +279,8 @@
         <span class="n">linkid</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">node_updater</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">linkid</span><span class="p">)</span>
         <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">node_updater</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">linkid</span><span class="p">)</span>
-        <span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_updater</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">conn</span><span class="o">=</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_updater</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span>
+                                 <span class="n">conn</span><span class="o">=</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_updater</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">conn</span><span class="o">=</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
     <span class="c1"># Finally, initialize new links to be walked</span>
@@ -297,7 +300,8 @@
             <span class="n">linkid</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">links2do</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
             <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">node_updater</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">linkid</span><span class="p">)</span>
-            <span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_updater</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_updater</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span>
+                                     <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
     <span class="c1"># Then initialize the diagonals</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">diagconn</span><span class="p">:</span>
@@ -312,13 +316,16 @@
             <span class="n">linkid</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">links2do</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
             <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">node_updater</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">linkid</span><span class="p">)</span>
-            <span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_updater</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_updater</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span>
+                                     <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">links2do</span></div>
 
 
 <div class="viewcode-block" id="bp_cluster"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.bp_cluster">[docs]</a><span class="k">def</span> <span class="nf">bp_cluster</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find clusters of branchpoints.</span>
+
 <span class="sd">    Finds clusters of branchpoints; i.e. branchpoints that are immediately</span>
 <span class="sd">    adjacent to each other in an 8-connected sense. This function is self-</span>
 <span class="sd">    referential in order to find all neighboring branchpoints.</span>
@@ -326,7 +333,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    bp : list</span>
-<span class="sd">        Contains the branchpoint cluster as indices (np.ravel_multi_index) </span>
+<span class="sd">        Contains the branchpoint cluster as indices (np.ravel_multi_index)</span>
 <span class="sd">        within Iskel. In the initial call, this list contains only a single</span>
 <span class="sd">        branchpoint.</span>
 <span class="sd">    Iskel : np.ndarray</span>
@@ -335,10 +342,10 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    bp : list</span>
-<span class="sd">        Contains the branchpoint cluster as indices (np.ravel_multi_index) </span>
+<span class="sd">        Contains the branchpoint cluster as indices (np.ravel_multi_index)</span>
 <span class="sd">        within Iskel.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">bp_neighs</span> <span class="o">=</span> <span class="n">walkable_neighbors</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">)</span>
     <span class="k">while</span> <span class="n">bp_neighs</span><span class="p">:</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">bp_neighs</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
@@ -352,6 +359,8 @@
 
 <div class="viewcode-block" id="idcs_no_turnaround"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.idcs_no_turnaround">[docs]</a><span class="k">def</span> <span class="nf">idcs_no_turnaround</span><span class="p">(</span><span class="n">idcs</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find possible indices to walk to given two input indices.</span>
+
 <span class="sd">    Returns list of possible indices to walk toward given two input indices</span>
 <span class="sd">    (idcs).</span>
 
@@ -359,7 +368,6 @@
 <span class="sd">    e.g. if moving down, only indices further below idcs[1] will be returned.</span>
 <span class="sd">    Based on directionality, only three possible indices should be returned</span>
 <span class="sd">    for all cases.</span>
-
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -375,8 +383,7 @@
 <span class="sd">        Indices within Iskel of possible next steps that ensure the walk will</span>
 <span class="sd">        not move &quot;backwards.&quot;</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>    
-        
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ncols</span> <span class="o">=</span> <span class="n">Iskel</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">idxdif</span> <span class="o">=</span> <span class="n">idcs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">idcs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
@@ -403,12 +410,16 @@
 
 <div class="viewcode-block" id="cant_walk"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.cant_walk">[docs]</a><span class="k">def</span> <span class="nf">cant_walk</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkidx</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Given an input link defined by linkidx, return all the pixels that cannot be walked</span>
-<span class="sd">    to. These include:</span>
-<span class="sd">        1) originating node (and any nodes adjacent to this one)</span>
-<span class="sd">        2) emanating links (i.e. first pixel away from each node)</span>
-<span class="sd">        3) links that have been resolved walking AWAY from the node (toward node not included)</span>
+<span class="sd">    Find pixels that cannot be walked to.</span>
 
+<span class="sd">    Given an input link defined by linkidx, return all the pixels that cannot</span>
+<span class="sd">    be walked to. These include:</span>
+
+<span class="sd">    1. originating node (and any nodes adjacent to this one)</span>
+
+<span class="sd">    2. emanating links (i.e. first pixel away from each node)</span>
+
+<span class="sd">    3. links that have been resolved walking AWAY from the node (toward node not included)</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -426,8 +437,7 @@
 <span class="sd">    walked : set</span>
 <span class="sd">        Indices of pixels within Iskel that have already been walked to.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>    
-
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># 1. Originating node and its adjacent nodes</span>
     <span class="n">bps</span> <span class="o">=</span> <span class="n">bp_cluster</span><span class="p">([</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span> <span class="n">Iskel</span><span class="p">)</span>
     <span class="n">walked</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">bps</span><span class="p">)</span>
@@ -442,7 +452,8 @@
 
     <span class="k">for</span> <span class="n">cl</span> <span class="ow">in</span> <span class="n">connlinks</span><span class="p">:</span>
         <span class="n">templinkidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
-        <span class="c1"># If statement ensures we only consider links walked from the node (as opposed to links entering the node)</span>
+        <span class="c1"># If statement ensures we only consider links walked from the node</span>
+        <span class="c1"># (as opposed to links entering the node)</span>
         <span class="k">if</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">templinkidx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
             <span class="n">walked</span> <span class="o">=</span> <span class="n">walked</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">templinkidx</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
@@ -454,6 +465,8 @@
 
 <div class="viewcode-block" id="find_emanators"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.find_emanators">[docs]</a><span class="k">def</span> <span class="nf">find_emanators</span><span class="p">(</span><span class="n">bpnode</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find possible next steps along the skeleton.</span>
+
 <span class="sd">    Returns all possible next steps along the skeleton from a given pixel.</span>
 <span class="sd">    Emanators are the second nodes in each link, or the first nodes away from</span>
 <span class="sd">    the link endpoint.</span>
@@ -471,7 +484,6 @@
 <span class="sd">        Indices within Iskel representing emanating nodes from bpnode.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># First, find all connected branchpoints</span>
     <span class="n">branchpoints</span> <span class="o">=</span> <span class="n">bp_cluster</span><span class="p">([</span><span class="n">bpnode</span><span class="p">],</span> <span class="n">Iskel</span><span class="p">)</span>
 
@@ -479,7 +491,7 @@
     <span class="n">emanators</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">bp</span> <span class="ow">in</span> <span class="n">branchpoints</span><span class="p">:</span>
         <span class="n">emanators</span> <span class="o">=</span> <span class="n">emanators</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">walkable_neighbors</span><span class="p">([</span><span class="n">bp</span><span class="p">],</span> <span class="n">Iskel</span><span class="p">))</span>
-        
+
     <span class="n">all_emanators</span> <span class="o">=</span> <span class="n">emanators</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">branchpoints</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">all_emanators</span></div>
@@ -487,8 +499,10 @@
 
 <div class="viewcode-block" id="walkable_neighbors"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.walkable_neighbors">[docs]</a><span class="k">def</span> <span class="nf">walkable_neighbors</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns all the walkable neighbors from the end pixel of an input link. </span>
-<span class="sd">    Walkable neighbors are simply pixels that are &quot;on&quot; within Iskel. The pixels </span>
+<span class="sd">    Find all walkable neighbors from the end pixel of an input link.</span>
+
+<span class="sd">    Returns all the walkable neighbors from the end pixel of an input link.</span>
+<span class="sd">    Walkable neighbors are simply pixels that are &quot;on&quot; within Iskel. The pixels</span>
 <span class="sd">    in the link are excluded as possibilities.</span>
 
 <span class="sd">    Parameters</span>
@@ -505,7 +519,6 @@
 <span class="sd">        Indices within Iskel of neighboring pixels to walk to.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">idx</span> <span class="o">=</span> <span class="n">link</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># Find its neighbors (next possible steps)</span>
@@ -513,7 +526,7 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">neighs</span> <span class="o">=</span> <span class="n">neighs</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">link</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])</span>
-    <span class="k">except</span><span class="p">:</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
         <span class="k">pass</span>
 
     <span class="k">return</span> <span class="n">neighs</span></div>
@@ -521,7 +534,9 @@
 
 <div class="viewcode-block" id="get_neighbors"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.get_neighbors">[docs]</a><span class="k">def</span> <span class="nf">get_neighbors</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a flattened array of the neighboring pixel indices within Iskel </span>
+<span class="sd">    Get a flattened array of neighboring pixel indices.</span>
+
+<span class="sd">    Returns a flattened array of the neighboring pixel indices within Iskel</span>
 <span class="sd">    that are True. Only looks at 8-connected neighbors (i.e. a 3x3 kernel with</span>
 <span class="sd">    centered on idx).</span>
 
@@ -538,9 +553,8 @@
 <span class="sd">        Indices within Iskel of True pixels bordering idx.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-    <span class="n">cent_idx</span> <span class="o">=</span> <span class="mi">4</span> <span class="c1"># OR int((size[0]*size[1] - 1) / 2)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">cent_idx</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># OR int((size[0]*size[1] - 1) / 2)</span>
 
     <span class="c1"># Pull square with idx at center</span>
     <span class="n">I</span><span class="p">,</span> <span class="n">row_offset</span><span class="p">,</span> <span class="n">col_offset</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
@@ -548,13 +562,17 @@
 
     <span class="c1"># Find its neighbors (next possible steps)</span>
     <span class="n">neighbor_idcs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">neighbors_flat</span><span class="p">(</span><span class="n">cent_idx</span><span class="p">,</span> <span class="n">I_flat</span><span class="p">,</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">neighbor_idcs_gloal</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">reglobalize_flat_idx</span><span class="p">(</span><span class="n">neighbor_idcs</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">row_offset</span><span class="p">,</span> <span class="n">col_offset</span><span class="p">,</span> <span class="n">Iskel</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">neighbor_idcs_gloal</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">reglobalize_flat_idx</span><span class="p">(</span><span class="n">neighbor_idcs</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span>
+                                                  <span class="n">row_offset</span><span class="p">,</span> <span class="n">col_offset</span><span class="p">,</span>
+                                                  <span class="n">Iskel</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">neighbor_idcs_gloal</span></div>
 
 
 <div class="viewcode-block" id="delete_link"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.delete_link">[docs]</a><span class="k">def</span> <span class="nf">delete_link</span><span class="p">(</span><span class="n">linkid</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Delete a link from the links dictionary and update the nodes dictionary.</span>
+
 <span class="sd">    Deletes a link from the links dictionary and updates the nodes dictionary</span>
 <span class="sd">    to account for the deleted link. This is a special case of the delete_link</span>
 <span class="sd">    found in ln_utils.py, as no properties have been added yet. It is possible</span>
@@ -577,7 +595,7 @@
 <span class="sd">        Network nodes and associated properties with the link deleted.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1">##TODO: Replace this function with the one in ln_utils. </span>
+    <span class="c1">#TODO: Replace this function with the one in ln_utils.</span>
 
     <span class="c1"># Get index of link within links dict</span>
     <span class="n">lid</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
@@ -596,7 +614,9 @@
 
 <div class="viewcode-block" id="check_dup_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.check_dup_links">[docs]</a><span class="k">def</span> <span class="nf">check_dup_links</span><span class="p">(</span><span class="n">linkid</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">links2do</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Checks that the link represented by linkid has no dubplicates in the </span>
+<span class="sd">    Check for duplicate links.</span>
+
+<span class="sd">    Checks that the link represented by linkid has no dubplicates in the</span>
 <span class="sd">    network. If so, the link is removed.</span>
 
 <span class="sd">    Parameters</span>
@@ -609,7 +629,8 @@
 <span class="sd">        Network nodes and associated properties.</span>
 <span class="sd">    links2do : OrderedSet</span>
 <span class="sd">        This set keeps track of all the links that still need to be resolved</span>
-<span class="sd">        in the full skeleton. It is generated and populated in mask_to_graph.</span>
+<span class="sd">        in the full skeleton. It is generated and populated in</span>
+<span class="sd">        :mod:`mask_to_graph`.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -621,11 +642,11 @@
 <span class="sd">        it existed.</span>
 <span class="sd">    links2do : OrderedSet</span>
 <span class="sd">        This set keeps track of all the links that still need to be resolved</span>
-<span class="sd">        in the full skeleton. It is generated and populated in mask_to_graph.</span>
+<span class="sd">        in the full skeleton. It is generated and populated in</span>
+<span class="sd">        :mod:`mask_to_graph`.</span>
 <span class="sd">        The duplicate link, if found, is removed from this set.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">linkidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
 
     <span class="n">link</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span>
@@ -633,7 +654,8 @@
     <span class="c1"># Get index of node we are connecting to</span>
     <span class="n">lconn</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
-    <span class="c1"># Get links that are connected to this node (set is required so we create a copy rather than a view)</span>
+    <span class="c1"># Get links that are connected to this node (set is required so we create</span>
+    <span class="c1"># a copy rather than a view)</span>
     <span class="c1"># The set also ensure uniqueness, so if there is a loop at this node</span>
     <span class="c1"># it is only checked once for duplication</span>
     <span class="n">nconn</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">lconn</span><span class="p">])</span>
@@ -649,7 +671,7 @@
             <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">delete_link</span><span class="p">(</span><span class="n">lid</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">links2do</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">lid</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="k">pass</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">links2do</span></div>
@@ -657,10 +679,12 @@
 
 <div class="viewcode-block" id="is_bp"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.is_bp">[docs]</a><span class="k">def</span> <span class="nf">is_bp</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine if an index is a branchpoint.</span>
+
 <span class="sd">    Determines if the index given by idx is a branchpoint. Branchpoints are</span>
 <span class="sd">    not simply pixels in the skeleton with more than two neighbors; they are</span>
 <span class="sd">    pruned through a somewhat complicated procedure that minimizes the number</span>
-<span class="sd">    of required branchpoints to preserve the skeleton topology. </span>
+<span class="sd">    of required branchpoints to preserve the skeleton topology.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -675,7 +699,7 @@
 <span class="sd">        1 if idx is a branchpoint, else 0.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1">## TODO: change to return True/False rather than 1/0.</span>
+    <span class="c1"># TODO: change to return True/False rather than 1/0.</span>
     <span class="c1"># Trivial case, only one or two neighbors is not bp</span>
     <span class="n">neighs</span> <span class="o">=</span> <span class="n">get_neighbors</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">neighs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
@@ -683,9 +707,10 @@
 
     <span class="c1"># Pull out the neighborhood</span>
     <span class="n">big_enough</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
 
-    <span class="c1"># Loop to ensure the domain is large enough to capture all connected nconn&gt;2 pixels</span>
+    <span class="c1"># Loop to ensure the domain is large enough to capture all connected</span>
+    <span class="c1"># nconn&gt;2 pixels</span>
     <span class="k">while</span> <span class="n">big_enough</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">centidx</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="nb">int</span><span class="p">((</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
         <span class="n">I</span><span class="p">,</span> <span class="n">roffset</span><span class="p">,</span> <span class="n">coffset</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
@@ -693,10 +718,10 @@
         <span class="c1"># Find 4-connected pixels with connectivity &gt; 2</span>
         <span class="n">Ic</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">im_connectivity</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
         <span class="n">Ict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
-        <span class="n">Ict</span><span class="p">[</span><span class="n">Ic</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">Ict</span><span class="p">[</span><span class="n">Ic</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">Ilab</span> <span class="o">=</span> <span class="n">measure</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">Ict</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="n">cpy</span><span class="p">,</span> <span class="n">cpx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ilab</span><span class="o">==</span><span class="n">Ilab</span><span class="p">[</span><span class="n">centidx</span><span class="p">])</span>
+        <span class="n">cpy</span><span class="p">,</span> <span class="n">cpx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ilab</span> <span class="o">==</span> <span class="n">Ilab</span><span class="p">[</span><span class="n">centidx</span><span class="p">])</span>
         <span class="n">big_enough</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">cpx</span> <span class="ow">or</span> <span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span> <span class="ow">in</span> <span class="n">cpx</span><span class="p">:</span>
             <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -705,7 +730,8 @@
             <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
             <span class="n">big_enough</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1"># Reduce image to subset of connected conn &gt; 2 pixels with a 1 pixel buffer by zeroing out values outside the domain</span>
+    <span class="c1"># Reduce image to subset of connected conn &gt; 2 pixels with a 1 pixel</span>
+    <span class="c1"># buffer by zeroing out values outside the domain</span>
     <span class="n">I</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">cpy</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">I</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">cpy</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">I</span><span class="p">[:,</span> <span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">cpx</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
@@ -715,11 +741,11 @@
     <span class="n">I</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">largest_blobs</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;keep&#39;</span><span class="p">)</span>
 
     <span class="c1"># Zero out everything outside our region of interest</span>
-    <span class="n">Ic</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">bitwise_and</span><span class="p">(</span><span class="n">Ilab</span> <span class="o">!=</span> <span class="n">Ilab</span><span class="p">[</span><span class="n">centidx</span><span class="p">],</span> <span class="n">Ic</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># set edge pixel connectivity to 1 (even if not true)</span>
+    <span class="n">Ic</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">bitwise_and</span><span class="p">(</span><span class="n">Ilab</span> <span class="o">!=</span> <span class="n">Ilab</span><span class="p">[</span><span class="n">centidx</span><span class="p">],</span> <span class="n">Ic</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># set edge pixel connectivity to 1 (even if not true)</span>
     <span class="n">Ic</span><span class="p">[</span><span class="n">I</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1"># Trivial case where idx is the only possible branchpoint</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Ic</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Ic</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">1</span>
 
     <span class="c1"># Compute number of axes and four-connectivity</span>
@@ -740,7 +766,7 @@
         <span class="n">isbp</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">isbp</span> <span class="o">=</span> <span class="mi">0</span>
-        
+
     <span class="k">return</span> <span class="n">isbp</span></div>
 
 
@@ -751,7 +777,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    Ic : np.ndarray</span>
-<span class="sd">        Image of possible branchpoints; values correspond to number of </span>
+<span class="sd">        Image of possible branchpoints; values correspond to number of</span>
 <span class="sd">        neighbors.</span>
 <span class="sd">    Icr : np.ndarray</span>
 <span class="sd">        Raveled (np.ravel) version of Ic.</span>
@@ -766,13 +792,13 @@
 <span class="sd">        All branchpoint indices within Ic.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    
     <span class="c1"># Find all possible branchpoints by considerng those with conn&gt;2</span>
-    <span class="n">bp_poss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ic</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">bp_poss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ic</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">bp_poss_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">(</span><span class="n">bp_poss</span><span class="p">,</span> <span class="n">Ic</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">bp_poss_i</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">bp_poss_i</span><span class="p">)</span> <span class="o">-</span> <span class="n">iu</span><span class="o">.</span><span class="n">edge_coords</span><span class="p">(</span><span class="n">Ic</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
 
-    <span class="c1"># Find all possible branchpoint combinations by walking from each possible initial branchpoint</span>
+    <span class="c1"># Find all possible branchpoint combinations by walking from each</span>
+    <span class="c1"># possible initial branchpoint</span>
     <span class="n">bpsave</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">bpi</span> <span class="ow">in</span> <span class="n">bp_poss_i</span><span class="p">:</span>
         <span class="n">bptemp</span> <span class="o">=</span> <span class="n">isbp_walk_for_bps</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Ic</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span> <span class="p">[</span><span class="n">bpi</span><span class="p">])</span>
@@ -780,7 +806,7 @@
 
     <span class="c1"># Number of branchpoints for each possible initial branchpoint</span>
     <span class="n">bpcounts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bpsave</span><span class="p">]</span>
-    <span class="n">bpsolo</span> <span class="o">=</span> <span class="p">[</span><span class="n">bpsave</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bpcounts</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">bpsolo</span> <span class="o">=</span> <span class="p">[</span><span class="n">bpsave</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bpcounts</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># If only one branchpoint is required, use it. However, there could be</span>
     <span class="c1"># multiple branchpoints that can serve as the single; use the one with</span>
@@ -803,16 +829,17 @@
         <span class="k">return</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">maxfour</span><span class="p">)]</span>
 
     <span class="c1"># Set bp_must according to conn, naxes, nfour</span>
-    <span class="n">keepvals</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">6</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">]]</span>
+    <span class="n">keepvals</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
     <span class="n">bp_must</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">kv</span> <span class="ow">in</span> <span class="n">keepvals</span><span class="p">:</span>
-        <span class="n">keeps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">tolist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">Icr</span><span class="o">==</span><span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Inar</span> <span class="o">==</span> <span class="n">kv</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">Infr</span> <span class="o">==</span> <span class="n">kv</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">==</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">keeps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">tolist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">Icr</span> <span class="o">==</span> <span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Inar</span> <span class="o">==</span> <span class="n">kv</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">Infr</span> <span class="o">==</span> <span class="n">kv</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">==</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">bp_must</span> <span class="o">=</span> <span class="n">bp_must</span> <span class="o">+</span> <span class="n">keeps</span>
 
     <span class="c1"># Special cases - 4,4,2 - choose one</span>
-    <span class="n">keepvals</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="n">keepvals</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
     <span class="k">for</span> <span class="n">kv</span> <span class="ow">in</span> <span class="n">keepvals</span><span class="p">:</span>
-        <span class="n">keeps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">tolist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">Icr</span><span class="o">==</span><span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Inar</span> <span class="o">==</span> <span class="n">kv</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">Infr</span> <span class="o">==</span> <span class="n">kv</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">==</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">keeps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">tolist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">Icr</span> <span class="o">==</span> <span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Inar</span> <span class="o">==</span> <span class="n">kv</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">Infr</span> <span class="o">==</span> <span class="n">kv</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">==</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keeps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">bp_must</span> <span class="o">=</span> <span class="n">bp_must</span> <span class="o">+</span> <span class="p">[</span><span class="n">keeps</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
 
@@ -825,7 +852,7 @@
     <span class="c1"># use the set with the smallest number of branchpoints. If there are multiple</span>
     <span class="c1"># sets, we move on...</span>
     <span class="n">mincount</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">bpcounts</span><span class="p">)</span>
-    <span class="n">minidcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">bpi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bpcounts</span><span class="p">)</span> <span class="k">if</span> <span class="n">bpi</span><span class="o">==</span> <span class="n">mincount</span><span class="p">]</span>
+    <span class="n">minidcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">bpi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bpcounts</span><span class="p">)</span> <span class="k">if</span> <span class="n">bpi</span> <span class="o">==</span> <span class="n">mincount</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">minidcs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">bpsave</span><span class="p">[</span><span class="n">minidcs</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
 
@@ -840,14 +867,16 @@
 
 <div class="viewcode-block" id="isbp_walk_for_bps"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.isbp_walk_for_bps">[docs]</a><span class="k">def</span> <span class="nf">isbp_walk_for_bps</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">bpi</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Finds branchpoints by ensuring that all pixels in the sub-skeleton can be </span>
+<span class="sd">    Find branchpoints by walking from a pixel.</span>
+
+<span class="sd">    Finds branchpoints by ensuring that all pixels in the sub-skeleton can be</span>
 <span class="sd">    walked to from the set of already-found branchpoints, without visiting</span>
 <span class="sd">    the same pixel more than once.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    I : np.ndarray</span>
-<span class="sd">        Binary image of a skeleton. In RivGraph, the skeleton is a reduced and </span>
+<span class="sd">        Binary image of a skeleton. In RivGraph, the skeleton is a reduced and</span>
 <span class="sd">        padded version of Iskel.</span>
 <span class="sd">    bpi : list</span>
 <span class="sd">        Indices within I of the branchpoint to begin walk.</span>
@@ -858,17 +887,16 @@
 <span class="sd">        Branchpoint indices in I.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">bpi</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">bpi</span><span class="p">)</span>
 
     <span class="c1"># Use raveled image</span>
     <span class="n">Ir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
 
     <span class="c1"># Get edge pixels</span>
-    <span class="n">edgeidcs</span> <span class="o">=</span>  <span class="n">iu</span><span class="o">.</span><span class="n">edge_coords</span><span class="p">(</span><span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">)</span>
+    <span class="n">edgeidcs</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">edge_coords</span><span class="p">(</span><span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">)</span>
 
     <span class="c1"># Get emanators from first bp</span>
-    <span class="n">do_first</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span> <span class="c1"># These are the 4-connected emanators</span>
+    <span class="n">do_first</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># These are the 4-connected emanators</span>
     <span class="n">emanators</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">bp</span> <span class="ow">in</span> <span class="n">bpi</span><span class="p">:</span>
         <span class="n">emanators</span> <span class="o">=</span> <span class="n">emanators</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">iu</span><span class="o">.</span><span class="n">neighbors_flat</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">Ir</span><span class="p">,</span> <span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
@@ -913,16 +941,18 @@
 
 <div class="viewcode-block" id="naxes_connectivity"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.naxes_connectivity">[docs]</a><span class="k">def</span> <span class="nf">naxes_connectivity</span><span class="p">(</span><span class="n">I</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute number of axes of connectivity.</span>
+
 <span class="sd">    Computes the number of axes of connectivity for each pixel in an input</span>
 <span class="sd">    skeleton. The maximum is four; horizontal, vertical, and two diagonals.</span>
-<span class="sd">    </span>
+
 <span class="sd">    The number of axes of pixel connectivity is used to determine where to</span>
 <span class="sd">    place branchpoints.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    I : np.ndarray</span>
-<span class="sd">        Binary image of a skeleton. In RivGraph, the skeleton is a reduced and </span>
+<span class="sd">        Binary image of a skeleton. In RivGraph, the skeleton is a reduced and</span>
 <span class="sd">        padded version of Iskel.</span>
 
 <span class="sd">    Returns</span>
@@ -932,12 +962,11 @@
 <span class="sd">        by each pixel&#39;s connectivity.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Get the pixels we want to check (exclude edge pixels)</span>
     <span class="n">Ir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
-    <span class="n">edgeidcs</span> <span class="o">=</span>  <span class="n">iu</span><span class="o">.</span><span class="n">edge_coords</span><span class="p">(</span><span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">)</span>
+    <span class="n">edgeidcs</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">edge_coords</span><span class="p">(</span><span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">)</span>
 
-    <span class="n">allpix</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ir</span><span class="o">==</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">allpix</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ir</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
     <span class="n">dopix</span> <span class="o">=</span> <span class="n">allpix</span> <span class="o">-</span> <span class="n">edgeidcs</span>
     <span class="n">savepix</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dopix</span><span class="p">)</span>
@@ -966,7 +995,7 @@
 <span class="sd">&quot;&quot;&quot; Graveyard &quot;&quot;&quot;</span>
 
 <span class="c1"># def adjacent_bps(bp, Iskel, bps):</span>
-    
+
 <span class="c1">#     # Find branchpoint neighbors that are also branchpoints</span>
 <span class="c1">#     bpneighs = walkable_neighbors([bp], Iskel)</span>
 <span class="c1">#     bpneighs = [bpn for bpn in bpneighs if bpn not in bps]</span>
@@ -982,7 +1011,7 @@
 <span class="c1">#     return bps</span>
 
 
-<span class="c1">#def pattern_vals(basepattern):</span>
+<span class="c1"># def pattern_vals(basepattern):</span>
 <span class="c1">#    &quot;&quot;&quot;</span>
 <span class="c1">#    Given an input pattern (3x3 or 2x2 numpy array), this function</span>
 <span class="c1">#    (1) returns a convolution kernel of the same shape and</span>
@@ -1014,7 +1043,7 @@
 <span class="c1">#</span>
 <span class="c1">#    return kern, convals</span>
 
-<span class="c1">#def naxes_conn(idcs, I):</span>
+<span class="c1"># def naxes_conn(idcs, I):</span>
 <span class="c1">#    &quot;&quot;&quot;</span>
 <span class="c1">#    Counts the number of connected axes for a given flat index in I.</span>
 <span class="c1">#    idcs must be a list, even if a single value.</span>

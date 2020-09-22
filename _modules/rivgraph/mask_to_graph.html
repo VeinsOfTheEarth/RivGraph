@@ -160,7 +160,7 @@
   <h1>Source code for rivgraph.mask_to_graph</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Mask to Graph Utilities (mask_to_graph.py)</span>
-<span class="sd">=============</span>
+<span class="sd">==========================================</span>
 
 <span class="sd">Functions for converting a binary channel mask to a graphical representation.</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -176,23 +176,23 @@
 
 <div class="viewcode-block" id="skel_to_graph"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.skel_to_graph">[docs]</a><span class="k">def</span> <span class="nf">skel_to_graph</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Resolves a skeleton into its consitutent links and nodes.   </span>
+<span class="sd">    Resolves a skeleton into its consitutent links and nodes.</span>
 <span class="sd">    This function finds a starting point to walk along a skeleton, then begins</span>
 <span class="sd">    the walk. Rules are in place to ensure the network is fully resolved. One</span>
 <span class="sd">    of the key algorithms called by this function involves the identfication of</span>
 <span class="sd">    branchpoints in a way that eliminates unnecessary ones to create a parsimonious</span>
-<span class="sd">    network. Rules are baked in for how to walk along the skeleton in cases </span>
+<span class="sd">    network. Rules are baked in for how to walk along the skeleton in cases</span>
 <span class="sd">    where multiple branchpoints are clustered or there are multiple possible</span>
 <span class="sd">    links to walk along.</span>
-<span class="sd">    </span>
-<span class="sd">    Note that some minor adjustments to the skeleton may be made in order to </span>
-<span class="sd">    reduce the complexity of the network. For example, in the case of a &quot;+&quot; </span>
-<span class="sd">    with a missing center pixel in the skeleton, this function will add the </span>
-<span class="sd">    pixel to the center to enable the use of a single branchpoint as opposed to </span>
+
+<span class="sd">    Note that some minor adjustments to the skeleton may be made in order to</span>
+<span class="sd">    reduce the complexity of the network. For example, in the case of a &quot;+&quot;</span>
+<span class="sd">    with a missing center pixel in the skeleton, this function will add the</span>
+<span class="sd">    pixel to the center to enable the use of a single branchpoint as opposed to</span>
 <span class="sd">    four.</span>
-<span class="sd">    </span>
+
 <span class="sd">    The takeaway is that there is no guarantee that the input skeleton will</span>
-<span class="sd">    be perfectly preserved when network-ifying. One possible workaround, if </span>
+<span class="sd">    be perfectly preserved when network-ifying. One possible workaround, if</span>
 <span class="sd">    perfect preservation is required, is to resample the skeleton to double the</span>
 <span class="sd">    resolution.</span>
 
@@ -204,27 +204,30 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
-<span class="sd">        Links of the network with four properties: </span>
-<span class="sd">            &#39;id&#39; - a list of unique ids for each link in the network</span>
-<span class="sd">            &#39;idx&#39; - a list containing the pixel indices within Iskel that </span>
-<span class="sd">                    defines the link. These are ordered.</span>
-<span class="sd">            &#39;conn&#39; - a list of 2-element lists containing the node ids that</span>
-<span class="sd">                     the link is connected to.</span>
-<span class="sd">            &#39;n_networks&#39; - the number of disconnected networks found in the</span>
-<span class="sd">                           skeleton</span>
-<span class="sd">        </span>
+<span class="sd">        Links of the network with four properties:</span>
+
+<span class="sd">        1. &#39;id&#39; - a list of unique ids for each link in the network</span>
+
+<span class="sd">        2. &#39;idx&#39; - a list containing the pixel indices within Iskel that defines the link. These are ordered.</span>
+
+<span class="sd">        3. &#39;conn&#39; - a list of 2-element lists containing the node ids that the link is connected to.</span>
+
+<span class="sd">        4. &#39;n_networks&#39; - the number of disconnected networks found in the skeleton</span>
+
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Nodes of the network with four properties:</span>
-<span class="sd">            &#39;id&#39; - a list of unique ids for each node in the network</span>
-<span class="sd">            &#39;idx&#39; - the index within Iskel of the node location</span>
-<span class="sd">            &#39;conn&#39; - a list of lists containing the link ids connected to this</span>
-<span class="sd">                     node</span>
+
+<span class="sd">        1. &#39;id&#39; - a list of unique ids for each node in the network</span>
+
+<span class="sd">        2. &#39;idx&#39; - the index within Iskel of the node location</span>
+
+<span class="sd">        3. &#39;conn&#39; - a list of lists containing the link ids connected to this node</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="k">def</span> <span class="nf">check_startpoint</span><span class="p">(</span><span class="n">spidx</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns True if a skeleton pixel&#39;s first neighbor is not a branchpoint </span>
+<span class="sd">        Returns True if a skeleton pixel&#39;s first neighbor is not a branchpoint</span>
 <span class="sd">        (i.e. the start pixel is valid for a walk), else returns False.</span>
 
 
@@ -240,7 +243,7 @@
 <span class="sd">        chk_sp : bool</span>
 <span class="sd">            True if the startpoint is valid; else False.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">neighs</span> <span class="o">=</span> <span class="n">walk</span><span class="o">.</span><span class="n">walkable_neighbors</span><span class="p">([</span><span class="n">spidx</span><span class="p">],</span> <span class="n">Iskel</span><span class="p">)</span>
         <span class="n">isbp</span> <span class="o">=</span> <span class="n">walk</span><span class="o">.</span><span class="n">is_bp</span><span class="p">(</span><span class="n">neighs</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="n">Iskel</span><span class="p">)</span>
 
@@ -248,7 +251,7 @@
             <span class="n">chk_sp</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">chk_sp</span> <span class="o">=</span> <span class="kc">False</span>
-            
+
         <span class="k">return</span> <span class="n">chk_sp</span>
 
 
@@ -299,7 +302,7 @@
     <span class="n">nodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([])</span>
     <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    
+
     <span class="n">links</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[]]</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[]]</span>
@@ -427,7 +430,7 @@
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">adjust_for_padding</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">npad</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">initial_dims</span><span class="p">)</span>
 
     <span class="c1"># Add indices to nodes--this probably should&#39;ve been done in network extraction</span>
-    <span class="c1"># but since nodes have unique idx it was unnecessary. </span>
+    <span class="c1"># but since nodes have unique idx it was unnecessary.</span>
     <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">])))</span>
 
     <span class="c1"># Remove duplicate links if they exist; for some single-pixel links,</span>
@@ -440,7 +443,7 @@
 
 <div class="viewcode-block" id="skeletonize_mask"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.skeletonize_mask">[docs]</a><span class="k">def</span> <span class="nf">skeletonize_mask</span><span class="p">(</span><span class="n">Imask</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Skeletonizes an input binary image, typically a mask. Also performs some </span>
+<span class="sd">    Skeletonizes an input binary image, typically a mask. Also performs some</span>
 <span class="sd">    skeleton simplification by (1) removing pixels that don&#39;t alter connectivity,</span>
 <span class="sd">    and (2) filling small skeleton holes and reskeletonizing.</span>
 
@@ -477,27 +480,19 @@
 
 <div class="viewcode-block" id="skeletonize_river_mask"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.skeletonize_river_mask">[docs]</a><span class="k">def</span> <span class="nf">skeletonize_river_mask</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">es</span><span class="p">,</span> <span class="n">padscale</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Skeletonizes a binary mask of a river channel network. Differs from </span>
+<span class="sd">    Skeletonizes a binary mask of a river channel network. Differs from</span>
 <span class="sd">    skeletonize mask above by using knowledge of the exit sides of the river</span>
 <span class="sd">    with respect to the mask (I) to avoid edge effects of skeletonization by</span>
 <span class="sd">    mirroring the mask at its ends, then trimming it after processing. As with</span>
 <span class="sd">    skeletonize_mask, skeleton simplification is performed.</span>
-
-<span class="sd">    INPUTS:</span>
-<span class="sd">        I - binary river mask to skeletonize</span>
-<span class="sd">       es - NSEW &quot;exit sides&quot; corresponding to the upstream and downstream</span>
-<span class="sd">             sides of the image that intersect the river. e.g. &#39;NS&#39;, &#39;EN&#39;, &#39;WS&#39;</span>
-<span class="sd"> padscale - (Optional) number of pixels to reflect I before skeletonization</span>
-<span class="sd">               to remove edge effects of skeletonization</span>
-
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    I : np.array</span>
 <span class="sd">        Binary river mask to skeletonize.</span>
 <span class="sd">    es : str</span>
-<span class="sd">        A two-character string (from N, E, S, or W) that denotes which sides </span>
-<span class="sd">        of the image the river intersects (upstream first) -- e.g. &#39;NS&#39;, &#39;EW&#39;, </span>
+<span class="sd">        A two-character string (from N, E, S, or W) that denotes which sides</span>
+<span class="sd">        of the image the river intersects (upstream first) -- e.g. &#39;NS&#39;, &#39;EW&#39;,</span>
 <span class="sd">        &#39;NW&#39;, etc.</span>
 <span class="sd">    padscale : int, optional</span>
 <span class="sd">        Pad multiplier that sets the size of the padding. Multplies the blob</span>
@@ -547,10 +542,10 @@
 
 <div class="viewcode-block" id="simplify_skel"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.simplify_skel">[docs]</a><span class="k">def</span> <span class="nf">simplify_skel</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This function iterates through all skeleton pixels pixels that have </span>
+<span class="sd">    This function iterates through all skeleton pixels pixels that have</span>
 <span class="sd">    connectivity &gt; 2. It removes the pixel and checks if the</span>
 <span class="sd">    number of blobs has changed after removal. If so, the pixel is necessary to</span>
-<span class="sd">    maintain connectivity. Otherwise the pixel is not retained. It also adds </span>
+<span class="sd">    maintain connectivity. Otherwise the pixel is not retained. It also adds</span>
 <span class="sd">    pixels to the centers of &quot;+&quot; cases, as this reduces the number</span>
 <span class="sd">    of branchpoints from 4 to 1.</span>
 
@@ -606,8 +601,8 @@
 <span class="sd">    I : np.array</span>
 <span class="sd">        Binary image to pad; typically a river channel network.</span>
 <span class="sd">    es : str</span>
-<span class="sd">        A two-character string (from N, E, S, or W) that denotes which sides </span>
-<span class="sd">        of the image the river intersects (upstream first) -- e.g. &#39;NS&#39;, &#39;EW&#39;, </span>
+<span class="sd">        A two-character string (from N, E, S, or W) that denotes which sides</span>
+<span class="sd">        of the image the river intersects (upstream first) -- e.g. &#39;NS&#39;, &#39;EW&#39;,</span>
 <span class="sd">        &#39;NW&#39;, etc.</span>
 <span class="sd">    pm : int, optional</span>
 <span class="sd">        Pad multiplier that sets the size of the padding. Multplies the blob</span>
@@ -640,7 +635,7 @@
         <span class="n">Ip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">addpad</span><span class="p">,</span> <span class="n">Ip</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="s1">&#39;s&#39;</span> <span class="ow">in</span> <span class="n">es</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-        
+
         <span class="n">rowidcs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">==</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">st</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">rowidcs</span><span class="p">)</span>
         <span class="n">en</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">rowidcs</span><span class="p">)</span>

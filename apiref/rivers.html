@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="rivgraph.html">rivgraph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deltas.html">deltas</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">rivers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#river-directionality">river_directionality</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#river-utils">river_utils</a></li>
 </ul>
 </li>
@@ -172,12 +173,15 @@
             
   <div class="section" id="rivers">
 <span id="id1"></span><h1>rivers<a class="headerlink" href="#rivers" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-rivgraph.rivers.river_directionality"></span><p>Created on Tue Nov  6 14:31:01 2018</p>
+<span class="target" id="module-rivgraph.rivers.river_directionality"></span><div class="section" id="river-directionality">
+<h2>river_directionality<a class="headerlink" href="#river-directionality" title="Permalink to this headline">¶</a></h2>
+<p>Created on Tue Nov  6 14:31:01 2018</p>
 <p>&#64;author: Jon</p>
 <dl class="function">
 <dt id="rivgraph.rivers.river_directionality.dir_centerline">
 <code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">dir_centerline</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>meshpolys</em>, <em>meshlines</em>, <em>Imask</em>, <em>gt</em>, <em>pixlen</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#dir_centerline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.dir_centerline" title="Permalink to this definition">¶</a></dt>
-<dd><p>Guesses the flow direction of links in a braided river channel network by
+<dd><p>Guess flow directions of links in a braided river channel.</p>
+<p>Guesses the flow direction of links in a braided river channel network by
 exploiting a “valleyline” centerline. Two metrics are computed to help
 guess the correct direction. The first is the number of centerline
 transects (meshlines) that the link crosses. The second is the local angle
@@ -208,7 +212,8 @@ attributes appended.</p>
 <dl class="function">
 <dt id="rivgraph.rivers.river_directionality.dir_link_widths">
 <code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">dir_link_widths</code><span class="sig-paren">(</span><em>links</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#dir_link_widths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.dir_link_widths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Guesses each link’s direction based on link widths at the endpoints. The
+<dd><p>Guess link directions based on link widths.</p>
+<p>Guesses each link’s direction based on link widths at the endpoints. The
 node with the larger width is guessed to be the upstream node. The ratio
 of guessed upstream to guessed downstream node widths is appended to links.
 If the width at a link’s endpoint is 0, the percent is set to 1000. This
@@ -230,7 +235,8 @@ appended.</p>
 <dl class="function">
 <dt id="rivgraph.rivers.river_directionality.directional_info">
 <code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">directional_info</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>Imask</em>, <em>pixlen</em>, <em>exit_sides</em>, <em>gt</em>, <em>meshlines</em>, <em>meshpolys</em>, <em>Idt</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#directional_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.directional_info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes all the information required for link directions to be set for
+<dd><p>Compute information for link direction setting.</p>
+<p>Computes all the information required for link directions to be set for
 a river channel network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -260,7 +266,8 @@ downsteram sides of the image that the network intersects (e.g. ‘SW’).</p></
 <dl class="function">
 <dt id="rivgraph.rivers.river_directionality.fix_river_cycle">
 <code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">fix_river_cycle</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>cyclelinks</em>, <em>cyclenodes</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#fix_river_cycle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.fix_river_cycle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attempts to resolve a single cycle within a river network. The general
+<dd><p>Attempt to fix a single cycle.</p>
+<p>Attempts to resolve a single cycle within a river network. The general
 logic is that all link directions of the cycle are un-set except for those
 set by highly-reliable algorithms, and a modified direction-setting
 recipe is implemented to re-set these algorithms. This was developed
@@ -278,8 +285,10 @@ but could certainly be improved.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with the cycle fixed if possible.</p></li>
-<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with the cycle fixed if possible.</p></li>
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with the cycle fixed if
+possible.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with the cycle fixed if
+possible.</p></li>
 <li><p><strong>fixed</strong> (<em>int</em>) – 1 if the cycle was resolved, else 0.</p></li>
 </ul>
 </p>
@@ -290,10 +299,11 @@ but could certainly be improved.</p>
 <dl class="function">
 <dt id="rivgraph.rivers.river_directionality.fix_river_cycles">
 <code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">fix_river_cycles</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#fix_river_cycles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.fix_river_cycles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attempts to resolve all cycles within the river network. This function
-is essentially a wrapper for fix_river_cycle(), which is where the
+<dd><p>Attempt to resolve cycles in the network.</p>
+<p>Attempts to resolve all cycles within the river network. This function
+is essentially a wrapper for <a class="reference internal" href="#rivgraph.rivers.river_directionality.fix_river_cycle" title="rivgraph.rivers.river_directionality.fix_river_cycle"><code class="xref py py-func docutils literal notranslate"><span class="pre">fix_river_cycle()</span></code></a>, which is where the
 heavy lifting is actually done. This function finds cycles, calls
-fix_river_cycle() on each one, then aggregates the results.</p>
+<a class="reference internal" href="#rivgraph.rivers.river_directionality.fix_river_cycle" title="rivgraph.rivers.river_directionality.fix_river_cycle"><code class="xref py py-func docutils literal notranslate"><span class="pre">fix_river_cycle()</span></code></a> on each one, then aggregates the results.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -319,7 +329,8 @@ unresolvable cycles.</p></li>
 <dl class="function">
 <dt id="rivgraph.rivers.river_directionality.re_set_linkdirs">
 <code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">re_set_linkdirs</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#re_set_linkdirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.re_set_linkdirs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Resets the link directions for a braided river channel network. This
+<dd><p>Reset link directions.</p>
+<p>Resets the link directions for a braided river channel network. This
 function is called to reset directions of links that belong to a cycle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -342,7 +353,8 @@ function is called to reset directions of links that belong to a cycle.</p>
 <dl class="function">
 <dt id="rivgraph.rivers.river_directionality.set_directionality">
 <code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">set_directionality</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>Imask</em>, <em>exit_sides</em>, <em>gt</em>, <em>meshlines</em>, <em>meshpolys</em>, <em>Idt</em>, <em>pixlen</em>, <em>manual_set_csv</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#set_directionality"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.set_directionality" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function sets the direction of each link within the network. It
+<dd><p>Set direction of each link.</p>
+<p>This function sets the direction of each link within the network. It
 calls a number of helping functions and uses a somewhat-complicated logic
 to achieve this. The algorithms and logic is described in this open-access
 paper: <a class="reference external" href="https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf">https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf</a></p>
@@ -379,9 +391,11 @@ is None.</p></li>
 <dl class="function">
 <dt id="rivgraph.rivers.river_directionality.set_unknown_cluster_by_widthpct">
 <code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">set_unknown_cluster_by_widthpct</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#set_unknown_cluster_by_widthpct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.set_unknown_cluster_by_widthpct" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set unknown links based on width differences at endpoints (flow goes wide-&gt;narrow)</p>
+<dd><p>Set unknown links based on width differences at endpoints.</p>
+<p>(flow goes wide-&gt;narrow)</p>
 </dd></dl>
 
+</div>
 <span class="target" id="module-rivgraph.rivers.river_utils"></span><div class="section" id="river-utils">
 <h2>river_utils<a class="headerlink" href="#river-utils" title="Permalink to this headline">¶</a></h2>
 <p>Created on Tue Nov  6 14:29:10 2018</p>
@@ -389,17 +403,21 @@ is None.</p></li>
 <dl class="function">
 <dt id="rivgraph.rivers.river_utils.centerline_mesh">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">centerline_mesh</code><span class="sig-paren">(</span><em>coords</em>, <em>width_chan</em>, <em>meshwidth</em>, <em>grid_spacing</em>, <em>smoothing_param=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#centerline_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.centerline_mesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a centerline mesh. Differs from valleyline_mesh() in that it draws
-perpendiculars rather than offsetting the valley line to compute mesh
-polygons. This method is more effective for narrower channels that don’t
-require an exceptionally wide mesh (i.e. not much change).
-INPUTS:</p>
-<blockquote>
-<div><p>coords: 2xN list, tuple, np.array (xs, ys) of coordinates defining centerline
-width_chan: width of the river in same units of coords
-mesh_dist: how wide should the mesh be, in same units of coords
-grid_spacing: how far apart should mesh cells be, in same units of coords</p>
-</div></blockquote>
+<dd><p>Generate a centerline mesh.</p>
+<p>Generates a centerline mesh. Differs from <a class="reference internal" href="#rivgraph.rivers.river_utils.valleyline_mesh" title="rivgraph.rivers.river_utils.valleyline_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">valleyline_mesh()</span></code></a> in that
+it draws perpendiculars rather than offsetting the valley line to compute
+mesh polygons. This method is more effective for narrower channels that
+don’t require an exceptionally wide mesh (i.e. not much change).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> – 2xN list, tuple, np.array (xs, ys) of coordinates defining centerline</p></li>
+<li><p><strong>width_chan</strong> – width of the river in same units of coords</p></li>
+<li><p><strong>mesh_dist</strong> – how wide should the mesh be, in same units of coords</p></li>
+<li><p><strong>grid_spacing</strong> – how far apart should mesh cells be, in same units of coords</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -418,7 +436,8 @@ coordinates.</p>
 <dl class="function">
 <dt id="rivgraph.rivers.river_utils.evenly_space_line">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">evenly_space_line</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>npts=None</em>, <em>k=3</em>, <em>s=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#evenly_space_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.evenly_space_line" title="Permalink to this definition">¶</a></dt>
-<dd><p>Resamples a curve defined by x,y coordinates such that coordinates are
+<dd><p>Resample evenly.</p>
+<p>Resamples a curve defined by x,y coordinates such that coordinates are
 evenly-spaced.
 If the optional npts parameter is not specified, the
 line will be resampled with the same number of points as the input
@@ -430,7 +449,8 @@ xs, ys must be numpy arrays.</p>
 <dl class="function">
 <dt id="rivgraph.rivers.river_utils.find_inlet_outlet_nodes">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">find_inlet_outlet_nodes</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>exit_sides</em>, <em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#find_inlet_outlet_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.find_inlet_outlet_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Appends the inlet and outlet nodes to the nodes dictionary. Only works for
+<dd><p>Append inlet and outlet nodes to the node dictionary.</p>
+<p>Appends the inlet and outlet nodes to the nodes dictionary. Only works for
 rivers; deltas must be treated differently.</p>
 </dd></dl>
 
@@ -443,45 +463,56 @@ rivers; deltas must be treated differently.</p>
 <dl class="function">
 <dt id="rivgraph.rivers.river_utils.inflection_pts_oversmooth">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">inflection_pts_oversmooth</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>n_infs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#inflection_pts_oversmooth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.inflection_pts_oversmooth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes inflection points as the intersection of a line given by
-xs, ys and its (over)smoothed version.
-INPUTS:</p>
-<blockquote>
-<div><p>xs: np-type array of x-coordinates
-ys: np-type array of y-coordinates
-n_infs: approx how many inflection points are expected? This sets the</p>
-<blockquote>
-<div><p>degree of smoothing. For meandering rivers, n_infs can be
+<dd><p>Compute inflection points.</p>
+<p>Computes inflection points as the intersection of a line given by
+xs, ys and its (over)smoothed version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xs</strong> – np-type array of x-coordinates</p></li>
+<li><p><strong>ys</strong> – np-type array of y-coordinates</p></li>
+<li><p><strong>n_infs</strong> – approx how many inflection points are expected? This sets the
+degree of smoothing. For meandering rivers, n_infs can be
 approximated by the relationship: wavelength = 10W, for average
-width W.</p>
-</div></blockquote>
-</div></blockquote>
+width W.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.rivers.river_utils.mask_to_centerline">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">mask_to_centerline</code><span class="sig-paren">(</span><em>Imask</em>, <em>es</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#mask_to_centerline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.mask_to_centerline" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function takes an input binary mask of a river and extracts its centerline.
-If there are multiple channels (and therefore islands) in the river, they
-will be filled before the centerline is computed.</p>
-<dl>
-<dt>The input mask should have the following properties:</dt><dd><ol class="arabic simple">
+<dd><p>Extract centerline from a river mask.</p>
+<p>This function takes an input binary mask of a river and extracts its
+centerline. If there are multiple channels (and therefore islands) in the
+river, they will be filled before the centerline is computed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The input mask should have the following properties:</p>
+<ol class="arabic simple">
 <li><p>There should be only one “blob” (connected component)</p></li>
 <li><p>Where the blob intersects the image edges, there should be only
 one channel. This avoids ambiguity in identifying inlet/outlet links</p></li>
 </ol>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Imask</strong> (<em>ndarray</em>) – the mask image (numpy array)</p></li>
+<li><p><strong>es</strong> (<em>str</em>) – two-character string comprinsed of “n”, “e”, “s”, or “w”. Exit sides
+correspond to the sides of the image that the river intersects.
+Upstream should be first, followed by downstream.</p></li>
+</ul>
 </dd>
-<dt>INPUTS:</dt><dd><p>Imask: the mask image (numpy array)
-es: two-character string comprinsed of “n”, “e”, “s”, or “w”. Exit sides</p>
-<blockquote>
-<div><p>correspond to the sides of the image that the river intersects.
-Upstream should be first, followed by downstream.</p>
-</div></blockquote>
-</dd>
-<dt>OUTPUTS:</dt><dd><p>dt.tif: geotiff of the distance transform of the binary mask
-skel.tif: geotiff of the skeletonized binary mask
-centerline.shp: shapefile of the centerline, arranged upstream to downstream
-cl.pkl: pickle file containing centerline coords, EPSG, and paths dictionary</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>dt.tif</strong> (<em>geotiff</em>) – geotiff of the distance transform of the binary mask</p></li>
+<li><p><strong>skel.tif</strong> (<em>geotiff</em>) – geotiff of the skeletonized binary mask</p></li>
+<li><p><strong>centerline.shp</strong> (<em>shp</em>) – shapefile of the centerline, arranged upstream to downstream</p></li>
+<li><p><strong>cl.pkl</strong> (<em>pkl</em>) – pickle file containing centerline coords, EPSG, and paths dictionary</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -509,7 +540,8 @@ are pixels, so be careful to re-convert.</p>
 <dl class="function">
 <dt id="rivgraph.rivers.river_utils.mirror_line_ends">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">mirror_line_ends</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>npad</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#mirror_line_ends"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.mirror_line_ends" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reflects both ends of a line defined by x and y coordinates. The mirrored
+<dd><p>Reflect both ends of a line.</p>
+<p>Reflects both ends of a line defined by x and y coordinates. The mirrored
 distance is set by npad, which refers to the number of vertices along the
 line to mirror.</p>
 </dd></dl>
@@ -517,18 +549,29 @@ line to mirror.</p>
 <dl class="function">
 <dt id="rivgraph.rivers.river_utils.offset_linestring">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">offset_linestring</code><span class="sig-paren">(</span><em>linestring</em>, <em>distance</em>, <em>side</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#offset_linestring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.offset_linestring" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>INPUTS:</dt><dd><p>linestring: shapely linestring
-distance: distance to offset linestring
-side: ‘left’ or ‘right’ to specify which side to compute offset</p>
+<dd><p>Offset a linestring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>linestring</strong> – shapely linestring</p></li>
+<li><p><strong>distance</strong> – distance to offset linestring</p></li>
+<li><p><strong>side</strong> – ‘left’ or ‘right’ to specify which side to compute offset</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="function">
+<dt id="rivgraph.rivers.river_utils.prune_river">
+<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">prune_river</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>exit_sides</em>, <em>Iskel</em>, <em>gdobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#prune_river"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.prune_river" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prune river network.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="rivgraph.rivers.river_utils.resample_line">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">resample_line</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>npts=None</em>, <em>nknots=None</em>, <em>k=3</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#resample_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.resample_line" title="Permalink to this definition">¶</a></dt>
-<dd><p>Resamples a line defined by x,y coordinates such that coordinates are
+<dd><p>Resample a line.</p>
+<p>Resamples a line defined by x,y coordinates such that coordinates are
 evenly-spaced.
 If the optional npts parameter is not specified, the
 line will be resampled with the same number of points as the input
@@ -539,29 +582,41 @@ k refers to order of spline that is fit to coordinates for resampling.</p>
 <dl class="function">
 <dt id="rivgraph.rivers.river_utils.smooth_curvatures">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">smooth_curvatures</code><span class="sig-paren">(</span><em>C</em>, <em>cvtarget</em>, <em>tolerance=10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#smooth_curvatures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.smooth_curvatures" title="Permalink to this definition">¶</a></dt>
-<dd><p>Smoothes a curvature signal until the coefficient of variation of its differenced
-curvatures is within tolerance percent.</p>
+<dd><p>Smoothes a curvature signal until the coefficient of variation of its
+differenced curvatures is within tolerance percent.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="rivgraph.rivers.river_utils.valleyline_mesh">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">valleyline_mesh</code><span class="sig-paren">(</span><em>coords</em>, <em>avg_chan_width</em>, <em>buf_halfwidth</em>, <em>grid_spacing</em>, <em>smoothing=0.15</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#valleyline_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.valleyline_mesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function generates a mesh over an input river centerline. The mesh
+<dd><p>Generate a mesh over an input river centerline.</p>
+<p>This function generates a mesh over an input river centerline. The mesh
 is generated across the valley, not just the channel width, in order to
 perform larger-scale spatial analyses. With the correct parameter
 combinations, it can also be used to generate a mesh for smaller-scale
 analysis, but it is optimized for larger and strange behavior may occur.</p>
 <p>Many plotting commands are commented out throughout this script as it’s
 still somewhat in beta mode.</p>
-<dl class="simple">
-<dt>INPUTS:</dt><dd><p>coords: Nx2 list, tuple, or np.array of x,y coordinates. Coordinates MUST be in projected CRS for viable results.
-width_chan: estimated width. Units MUST correspond to those of the input coordinates
-buf_width: distance between centerline and left or right bufferline, in units of coords
-grid_spacing: fraction of input centerline length that should be used for smoothing to create the valley centerline  (between 0 and 1)
-smoothing: fraction of centerline length to use for smoothing window</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> – Nx2 list, tuple, or np.array of x,y coordinates. Coordinates MUST be
+in projected CRS for viable results.</p></li>
+<li><p><strong>width_chan</strong> – estimated width. Units MUST correspond to those of the input
+coordinates</p></li>
+<li><p><strong>buf_width</strong> – distance between centerline and left or right bufferline, in units of
+coords</p></li>
+<li><p><strong>grid_spacing</strong> – fraction of input centerline length that should be used for smoothing
+to create the valley centerline  (between 0 and 1)</p></li>
+<li><p><strong>smoothing</strong> – fraction of centerline length to use for smoothing window</p></li>
+</ul>
 </dd>
-<dt>OUTPUTS:</dt><dd><p>lines - the “perpendiculars” to the centerline used to generate the mesh
-polys - coordinates of the polygons representing the grid cells of the mesh</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>lines</em> – the “perpendiculars” to the centerline used to generate the mesh</p></li>
+<li><p><em>polys</em> – coordinates of the polygons representing the grid cells of the mesh</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>

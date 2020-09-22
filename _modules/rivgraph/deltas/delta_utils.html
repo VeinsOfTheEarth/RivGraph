@@ -181,8 +181,11 @@
 <span class="c1"># inlets_shp = r&quot;C:\Users\Jon\Anaconda3\envs\rivgraph\Lib\site-packages\rivgraph\tests\data\Colville\Colville_inlet_nodes.shp&quot;</span>
 <span class="c1"># gdobj = obj.gdobj</span>
 
+
 <div class="viewcode-block" id="prune_delta"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_utils.prune_delta">[docs]</a><span class="k">def</span> <span class="nf">prune_delta</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">shoreline_shp</span><span class="p">,</span> <span class="n">inlets_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prune a delta network.</span>
+
 <span class="sd">    Clips a delta channel network given an inlet and shoreline shapefile and</span>
 <span class="sd">    removes spurious links.</span>
 
@@ -197,7 +200,8 @@
 <span class="sd">    inlets_shp : str</span>
 <span class="sd">        path to the shapefile of inlet locations (point shapefile)</span>
 <span class="sd">    gdobj : osgeo.gdal.Dataset</span>
-<span class="sd">        gdal object corresponding to the georeferenced input binary channel mask</span>
+<span class="sd">        gdal object corresponding to the georeferenced input binary channel</span>
+<span class="sd">        mask</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -205,21 +209,25 @@
 <span class="sd">        updated links dictionary</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        updated nodes dictionary</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get inlet nodes</span>
     <span class="n">nodes</span> <span class="o">=</span> <span class="n">find_inlet_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">inlets_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">)</span>
 
     <span class="c1"># Remove spurs from network (this includes valid inlets and outlets)</span>
-    <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">dontremove</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]))</span>
+    <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span>
+                                        <span class="n">dontremove</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]))</span>
 
     <span class="c1"># Clip the network with a shoreline polyline, adding outlet nodes</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">clip_by_shoreline</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">shoreline_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">)</span>
 
     <span class="c1"># Remove spurs from network (this includes valid inlets and outlets)</span>
-    <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">dontremove</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]))</span>
+    <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span>
+                                        <span class="n">dontremove</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">])</span> <span class="o">+</span>
+                                                   <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]))</span>
 
-    <span class="c1"># Remove sets of links that are disconnected from inlets/outlets except for a single bridge link (effectively re-pruning the network)</span>
+    <span class="c1"># Remove sets of links that are disconnected from inlets/outlets except for</span>
+    <span class="c1"># a single bridge link (effectively re-pruning the network)</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_disconnected_bridge_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
 
     <span class="c1"># # Add artificial nodes where necessary</span>
@@ -236,6 +244,8 @@
 
 <div class="viewcode-block" id="find_inlet_nodes"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_utils.find_inlet_nodes">[docs]</a><span class="k">def</span> <span class="nf">find_inlet_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">inlets_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load inlets from a shapefile.</span>
+
 <span class="sd">    Loads the user-defined inlet nodes point shapefile and uses it to identify</span>
 <span class="sd">    the inlet nodes within the network.</span>
 
@@ -246,7 +256,8 @@
 <span class="sd">    inlets_shp : str</span>
 <span class="sd">        path to the shapefile of inlet locations (point shapefile)</span>
 <span class="sd">    gdobj : osgeo.gdal.Dataset</span>
-<span class="sd">        gdal object corresponding to the georeferenced input binary channel mask</span>
+<span class="sd">        gdal object corresponding to the georeferenced input binary channel</span>
+<span class="sd">        mask</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -301,9 +312,9 @@
 <span class="sd">    links : dict</span>
 <span class="sd">        links dictionary representing network clipped by the shoreline</span>
 <span class="sd">    nodes : dict</span>
-<span class="sd">        nodes dictionary representing network clipped by the shoreline. &#39;outlets&#39;</span>
-<span class="sd">        has been added to the dictionary to store a list of outlet node ids</span>
-
+<span class="sd">        nodes dictionary representing network clipped by the shoreline.</span>
+<span class="sd">        &#39;outlets&#39; has been added to the dictionary to store a list of outlet</span>
+<span class="sd">        node ids</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># links = d.links</span>
@@ -325,7 +336,8 @@
 
     <span class="c1">## Remove the links beyond the shoreline</span>
     <span class="c1"># Intersect links with shoreline</span>
-    <span class="n">shore_int</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">links_gdf</span><span class="p">,</span> <span class="n">shore_gdf</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="s1">&#39;intersects&#39;</span><span class="p">,</span> <span class="n">lsuffix</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+    <span class="n">shore_int</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">links_gdf</span><span class="p">,</span> <span class="n">shore_gdf</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="s1">&#39;intersects&#39;</span><span class="p">,</span>
+                          <span class="n">lsuffix</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
 
     <span class="c1"># Get ids of intersecting links</span>
     <span class="n">leftkey</span> <span class="o">=</span> <span class="p">[</span><span class="n">lid</span> <span class="k">for</span> <span class="n">lid</span> <span class="ow">in</span> <span class="n">shore_int</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s1">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">lid</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="s1">&#39;left&#39;</span> <span class="ow">in</span> <span class="n">lid</span><span class="o">.</span><span class="n">lower</span><span class="p">()][</span><span class="mi">0</span><span class="p">]</span>
@@ -336,8 +348,8 @@
     <span class="n">newlink_ids</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">clid</span> <span class="ow">in</span> <span class="n">cut_link_ids</span><span class="p">:</span>
 
-        <span class="c1"># Remove the pixel that represents the intersection between the outlet links</span>
-        <span class="c1"># and the shoreline. Gotta find it first.</span>
+        <span class="c1"># Remove the pixel that represents the intersection between the outlet</span>
+        <span class="c1"># links and the shoreline. Gotta find it first.</span>
         <span class="n">lidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">clid</span><span class="p">)</span>
         <span class="n">idcs</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][:]</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">idx_to_coords</span><span class="p">(</span><span class="n">idcs</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">)</span>
@@ -349,7 +361,7 @@
             <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">int_points</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">int_points</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
             <span class="n">min_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
             <span class="n">max_idx</span> <span class="o">=</span> <span class="n">min_idx</span>
-        <span class="k">elif</span> <span class="n">int_points</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;MultiPoint&#39;</span><span class="p">:</span>         <span class="c1"># Handle multiple intersections by finding the first and last one so we can remove that section of the link</span>
+        <span class="k">elif</span> <span class="n">int_points</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;MultiPoint&#39;</span><span class="p">:</span>  <span class="c1"># Handle multiple intersections by finding the first and last one so we can remove that section of the link</span>
             <span class="n">cutidcs</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">int_points</span><span class="p">:</span>
                 <span class="c1"># Find index of closest pixel</span>
@@ -366,13 +378,13 @@
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">conn</span><span class="p">:</span>
             <span class="n">nidx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
             <span class="n">nflatidx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">nidx</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">nflatidx</span> <span class="o">==</span> <span class="n">idcs</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="c1"># Link corresponds to beginning of idcs -&gt; break (minus one to ensure the break is true)</span>
+            <span class="k">if</span> <span class="n">nflatidx</span> <span class="o">==</span> <span class="n">idcs</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>  <span class="c1"># Link corresponds to beginning of idcs -&gt; break (minus one to ensure the break is true)</span>
                 <span class="k">if</span> <span class="n">min_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">newlink_idcs</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">newlink_idcs</span> <span class="o">=</span> <span class="n">idcs</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">min_idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
 
-            <span class="k">elif</span> <span class="n">nflatidx</span> <span class="o">==</span> <span class="n">idcs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="c1"># Link corresponds to break (plus one to ensure the break is true) -&gt; end of idcs</span>
+            <span class="k">elif</span> <span class="n">nflatidx</span> <span class="o">==</span> <span class="n">idcs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>  <span class="c1"># Link corresponds to break (plus one to ensure the break is true) -&gt; end of idcs</span>
                 <span class="k">if</span> <span class="n">max_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">newlink_idcs</span> <span class="o">=</span> <span class="n">idcs</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
                 <span class="k">elif</span> <span class="n">max_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">idcs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
@@ -392,40 +404,40 @@
 
     <span class="c1"># Now that the links have been clipped, remove the links that are not</span>
     <span class="c1"># part of the delta network</span>
-    
+
     <span class="c1"># Use networkx graph to determine which links to keep</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiGraph</span><span class="p">()</span>
     <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">lk</span><span class="p">,</span> <span class="n">lc</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]):</span>
         <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">lc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="n">lk</span><span class="p">)</span>
-        
+
     <span class="c1"># Find the network containing the inlet(s)</span>
     <span class="n">main_net</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">node_connected_component</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-    
+
     <span class="c1"># Ensure all inlets are contained in this network</span>
     <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">main_net</span> <span class="o">-</span> <span class="n">nx</span><span class="o">.</span><span class="n">node_connected_component</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">nid</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Not all inlets found in main connected component.&#39;</span><span class="p">)</span>
-            
+
     <span class="c1"># Remove all nodes not in the main network</span>
     <span class="n">remove_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">main_net</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">rn</span> <span class="ow">in</span> <span class="n">remove_nodes</span><span class="p">:</span>
         <span class="n">G</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">rn</span><span class="p">)</span>
-            
+
     <span class="c1"># Get ids of the remaining links</span>
     <span class="n">link_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">]</span>
-        
+
     <span class="c1"># Get ids to remove from network</span>
     <span class="n">remove_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">l</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">link_ids</span><span class="p">]</span>
-    
+
     <span class="c1"># Remove the links</span>
     <span class="k">for</span> <span class="n">rl</span> <span class="ow">in</span> <span class="n">remove_links</span><span class="p">:</span>
         <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">delete_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">rl</span><span class="p">)</span>
-   
+
     <span class="c1"># Identify the outlet nodes and add to nodes dictionary</span>
     <span class="n">outlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">ncon</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ncon</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">ncon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">newlink_ids</span><span class="p">]</span>
     <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlets</span>
-    
+
     <span class="c1"># # Old method below here</span>
     <span class="c1"># shape = (gdobj.RasterYSize, gdobj.RasterXSize)</span>
 

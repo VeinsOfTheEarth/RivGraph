@@ -105,7 +105,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#network-utilities-ln-utils-py">Network Utilities (ln_utils.py)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mask-to-graph-utilities-mask-to-graph-py">Mask to Graph Utilities (mask_to_graph.py)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mask-filtering-utils-mask-utils-py">Mask Filtering Utils (mask_utils.py)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ordered-set-py">ordered_set.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#skelton-walking-utils-walk-py">Skelton Walking Utils (walk.py)</a></li>
 </ul>
 </li>
@@ -250,16 +249,13 @@ their location is specified by paths dictionary.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path_shoreline</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to shoreline shapefile/geosjon. The default is None but will
-check for the file at paths[‘shoreline’].</p></li>
+check for the file at <cite>paths[‘shoreline’]</cite>.</p></li>
 <li><p><strong>path_inletnodes</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to inlet nodes shapefile/geojson. The default is None but will
-check for the file at paths[‘inlet_nodes’].</p></li>
+check for the file at <cite>paths[‘inlet_nodes’]</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>None, but saves pruned links and nodes dictionaries to class object.</p>
+<dd class="field-even"><p>None, but saves pruned links and nodes dictionaries to class object.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -277,11 +273,10 @@ check for the file at paths[‘inlet_nodes’].</p></li>
 <em class="property">class </em><code class="descclassname">rivgraph.classes.</code><code class="descname">river</code><span class="sig-paren">(</span><em>name</em>, <em>path_to_mask</em>, <em>results_folder=None</em>, <em>exit_sides=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#river"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.river" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class to manage and organize data and methods for analyzing a braided river channel network.
 This class inherets all the attributes and methods of the rivnewtwork class, but also includes delta-specific attributes and methods.</p>
-<p>…</p>
 <dl class="attribute">
 <dt id="rivgraph.classes.river.Iskel">
 <code class="descname">Iskel</code><a class="headerlink" href="#rivgraph.classes.river.Iskel" title="Permalink to this definition">¶</a></dt>
-<dd><p>image of the skeletonized binary mask</p>
+<dd><p>Image of the skeletonized binary mask</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>np.ndarray</p>
@@ -410,7 +405,7 @@ This class inherets all the attributes and methods of the rivnewtwork class, but
 <dl class="method">
 <dt id="rivgraph.classes.river.set_flow_dirs_manually">
 <code class="descname">set_flow_dirs_manually</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rivgraph.classes.river.set_flow_dirs_manually" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads a user-created .csv file found at paths[‘fixlinks_csv’] to set flow directions of specified liks.</p>
+<dd><p>Reads a user-created .csv file found at <cite>paths[‘fixlinks_csv’]</cite> to set flow directions of specified links.</p>
 </dd></dl>
 
 <dl class="method">
@@ -420,10 +415,15 @@ This class inherets all the attributes and methods of the rivnewtwork class, but
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – The name of the channel network; also defines the folder name for storing results.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the channel network; also defines the folder name for
+storing results.</p></li>
 <li><p><strong>path_to_mask</strong> (<em>str</em>) – Points to the channel network mask file path</p></li>
-<li><p><strong>results_folder</strong> (<em>str</em>) – Specifies a directory where results should be stored</p></li>
-<li><p><strong>exit_sides</strong> (<em>str</em>) – Only required for river channel netowrks. A two-character string (from N, E, S, or W) that denotes which sides of the image the river intersects (upstream first) – e.g. ‘NS’, ‘EW’, ‘NW’, etc.</p></li>
+<li><p><strong>results_folder</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies a directory where results should be stored</p></li>
+<li><p><strong>exit_sides</strong> (<em>str</em><em>, </em><em>optional</em>) – Only required for river channel netowrks. A two-character string
+(from N, E, S, or W) that denotes which sides of the image the
+river intersects (upstream first) – e.g. ‘NS’, ‘EW’, ‘NW’, etc.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, print run information and warnings to the console, default
+is False.</p></li>
 </ul>
 </dd>
 </dl>
@@ -452,7 +452,8 @@ This class inherets all the attributes and methods of the rivnewtwork class, but
 <dl class="attribute">
 <dt id="rivgraph.classes.river.d">
 <code class="descname">d</code><a class="headerlink" href="#rivgraph.classes.river.d" title="Permalink to this definition">¶</a></dt>
-<dd><p>object created by gdal.Open() that provides access to geotiff metadata</p>
+<dd><p>object created by gdal.Open() that provides access to geotiff
+metadata</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>osgeo.gdal.Dataset</p>
@@ -496,7 +497,8 @@ This class inherets all the attributes and methods of the rivnewtwork class, but
 <dl class="attribute">
 <dt id="rivgraph.classes.river.wkt">
 <code class="descname">wkt</code><a class="headerlink" href="#rivgraph.classes.river.wkt" title="Permalink to this definition">¶</a></dt>
-<dd><p>well known text representation of coordinate reference system of input mask geotiff</p>
+<dd><p>well known text representation of coordinate reference system of
+input mask geotiff</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>str</p>
@@ -518,7 +520,8 @@ This class inherets all the attributes and methods of the rivnewtwork class, but
 <dl class="attribute">
 <dt id="rivgraph.classes.river.unit">
 <code class="descname">unit</code><a class="headerlink" href="#rivgraph.classes.river.unit" title="Permalink to this definition">¶</a></dt>
-<dd><p>units of the coordinate reference system; typically ‘degree’ or ‘meter’</p>
+<dd><p>units of the coordinate reference system; typically ‘degree’ or
+‘meter’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>str</p>
@@ -551,7 +554,8 @@ This class inherets all the attributes and methods of the rivnewtwork class, but
 <dl class="attribute">
 <dt id="rivgraph.classes.river.paths">
 <code class="descname">paths</code><a class="headerlink" href="#rivgraph.classes.river.paths" title="Permalink to this definition">¶</a></dt>
-<dd><p>dictionary of strings for managing where files should be read/written</p>
+<dd><p>dictionary of strings for managing where files should be
+read/written</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>dict</p>
@@ -562,7 +566,9 @@ This class inherets all the attributes and methods of the rivnewtwork class, but
 <dl class="attribute">
 <dt id="rivgraph.classes.river.exit_sides">
 <code class="descname">exit_sides</code><a class="headerlink" href="#rivgraph.classes.river.exit_sides" title="Permalink to this definition">¶</a></dt>
-<dd><p>two-character string denoting which sides of the image the channel network intersects (N,E,S, and/or W). Upstream side should be given first.</p>
+<dd><p>two-character string denoting which sides of the image the channel
+network intersects (N,E,S, and/or W). Upstream side should be given
+first.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>str</p>
@@ -573,7 +579,8 @@ This class inherets all the attributes and methods of the rivnewtwork class, but
 <dl class="attribute">
 <dt id="rivgraph.classes.river.Imask">
 <code class="descname">Imask</code><a class="headerlink" href="#rivgraph.classes.river.Imask" title="Permalink to this definition">¶</a></dt>
-<dd><p>binary mask found at mask_path loaded into a numpy array via gdal.Open().ReadAsArray(), dtype=np.bool</p>
+<dd><p>binary mask found at mask_path loaded into a numpy array via
+<cite>gdal.Open().ReadAsArray()</cite>, dtype=np.bool</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>numpy.ndarray</p>
@@ -671,10 +678,11 @@ input mask.</p></li>
 <dl class="class">
 <dt id="rivgraph.classes.rivnetwork">
 <em class="property">class </em><code class="descclassname">rivgraph.classes.</code><code class="descname">rivnetwork</code><span class="sig-paren">(</span><em>name</em>, <em>path_to_mask</em>, <em>results_folder=None</em>, <em>exit_sides=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork" title="Permalink to this definition">¶</a></dt>
-<dd><p>The rivnetwork class organizes data and methods for channel networks. This is
-a parent class to the delta and river classes which inherit rivnetwork methods and
-attributes. This class thus represents the common elements of river and delta
-channel networks.</p>
+<dd><p>Base rivnetwork class.</p>
+<p>The rivnetwork class organizes data and methods for channel networks. This
+is a parent class to the delta and river classes which inherit rivnetwork
+methods and attributes. This class thus represents the common elements of
+river and delta channel networks.</p>
 <dl class="method">
 <dt id="rivgraph.classes.rivnetwork.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>name</em>, <em>path_to_mask</em>, <em>results_folder=None</em>, <em>exit_sides=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.__init__" title="Permalink to this definition">¶</a></dt>
@@ -682,10 +690,15 @@ channel networks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – The name of the channel network; also defines the folder name for storing results.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the channel network; also defines the folder name for
+storing results.</p></li>
 <li><p><strong>path_to_mask</strong> (<em>str</em>) – Points to the channel network mask file path</p></li>
-<li><p><strong>results_folder</strong> (<em>str</em>) – Specifies a directory where results should be stored</p></li>
-<li><p><strong>exit_sides</strong> (<em>str</em>) – Only required for river channel netowrks. A two-character string (from N, E, S, or W) that denotes which sides of the image the river intersects (upstream first) – e.g. ‘NS’, ‘EW’, ‘NW’, etc.</p></li>
+<li><p><strong>results_folder</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies a directory where results should be stored</p></li>
+<li><p><strong>exit_sides</strong> (<em>str</em><em>, </em><em>optional</em>) – Only required for river channel netowrks. A two-character string
+(from N, E, S, or W) that denotes which sides of the image the
+river intersects (upstream first) – e.g. ‘NS’, ‘EW’, ‘NW’, etc.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, print run information and warnings to the console, default
+is False.</p></li>
 </ul>
 </dd>
 </dl>
@@ -714,7 +727,8 @@ channel networks.</p>
 <dl class="attribute">
 <dt id="rivgraph.classes.rivnetwork.d">
 <code class="descname">d</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.d" title="Permalink to this definition">¶</a></dt>
-<dd><p>object created by gdal.Open() that provides access to geotiff metadata</p>
+<dd><p>object created by gdal.Open() that provides access to geotiff
+metadata</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>osgeo.gdal.Dataset</p>
@@ -758,7 +772,8 @@ channel networks.</p>
 <dl class="attribute">
 <dt id="rivgraph.classes.rivnetwork.wkt">
 <code class="descname">wkt</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.wkt" title="Permalink to this definition">¶</a></dt>
-<dd><p>well known text representation of coordinate reference system of input mask geotiff</p>
+<dd><p>well known text representation of coordinate reference system of
+input mask geotiff</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>str</p>
@@ -780,7 +795,8 @@ channel networks.</p>
 <dl class="attribute">
 <dt id="rivgraph.classes.rivnetwork.unit">
 <code class="descname">unit</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.unit" title="Permalink to this definition">¶</a></dt>
-<dd><p>units of the coordinate reference system; typically ‘degree’ or ‘meter’</p>
+<dd><p>units of the coordinate reference system; typically ‘degree’ or
+‘meter’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>str</p>
@@ -813,7 +829,8 @@ channel networks.</p>
 <dl class="attribute">
 <dt id="rivgraph.classes.rivnetwork.paths">
 <code class="descname">paths</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.paths" title="Permalink to this definition">¶</a></dt>
-<dd><p>dictionary of strings for managing where files should be read/written</p>
+<dd><p>dictionary of strings for managing where files should be
+read/written</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>dict</p>
@@ -824,7 +841,9 @@ channel networks.</p>
 <dl class="attribute">
 <dt id="rivgraph.classes.rivnetwork.exit_sides">
 <code class="descname">exit_sides</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.exit_sides" title="Permalink to this definition">¶</a></dt>
-<dd><p>two-character string denoting which sides of the image the channel network intersects (N,E,S, and/or W). Upstream side should be given first.</p>
+<dd><p>two-character string denoting which sides of the image the channel
+network intersects (N,E,S, and/or W). Upstream side should be given
+first.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>str</p>
@@ -835,7 +854,8 @@ channel networks.</p>
 <dl class="attribute">
 <dt id="rivgraph.classes.rivnetwork.Imask">
 <code class="descname">Imask</code><a class="headerlink" href="#rivgraph.classes.rivnetwork.Imask" title="Permalink to this definition">¶</a></dt>
-<dd><p>binary mask found at mask_path loaded into a numpy array via gdal.Open().ReadAsArray(), dtype=np.bool</p>
+<dd><p>binary mask found at mask_path loaded into a numpy array via
+<cite>gdal.Open().ReadAsArray()</cite>, dtype=np.bool</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>numpy.ndarray</p>
@@ -897,8 +917,8 @@ dictionaries.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>A</strong> – an NxN matrix representing the connectivity of the graph, where N is the
-number of nodes in the network. See adjacency matrix for more details.</p>
+<dd class="field-even"><p><strong>A</strong> – an NxN matrix representing the connectivity of the graph, where N
+is the number of nodes in the network. See adjacency matrix for more details.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>numpy.ndarray</p>
@@ -915,15 +935,15 @@ number of nodes in the network. See adjacency matrix for more details.</p>
 <dl class="method">
 <dt id="rivgraph.classes.rivnetwork.compute_junction_angles">
 <code class="descname">compute_junction_angles</code><span class="sig-paren">(</span><em>weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.compute_junction_angles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.compute_junction_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the angle at nodes where only three links are connected. Directions
-must be assigned before angles can be computed. Also defines each 3-link
-node as ‘confluence’ or ‘bifurcation’ and appends this designation to
-the nodes dictionary.</p>
+<dd><p>Computes the angle at nodes where only three links are connected.
+Directions must be assigned before angles can be computed. Also defines
+each 3-link node as ‘confluence’ or ‘bifurcation’ and appends this
+designation to the nodes dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>weight</strong> (<em>str</em>) – [None], ‘exp’ (exponential), or ‘lin’ (linear) to determine the decay
-of the weights the contributions of pixels as we move away from the
-junction node.</p>
+<dd class="field-odd"><p><strong>weight</strong> (<em>str</em>) – [None], ‘exp’ (exponential), or ‘lin’ (linear) to determine the
+decay of the weights the contributions of pixels as we move away
+from the junction node.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -938,8 +958,9 @@ appends them as dictionary attributes.</p>
 <dl class="method">
 <dt id="rivgraph.classes.rivnetwork.compute_network">
 <code class="descname">compute_network</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.compute_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.compute_network" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the links and nodes of the channel network mask.  First skeletonizes
-the mask if not already done, then resolves the skeleton’s graph.</p>
+<dd><p>Computes the links and nodes of the channel network mask.
+First skeletonizes the mask if not already done, then resolves the
+skeleton’s graph.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1025,22 +1046,22 @@ written to path found in paths[‘network_pickle’]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>export</strong> (<em>str</em>) – <dl class="simple">
-<dt>Determines which features to export. Choose from:</dt><dd><p>all (exports all available vector data)
-network (links and nodes)
-links
-nodes
-centerline (river classes only)
-mesh (centerline mesh, river classes only)
-centerline_smooth (river classes only)</p>
-</dd>
-</dl>
+<li><p><strong>export</strong> (<em>str</em>) – <p>Determines which features to export. Choose from:</p>
+<ul>
+<li><p>all (exports all available vector data)</p></li>
+<li><p>network (links and nodes)</p></li>
+<li><p>links</p></li>
+<li><p>nodes</p></li>
+<li><p>centerline (river classes only)</p></li>
+<li><p>mesh (centerline mesh, river classes only)</p></li>
+<li><p>centerline_smooth (river classes only)</p></li>
+</ul>
 </p></li>
-<li><p><strong>ftype</strong> (<em>str</em>) – <dl class="simple">
-<dt>Sets the output file format. Choose from:</dt><dd><p>json (GeoJSON)
-shp  (ESRI Shapefile)</p>
-</dd>
-</dl>
+<li><p><strong>ftype</strong> (<em>str</em>) – <p>Sets the output file format. Choose from:</p>
+<ul>
+<li><p>json (GeoJSON)</p></li>
+<li><p>shp  (ESRI Shapefile)</p></li>
+</ul>
 </p></li>
 </ul>
 </dd>
@@ -1059,16 +1080,17 @@ shp  (ESRI Shapefile)</p>
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">add_directionality_trackers</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>ntype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#add_directionality_trackers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.add_directionality_trackers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds fields to the links and nodes dictionaries that are required for
 setting and diagnosing directionality. Nodes are not altered in this
-function, but passed for consistency and generalizability.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict
-:param ntype: Network type. Choose either ‘delta’ or ‘river’.
-:type ntype: str</p>
+function, but passed for consistency and generalizability.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>ntype</strong> (<em>str</em>) – Network type. Choose either ‘delta’ or ‘river’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links with added directionality properties.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
 </ul>
@@ -1083,15 +1105,16 @@ function, but passed for consistency and generalizability.
 <dd><p>Returns a numeric key corresponding to each algorithm used by RivGraph to
 set link directionality. These numbers are found in links[‘guess_alg’] and
 links[‘certain_alg’] and are useful for diagnosing issues in setting
-directionality.
-:param key: See the mapper below for the possible keywords.
-:type key: str</p>
+directionality.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>algno</strong> – Numeric representation of direction-setting algorithm.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – See the mapper below for the possible keywords.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float or int</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>algno</strong> – Numeric representation of direction-setting algorithm.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float or int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1101,17 +1124,19 @@ directionality.
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">check_continuity</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#check_continuity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.check_continuity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds all sinks or sources within the network, excluding inlets and outlets.
 Returns any nodes where continuity is violated. Only checks nodes for whom
-all attached links are certain.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict</p>
+all attached links are certain.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>problem_nodes</strong> – Node ids corresponding to nodes[‘id’] where continuity is violated.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>list</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>problem_nodes</strong> – Node ids corresponding to nodes[‘id’] where continuity is violated.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1121,18 +1146,20 @@ all attached links are certain.
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">cycle_get_original_orientation</code><span class="sig-paren">(</span><em>links</em>, <em>lids</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#cycle_get_original_orientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.cycle_get_original_orientation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves the orientation of a set of links. Used before attempting to fix
 cycles. Properties besides ‘conn’ must also be reversed, so their original
-orientations are also stored.
-:param links: Network links and associated properties.
-:type links: dict
-:param lids: Link ids whose orientations should be saved.
-:type lids: list</p>
+orientations are also stored.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>orig</strong> – A subset of the links dictionary containing the orientations of each
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>lids</strong> (<em>list</em>) – Link ids whose orientations should be saved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>orig</strong> – A subset of the links dictionary containing the orientations of each
 link in lids.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1165,14 +1192,16 @@ orientations.</p></li>
 must pass through to reach the outlet; in other words, if a bridge link is
 removed from the network, there will no longer be just one connected
 network. Directionality is inferred by consideration of which subnetwork
-(after removing the bridge link) contains inlet and outlet nodes.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict</p>
+(after removing the bridge link) contains inlet and outlet nodes.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -1218,14 +1247,16 @@ according to this algorithm.</p></li>
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">dir_main_channel</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#dir_main_channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.dir_main_channel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Guesses directionality of links based on shortest paths from widest inlet
 link to all the outlet links. Links are also weighted by width, such that
-deviations from the “main channel” width cost more to traverse.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict</p>
+deviations from the “main channel” width cost more to traverse.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -1242,16 +1273,17 @@ according to this algorithm.</p></li>
 <dd><p>Sets link directions based on a user-provided csv-file. The csv file has
 exactly two columns; one called ‘link_id’, and one called ‘usnode’.
 This file can be created automatically by the function
-io_utils.create_manual_dir_csv().
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict
-:param manual_set_csv: Path to csv defining which links have which upstream nodes.
-:type manual_set_csv: str</p>
+io_utils.create_manual_dir_csv().</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>manual_set_csv</strong> (<em>str</em>) – Path to csv defining which links have which upstream nodes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with specified links set
 manually.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with specified links set
@@ -1268,20 +1300,20 @@ manually.</p></li>
 <dd><p>Guesses a link’s directionality by which of its endpoint nodes is
 closer to the nearest outlet (or preoutlet). “difthresh” refers to the
 difference in distances between endpoint nodes; higher means directionality
-is less likely to be ascertained.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict
-:param difthresh: Threshold for the length (in number of nodes) that must be surpassed</p>
-<blockquote>
-<div><p>between an unknown link’s endpoints for directionality to be set.
-Lengths are measured from the link’s endpoints to the nearest
-outlet (or preoutlet). The default is 0.</p>
-</div></blockquote>
+is less likely to be ascertained.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>difthresh</strong> (<em>int</em><em>, </em><em>optional</em>) – Threshold for the length (in number of nodes) that must be surpassed
+between an unknown link’s endpoints for directionality to be set.
+Lengths are measured from the link’s endpoints to the nearest
+outlet (or preoutlet). The default is 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -1297,16 +1329,18 @@ according to this algorithm.</p></li>
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">dir_shortest_paths_nodes</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#dir_shortest_paths_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.dir_shortest_paths_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Guesses link directionality based on the shortest path from its end
 nodes to the nearest outlet (or pre-outlet). For each unknown link, if the
-path flows through the link attached to the node (as opposed to immediately)
+path flows through the link attached to the node (as opposed to immediately
 away from the link), its directionality is set; otherwise nothing
-is done. Note that this will not set all links’ directionalities.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict</p>
+is done. Note that this will not set all links’ directionalities.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -1345,14 +1379,16 @@ function returns only the first one encountered.</p>
 <dd><p>Attempts to remove all cycles in the directed graph. A number of approaches
 are tried, and if any of them result in a source/sink node or a cycle,
 another approach is attempted until the cycle is resolved or we run out
-of approaches.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict</p>
+of approaches.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with all possible cycles
 resolved.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with all possible cycles
@@ -1371,14 +1407,16 @@ resolved</p></li>
 near the problem node(s). The links to flip are chosen by ensuring they do
 not create a cycle; if multiple links can be flipped, the shortest one is
 chosen. If no solution is found, links are returned to their original
-orientation.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict</p>
+orientation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with sources/sinks fixed if
 possible.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network links and associated properties with sources/sinks fixed if
@@ -1392,19 +1430,20 @@ possible.</p></li>
 <dl class="function">
 <dt id="rivgraph.directionality.flip_links_in_G">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">flip_links_in_G</code><span class="sig-paren">(</span><em>G</em>, <em>links2flip</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#flip_links_in_G"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.flip_links_in_G" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flips the directionality of links in a networkx graph object.
-:param G: Graph object representing the network.
-:type G: networkx.Graph or similar
-:param links2flip: An Nx2 tuple containing the US and DS node ids of the edge (link) to</p>
-<blockquote>
-<div><p>flip.</p>
-</div></blockquote>
+<dd><p>Flips the directionality of links in a networkx graph object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>G</strong> – Graph object representing the network with the requested links flipped.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>G</strong> (<em>networkx.Graph</em><em> or </em><em>similar</em>) – Graph object representing the network.</p></li>
+<li><p><strong>links2flip</strong> (<em>tuple or</em>) – An Nx2 tuple containing the US and DS node ids of the edge (link) to
+flip.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>networkx.Graph or similar</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>G</strong> – Graph object representing the network with the requested links flipped.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>networkx.Graph or similar</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1413,18 +1452,18 @@ possible.</p></li>
 <dt id="rivgraph.directionality.get_cycles">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">get_cycles</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>checknode='all'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#get_cycles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.get_cycles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds either all cycles in the network or cycles containing the checknode’th
-node. Cycles are returned as both nodes and links.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict
-:param checknode: ID of node to check for its inclusion in any cycles. If the default</p>
-<blockquote>
-<div><p>value ‘all’ is selected, all cycles will be returned.</p>
-</div></blockquote>
+node. Cycles are returned as both nodes and links.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>checknode</strong> (<em>int OR str</em><em>, </em><em>optional</em>) – ID of node to check for its inclusion in any cycles. If the default
+value ‘all’ is selected, all cycles will be returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>cycle_nodes</strong> (<em>list of lists</em>) – List containing lists of all cycles found in the network; cycles are
 returned in cyclic order and in terms of node ids.</p></li>
 <li><p><strong>cycles_links</strong> (<em>TYPE</em>) – List containing lists of all cycles found in the network; cycles are
@@ -1442,31 +1481,27 @@ returned in cyclic order and in terms of link ids.</p></li>
 flow through a link based on its connectivity. This function will first trim
 the link by its endpoint (half)width values to mitigate cases where where wide
 channels are connected to narrow channels.</p>
-<p>Requires a link contain at least min_len_for_trim pixels post-trimming.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict
-:param linkid: ID of the link correspoinding to those found in links[‘id’].
-:type linkid: int
-:param imshape: Shape of the binary mask as (nrows, ncols).
-:type imshape: tuple
-:param pixlen: Length resolution of each pixel. The default is 1.
-:type pixlen: float, optional
-:param normalized: If True, will return a vector on [-1, 1]. The default is True.
-:type normalized: bool, optional
-:param trim: If True, links will be trimmed to remove possibly direction-biasing</p>
-<blockquote>
-<div><p>end segments. If False, the untrimmed link endpoints will define the
-vector direction. The default is False.</p>
-</div></blockquote>
+<p>Requires a link contain at least min_len_for_trim pixels post-trimming.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>link_vec</strong> – Two-element array describing the x and y components of the direction
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>linkid</strong> (<em>int</em>) – ID of the link correspoinding to those found in links[‘id’].</p></li>
+<li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of the binary mask as (nrows, ncols).</p></li>
+<li><p><strong>pixlen</strong> (<em>float</em><em>, </em><em>optional</em>) – Length resolution of each pixel. The default is 1.</p></li>
+<li><p><strong>normalized</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, will return a vector on [-1, 1]. The default is True.</p></li>
+<li><p><strong>trim</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, links will be trimmed to remove possibly direction-biasing
+end segments. If False, the untrimmed link endpoints will define the
+vector direction. The default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>link_vec</strong> – Two-element array describing the x and y components of the direction
 vector describing the link.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.array</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1475,16 +1510,17 @@ vector describing the link.</p>
 <dt id="rivgraph.directionality.merge_list_of_lists">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">merge_list_of_lists</code><span class="sig-paren">(</span><em>inlist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#merge_list_of_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.merge_list_of_lists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merges a list of lists into a single list, but removes duplicates.
-Uses networkx and itertools for a fun solution.
-:param inlist: List of lists to merge without dulplicates.
-:type inlist: list of lists</p>
+Uses networkx and itertools for a fun solution.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>merged</strong> – List of length equal to number of unique entries across all lists of
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inlist</strong> (<em>list of lists</em>) – List of lists to merge without dulplicates.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>merged</strong> – List of length equal to number of unique entries across all lists of
 inlist.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>list</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1492,19 +1528,20 @@ inlist.</p>
 <dl class="function">
 <dt id="rivgraph.directionality.nodepath_to_links">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">nodepath_to_links</code><span class="sig-paren">(</span><em>path</em>, <em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#nodepath_to_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.nodepath_to_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts a path defined by node ids to a path defined by link ids.
-:param path: Node ids comprising a path within the network.
-:type path: list
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict</p>
+<dd><p>Converts a path defined by node ids to a path defined by link ids.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>linkpath</strong> – Link ids comprising the path defined by the given node ids.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>list</em>) – Node ids comprising a path within the network.</p></li>
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>list</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>linkpath</strong> – Link ids comprising the path defined by the given node ids.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1588,21 +1625,20 @@ main channels are found as the widest, shortest paths from each inlet to
 each outlet. For each unknown link, the distance is computed from its
 endpoints to the nearest nodes of the nearest main channel. If the nearest
 nodes of the main channel include more than 2 + nodethresh nodes, the
-direction of the main channel is used to set the unknown link.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict
-:param imshape: Shape of binary mask as (nrows, ncols).
-:type imshape: tuple
-:param nodethresh: Threshold for the number of nodes along the nearest main channel that</p>
-<blockquote>
-<div><p>must be encompassed by the unknown link’s endnodes to confidently
-set the unknown link’s direction. The default is 0.</p>
-</div></blockquote>
+direction of the main channel is used to set the unknown link.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of binary mask as (nrows, ncols).</p></li>
+<li><p><strong>nodethresh</strong> (<em>int</em><em>, </em><em>optional</em>) – Threshold for the number of nodes along the nearest main channel that
+must be encompassed by the unknown link’s endnodes to confidently
+set the unknown link’s direction. The default is 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -1643,14 +1679,16 @@ according to this algorithm.</p></li>
 <dl class="function">
 <dt id="rivgraph.directionality.set_inletoutlet">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">set_inletoutlet</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#set_inletoutlet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.set_inletoutlet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets directions of links that are connected to inlets and outlets.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict</p>
+<dd><p>Sets directions of links that are connected to inlets and outlets.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -1665,18 +1703,14 @@ according to this algorithm.</p></li>
 <dt id="rivgraph.directionality.set_link">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">set_link</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>linkidx</em>, <em>usnode</em>, <em>alg=9999</em>, <em>checkcontinuity=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#set_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.set_link" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets a link directionality. Option to check for continuity (including
-parallel links) after setting.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict
-:param linkidx: Index of link within links[‘id’] to set. This index can be found from</p>
-<blockquote>
-<div><p>the link id via links[‘id’].index(linkid).</p>
-</div></blockquote>
+parallel links) after setting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>linkidx</strong> (<em>int</em>) – Index of link within links[‘id’] to set. This index can be found from
+the link id via links[‘id’].index(linkid).</p></li>
 <li><p><strong>usnode</strong> (<em>int</em>) – Node id of the upstream node.</p></li>
 <li><p><strong>alg</strong> (<em>int</em><em>, </em><em>optional</em>) – The algorithm id used to set the link. Used for diagnostic purposes and
 fixing cycles. The default is 9999.</p></li>
@@ -1727,17 +1761,19 @@ according to this algorithm.</p></li>
 <dt id="rivgraph.directionality.widest_inlet_index">
 <code class="descclassname">rivgraph.directionality.</code><code class="descname">widest_inlet_index</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/directionality.html#widest_inlet_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.directionality.widest_inlet_index" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds the index of the inlet occurring at the widest link. Index is with
-respect to the nodes[‘id’] list.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict</p>
+respect to the nodes[‘id’] list.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>inlet_idx</strong> – Index of the inlet node of the widest link.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>int</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>inlet_idx</strong> – Index of the inlet node of the widest link.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1759,7 +1795,8 @@ a geotiff.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>xs</strong> (<em>list</em><em> or </em><em>np.array</em><em>(</em><em>)</em>) – Specifies the E-W coordinates (longitude).</p></li>
 <li><p><strong>ys</strong> (<em>list</em><em> or </em><em>np.array</em><em>(</em><em>)</em>) – Specifies the N-S coordinates (latitude).</p></li>
-<li><p><strong>gt</strong> (<em>tuple</em>) – 6-element tuple gdal GeoTransform. (uL_x, x_res, rotation, ul_y, rotation, y_res).
+<li><p><strong>gt</strong> (<em>tuple</em>) – 6-element tuple gdal GeoTransform.
+(uL_x, x_res, rotation, ul_y, rotation, y_res).
 Automatically created by gdal’s GetGeoTransform() method.</p></li>
 </ul>
 </dd>
@@ -1866,7 +1903,8 @@ This implementation differs from above by using pyproj.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ys</strong><strong>)</strong> (<em>(</em><em>xs</em><em>,</em>) – Specifies the coordinates to transform.</p></li>
+<li><p><strong>xs</strong> (<em>np.array</em>) – Specifies the x-coordinates to transform.</p></li>
+<li><p><strong>ys</strong> (<em>np.array</em>) – Specifies the y-coordinates to transform.</p></li>
 <li><p><strong>inputEPSG</strong> (<em>int</em>) – epsg code corresponding to xs, ys</p></li>
 <li><p><strong>outputEPSG</strong> (<em>int</em>) – epsg code corresponding to desired CRS.</p></li>
 </ul>
@@ -1889,8 +1927,10 @@ within a geotiff image.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ys</strong><strong>)</strong> (<em>(</em><em>xs</em><em>,</em>) – Specifies the coordinates to transform.</p></li>
-<li><p><strong>gt</strong> (<em>tuple</em>) – 6-element tuple gdal GeoTransform. (uL_x, x_res, rotation, ul_y, rotation, y_res).
+<li><p><strong>xs</strong> (<em>np.array</em>) – Specifies the x-coordinates to transform.</p></li>
+<li><p><strong>ys</strong> (<em>np.array</em>) – Specifies the y-coordinates to transform.</p></li>
+<li><p><strong>gt</strong> (<em>tuple</em>) – 6-element tuple gdal GeoTransform.
+(uL_x, x_res, rotation, ul_y, rotation, y_res).
 Automatically created by gdal’s GetGeoTransform() method.</p></li>
 </ul>
 </dd>
@@ -2532,11 +2572,6 @@ skipped.</p>
 trendline through npix pixels “upstream” and “downstream” of the pixel in
 question. Scale is therefore set by npixels; larger will reduce
 variability in the curvature estimates.</p>
-<dl class="simple">
-<dt>INPUTS:      Iskel - binary image of skeleton whose pixels you want</dt><dd><p>curvature values</p>
-</dd>
-</dl>
-<p>OUTPUTS:         I - image of skeleton with curvature values at pixels</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -2801,7 +2836,7 @@ all possible exports’ paths are contained.</p>
 <dl class="function">
 <dt id="rivgraph.io_utils.shapely_list_to_geovectors">
 <code class="descclassname">rivgraph.io_utils.</code><code class="descname">shapely_list_to_geovectors</code><span class="sig-paren">(</span><em>shplist</em>, <em>crs</em>, <em>path_export</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#shapely_list_to_geovectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.shapely_list_to_geovectors" title="Permalink to this definition">¶</a></dt>
-<dd><p>Exports a list of shapely geometries to a GIS-ingestilbe format.</p>
+<dd><p>Exports a list of shapely geometries to a GIS-ingestible format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -2842,7 +2877,7 @@ within this function so that pickle can interpret OrderedSet object fields.</p>
 
 <dl class="function">
 <dt id="rivgraph.io_utils.write_geotiff">
-<code class="descclassname">rivgraph.io_utils.</code><code class="descname">write_geotiff</code><span class="sig-paren">(</span><em>raster, gt, wkt, path_export, dtype=&lt;Mock name='mock.GDT_UInt16' id='140211938246960'&gt;, options=['COMPRESS=LZW'], nbands=1, nodata=None, color_table=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#write_geotiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.write_geotiff" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">write_geotiff</code><span class="sig-paren">(</span><em>raster, gt, wkt, path_export, dtype=&lt;Mock name='mock.GDT_UInt16' id='139640109088976'&gt;, options=['COMPRESS=LZW'], nbands=1, nodata=None, color_table=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#write_geotiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.write_geotiff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes a georeferenced raster to disk.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2916,7 +2951,8 @@ written.</p></li>
 <dl class="function">
 <dt id="rivgraph.ln_utils.add_artificial_nodes">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">add_artificial_nodes</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>gd_obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#add_artificial_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.add_artificial_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Some topologic metrics fail for graphs that contain parallel links, or
+<dd><p>Add artificial nodes.</p>
+<p>Some topologic metrics fail for graphs that contain parallel links, or
 links that share the same end nodes. This function alleviates that issue
 by inserting artificial nodes into all but one of the parallel links. The
 shortest link of the parallel set will not receive an artificial node.
@@ -2925,12 +2961,12 @@ two new links are put in its place.</p>
 <p>A new attribute is appended to the nodes dictionary called ‘arts’ that
 contains the node IDs of artifical nodes.</p>
 <p>If flow directions are needed, this function should be run after setting
-them. If flow directions have been set for links, the properties of the link that
-is broken into two are appended to the two parts. This may result in some
-properties that are no longer correct, e.g. slope.</p>
-<p>Additionally, the ‘guess’ attribute of the links where artificial nodes are added
-will be incorrect as it doesn’t account for the artificial node, but
-references the original end nodes.</p>
+them. If flow directions have been set for links, the properties of the
+link that is broken into two are appended to the two parts. This may result
+in some properties that are no longer correct, e.g. slope.</p>
+<p>Additionally, the ‘guess’ attribute of the links where artificial nodes
+are added will be incorrect as it doesn’t account for the artificial node,
+but references the original end nodes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -2952,7 +2988,8 @@ references the original end nodes.</p>
 <dl class="function">
 <dt id="rivgraph.ln_utils.add_link">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">add_link</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>idcs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#add_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.add_link" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a new link to the network. Connectivity is updated in nodes to account
+<dd><p>Add a new link to the network.</p>
+<p>Adds a new link to the network. Connectivity is updated in nodes to account
 for the added link. Attributes such as link width, length are not
 recomputed here; must be recomputed for the entire network.</p>
 <dl class="field-list simple">
@@ -2979,7 +3016,8 @@ recomputed here; must be recomputed for the entire network.</p>
 <dl class="function">
 <dt id="rivgraph.ln_utils.add_node">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">add_node</code><span class="sig-paren">(</span><em>nodes</em>, <em>idx</em>, <em>linkconn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#add_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.add_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a new node to the network. Connectivity is updated in links to account
+<dd><p>Add a new node to the network.</p>
+<p>Adds a new node to the network. Connectivity is updated in links to account
 for the added node. No node properties (e.g. juncation angle) are updated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3001,7 +3039,8 @@ for the added node. No node properties (e.g. juncation angle) are updated.</p>
 <dl class="function">
 <dt id="rivgraph.ln_utils.adjust_for_padding">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">adjust_for_padding</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>npad</em>, <em>dims</em>, <em>initial_dims</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#adjust_for_padding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.adjust_for_padding" title="Permalink to this definition">¶</a></dt>
-<dd><p>In some cases, a mask is padded before extracting the network. In order
+<dd><p>Adjust mask for any padding.</p>
+<p>In some cases, a mask is padded before extracting the network. In order
 to ensure the extracted network maps to the original mask, the padding must
 be stripped away from all the coordinates of the network. The function
 achieves this by adjusting the [‘idx’] attributes of the links and nodes.</p>
@@ -3029,9 +3068,11 @@ of image.</p></li>
 <dl class="function">
 <dt id="rivgraph.ln_utils.append_link_lengths">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">append_link_lengths</code><span class="sig-paren">(</span><em>links</em>, <em>gdobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#append_link_lengths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.append_link_lengths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Appends link lengths to each link. Lengths are computed in the units of
+<dd><p>Append link lengths to each link.</p>
+<p>Appends link lengths to each link. Lengths are computed in the units of
 the coordinate reference system of the original mask.</p>
-<p>This function provides a subset of the functionality of link_widths_and_lengths().
+<p>This function provides a subset of the functionality of
+<a class="reference internal" href="#rivgraph.ln_utils.link_widths_and_lengths" title="rivgraph.ln_utils.link_widths_and_lengths"><code class="xref py py-func docutils literal notranslate"><span class="pre">link_widths_and_lengths()</span></code></a>.
 It is used when only link lengths are needed for, e.g. finding shortest
 paths.</p>
 <dl class="field-list simple">
@@ -3053,7 +3094,8 @@ paths.</p>
 <dl class="function">
 <dt id="rivgraph.ln_utils.conn_links">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">conn_links</code><span class="sig-paren">(</span><em>nodes</em>, <em>links</em>, <em>node_idx</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#conn_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.conn_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds the first and last pixels of all links connected to the node specified
+<dd><p>Find first and last pixels of all links connected to a node.</p>
+<p>Finds the first and last pixels of all links connected to the node specified
 by node_idx.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3076,7 +3118,7 @@ node specified by node_idx.</p>
 <dl class="function">
 <dt id="rivgraph.ln_utils.delete_link">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">delete_link</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>linkid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#delete_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.delete_link" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes a link from the network.</p>
+<dd><p>Delete a link from the network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3098,8 +3140,9 @@ node specified by node_idx.</p>
 <dl class="function">
 <dt id="rivgraph.ln_utils.delete_node">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">delete_node</code><span class="sig-paren">(</span><em>nodes</em>, <em>nodeid</em>, <em>warn=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#delete_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.delete_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes a node from the network. Assumes that the node’s connected links have
-already been deleted, and hence does not update the links dictionary.</p>
+<dd><p>Delete a node from the network.</p>
+<p>Deletes a node from the network. Assumes that the node’s connected links
+have already been deleted, and hence does not update the links dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3121,7 +3164,8 @@ connected to links in the network. The default is True.</p></li>
 <dl class="function">
 <dt id="rivgraph.ln_utils.find_art_links">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">find_art_links</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#find_art_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.find_art_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds the triad links corresponding to each artificial node. The triad
+<dd><p>Find artificial links.</p>
+<p>Finds the triad links corresponding to each artificial node. The triad
 links are the two links connected to the artifical node, and the link
 parallel to these two links.</p>
 <p>Adds a new ‘arts’ property to the links dictionary that contains the triad
@@ -3147,7 +3191,8 @@ parallel links.</p>
 <dl class="function">
 <dt id="rivgraph.ln_utils.find_parallel_links">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">find_parallel_links</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#find_parallel_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.find_parallel_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds all parallel links within the graph. A set of parallel links all have
+<dd><p>Find parallel links within the graph.</p>
+<p>Finds all parallel links within the graph. A set of parallel links all have
 the same start and end node. A new attribute called ‘parallels’ is added
 to the links dictionary.</p>
 <dl class="field-list simple">
@@ -3170,7 +3215,8 @@ to the links dictionary.</p>
 <dl class="function">
 <dt id="rivgraph.ln_utils.flip_link">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">flip_link</code><span class="sig-paren">(</span><em>links</em>, <em>linkid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#flip_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.flip_link" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reverses a link’s direction by flipping the ordering of its comprising
+<dd><p>Reverse a link’s direction.</p>
+<p>Reverses a link’s direction by flipping the ordering of its comprising
 pixels, as well as any ordered attributes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3191,7 +3237,8 @@ pixels, as well as any ordered attributes.</p>
 <dl class="function">
 <dt id="rivgraph.ln_utils.junction_angles">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">junction_angles</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>imshape</em>, <em>pixlen</em>, <em>weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#junction_angles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.junction_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes junction angles between links in a network with directions set.
+<dd><p>Compute junction angles.</p>
+<p>Computes junction angles between links in a network with directions set.
 Only nodes of degree three are considered for simplicity. Angles are only
 computed between the two links that share a common flow directions. The
 acute-most angle between these two links is returned.</p>
@@ -3203,15 +3250,12 @@ contribution of pixels to a link’s direction vector.</p>
 <p>Also computes the ratio of link widths (max/min) at junctions, and
 determines whether the junction is a confluence (joining) or a bifurcation
 (diverging).</p>
-<dl>
-<dt>The following attributes are appended to the ndoes dictionary:</dt><dd><p>‘int_ang’ - the interior angle between the two links in the
-‘width_ratio’ - the ratio of the maximum/minimum link widths for the</p>
-<blockquote>
-<div><p>two links whose directions agree</p>
-</div></blockquote>
-<p>‘jtype’ - the junction type, either ‘b’ifurcation or ‘c’onfluence</p>
-</dd>
-</dl>
+<p>The following attributes are appended to the nodes dictionary:</p>
+<ul class="simple">
+<li><p><strong>int_ang</strong> : the interior angle between the two links in the</p></li>
+<li><p><strong>width_ratio</strong> : the ratio of the maximum/minimum link widths for the two links whose directions agree</p></li>
+<li><p><strong>jtype</strong> : the junction type, either ‘b’ifurcation or ‘c’onfluence</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3221,16 +3265,12 @@ determines whether the junction is a confluence (joining) or a bifurcation
 <li><p><strong>pixlen</strong> (<em>numeric</em>) – Resolution of the image; assumes same resolution in the horizontal and
 vertical.</p></li>
 <li><p><strong>weight</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>How to weight pixel contributions to a link’s direction vector as we
-move away from the joining node. Choose from
-None - all pixels are weighted equally
-‘lin’ - the contribution of pixels decreases linearly as we move away</p>
-<blockquote>
-<div><p>from the joining node.</p>
-</div></blockquote>
-<dl class="simple">
-<dt>’exp’ - the contribution of  pixels decreases exponentially as we move</dt><dd><p>away from the joining node.</p>
-</dd>
-</dl>
+move away from the joining node. Choose from</p>
+<ul>
+<li><p><strong>None</strong> : all pixels are weighted equally</p></li>
+<li><p><strong>lin</strong> : the contribution of pixels decreases linearly as we move away from the joining node.</p></li>
+<li><p><strong>exp</strong> : the contribution of  pixels decreases exponentially as we move away from the joining node.</p></li>
+</ul>
 <p>The default is None.</p>
 </p></li>
 </ul>
@@ -3255,7 +3295,8 @@ None - all pixels are weighted equally
 <dl class="function">
 <dt id="rivgraph.ln_utils.link_updater">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">link_updater</code><span class="sig-paren">(</span><em>links</em>, <em>linkid</em>, <em>idx=-1</em>, <em>conn=-1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#link_updater"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.link_updater" title="Permalink to this definition">¶</a></dt>
-<dd><p>Updates link dictionary by appending a new link or adding connectivity
+<dd><p>Update the link dictionary.</p>
+<p>Updates link dictionary by appending a new link or adding connectivity
 to an existing link. This function cannot add a new link.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3263,10 +3304,10 @@ to an existing link. This function cannot add a new link.</p>
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties. Should contain ‘id’, ‘idx’,
 and ‘conn’ at a minimum.</p></li>
 <li><p><strong>linkid</strong> (<em>int</em>) – ID of the link to update.</p></li>
-<li><p><strong>idx</strong> (<em>list</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – Pixel indices of the link to update. The default is -1, which effectively
-skips updating the idx field.</p></li>
-<li><p><strong>conn</strong> (<em>int</em><em>, </em><em>optional</em>) – Node id (as found in nodes[‘id’]) connected to the link. The default is -1,
-which effectively skips updating the ‘id’ field.</p></li>
+<li><p><strong>idx</strong> (<em>list</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – Pixel indices of the link to update. The default is -1, which
+effectively skips updating the idx field.</p></li>
+<li><p><strong>conn</strong> (<em>int</em><em>, </em><em>optional</em>) – Node id (as found in nodes[‘id’]) connected to the link. The default
+is -1, which effectively skips updating the ‘id’ field.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -3281,7 +3322,8 @@ which effectively skips updating the ‘id’ field.</p></li>
 <dl class="function">
 <dt id="rivgraph.ln_utils.link_widths_and_lengths">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">link_widths_and_lengths</code><span class="sig-paren">(</span><em>links</em>, <em>Idt</em>, <em>pixlen=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#link_widths_and_lengths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.link_widths_and_lengths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes link widths and lengths for all links in the network. A
+<dd><p>Compute all link widths and lengths.</p>
+<p>Computes link widths and lengths for all links in the network. A
 distance transform approach is used where the width of a pixel is its
 distance to the nearest non-max pixel times two.</p>
 <p>There is a slight twist. When a skeleton is computed for a very wide
@@ -3289,18 +3331,18 @@ channel with a narrow tributary, there is a very straight section of the
 skeleton as it leaves the wide channel to go into the tributary; this
 straight section (so-called “false” pixels) should not be used to compute
 average link width, as it’s technically part of the wide channel. The twist
-here accounts for that by elminating the ends of the each link from computing
-widths and lengths, where the distance along each end is equal to the
-half-width of the endmost pixels. Adjusted link widths and lengths are also
-computed that account for this effect.</p>
-<dl class="simple">
-<dt>The following new attributes are added to the links dictionary:</dt><dd><p>‘len’ - the length of the full link
-‘wid_pix’ - the width of each pixel in the link
-‘wid’ - the average width of all pixels of the link
-‘wid_adj’ - the “adjusted” average width of all link pixels excluding “false” pixels
-‘len_adj’ - the “adjusted” length of the link after excluding “false” pixels</p>
-</dd>
-</dl>
+here accounts for that by elminating the ends of the each link from
+computing widths and lengths, where the distance along each end is equal to
+the half-width of the endmost pixels. Adjusted link widths and lengths are
+also computed that account for this effect.</p>
+<p>The following new attributes are added to the links dictionary:</p>
+<ul class="simple">
+<li><p>‘len’ : the length of the full link</p></li>
+<li><p>‘wid_pix’ : the width of each pixel in the link</p></li>
+<li><p>‘wid’ : the average width of all pixels of the link</p></li>
+<li><p>‘wid_adj’ : the “adjusted” average width of all link pixels excluding “false” pixels</p></li>
+<li><p>‘len_adj’ : the “adjusted” length of the link after excluding “false” pixels</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3324,7 +3366,7 @@ in units of pixels.</p></li>
 <dl class="function">
 <dt id="rivgraph.ln_utils.links_to_gpd">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">links_to_gpd</code><span class="sig-paren">(</span><em>links</em>, <em>gdobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#links_to_gpd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.links_to_gpd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts the links dictionary to a GeoPandas GeoDataFrame.</p>
+<dd><p>Convert the links dictionary to a GeoPandas GeoDataFrame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3344,7 +3386,8 @@ in units of pixels.</p></li>
 <dl class="function">
 <dt id="rivgraph.ln_utils.node_updater">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">node_updater</code><span class="sig-paren">(</span><em>nodes</em>, <em>idx</em>, <em>conn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#node_updater"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.node_updater" title="Permalink to this definition">¶</a></dt>
-<dd><p>Updates node dictionary by adding connectivity and idx information
+<dd><p>Update the node dictionary.</p>
+<p>Updates node dictionary by adding connectivity and idx information
 to an existing node. The function cannot add a node to the network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3411,7 +3454,8 @@ with matplotlib.pyplot.subplots(). The default is None.</p></li>
 <dl class="function">
 <dt id="rivgraph.ln_utils.remove_all_spurs">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">remove_all_spurs</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>dontremove=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#remove_all_spurs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.remove_all_spurs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes all links who have a node of degree one. This is performed iteratively
+<dd><p>Remove spurs.</p>
+<p>Removes all links who have a node of degree one. This is performed iteratively
 until all spurs are removed. Also removes redundant nodes (i.e. nodes
 with degree two.)</p>
 <dl class="field-list simple">
@@ -3436,7 +3480,8 @@ The default is [].</p></li>
 <dl class="function">
 <dt id="rivgraph.ln_utils.remove_disconnected_bridge_links">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">remove_disconnected_bridge_links</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#remove_disconnected_bridge_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.remove_disconnected_bridge_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>When simplifying a channel network, there are often tributaries joining
+<dd><p>Remove disconnected bridge links.</p>
+<p>When simplifying a channel network, there are often tributaries joining
 the network further downstream. These tributaries may have loops, which
 prevents their automatic removal by simple pruning.</p>
 <p>This function helps prune these cases by removing bridge links that are
@@ -3491,7 +3536,8 @@ subnetworks are removed.</p>
 <dl class="function">
 <dt id="rivgraph.ln_utils.remove_single_pixel_links">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">remove_single_pixel_links</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#remove_single_pixel_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.remove_single_pixel_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>RivGraph’s resolving of the network can result in single-pixel links that
+<dd><p>Remove single pixel links.</p>
+<p>RivGraph’s resolving of the network can result in single-pixel links that
 can be removed without altering connectivity. This function removes those.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3513,8 +3559,9 @@ can be removed without altering connectivity. This function removes those.</p>
 <dl class="function">
 <dt id="rivgraph.ln_utils.remove_two_link_nodes">
 <code class="descclassname">rivgraph.ln_utils.</code><code class="descname">remove_two_link_nodes</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>dontremove</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#remove_two_link_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.remove_two_link_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes superfluous nodes from the network; i.e. nodes with degree two.
-Is called by remove_all_spurs().</p>
+<dd><p>Remove superfluous nodes.</p>
+<p>Removes superfluous nodes from the network; i.e. nodes with degree two.
+Is called by <a class="reference internal" href="#rivgraph.ln_utils.remove_all_spurs" title="rivgraph.ln_utils.remove_all_spurs"><code class="xref py py-func docutils literal notranslate"><span class="pre">remove_all_spurs()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3614,33 +3661,21 @@ resolution.</p>
 <dd class="field-odd"><p><strong>Iskel</strong> (<em>np.ndarray</em>) – Binary image of a skeleton.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul>
-<li><p><strong>links</strong> (<em>dict</em>) –</p>
-<dl>
-<dt>Links of the network with four properties:</dt><dd><p>’id’ - a list of unique ids for each link in the network
-‘idx’ - a list containing the pixel indices within Iskel that</p>
-<blockquote>
-<div><p>defines the link. These are ordered.</p>
-</div></blockquote>
-<dl class="simple">
-<dt>’conn’ - a list of 2-element lists containing the node ids that</dt><dd><p>the link is connected to.</p>
-</dd>
-<dt>’n_networks’ - the number of disconnected networks found in the</dt><dd><p>skeleton</p>
-</dd>
-</dl>
-</dd>
-</dl>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Links of the network with four properties:</p>
+<ol class="arabic simple">
+<li><p>’id’ - a list of unique ids for each link in the network</p></li>
+<li><p>’idx’ - a list containing the pixel indices within Iskel that defines the link. These are ordered.</p></li>
+<li><p>’conn’ - a list of 2-element lists containing the node ids that the link is connected to.</p></li>
+<li><p>’n_networks’ - the number of disconnected networks found in the skeleton</p></li>
+</ol>
 </li>
-<li><p><strong>nodes</strong> (<em>dict</em>) –</p>
-<dl>
-<dt>Nodes of the network with four properties:</dt><dd><p>’id’ - a list of unique ids for each node in the network
-‘idx’ - the index within Iskel of the node location
-‘conn’ - a list of lists containing the link ids connected to this</p>
-<blockquote>
-<div><p>node</p>
-</div></blockquote>
-</dd>
-</dl>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Nodes of the network with four properties:</p>
+<ol class="arabic simple">
+<li><p>’id’ - a list of unique ids for each node in the network</p></li>
+<li><p>’idx’ - the index within Iskel of the node location</p></li>
+<li><p>’conn’ - a list of lists containing the link ids connected to this node</p></li>
+</ol>
 </li>
 </ul>
 </p>
@@ -3670,43 +3705,28 @@ and (2) filling small skeleton holes and reskeletonizing.</p>
 <dl class="function">
 <dt id="rivgraph.mask_to_graph.skeletonize_river_mask">
 <code class="descclassname">rivgraph.mask_to_graph.</code><code class="descname">skeletonize_river_mask</code><span class="sig-paren">(</span><em>I</em>, <em>es</em>, <em>padscale=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_to_graph.html#skeletonize_river_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_to_graph.skeletonize_river_mask" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Skeletonizes a binary mask of a river channel network. Differs from
+<dd><p>Skeletonizes a binary mask of a river channel network. Differs from
 skeletonize mask above by using knowledge of the exit sides of the river
 with respect to the mask (I) to avoid edge effects of skeletonization by
 mirroring the mask at its ends, then trimming it after processing. As with
 skeletonize_mask, skeleton simplification is performed.</p>
-<dl>
-<dt>INPUTS:</dt><dd><blockquote>
-<div><p>I - binary river mask to skeletonize</p>
-</div></blockquote>
-<dl class="simple">
-<dt>es - NSEW “exit sides” corresponding to the upstream and downstream</dt><dd><p>sides of the image that intersect the river. e.g. ‘NS’, ‘EN’, ‘WS’</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</div></blockquote>
-<dl>
-<dt>padscale - (Optional) number of pixels to reflect I before skeletonization</dt><dd><blockquote>
-<div><p>to remove edge effects of skeletonization</p>
-</div></blockquote>
-<dl class="simple">
-<dt>I<span class="classifier">np.array</span></dt><dd><p>Binary river mask to skeletonize.</p>
-</dd>
-<dt>es<span class="classifier">str</span></dt><dd><p>A two-character string (from N, E, S, or W) that denotes which sides
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I</strong> (<em>np.array</em>) – Binary river mask to skeletonize.</p></li>
+<li><p><strong>es</strong> (<em>str</em>) – A two-character string (from N, E, S, or W) that denotes which sides
 of the image the river intersects (upstream first) – e.g. ‘NS’, ‘EW’,
-‘NW’, etc.</p>
-</dd>
-<dt>padscale<span class="classifier">int, optional</span></dt><dd><p>Pad multiplier that sets the size of the padding. Multplies the blob
+‘NW’, etc.</p></li>
+<li><p><strong>padscale</strong> (<em>int</em><em>, </em><em>optional</em>) – Pad multiplier that sets the size of the padding. Multplies the blob
 size along the axis of the image that the blob intersect to determine
-the padding distance. The default is 2.</p>
+the padding distance. The default is 2.</p></li>
+</ul>
 </dd>
-</dl>
-<dl class="simple">
-<dt>Iskel<span class="classifier">np.array</span></dt><dd><p>The skeletonization of I.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Iskel</strong> – The skeletonization of I.</p>
 </dd>
-</dl>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3715,9 +3735,15 @@ the padding distance. The default is 2.</p>
 <span class="target" id="module-rivgraph.mask_utils"></span><div class="section" id="mask-filtering-utils-mask-utils-py">
 <h2>Mask Filtering Utils (mask_utils.py)<a class="headerlink" href="#mask-filtering-utils-mask-utils-py" title="Permalink to this headline">¶</a></h2>
 <p>Functions for filtering islands from channel masks. Currently in beta.
-Also see im_utils.py for morphologic operations that could be useful.</p>
+Also see <code class="xref py py-mod docutils literal notranslate"><span class="pre">im_utils</span></code> for morphologic operations that could be useful.</p>
 <p>Created on Mon Jul 6 18:29:23 2020</p>
 <p>&#64;author: Jon</p>
+<dl class="function">
+<dt id="rivgraph.mask_utils.get_island_properties">
+<code class="descclassname">rivgraph.mask_utils.</code><code class="descname">get_island_properties</code><span class="sig-paren">(</span><em>Imask</em>, <em>pixlen</em>, <em>pixarea</em>, <em>crs</em>, <em>gt</em>, <em>props</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_utils.html#get_island_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_utils.get_island_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get island properties.</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="rivgraph.mask_utils.pixagon">
 <code class="descclassname">rivgraph.mask_utils.</code><code class="descname">pixagon</code><span class="sig-paren">(</span><em>c_cent</em>, <em>r_cent</em>, <em>pixlen</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_utils.html#pixagon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_utils.pixagon" title="Permalink to this definition">¶</a></dt>
@@ -3725,388 +3751,10 @@ Also see im_utils.py for morphologic operations that could be useful.</p>
 of a provided center coordinate given the pixel resolution (pixlen).</p>
 </dd></dl>
 
-</div>
-<span class="target" id="module-rivgraph.ordered_set"></span><div class="section" id="ordered-set-py">
-<h2>ordered_set.py<a class="headerlink" href="#ordered-set-py" title="Permalink to this headline">¶</a></h2>
-<p>This script is copied from the ordered_set package, but is included as a
-separate .py file in RivGraph due to packaging issues.</p>
-<p>An OrderedSet is a custom MutableSet that remembers its order, so that every
-entry has an index that can be looked up.</p>
-<p>Based on a recipe originally posted to ActiveState Recipes by Raymond Hettiger,
-and released under the MIT license.</p>
-<dl class="class">
-<dt id="rivgraph.ordered_set.OrderedSet">
-<em class="property">class </em><code class="descclassname">rivgraph.ordered_set.</code><code class="descname">OrderedSet</code><span class="sig-paren">(</span><em>iterable=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet" title="Permalink to this definition">¶</a></dt>
-<dd><p>An OrderedSet is a custom MutableSet that remembers its order, so that
-every entry has an index that can be looked up.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="go">OrderedSet([1, 2, 3])</span>
-</pre></div>
-</div>
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.__contains__">
-<code class="descname">__contains__</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.__contains__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.__contains__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test if the item is in this ordered set</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mi">1</span> <span class="ow">in</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="mi">5</span> <span class="ow">in</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="go">False</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.__eq__">
-<code class="descname">__eq__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.__eq__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.__eq__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns true if the containers have the same items. If <cite>other</cite> is a
-Sequence, then order is checked, otherwise it is ignored.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">==</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="go">False</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.__getitem__">
-<code class="descname">__getitem__</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.__getitem__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the item at a given index.</p>
-<p>If <cite>index</cite> is a slice, you will get back that slice of items. If it’s
-the slice [:], a copy of this object is returned.</p>
-<p>If <cite>index</cite> is a list or a similar iterable, you’ll get the OrderedSet
-of items corresponding to those indices. This is similar to NumPy’s
-“fancy indexing”.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<span class="go">2</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>iterable=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.__iter__">
-<code class="descname">__iter__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.__iter__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.__iter__" title="Permalink to this definition">¶</a></dt>
-<dd><p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])))</span>
-<span class="go">[1, 2, 3]</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.__len__">
-<code class="descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.__len__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.__len__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of unique elements in the ordered set</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">([]))</span>
-<span class="go">0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
-<span class="go">2</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.__repr__">
-<code class="descname">__repr__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.__repr__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.__repr__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return repr(self).</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.__reversed__">
-<code class="descname">__reversed__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.__reversed__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.__reversed__" title="Permalink to this definition">¶</a></dt>
-<dd><p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])))</span>
-<span class="go">[3, 2, 1]</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="rivgraph.ordered_set.OrderedSet.__weakref__">
-<code class="descname">__weakref__</code><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.__weakref__" title="Permalink to this definition">¶</a></dt>
-<dd><p>list of weak references to the object (if defined)</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.add">
-<code class="descname">add</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add <cite>key</cite> as an item to this OrderedSet, then return its index.</p>
-<p>If <cite>key</cite> is already in the OrderedSet, return the index it already
-had.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="go">0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="go">OrderedSet([3])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.append">
-<code class="descname">append</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.append" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add <cite>key</cite> as an item to this OrderedSet, then return its index.</p>
-<p>If <cite>key</cite> is already in the OrderedSet, return the index it already
-had.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="go">0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="go">OrderedSet([3])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.clear">
-<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.clear" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove all items from this OrderedSet.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.copy">
-<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a shallow copy of this object.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">==</span> <span class="n">other</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="ow">is</span> <span class="n">other</span>
-<span class="go">False</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.difference">
-<code class="descname">difference</code><span class="sig-paren">(</span><em>*sets</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.difference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.difference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns all elements that are in this set but not the others.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">2</span><span class="p">]))</span>
-<span class="go">OrderedSet([1, 3])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">2</span><span class="p">])</span>
-<span class="go">OrderedSet([1, 3])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.difference_update">
-<code class="descname">difference_update</code><span class="sig-paren">(</span><em>*sets</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.difference_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.difference_update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a copy of self with items from other removed</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">difference_update</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">2</span><span class="p">]))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="go">OrderedSet([1, 3])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.discard">
-<code class="descname">discard</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.discard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.discard" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove an element.  Do not raise an exception if absent.</p>
-<p>The MutableSet mixin uses this to implement the .remove() method, which
-<em>does</em> raise an error when asked to remove a non-existent item.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="go">OrderedSet([1, 3])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="go">OrderedSet([1, 3])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.index">
-<code class="descname">index</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.index" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the index of a given entry, raising an IndexError if it’s not
-present.</p>
-<p><cite>key</cite> can be an iterable of entries that is not a string, in which case
-this returns a list of indices.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="go">1</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.intersection">
-<code class="descname">intersection</code><span class="sig-paren">(</span><em>*sets</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.intersection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns elements in common between all sets. Order is defined only
-by the first set.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="go">OrderedSet([1, 2, 3])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">intersection</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="go">OrderedSet([2])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedSet</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span>
-<span class="go">OrderedSet([1, 2, 3])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.intersection_update">
-<code class="descname">intersection_update</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.intersection_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.intersection_update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update a set with the intersection of itself and another.
-Order depends only on the first element</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">other</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">9</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">intersection_update</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="go">OrderedSet([1, 3, 7])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.issubset">
-<code class="descname">issubset</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.issubset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.issubset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Report whether another set contains this set.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">issubset</span><span class="p">({</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">})</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">issubset</span><span class="p">({</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">})</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">issubset</span><span class="p">({</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">})</span>
-<span class="go">False</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.issuperset">
-<code class="descname">issuperset</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.issuperset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.issuperset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Report whether this set contains another set.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">issuperset</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span><span class="o">.</span><span class="n">issuperset</span><span class="p">({</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">})</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span><span class="o">.</span><span class="n">issuperset</span><span class="p">({</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">})</span>
-<span class="go">False</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.pop">
-<code class="descname">pop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.pop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove and return the last element from the set.</p>
-<p>Raises KeyError if the set is empty.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-<span class="go">3</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.symmetric_difference">
-<code class="descname">symmetric_difference</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.symmetric_difference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.symmetric_difference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the symmetric difference of two sets as a new set.
-(I.e. all elements that are in exactly one of the sets.)</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">other</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">9</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">symmetric_difference</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-<span class="go">OrderedSet([4, 5, 9, 2])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.symmetric_difference_update">
-<code class="descname">symmetric_difference_update</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.symmetric_difference_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.symmetric_difference_update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update a set with the intersection of itself and another.
-Order depends only on the first element</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">other</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">9</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">symmetric_difference_update</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="go">OrderedSet([4, 5, 9, 2])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.union">
-<code class="descname">union</code><span class="sig-paren">(</span><em>*sets</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.union"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.union" title="Permalink to this definition">¶</a></dt>
-<dd><p>Combines all unique items.
-Each items order is defined by its first appearance.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">]),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="go">OrderedSet([3, 1, 4, 5, 2, 0])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">union</span><span class="p">([</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
-<span class="go">OrderedSet([3, 1, 4, 5, 2, 0, 8, 9])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">|</span> <span class="p">{</span><span class="mi">10</span><span class="p">}</span>
-<span class="go">OrderedSet([3, 1, 4, 5, 2, 0, 10])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedSet</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span>
-<span class="go">OrderedSet([1, 2, 3])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="rivgraph.ordered_set.OrderedSet.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>sequence</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#OrderedSet.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.OrderedSet.update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update the set with the given iterable sequence, then return the index
-of the last element inserted.</p>
-<p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="go">4</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<span class="go">OrderedSet([1, 2, 3, 5, 4])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-</dd></dl>
-
 <dl class="function">
-<dt id="rivgraph.ordered_set.is_iterable">
-<code class="descclassname">rivgraph.ordered_set.</code><code class="descname">is_iterable</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ordered_set.html#is_iterable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ordered_set.is_iterable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Are we being asked to look up a list of things, instead of a single thing?
-We check for the <cite>__iter__</cite> attribute so that this can cover types that
-don’t have to be known by this module, such as NumPy arrays.</p>
-<p>Strings, however, should be considered as atomic values to look up, not
-iterables. The same goes for tuples, since they are immutable and therefore
-valid entries.</p>
-<p>We don’t need to check for the Python 2 <cite>unicode</cite> type, because it doesn’t
-have an <cite>__iter__</cite> attribute anyway.</p>
+<dt id="rivgraph.mask_utils.surrounding_link_properties">
+<code class="descclassname">rivgraph.mask_utils.</code><code class="descname">surrounding_link_properties</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>Imask</em>, <em>islands</em>, <em>Iislands</em>, <em>pixlen</em>, <em>pixarea</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_utils.html#surrounding_link_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_utils.surrounding_link_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get surrounding link properties.</p>
 </dd></dl>
 
 </div>
@@ -4117,7 +3765,8 @@ have an <cite>__iter__</cite> attribute anyway.</p>
 <dl class="function">
 <dt id="rivgraph.walk.bp_cluster">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">bp_cluster</code><span class="sig-paren">(</span><em>bp</em>, <em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#bp_cluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.bp_cluster" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds clusters of branchpoints; i.e. branchpoints that are immediately
+<dd><p>Find clusters of branchpoints.</p>
+<p>Finds clusters of branchpoints; i.e. branchpoints that are immediately
 adjacent to each other in an 8-connected sense. This function is self-
 referential in order to find all neighboring branchpoints.</p>
 <dl class="field-list simple">
@@ -4142,15 +3791,14 @@ within Iskel.</p>
 <dl class="function">
 <dt id="rivgraph.walk.cant_walk">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">cant_walk</code><span class="sig-paren">(</span><em>links</em>, <em>linkidx</em>, <em>nodes</em>, <em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#cant_walk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.cant_walk" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given an input link defined by linkidx, return all the pixels that cannot be walked
-to. These include:</p>
-<blockquote>
-<div><ol class="arabic simple">
+<dd><p>Find pixels that cannot be walked to.</p>
+<p>Given an input link defined by linkidx, return all the pixels that cannot
+be walked to. These include:</p>
+<ol class="arabic simple">
 <li><p>originating node (and any nodes adjacent to this one)</p></li>
 <li><p>emanating links (i.e. first pixel away from each node)</p></li>
 <li><p>links that have been resolved walking AWAY from the node (toward node not included)</p></li>
 </ol>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -4172,7 +3820,8 @@ to. These include:</p>
 <dl class="function">
 <dt id="rivgraph.walk.check_dup_links">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">check_dup_links</code><span class="sig-paren">(</span><em>linkid</em>, <em>links</em>, <em>nodes</em>, <em>links2do</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#check_dup_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.check_dup_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks that the link represented by linkid has no dubplicates in the
+<dd><p>Check for duplicate links.</p>
+<p>Checks that the link represented by linkid has no dubplicates in the
 network. If so, the link is removed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -4180,8 +3829,9 @@ network. If so, the link is removed.</p>
 <li><p><strong>linkid</strong> (<em>int</em>) – Id of the link to check for duplication.</p></li>
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
-<li><p><strong>links2do</strong> (<a class="reference internal" href="#rivgraph.ordered_set.OrderedSet" title="rivgraph.ordered_set.OrderedSet"><em>OrderedSet</em></a>) – This set keeps track of all the links that still need to be resolved
-in the full skeleton. It is generated and populated in mask_to_graph.</p></li>
+<li><p><strong>links2do</strong> (<em>OrderedSet</em>) – This set keeps track of all the links that still need to be resolved
+in the full skeleton. It is generated and populated in
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">mask_to_graph</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -4191,7 +3841,8 @@ it existed.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with duplicate ilnk removed, if
 it existed.</p></li>
 <li><p><strong>links2do</strong> (<em>OrderedSet</em>) – This set keeps track of all the links that still need to be resolved
-in the full skeleton. It is generated and populated in mask_to_graph.
+in the full skeleton. It is generated and populated in
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">mask_to_graph</span></code>.
 The duplicate link, if found, is removed from this set.</p></li>
 </ul>
 </p>
@@ -4202,7 +3853,8 @@ The duplicate link, if found, is removed from this set.</p></li>
 <dl class="function">
 <dt id="rivgraph.walk.delete_link">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">delete_link</code><span class="sig-paren">(</span><em>linkid</em>, <em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#delete_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.delete_link" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes a link from the links dictionary and updates the nodes dictionary
+<dd><p>Delete a link from the links dictionary and update the nodes dictionary.</p>
+<p>Deletes a link from the links dictionary and updates the nodes dictionary
 to account for the deleted link. This is a special case of the delete_link
 found in ln_utils.py, as no properties have been added yet. It is possible
 that this function could be replaced by that one.</p>
@@ -4227,7 +3879,8 @@ that this function could be replaced by that one.</p>
 <dl class="function">
 <dt id="rivgraph.walk.find_emanators">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">find_emanators</code><span class="sig-paren">(</span><em>bpnode</em>, <em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#find_emanators"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.find_emanators" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns all possible next steps along the skeleton from a given pixel.
+<dd><p>Find possible next steps along the skeleton.</p>
+<p>Returns all possible next steps along the skeleton from a given pixel.
 Emanators are the second nodes in each link, or the first nodes away from
 the link endpoint.</p>
 <dl class="field-list simple">
@@ -4249,7 +3902,8 @@ the link endpoint.</p>
 <dl class="function">
 <dt id="rivgraph.walk.get_neighbors">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">get_neighbors</code><span class="sig-paren">(</span><em>idx</em>, <em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#get_neighbors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.get_neighbors" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a flattened array of the neighboring pixel indices within Iskel
+<dd><p>Get a flattened array of neighboring pixel indices.</p>
+<p>Returns a flattened array of the neighboring pixel indices within Iskel
 that are True. Only looks at 8-connected neighbors (i.e. a 3x3 kernel with
 centered on idx).</p>
 <dl class="field-list simple">
@@ -4271,7 +3925,8 @@ centered on idx).</p>
 <dl class="function">
 <dt id="rivgraph.walk.handle_bp">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">handle_bp</code><span class="sig-paren">(</span><em>linkid</em>, <em>bpnode</em>, <em>nodes</em>, <em>links</em>, <em>links2do</em>, <em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#handle_bp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.handle_bp" title="Permalink to this definition">¶</a></dt>
-<dd><p>When walking along a skeleton and encountering a branchpoint, we want to
+<dd><p>Handle branchpoints.</p>
+<p>When walking along a skeleton and encountering a branchpoint, we want to
 initialize all un-done links emanating from the branchpoint. Each new link
 contains the branchpoint as the first index, and this function also takes
 the first step of the link.</p>
@@ -4282,7 +3937,7 @@ the first step of the link.</p>
 <li><p><strong>bpnode</strong> (<em>np.int</em>) – Node id of the branchpoint to be resolved.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
-<li><p><strong>links2do</strong> (<a class="reference internal" href="#rivgraph.ordered_set.OrderedSet" title="rivgraph.ordered_set.OrderedSet"><em>OrderedSet</em></a>) – This set keeps track of all the links that still need to be resolved
+<li><p><strong>links2do</strong> (<em>OrderedSet</em>) – This set keeps track of all the links that still need to be resolved
 in the full skeleton. It is generated and populated in mask_to_graph.</p></li>
 <li><p><strong>Iskel</strong> (<em>np.ndarray</em>) – Image of the local skeletonized mask.</p></li>
 </ul>
@@ -4303,7 +3958,8 @@ nodes added.</p></li>
 <dl class="function">
 <dt id="rivgraph.walk.idcs_no_turnaround">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">idcs_no_turnaround</code><span class="sig-paren">(</span><em>idcs</em>, <em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#idcs_no_turnaround"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.idcs_no_turnaround" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns list of possible indices to walk toward given two input indices
+<dd><p>Find possible indices to walk to given two input indices.</p>
+<p>Returns list of possible indices to walk toward given two input indices
 (idcs).</p>
 <p>Possible indices are defined as those which require no turning around;
 e.g. if moving down, only indices further below idcs[1] will be returned.
@@ -4330,7 +3986,8 @@ not move “backwards.”</p>
 <dl class="function">
 <dt id="rivgraph.walk.is_bp">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">is_bp</code><span class="sig-paren">(</span><em>idx</em>, <em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#is_bp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.is_bp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines if the index given by idx is a branchpoint. Branchpoints are
+<dd><p>Determine if an index is a branchpoint.</p>
+<p>Determines if the index given by idx is a branchpoint. Branchpoints are
 not simply pixels in the skeleton with more than two neighbors; they are
 pruned through a somewhat complicated procedure that minimizes the number
 of required branchpoints to preserve the skeleton topology.</p>
@@ -4376,7 +4033,8 @@ neighbors.</p></li>
 <dl class="function">
 <dt id="rivgraph.walk.isbp_walk_for_bps">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">isbp_walk_for_bps</code><span class="sig-paren">(</span><em>I</em>, <em>bpi</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#isbp_walk_for_bps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.isbp_walk_for_bps" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds branchpoints by ensuring that all pixels in the sub-skeleton can be
+<dd><p>Find branchpoints by walking from a pixel.</p>
+<p>Finds branchpoints by ensuring that all pixels in the sub-skeleton can be
 walked to from the set of already-found branchpoints, without visiting
 the same pixel more than once.</p>
 <dl class="field-list simple">
@@ -4399,7 +4057,8 @@ padded version of Iskel.</p></li>
 <dl class="function">
 <dt id="rivgraph.walk.naxes_connectivity">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">naxes_connectivity</code><span class="sig-paren">(</span><em>I</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#naxes_connectivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.naxes_connectivity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the number of axes of connectivity for each pixel in an input
+<dd><p>Compute number of axes of connectivity.</p>
+<p>Computes the number of axes of connectivity for each pixel in an input
 skeleton. The maximum is four; horizontal, vertical, and two diagonals.</p>
 <p>The number of axes of pixel connectivity is used to determine where to
 place branchpoints.</p>
@@ -4421,7 +4080,8 @@ by each pixel’s connectivity.</p>
 <dl class="function">
 <dt id="rivgraph.walk.walkable_neighbors">
 <code class="descclassname">rivgraph.walk.</code><code class="descname">walkable_neighbors</code><span class="sig-paren">(</span><em>link</em>, <em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/walk.html#walkable_neighbors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.walk.walkable_neighbors" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns all the walkable neighbors from the end pixel of an input link.
+<dd><p>Find all walkable neighbors from the end pixel of an input link.</p>
+<p>Returns all the walkable neighbors from the end pixel of an input link.
 Walkable neighbors are simply pixels that are “on” within Iskel. The pixels
 in the link are excluded as possibilities.</p>
 <dl class="field-list simple">

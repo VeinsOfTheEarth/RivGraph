@@ -161,7 +161,7 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">RivGraph (classes.py)</span>
-<span class="sd">=============</span>
+<span class="sd">=====================</span>
 <span class="sd">Classes for running rivgraph commands on your channel network.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
@@ -183,14 +183,21 @@
 <span class="kn">import</span> <span class="nn">rivgraph.rivers.river_directionality</span> <span class="k">as</span> <span class="nn">rd</span>
 <span class="kn">import</span> <span class="nn">rivgraph.rivers.river_utils</span> <span class="k">as</span> <span class="nn">ru</span>
 
+
 <div class="viewcode-block" id="rivnetwork"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork">[docs]</a><span class="k">class</span> <span class="nc">rivnetwork</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The rivnetwork class organizes data and methods for channel networks. This is</span>
-<span class="sd">    a parent class to the delta and river classes which inherit rivnetwork methods and</span>
-<span class="sd">    attributes. This class thus represents the common elements of river and delta</span>
-<span class="sd">    channel networks.</span>
+<span class="sd">    Base rivnetwork class.</span>
+
+<span class="sd">    The rivnetwork class organizes data and methods for channel networks. This</span>
+<span class="sd">    is a parent class to the delta and river classes which inherit rivnetwork</span>
+<span class="sd">    methods and attributes. This class thus represents the common elements of</span>
+<span class="sd">    river and delta channel networks.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="rivnetwork.__init__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exit_sides</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+
+<div class="viewcode-block" id="rivnetwork.__init__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">exit_sides</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a channelnetwork class.</span>
 
@@ -198,13 +205,19 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        name : str</span>
-<span class="sd">            The name of the channel network; also defines the folder name for storing results.</span>
+<span class="sd">            The name of the channel network; also defines the folder name for</span>
+<span class="sd">            storing results.</span>
 <span class="sd">        path_to_mask : str</span>
-<span class="sd">           Points to the channel network mask file path</span>
-<span class="sd">        results_folder : str</span>
+<span class="sd">            Points to the channel network mask file path</span>
+<span class="sd">        results_folder : str, optional</span>
 <span class="sd">            Specifies a directory where results should be stored</span>
-<span class="sd">        exit_sides : str</span>
-<span class="sd">            Only required for river channel netowrks. A two-character string (from N, E, S, or W) that denotes which sides of the image the river intersects (upstream first) -- e.g. &#39;NS&#39;, &#39;EW&#39;, &#39;NW&#39;, etc.</span>
+<span class="sd">        exit_sides : str, optional</span>
+<span class="sd">            Only required for river channel netowrks. A two-character string</span>
+<span class="sd">            (from N, E, S, or W) that denotes which sides of the image the</span>
+<span class="sd">            river intersects (upstream first) -- e.g. &#39;NS&#39;, &#39;EW&#39;, &#39;NW&#39;, etc.</span>
+<span class="sd">        verbose : bool, optional</span>
+<span class="sd">            If True, print run information and warnings to the console, default</span>
+<span class="sd">            is False.</span>
 
 
 <span class="sd">        Attributes</span>
@@ -214,7 +227,8 @@
 <span class="sd">        verbose : str</span>
 <span class="sd">            [True] or False to specify if processing updates should be printed.</span>
 <span class="sd">        d : osgeo.gdal.Dataset</span>
-<span class="sd">            object created by gdal.Open() that provides access to geotiff metadata</span>
+<span class="sd">            object created by gdal.Open() that provides access to geotiff</span>
+<span class="sd">            metadata</span>
 <span class="sd">        mask_path : str</span>
 <span class="sd">            filepath to the input binary channel network mask</span>
 <span class="sd">        imshape : tuple</span>
@@ -222,21 +236,27 @@
 <span class="sd">        gt : tuple</span>
 <span class="sd">            gdal-type Geotransform of the input mask geotiff</span>
 <span class="sd">        wkt : str</span>
-<span class="sd">            well known text representation of coordinate reference system of input mask geotiff</span>
+<span class="sd">            well known text representation of coordinate reference system of</span>
+<span class="sd">            input mask geotiff</span>
 <span class="sd">        epsg: int</span>
 <span class="sd">            epsg code of the coordinate reference system of input mask geotiff</span>
 <span class="sd">        unit: str</span>
-<span class="sd">            units of the coordinate reference system; typically &#39;degree&#39; or &#39;meter&#39;</span>
+<span class="sd">            units of the coordinate reference system; typically &#39;degree&#39; or</span>
+<span class="sd">            &#39;meter&#39;</span>
 <span class="sd">        pixarea: int or float</span>
 <span class="sd">            area of each pixel, in units of &#39;unit&#39;</span>
 <span class="sd">        pixlen: int or float</span>
 <span class="sd">            length of each pixel, assumes sides are equal-length</span>
 <span class="sd">        paths: dict</span>
-<span class="sd">            dictionary of strings for managing where files should be read/written</span>
+<span class="sd">            dictionary of strings for managing where files should be</span>
+<span class="sd">            read/written</span>
 <span class="sd">        exit_sides: str</span>
-<span class="sd">            two-character string denoting which sides of the image the channel network intersects (N,E,S, and/or W). Upstream side should be given first.</span>
+<span class="sd">            two-character string denoting which sides of the image the channel</span>
+<span class="sd">            network intersects (N,E,S, and/or W). Upstream side should be given</span>
+<span class="sd">            first.</span>
 <span class="sd">        Imask: numpy.ndarray</span>
-<span class="sd">            binary mask found at mask_path loaded into a numpy array via gdal.Open().ReadAsArray(), dtype=np.bool</span>
+<span class="sd">            binary mask found at mask_path loaded into a numpy array via</span>
+<span class="sd">            `gdal.Open().ReadAsArray()`, dtype=np.bool</span>
 <span class="sd">        links: dict</span>
 <span class="sd">            Stores the links of the network and associated properties</span>
 <span class="sd">        nodes: dict</span>
@@ -253,12 +273,16 @@
         <span class="k">if</span> <span class="n">results_folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">prepare_paths</span><span class="p">(</span><span class="n">results_folder</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">prepare_paths</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path_to_mask</span><span class="p">))</span> <span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">prepare_paths</span><span class="p">(</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span>
+                                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path_to_mask</span><span class="p">)),</span> <span class="n">name</span><span class="p">,</span>
+                                    <span class="n">path_to_mask</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">path_to_mask</span><span class="p">)</span>
 
         <span class="c1"># Handle georeferencing</span>
         <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gdobj</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">],</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GA_Update</span><span class="p">)</span> <span class="c1"># GA_Update required for setting dummy projection/geotransform</span>
+        <span class="c1"># GA_Update required for setting dummy projection/geotransform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gdobj</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">],</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GA_Update</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imshape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gdobj</span><span class="o">.</span><span class="n">RasterYSize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdobj</span><span class="o">.</span><span class="n">RasterXSize</span><span class="p">)</span>
 
         <span class="c1"># Create dummy georeferencing if none is supplied</span>
@@ -290,10 +314,11 @@
 
 <div class="viewcode-block" id="rivnetwork.compute_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_network">[docs]</a>    <span class="k">def</span> <span class="nf">compute_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Computes the links and nodes of the channel network mask.  First skeletonizes</span>
-<span class="sd">        the mask if not already done, then resolves the skeleton&#39;s graph.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Computes the links and nodes of the channel network mask.</span>
+<span class="sd">        First skeletonizes the mask if not already done, then resolves the</span>
+<span class="sd">        skeleton&#39;s graph.</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Iskel&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">skeletonize</span><span class="p">()</span>
 
@@ -309,10 +334,11 @@
 <div class="viewcode-block" id="rivnetwork.compute_distance_transform"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_distance_transform">[docs]</a>    <span class="k">def</span> <span class="nf">compute_distance_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the distance transform of the channel network mask.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Load the distance transform if it already exists</span>
-        <span class="k">if</span> <span class="s1">&#39;Idist&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;Idist&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;Idist&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> \
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;Idist&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Idist</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;Idist&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">ReadAsArray</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -328,8 +354,8 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes widths and lengths of each link in the links dictionary and</span>
 <span class="sd">        appends them as dictionary attributes.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;links&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">compute_network</span><span class="p">()</span>
 
@@ -340,7 +366,8 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing link widths and lengths...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
         <span class="c1"># Widths and lengths are appended to links dict</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_widths_and_lengths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Idist</span><span class="p">,</span> <span class="n">pixlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_widths_and_lengths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Idist</span><span class="p">,</span>
+                                                 <span class="n">pixlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span></div>
@@ -348,29 +375,32 @@
 
 <div class="viewcode-block" id="rivnetwork.compute_junction_angles"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_junction_angles">[docs]</a>    <span class="k">def</span> <span class="nf">compute_junction_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Computes the angle at nodes where only three links are connected. Directions</span>
-<span class="sd">        must be assigned before angles can be computed. Also defines each 3-link</span>
-<span class="sd">        node as &#39;confluence&#39; or &#39;bifurcation&#39; and appends this designation to</span>
-<span class="sd">        the nodes dictionary.</span>
+<span class="sd">        Computes the angle at nodes where only three links are connected.</span>
+<span class="sd">        Directions must be assigned before angles can be computed. Also defines</span>
+<span class="sd">        each 3-link node as &#39;confluence&#39; or &#39;bifurcation&#39; and appends this</span>
+<span class="sd">        designation to the nodes dictionary.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        weight : str</span>
-<span class="sd">            [None], &#39;exp&#39; (exponential), or &#39;lin&#39; (linear) to determine the decay</span>
-<span class="sd">            of the weights the contributions of pixels as we move away from the</span>
-<span class="sd">            junction node.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            [None], &#39;exp&#39; (exponential), or &#39;lin&#39; (linear) to determine the</span>
+<span class="sd">            decay of the weights the contributions of pixels as we move away</span>
+<span class="sd">            from the junction node.</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s1">&#39;certain&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Junction angles cannot be computed before link directions are set.&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">junction_angles</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">imshape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span></div>
-            
-            
-<div class="viewcode-block" id="rivnetwork.get_islands"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.get_islands">[docs]</a>    <span class="k">def</span> <span class="nf">get_islands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;area&#39;</span><span class="p">,</span> <span class="s1">&#39;maxwidth&#39;</span><span class="p">,</span> <span class="s1">&#39;major_axis_length&#39;</span><span class="p">,</span> <span class="s1">&#39;minor_axis_length&#39;</span><span class="p">,</span> <span class="s1">&#39;surrounding_links&#39;</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">junction_angles</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">imshape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">,</span>
+                                             <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="rivnetwork.get_islands"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.get_islands">[docs]</a>    <span class="k">def</span> <span class="nf">get_islands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;area&#39;</span><span class="p">,</span> <span class="s1">&#39;maxwidth&#39;</span><span class="p">,</span> <span class="s1">&#39;major_axis_length&#39;</span><span class="p">,</span>
+                                 <span class="s1">&#39;minor_axis_length&#39;</span><span class="p">,</span> <span class="s1">&#39;surrounding_links&#39;</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds all the islands in the binary mask and computes their morphological</span>
-<span class="sd">        properties. Can be used to help &quot;clean&quot; masks of small islands. </span>
+<span class="sd">        properties. Can be used to help &quot;clean&quot; masks of small islands.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -378,15 +408,15 @@
 <span class="sd">            Properties to compute for each island. Properties can be any of those</span>
 <span class="sd">            provided by rivgraph.im_utils.regionprops.</span>
 <span class="sd">            The default is [&#39;area&#39;, &#39;maxwidth&#39;, &#39;major_axis_length&#39;, &#39;minor_axis_length&#39;].</span>
-<span class="sd">       </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        islands : geopandas GeoDataFrame</span>
 <span class="sd">             Contains the polygons of each island with the requested property</span>
-<span class="sd">             attributes as columns. An additional &#39;remove&#39; attribute is </span>
-<span class="sd">             initialized to make thresholding easier. </span>
+<span class="sd">             attributes as columns. An additional &#39;remove&#39; attribute is</span>
+<span class="sd">             initialized to make thresholding easier.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        
         <span class="n">do_surr</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="s1">&#39;surrounding_links&#39;</span> <span class="ow">in</span> <span class="n">props</span><span class="p">:</span>
             <span class="n">props</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;surrounding_links&#39;</span><span class="p">)</span>
@@ -397,30 +427,30 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Getting island properties...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-        
+
         <span class="n">islands</span><span class="p">,</span> <span class="n">Iislands</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">get_island_properties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixarea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gt</span><span class="p">,</span> <span class="n">props</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="n">do_surr</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="s1">&#39;wid_adj&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">compute_link_width_and_length</span><span class="p">()</span>
-            
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing surrounding links for each island...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
             <span class="n">islands</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">surrounding_link_properties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">,</span> <span class="n">islands</span><span class="p">,</span> <span class="n">Iislands</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixarea</span><span class="p">)</span>
-        
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span>
 
         <span class="c1"># Add a column to be used for thresholding</span>
         <span class="n">islands</span><span class="p">[</span><span class="s1">&#39;remove&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">islands</span><span class="p">))]</span>
-        
+
         <span class="k">return</span> <span class="n">islands</span><span class="p">,</span> <span class="n">Iislands</span></div>
-        
-        
+
+
 <div class="viewcode-block" id="rivnetwork.plot"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates matplotlib plots of the network.</span>
@@ -431,6 +461,7 @@
 <span class="sd">            If [None], both of the following plots will be generated:</span>
 <span class="sd">            &#39;network&#39;: links and nodes are plotted, labeled with their ids</span>
 <span class="sd">            &#39;directions&#39;: links are plotted with their directionality indicated</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">## TODO: add error handling for wrong plotting commands</span>
 
@@ -469,8 +500,8 @@
 <span class="sd">        path : str</span>
 <span class="sd">            path--including extension--to network .pkl file. If [None], file</span>
 <span class="sd">            written to path found in paths[&#39;network_pickle&#39;]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">path</span><span class="o">==</span><span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;paths&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No path is available to load the network.&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -521,8 +552,9 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        A : numpy.ndarray</span>
-<span class="sd">             an NxN matrix representing the connectivity of the graph, where N is the</span>
-<span class="sd">             number of nodes in the network. See adjacency matrix for more details.</span>
+<span class="sd">            an NxN matrix representing the connectivity of the graph, where N</span>
+<span class="sd">            is the number of nodes in the network. See adjacency matrix for more details.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Create (weighted) adjacency matrix networkx object</span>
         <span class="n">G</span> <span class="o">=</span> <span class="n">dm</span><span class="o">.</span><span class="n">graphiphy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
@@ -543,17 +575,28 @@
 <span class="sd">        ----------</span>
 <span class="sd">        export : str</span>
 <span class="sd">            Determines which features to export. Choose from:</span>
-<span class="sd">                all (exports all available vector data)</span>
-<span class="sd">                network (links and nodes)</span>
-<span class="sd">                links</span>
-<span class="sd">                nodes</span>
-<span class="sd">                centerline (river classes only)</span>
-<span class="sd">                mesh (centerline mesh, river classes only)</span>
-<span class="sd">                centerline_smooth (river classes only)</span>
+
+<span class="sd">            - all (exports all available vector data)</span>
+
+<span class="sd">            - network (links and nodes)</span>
+
+<span class="sd">            - links</span>
+
+<span class="sd">            - nodes</span>
+
+<span class="sd">            - centerline (river classes only)</span>
+
+<span class="sd">            - mesh (centerline mesh, river classes only)</span>
+
+<span class="sd">            - centerline_smooth (river classes only)</span>
+<span class="sd">            </span>
 <span class="sd">        ftype : str</span>
 <span class="sd">            Sets the output file format. Choose from:</span>
-<span class="sd">                json (GeoJSON)</span>
-<span class="sd">                shp  (ESRI Shapefile)</span>
+
+<span class="sd">            - json (GeoJSON)</span>
+
+<span class="sd">            - shp  (ESRI Shapefile)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get extension for requested output type</span>
         <span class="k">if</span> <span class="n">ftype</span> <span class="o">==</span> <span class="s1">&#39;json&#39;</span><span class="p">:</span>
@@ -618,6 +661,7 @@
 <span class="sd">                &#39;directions&#39; - network burned into a raster with link directions from 0 (upstream) to 1 (downstream))</span>
 <span class="sd">                &#39;skeleton&#39;  - skeletonized mask</span>
 <span class="sd">                &#39;distance&#39; - distance-transformed mask</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">valid_exports</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;directions&#39;</span><span class="p">,</span> <span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="s1">&#39;skeleton&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">export</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_exports</span><span class="p">:</span>
@@ -679,7 +723,6 @@
 <span class="sd">            RivGraph will output processing progress if &#39;True&#39;. Default is &#39;False&#39;.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">rivnetwork</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span></div>
 
 
@@ -688,7 +731,6 @@
 <span class="sd">        Skeletonizes the delta binary mask.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Imask&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Mask array was not provided or was unreadable.&#39;</span><span class="p">)</span>
 
@@ -717,18 +759,18 @@
 <span class="sd">        ----------</span>
 <span class="sd">        path_shoreline : str, optional</span>
 <span class="sd">            Path to shoreline shapefile/geosjon. The default is None but will</span>
-<span class="sd">            check for the file at paths[&#39;shoreline&#39;].</span>
+<span class="sd">            check for the file at `paths[&#39;shoreline&#39;]`.</span>
 <span class="sd">        path_inletnodes : str, optional</span>
 <span class="sd">            Path to inlet nodes shapefile/geojson. The default is None but will</span>
-<span class="sd">            check for the file at paths[&#39;inlet_nodes&#39;].</span>
+<span class="sd">            check for the file at `paths[&#39;inlet_nodes&#39;]`.</span>
 
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        None, but saves pruned links and nodes dictionaries to class object.</span>
+<span class="sd">        :</span>
+<span class="sd">            None, but saves pruned links and nodes dictionaries to class object.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">path_shoreline</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">path_shoreline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;shoreline&#39;</span><span class="p">]</span>
@@ -747,8 +789,8 @@
 <div class="viewcode-block" id="delta.assign_flow_directions"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta.assign_flow_directions">[docs]</a>    <span class="k">def</span> <span class="nf">assign_flow_directions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes flow directions for each link in the delta channel network.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;links&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Network has not yet been computed.&#39;</span><span class="p">)</span>
 
@@ -767,8 +809,8 @@
 <div class="viewcode-block" id="delta.compute_topologic_metrics"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta.compute_topologic_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">compute_topologic_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes a suite of connectivity and network metrics for a delta channel network.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;links&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Network has not yet been computed.&#39;</span><span class="p">)</span>
 
@@ -783,12 +825,11 @@
 <span class="sd">    A class to manage and organize data and methods for analyzing a braided river channel network.</span>
 <span class="sd">    This class inherets all the attributes and methods of the rivnewtwork class, but also includes delta-specific attributes and methods.</span>
 
-<span class="sd">    ...</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    Iskel : np.ndarray</span>
-<span class="sd">        image of the skeletonized binary mask</span>
+<span class="sd">        Image of the skeletonized binary mask</span>
 <span class="sd">    topo_metrics : dict</span>
 <span class="sd">        Contains a number of connectivity and network metrics.</span>
 <span class="sd">    centerline : tuple of two numpy.ndarrays</span>
@@ -819,10 +860,12 @@
 <span class="sd">    assign_flow_direcions()</span>
 <span class="sd">        Computes flow directions for each link in the delta channel network.</span>
 <span class="sd">    set_flow_dirs_manually()</span>
-<span class="sd">        Reads a user-created .csv file found at paths[&#39;fixlinks_csv&#39;] to set flow directions of specified liks.</span>
+<span class="sd">        Reads a user-created .csv file found at `paths[&#39;fixlinks_csv&#39;]` to set flow directions of specified links.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="river.__init__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exit_sides</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="river.__init__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">exit_sides</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">exit_sides</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span><span class="s1">&#39;Must provide exit_sides for river class.&#39;</span><span class="p">)</span>
@@ -833,8 +876,8 @@
 <div class="viewcode-block" id="river.skeletonize"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.skeletonize">[docs]</a>    <span class="k">def</span> <span class="nf">skeletonize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Skeletonizes the river binary mask.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Imask&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Mask array was not provided or was unreadable.&#39;</span><span class="p">)</span>
 
@@ -855,8 +898,8 @@
 <div class="viewcode-block" id="river.prune_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.prune_network">[docs]</a>    <span class="k">def</span> <span class="nf">prune_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prunes the computed river network.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;links&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Could not prune river. Check that network has been computed.&#39;</span><span class="p">)</span>
 
@@ -869,8 +912,8 @@
 <div class="viewcode-block" id="river.compute_centerline"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.compute_centerline">[docs]</a>    <span class="k">def</span> <span class="nf">compute_centerline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the centerline of the holes-filled river binary image.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing centerline...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
@@ -888,11 +931,11 @@
 <span class="sd">        of sorts. The mesh is useful for computing spatial statistics as a function</span>
 <span class="sd">        of downstream distance. The resulting mesh captures the low-frequency</span>
 <span class="sd">        characteristic of the river corridor.</span>
-<span class="sd">        </span>
+
 <span class="sd">        This tool is tricky to fully automate, and the user may need to play</span>
 <span class="sd">        with the smoothing and bufferdist parameters if errors are thrown or</span>
 <span class="sd">        the result is not satisfying.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        grid_spacing : float</span>
@@ -905,8 +948,8 @@
 <span class="sd">            Defines the offset distance of the left- and right-valleylines from</span>
 <span class="sd">            from the centerline. Units correspond to those of the CRS of the</span>
 <span class="sd">            input mask.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        
         <span class="c1"># Need a centerline</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;centerline&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">compute_centerline</span><span class="p">()</span>
@@ -917,7 +960,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">compute_network</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="s1">&#39;wid_adj&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">compute_link_width_and_length</span><span class="p">()</span>
-           
+
             <span class="c1"># self.avg_chan_width = np.mean(self.links[&#39;wid_a1dj&#39;])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">avg_chan_width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixarea</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;len_adj&#39;</span><span class="p">])</span>
 
@@ -929,12 +972,12 @@
         <span class="k">if</span> <span class="n">buf_halfwidth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Compute the maximum valley width in pixels</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;max_valley_width_pixels&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                
+
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing maximum valley width...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-               
+
                 <span class="bp">self</span><span class="o">.</span><span class="n">max_valley_width_pixels</span> <span class="o">=</span> <span class="n">ru</span><span class="o">.</span><span class="n">max_valley_width</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">)</span>
-                
+
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span>
 
@@ -954,8 +997,8 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Automatically sets flow directions for each link in a braided river</span>
 <span class="sd">        channel network.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s1">&#39;inlets&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Cannot assign flow directions until prune_network() has been run.&#39;</span><span class="p">)</span>
 
@@ -975,10 +1018,6 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span></div></div>
-
-
-
-
 </pre></div>
 
            </div>

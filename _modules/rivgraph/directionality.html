@@ -161,7 +161,7 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Directionality Utils (directionality.py)</span>
-<span class="sd">=============</span>
+<span class="sd">========================================</span>
 
 <span class="sd">Created on Wed Nov  7 11:38:16 2018</span>
 <span class="sd">@author: Jon</span>
@@ -177,9 +177,10 @@
 
 <div class="viewcode-block" id="add_directionality_trackers"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.add_directionality_trackers">[docs]</a><span class="k">def</span> <span class="nf">add_directionality_trackers</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">ntype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Adds fields to the links and nodes dictionaries that are required for </span>
-<span class="sd">    setting and diagnosing directionality. Nodes are not altered in this </span>
+<span class="sd">    Adds fields to the links and nodes dictionaries that are required for</span>
+<span class="sd">    setting and diagnosing directionality. Nodes are not altered in this</span>
 <span class="sd">    function, but passed for consistency and generalizability.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -188,6 +189,7 @@
 <span class="sd">        Network nodes and associated properties.</span>
 <span class="sd">    ntype : str</span>
 <span class="sd">        Network type. Choose either &#39;delta&#39; or &#39;river&#39;.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -195,19 +197,19 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="c1"># Add a &#39;certain&#39; entry to the links dict to keep track of links whose directions have been set</span>
-    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))</span> <span class="c1"># tracks whether a link&#39;s directinoality is certain or not</span>
-    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain_order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))</span> <span class="c1"># tracks the order in which links certainty is set</span>
-    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain_alg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))</span> <span class="c1"># tracks the algorithm used to set certainty</span>
+    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))</span>  <span class="c1"># tracks whether a link&#39;s directinoality is certain or not</span>
+    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain_order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))</span>  <span class="c1"># tracks the order in which links certainty is set</span>
+    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain_alg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))</span>  <span class="c1"># tracks the algorithm used to set certainty</span>
 
     <span class="c1"># Add a &quot;guess&quot; entry to keep track of the different algorithms&#39; guesses for flow directionality</span>
-    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;guess&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))]</span> <span class="c1"># contains guess at upstream ndoe</span>
-    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;guess_alg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))]</span> <span class="c1"># contains algorithm that made guess</span>
+    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;guess&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))]</span>  <span class="c1"># contains guess at upstream ndoe</span>
+    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;guess_alg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))]</span>  <span class="c1"># contains algorithm that made guess</span>
 
     <span class="c1"># Add network-type-specific properties</span>
     <span class="k">if</span> <span class="n">ntype</span> <span class="o">==</span> <span class="s1">&#39;river&#39;</span><span class="p">:</span>
-        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;maxang&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="c1"># saves the angle used in set_by_flow_directions, diagnostic only</span>
+        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;maxang&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># saves the angle used in set_by_flow_directions, diagnostic only</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
@@ -218,10 +220,12 @@
 <span class="sd">    set link directionality. These numbers are found in links[&#39;guess_alg&#39;] and</span>
 <span class="sd">    links[&#39;certain_alg&#39;] and are useful for diagnosing issues in setting</span>
 <span class="sd">    directionality.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    key : str</span>
 <span class="sd">        See the mapper below for the possible keywords.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    algno : float or int</span>
@@ -237,7 +241,7 @@
               <span class="s1">&#39;main_chans&#39;</span> <span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
               <span class="s1">&#39;bridges&#39;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
               <span class="s1">&#39;known_fdr&#39;</span> <span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
-              <span class="s1">&#39;known_fdr_rs&#39;</span> <span class="p">:</span> <span class="mf">6.1</span><span class="p">,</span> 
+              <span class="s1">&#39;known_fdr_rs&#39;</span> <span class="p">:</span> <span class="mf">6.1</span><span class="p">,</span>
               <span class="s1">&#39;syn_dem&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
               <span class="s1">&#39;syn_dem_med&#39;</span> <span class="p">:</span> <span class="mf">10.1</span><span class="p">,</span>
               <span class="s1">&#39;sym_dem_leftover&#39;</span> <span class="p">:</span> <span class="mf">10.2</span><span class="p">,</span>
@@ -249,14 +253,14 @@
               <span class="s1">&#39;cl_dist_guess&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
               <span class="s1">&#39;cl_ang_guess&#39;</span> <span class="p">:</span> <span class="mi">21</span><span class="p">,</span>
               <span class="s1">&#39;cl_dist_set&#39;</span> <span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
-              <span class="s1">&#39;cl_ang_set&#39;</span> <span class="p">:</span> <span class="mi">23</span><span class="p">,</span> 
+              <span class="s1">&#39;cl_ang_set&#39;</span> <span class="p">:</span> <span class="mi">23</span><span class="p">,</span>
               <span class="s1">&#39;cl_ang_rs&#39;</span> <span class="p">:</span> <span class="mf">23.1</span><span class="p">,</span>
               <span class="s1">&#39;cl_dist_and_ang&#39;</span> <span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
               <span class="s1">&#39;short_no_bktrck&#39;</span> <span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
               <span class="s1">&#39;wid_pctdiff&#39;</span> <span class="p">:</span> <span class="mi">26</span><span class="p">}</span>
-    
+
     <span class="n">algno</span> <span class="o">=</span> <span class="n">mapper</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-    
+
     <span class="k">return</span> <span class="n">algno</span></div>
 
 
@@ -264,10 +268,11 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets all possible links&#39; directions using the nearest main channel. The</span>
 <span class="sd">    main channels are found as the widest, shortest paths from each inlet to</span>
-<span class="sd">    each outlet. For each unknown link, the distance is computed from its </span>
+<span class="sd">    each outlet. For each unknown link, the distance is computed from its</span>
 <span class="sd">    endpoints to the nearest nodes of the nearest main channel. If the nearest</span>
 <span class="sd">    nodes of the main channel include more than 2 + nodethresh nodes, the</span>
 <span class="sd">    direction of the main channel is used to set the unknown link.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -280,6 +285,7 @@
 <span class="sd">        Threshold for the number of nodes along the nearest main channel that</span>
 <span class="sd">        must be encompassed by the unknown link&#39;s endnodes to confidently</span>
 <span class="sd">        set the unknown link&#39;s direction. The default is 0.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -289,7 +295,7 @@
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="c1"># alg = 3 # identifier for diagnostics</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;parallels&#39;</span><span class="p">)</span>
 
@@ -328,7 +334,7 @@
     <span class="n">rc_pathnodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">pathnode_set_idcs</span><span class="p">,</span> <span class="n">imshape</span><span class="p">)</span>
 
     <span class="c1"># Find the nearest path to all uncertain links</span>
-    <span class="n">uncertains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">uncertains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">uncertains</span><span class="p">:</span>
 
         <span class="c1"># Since we&#39;re not updating uncertains as links are being set, need to</span>
@@ -349,7 +355,7 @@
 
         <span class="c1"># Choose any path that is nearest to both nodes</span>
         <span class="n">closest_to_link</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nearest_paths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nearest_paths</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">closest_to_link</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># The links&#39;s endpoints are closer to two different paths</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">closest_to_link</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># The links&#39;s endpoints are closer to two different paths</span>
             <span class="k">continue</span>
 
         <span class="n">use_path</span> <span class="o">=</span> <span class="n">closest_to_link</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
@@ -376,7 +382,8 @@
 
 <div class="viewcode-block" id="nodepath_to_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.nodepath_to_links">[docs]</a><span class="k">def</span> <span class="nf">nodepath_to_links</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts a path defined by node ids to a path defined by link ids. </span>
+<span class="sd">    Converts a path defined by node ids to a path defined by link ids.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    path : list</span>
@@ -385,6 +392,7 @@
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    linkpath : list</span>
@@ -392,7 +400,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">linkpath</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+    <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
         <span class="n">ulinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">u</span><span class="p">)]</span>
         <span class="n">vlinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span>
         <span class="n">linkpath</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ul</span> <span class="k">for</span> <span class="n">ul</span> <span class="ow">in</span> <span class="n">ulinks</span> <span class="k">if</span> <span class="n">ul</span> <span class="ow">in</span> <span class="n">vlinks</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
@@ -404,12 +412,14 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the index of the inlet occurring at the widest link. Index is with</span>
 <span class="sd">    respect to the nodes[&#39;id&#39;] list.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    inlet_idx : int</span>
@@ -434,12 +444,14 @@
 <span class="sd">    Guesses directionality of links based on shortest paths from widest inlet</span>
 <span class="sd">    link to all the outlet links. Links are also weighted by width, such that</span>
 <span class="sd">    deviations from the &quot;main channel&quot; width cost more to traverse.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -488,16 +500,18 @@
 <div class="viewcode-block" id="dir_shortest_paths_nodes"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.dir_shortest_paths_nodes">[docs]</a><span class="k">def</span> <span class="nf">dir_shortest_paths_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Guesses link directionality based on the shortest path from its end</span>
-<span class="sd">    nodes to the nearest outlet (or pre-outlet). For each unknown link, if the </span>
-<span class="sd">    path flows through the link attached to the node (as opposed to immediately)</span>
+<span class="sd">    nodes to the nearest outlet (or pre-outlet). For each unknown link, if the</span>
+<span class="sd">    path flows through the link attached to the node (as opposed to immediately</span>
 <span class="sd">    away from the link), its directionality is set; otherwise nothing</span>
 <span class="sd">    is done. Note that this will not set all links&#39; directionalities.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -507,10 +521,10 @@
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="c1"># alg = 12 # identifier for diagnostics</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;sp_nodes&#39;</span><span class="p">)</span>
-    
+
     <span class="c1"># Create networkX graph, adding weighted edges</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
     <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
@@ -560,12 +574,13 @@
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 
-<div class="viewcode-block" id="dir_shortest_paths_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.dir_shortest_paths_links">[docs]</a><span class="k">def</span> <span class="nf">dir_shortest_paths_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">difthresh</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="dir_shortest_paths_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.dir_shortest_paths_links">[docs]</a><span class="k">def</span> <span class="nf">dir_shortest_paths_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">difthresh</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Guesses a link&#39;s directionality by which of its endpoint nodes is </span>
-<span class="sd">    closer to the nearest outlet (or preoutlet). &quot;difthresh&quot; refers to the </span>
-<span class="sd">    difference in distances between endpoint nodes; higher means directionality </span>
+<span class="sd">    Guesses a link&#39;s directionality by which of its endpoint nodes is</span>
+<span class="sd">    closer to the nearest outlet (or preoutlet). &quot;difthresh&quot; refers to the</span>
+<span class="sd">    difference in distances between endpoint nodes; higher means directionality</span>
 <span class="sd">    is less likely to be ascertained.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -574,9 +589,10 @@
 <span class="sd">        Network nodes and associated properties.</span>
 <span class="sd">    difthresh : int, optional</span>
 <span class="sd">        Threshold for the length (in number of nodes) that must be surpassed</span>
-<span class="sd">        between an unknown link&#39;s endpoints for directionality to be set. </span>
-<span class="sd">        Lengths are measured from the link&#39;s endpoints to the nearest </span>
+<span class="sd">        between an unknown link&#39;s endpoints for directionality to be set.</span>
+<span class="sd">        Lengths are measured from the link&#39;s endpoints to the nearest</span>
 <span class="sd">        outlet (or preoutlet). The default is 0.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -621,7 +637,7 @@
         <span class="c1"># Skip if the minima are too similar</span>
         <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">node_min_len</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">node_min_len</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">difthresh</span><span class="p">:</span>
             <span class="k">continue</span>
-        <span class="k">else</span><span class="p">:</span> <span class="c1"># DS node is the closer one</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># DS node is the closer one</span>
             <span class="n">dsnode</span> <span class="o">=</span> <span class="n">lconn</span><span class="p">[</span><span class="n">node_min_len</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">node_min_len</span><span class="p">))]</span>
             <span class="n">usnode</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">lconn</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="n">dsnode</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -639,7 +655,7 @@
 <span class="sd">    inlet end nodes for each neighboring link, then sets the unknown link</span>
 <span class="sd">    such that its orientation minimizes the error between its neighbors and</span>
 <span class="sd">    itself.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -651,6 +667,7 @@
 <span class="sd">    checklinks : list OR str, optional</span>
 <span class="sd">        A list of link ids can be provided to check only specific links.</span>
 <span class="sd">        Otherwise, the default is &#39;all&#39; which checks all links.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -678,7 +695,7 @@
     <span class="k">if</span> <span class="n">checklinks</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
         <span class="n">checklinks</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
 
-    <span class="n">linkangs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span><span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">linkangs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="k">for</span> <span class="n">lid</span> <span class="ow">in</span> <span class="n">checklinks</span><span class="p">:</span>
         <span class="n">linkidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">lid</span><span class="p">)</span>
         <span class="n">conn</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span>
@@ -703,7 +720,7 @@
 
         <span class="c1"># Get angles of all connected links (oriented up-to-downstream)</span>
         <span class="n">angs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">horiz_vec</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">horiz_vec</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">connlinks</span><span class="p">:</span>
             <span class="n">linkidxt</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
             <span class="n">lidcst</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidxt</span><span class="p">]</span>
@@ -714,7 +731,7 @@
 
         <span class="c1"># Compute angle for both orientations of unknown link</span>
         <span class="n">poss_angs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">orient</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">orient</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">orient</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">ep_vec</span> <span class="o">=</span> <span class="p">(</span><span class="n">rc_idcs</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">rc_idcs</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">rc_idcs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">rc_idcs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
@@ -734,20 +751,21 @@
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 
-
 <div class="viewcode-block" id="dir_bridges"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.dir_bridges">[docs]</a><span class="k">def</span> <span class="nf">dir_bridges</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Guesses directionality of bridge links. Bridge links are those which flow </span>
-<span class="sd">    must pass through to reach the outlet; in other words, if a bridge link is </span>
-<span class="sd">    removed from the network, there will no longer be just one connected </span>
-<span class="sd">    network. Directionality is inferred by consideration of which subnetwork </span>
+<span class="sd">    Guesses directionality of bridge links. Bridge links are those which flow</span>
+<span class="sd">    must pass through to reach the outlet; in other words, if a bridge link is</span>
+<span class="sd">    removed from the network, there will no longer be just one connected</span>
+<span class="sd">    network. Directionality is inferred by consideration of which subnetwork</span>
 <span class="sd">    (after removing the bridge link) contains inlet and outlet nodes.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -836,12 +854,14 @@
 <span class="sd">    Saves the orientation of a set of links. Used before attempting to fix</span>
 <span class="sd">    cycles. Properties besides &#39;conn&#39; must also be reversed, so their original</span>
 <span class="sd">    orientations are also stored.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    lids : list</span>
 <span class="sd">        Link ids whose orientations should be saved.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    orig : dict</span>
@@ -853,8 +873,8 @@
     <span class="n">orig</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="n">orig</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lids</span>
     <span class="n">orig</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">l</span><span class="p">][:]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lidx</span><span class="p">]</span>
-    <span class="n">orig</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">l</span><span class="p">][:]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lidx</span><span class="p">]</span>
-    <span class="n">orig</span><span class="p">[</span><span class="s1">&#39;wid_pix&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_pix&#39;</span><span class="p">][</span><span class="n">l</span><span class="p">][:]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lidx</span><span class="p">]</span>
+    <span class="n">orig</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">l</span><span class="p">][:]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lidx</span><span class="p">]</span>
+    <span class="n">orig</span><span class="p">[</span><span class="s1">&#39;wid_pix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_pix&#39;</span><span class="p">][</span><span class="n">l</span><span class="p">][:]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lidx</span><span class="p">]</span>
     <span class="n">orig</span><span class="p">[</span><span class="s1">&#39;certain_alg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain_alg&#39;</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lidx</span><span class="p">]</span>
     <span class="n">orig</span><span class="p">[</span><span class="s1">&#39;certain_order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain_order&#39;</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lidx</span><span class="p">]</span>
 
@@ -864,7 +884,7 @@
 <div class="viewcode-block" id="cycle_return_to_original_orientation"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.cycle_return_to_original_orientation">[docs]</a><span class="k">def</span> <span class="nf">cycle_return_to_original_orientation</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">orig</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a set of links to its original orientation.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -872,6 +892,7 @@
 <span class="sd">    orig : dict</span>
 <span class="sd">        Network links and associated properties to return to original</span>
 <span class="sd">        orientations.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -891,19 +912,21 @@
 
 <div class="viewcode-block" id="merge_list_of_lists"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.merge_list_of_lists">[docs]</a><span class="k">def</span> <span class="nf">merge_list_of_lists</span><span class="p">(</span><span class="n">inlist</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Merges a list of lists into a single list, but removes duplicates. </span>
+<span class="sd">    Merges a list of lists into a single list, but removes duplicates.</span>
 <span class="sd">    Uses networkx and itertools for a fun solution.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    inlist : list of lists</span>
 <span class="sd">        List of lists to merge without dulplicates.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    merged : list</span>
 <span class="sd">        List of length equal to number of unique entries across all lists of</span>
 <span class="sd">        inlist.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="c1"># Combine overlapping cycles (where cycles share the same nodes, join them)</span>
     <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations_with_replacement</span><span class="p">,</span> <span class="n">chain</span>
     <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
@@ -917,8 +940,9 @@
 
 <div class="viewcode-block" id="set_link"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_link">[docs]</a><span class="k">def</span> <span class="nf">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">linkidx</span><span class="p">,</span> <span class="n">usnode</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="mi">9999</span><span class="p">,</span> <span class="n">checkcontinuity</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Sets a link directionality. Option to check for continuity (including </span>
+<span class="sd">    Sets a link directionality. Option to check for continuity (including</span>
 <span class="sd">    parallel links) after setting.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -936,15 +960,17 @@
 <span class="sd">    checkcontinuity : bool, optional</span>
 <span class="sd">        If True, checks nearby links for continuity and parallel links after</span>
 <span class="sd">        setting the link&#39;s direction. The default is True.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties with updated link direction.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties with updated link direction.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">usnode</span><span class="p">)</span>
-    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">usnode</span><span class="p">)</span>
+    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">usnode</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">usnode</span><span class="p">)]:</span>
         <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">if</span> <span class="s1">&#39;wid_pix&#39;</span> <span class="ow">in</span> <span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -957,11 +983,11 @@
     <span class="k">if</span> <span class="n">checkcontinuity</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="c1"># Set any other possible links via continuity</span>
         <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_continuity</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">checknodes</span><span class="o">=</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][:])</span>
-       
+
         <span class="c1"># Also set parallel links connected to this one, or if this link is part</span>
         <span class="c1"># of a parallel set, set the others in the set</span>
         <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_parallel_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">knownlink</span><span class="o">=</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">])</span>
-        
+
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 
@@ -969,15 +995,17 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fixes sources and sinks within the network by flipping link directionality</span>
 <span class="sd">    near the problem node(s). The links to flip are chosen by ensuring they do</span>
-<span class="sd">    not create a cycle; if multiple links can be flipped, the shortest one is </span>
+<span class="sd">    not create a cycle; if multiple links can be flipped, the shortest one is</span>
 <span class="sd">    chosen. If no solution is found, links are returned to their original</span>
 <span class="sd">    orientation.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -986,6 +1014,7 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network links and associated properties with sources/sinks fixed if</span>
 <span class="sd">        possible.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">badnodes</span> <span class="o">=</span> <span class="n">check_continuity</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
 
@@ -998,7 +1027,7 @@
         <span class="n">lconn</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">bn</span><span class="p">)]</span>
 
         <span class="c1"># Reverse their order and see if we&#39;ve violated continuity or created a cycle</span>
-        <span class="n">bn_linkflip</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># number of bad nodes after flipping link</span>
+        <span class="n">bn_linkflip</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># number of bad nodes after flipping link</span>
         <span class="n">cycle_linkflip</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lconn</span><span class="p">:</span>
             <span class="n">lidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
@@ -1027,11 +1056,11 @@
         <span class="n">poss_cy</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">clf</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lconn</span><span class="p">,</span> <span class="n">cycle_linkflip</span><span class="p">)</span> <span class="k">if</span> <span class="n">clf</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">poss_links</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">poss_bn</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">poss_cy</span><span class="p">)))</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">poss_links</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># No possible links to flip, move on</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">poss_links</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># No possible links to flip, move on</span>
             <span class="k">continue</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">poss_links</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># Only one possible link we can flip, so do it</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">poss_links</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Only one possible link we can flip, so do it</span>
             <span class="n">linkidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">poss_links</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span> <span class="c1"># More than one link meets the criteria; choose the shortest</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># More than one link meets the criteria; choose the shortest</span>
             <span class="n">linklens</span> <span class="o">=</span> <span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">poss_links</span><span class="p">]</span>
             <span class="n">linkidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">poss_links</span><span class="p">[</span><span class="n">linklens</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">linklens</span><span class="p">))])</span>
 
@@ -1046,16 +1075,19 @@
 <span class="sd">    Finds all sinks or sources within the network, excluding inlets and outlets.</span>
 <span class="sd">    Returns any nodes where continuity is violated. Only checks nodes for whom</span>
 <span class="sd">    all attached links are certain.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    problem_nodes : list</span>
 <span class="sd">        Node ids corresponding to nodes[&#39;id&#39;] where continuity is violated.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">problem_nodes</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">nidx</span><span class="p">,</span> <span class="n">nconn</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">],</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]):</span>
@@ -1084,23 +1116,24 @@
 
 <div class="viewcode-block" id="find_a_cycle"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.find_a_cycle">[docs]</a><span class="k">def</span> <span class="nf">find_a_cycle</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Finds a single cycle in the network. Multiple cycles may exist; this </span>
+<span class="sd">    Finds a single cycle in the network. Multiple cycles may exist; this</span>
 <span class="sd">    function returns only the first one encountered.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    cycle_nodes : list</span>
 <span class="sd">        Node ids comprising the cycle. Arranged in order of cycle.</span>
 <span class="sd">    cycle_links : list</span>
 <span class="sd">        Link ids comprising the cycle. Arranged in order of cycle.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
     <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">lc</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]:</span>
@@ -1111,7 +1144,7 @@
     <span class="n">us</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cycle_nodes</span><span class="p">]</span>
     <span class="n">vs</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cycle_nodes</span><span class="p">]</span>
     <span class="n">cycle_links</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">us</span><span class="p">,</span><span class="n">vs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">us</span><span class="p">,</span> <span class="n">vs</span><span class="p">):</span>
             <span class="n">ulinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">u</span><span class="p">)]</span>
             <span class="n">vlinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span>
             <span class="n">cycle_links</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ul</span> <span class="k">for</span> <span class="n">ul</span> <span class="ow">in</span> <span class="n">ulinks</span> <span class="k">if</span> <span class="n">ul</span> <span class="ow">in</span> <span class="n">vlinks</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
@@ -1125,6 +1158,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds either all cycles in the network or cycles containing the checknode&#39;th</span>
 <span class="sd">    node. Cycles are returned as both nodes and links.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -1132,8 +1166,9 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
 <span class="sd">    checknode : int OR str, optional</span>
-<span class="sd">        ID of node to check for its inclusion in any cycles. If the default </span>
+<span class="sd">        ID of node to check for its inclusion in any cycles. If the default</span>
 <span class="sd">        value &#39;all&#39; is selected, all cycles will be returned.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    cycle_nodes : list of lists</span>
@@ -1142,7 +1177,7 @@
 <span class="sd">    cycles_links : TYPE</span>
 <span class="sd">        List containing lists of all cycles found in the network; cycles are</span>
 <span class="sd">        returned in cyclic order and in terms of link ids.</span>
-<span class="sd">        </span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
     <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
@@ -1161,7 +1196,7 @@
             <span class="k">for</span> <span class="n">cn</span> <span class="ow">in</span> <span class="n">single_cycle</span><span class="p">:</span>
                 <span class="n">cycle_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cn</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">cycle_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">cycle_nodes</span><span class="p">]</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">cycle_nodes</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Get links of cycles</span>
@@ -1169,7 +1204,7 @@
     <span class="k">if</span> <span class="n">cycle_nodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cycle_nodes</span><span class="p">:</span>
             <span class="n">pathlinks</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">us</span><span class="p">,</span><span class="n">vs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]]):</span>
+            <span class="k">for</span> <span class="n">us</span><span class="p">,</span> <span class="n">vs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]]):</span>
                 <span class="n">ulinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">us</span><span class="p">)]</span>
                 <span class="n">vlinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">vs</span><span class="p">)]</span>
                 <span class="n">pathlinks</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ul</span> <span class="k">for</span> <span class="n">ul</span> <span class="ow">in</span> <span class="n">ulinks</span> <span class="k">if</span> <span class="n">ul</span> <span class="ow">in</span> <span class="n">vlinks</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
@@ -1183,17 +1218,20 @@
 <div class="viewcode-block" id="flip_links_in_G"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.flip_links_in_G">[docs]</a><span class="k">def</span> <span class="nf">flip_links_in_G</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">links2flip</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Flips the directionality of links in a networkx graph object.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    G : networkx.Graph or similar</span>
 <span class="sd">        Graph object representing the network.</span>
-<span class="sd">    links2flip : tuple or </span>
-<span class="sd">        An Nx2 tuple containing the US and DS node ids of the edge (link) to </span>
+<span class="sd">    links2flip : tuple or</span>
+<span class="sd">        An Nx2 tuple containing the US and DS node ids of the edge (link) to</span>
 <span class="sd">        flip.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    G : networkx.Graph or similar</span>
 <span class="sd">        Graph object representing the network with the requested links flipped.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">links2flip</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
         <span class="n">links2flip</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
@@ -1207,29 +1245,31 @@
     <span class="k">return</span> <span class="n">G</span></div>
 
 
-
 <div class="viewcode-block" id="fix_cycles"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.fix_cycles">[docs]</a><span class="k">def</span> <span class="nf">fix_cycles</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempts to remove all cycles in the directed graph. A number of approaches</span>
-<span class="sd">    are tried, and if any of them result in a source/sink node or a cycle, </span>
+<span class="sd">    are tried, and if any of them result in a source/sink node or a cycle,</span>
 <span class="sd">    another approach is attempted until the cycle is resolved or we run out</span>
 <span class="sd">    of approaches.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
-<span class="sd">        Network links and associated properties with all possible cycles </span>
+<span class="sd">        Network links and associated properties with all possible cycles</span>
 <span class="sd">        resolved.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties with all possible cycles</span>
 <span class="sd">        resolved</span>
 <span class="sd">    n_cycles_remaining : int</span>
 <span class="sd">        Number of cycles that were unresolvable.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Create networkx graph object</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
@@ -1244,7 +1284,7 @@
         <span class="n">c_nodes</span><span class="p">,</span> <span class="n">c_links</span> <span class="o">=</span> <span class="n">get_cycles</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
 
         <span class="c1"># Remove any cycles that are subsets of larger cycles</span>
-        <span class="n">isin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">c_links</span><span class="p">),</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">isin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">c_links</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
         <span class="n">isin</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
         <span class="k">for</span> <span class="n">icn</span><span class="p">,</span> <span class="n">cn</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">c_nodes</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">icn2</span><span class="p">,</span> <span class="n">cn2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">c_nodes</span><span class="p">):</span>
@@ -1412,10 +1452,11 @@
 
 <div class="viewcode-block" id="dir_set_manually"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.dir_set_manually">[docs]</a><span class="k">def</span> <span class="nf">dir_set_manually</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">manual_set_csv</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Sets link directions based on a user-provided csv-file. The csv file has </span>
+<span class="sd">    Sets link directions based on a user-provided csv-file. The csv file has</span>
 <span class="sd">    exactly two columns; one called &#39;link_id&#39;, and one called &#39;usnode&#39;.</span>
-<span class="sd">    This file can be created automatically by the function </span>
+<span class="sd">    This file can be created automatically by the function</span>
 <span class="sd">    io_utils.create_manual_dir_csv().</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -1424,34 +1465,37 @@
 <span class="sd">        Network nodes and associated properties.</span>
 <span class="sd">    manual_set_csv : str</span>
 <span class="sd">        Path to csv defining which links have which upstream nodes.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
-<span class="sd">        Network links and associated properties with specified links set </span>
+<span class="sd">        Network links and associated properties with specified links set</span>
 <span class="sd">        manually.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties with specified links set</span>
 <span class="sd">        manually.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># alg = -1 </span>
+    <span class="c1"># alg = -1</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;manual_set&#39;</span><span class="p">)</span>
-    
+
     <span class="c1"># Read the csv file for fixing link directions.</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No file found for manually setting link directions.&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Using </span><span class="si">{}</span><span class="s1"> to manually set flow directions.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">))</span>
-    
+
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">)</span>
-    
+
     <span class="c1"># Check if any links have been manually corrected and correct them</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">usnodes</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;usnode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="n">links_to_set</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;link_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        
+
         <span class="k">for</span> <span class="n">lid</span><span class="p">,</span> <span class="n">usn</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">links_to_set</span><span class="p">,</span> <span class="n">usnodes</span><span class="p">):</span>
-            <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">lid</span><span class="p">),</span> <span class="n">usn</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">)</span>
+            <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">lid</span><span class="p">),</span> <span class="n">usn</span><span class="p">,</span>
+                                    <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
@@ -1459,12 +1503,14 @@
 <div class="viewcode-block" id="set_inletoutlet"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_inletoutlet">[docs]</a><span class="k">def</span> <span class="nf">set_inletoutlet</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets directions of links that are connected to inlets and outlets.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
 <span class="sd">        Network links and associated properties.</span>
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -1473,6 +1519,7 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># alg = 0</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;inletoutlet&#39;</span><span class="p">)</span>
@@ -1487,7 +1534,8 @@
             <span class="n">linkidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
             <span class="c1"># Set link directionality</span>
-            <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">linkidx</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span> <span class="n">checkcontinuity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">linkidx</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
+                                    <span class="n">checkcontinuity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Set directionality of outlet links</span>
     <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]:</span>
@@ -1501,18 +1549,18 @@
             <span class="c1"># Set link directionality</span>
             <span class="n">usnode</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][:]</span>
             <span class="n">usnode</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
-            <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">linkidx</span><span class="p">,</span> <span class="n">usnode</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span> <span class="n">checkcontinuity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">linkidx</span><span class="p">,</span> <span class="n">usnode</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
+                                    <span class="n">checkcontinuity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
-
 
 
 <div class="viewcode-block" id="set_continuity"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_continuity">[docs]</a><span class="k">def</span> <span class="nf">set_continuity</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">checknodes</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets link directions by enforce continuity at each node such that there</span>
-<span class="sd">    are no sources or sinks within the network. Iterates until no more links </span>
+<span class="sd">    are no sources or sinks within the network. Iterates until no more links</span>
 <span class="sd">    directions can be set.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -1522,6 +1570,7 @@
 <span class="sd">    checknodes : list OR str, optional</span>
 <span class="sd">        Each link connected to each node id in this list will be checked for</span>
 <span class="sd">        continuity. All nodes will be checked if using the default value &#39;all&#39;.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -1530,6 +1579,7 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># alg = 1</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;continuity&#39;</span><span class="p">)</span>
@@ -1543,7 +1593,7 @@
         <span class="n">conn</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nindex</span><span class="p">]</span>
 
         <span class="c1"># Initialize bookkeeping for all the links connected to this node</span>
-        <span class="n">linkdir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">conn</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span> <span class="c1"># 0 if uncertain, 1 if into, 2 if out of</span>
+        <span class="n">linkdir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">conn</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>  <span class="c1"># 0 if uncertain, 1 if into, 2 if out of</span>
 
         <span class="k">if</span> <span class="n">linkdir</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">continue</span>
@@ -1556,25 +1606,25 @@
             <span class="c1"># Skip if we&#39;re uncertain about the link&#39;s direction</span>
             <span class="k">if</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="k">elif</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">nidx</span><span class="p">:</span> <span class="c1"># out of</span>
+            <span class="k">elif</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">nidx</span><span class="p">:</span>  <span class="c1"># out of</span>
                 <span class="n">linkdir</span><span class="p">[</span><span class="n">il</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
 
-            <span class="k">elif</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">nidx</span><span class="p">:</span> <span class="c1"># into</span>
+            <span class="k">elif</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">nidx</span><span class="p">:</span>  <span class="c1"># into</span>
                 <span class="n">linkdir</span><span class="p">[</span><span class="n">il</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">linkdir</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># If there is only a single unknown link</span>
-            <span class="n">unknown_link_id</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">linkdir</span><span class="o">==</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">linkdir</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># If there is only a single unknown link</span>
+            <span class="n">unknown_link_id</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">linkdir</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
             <span class="n">unknown_link_idx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">unknown_link_id</span><span class="p">)</span>
-            <span class="n">m</span> <span class="o">=</span> <span class="n">mode</span><span class="p">(</span><span class="n">linkdir</span><span class="p">[</span><span class="n">linkdir</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">mode</span><span class="p">(</span><span class="n">linkdir</span><span class="p">[</span><span class="n">linkdir</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
 
             <span class="n">lconn</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">unknown_link_idx</span><span class="p">][:]</span>
 
-            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">linkdir</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c1"># if the non-zero elements are all the same (either all 1s or 2s)</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">linkdir</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>  <span class="c1"># if the non-zero elements are all the same (either all 1s or 2s)</span>
 
-                <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">mode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span>  <span class="mi">1</span><span class="p">:</span> <span class="c1"># The unknown link must be out of the node</span>
+                <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">mode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># The unknown link must be out of the node</span>
                     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">unknown_link_idx</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">)</span>
 
-                <span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">mode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="c1"># The unknown link must be into the node</span>
+                <span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">mode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># The unknown link must be into the node</span>
                     <span class="n">usnode</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">lconn</span> <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="n">nid</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">unknown_link_idx</span><span class="p">,</span> <span class="n">usnode</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">)</span>
 
@@ -1583,12 +1633,12 @@
 
 <div class="viewcode-block" id="set_parallel_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_parallel_links">[docs]</a><span class="k">def</span> <span class="nf">set_parallel_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">knownlink</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Sets directionality of parallel links. If two links are parallel, they </span>
-<span class="sd">    share the same end nodes. If the direction of one of the links is known, </span>
-<span class="sd">    the other must be set in a direction to avoide creating a cycle within </span>
+<span class="sd">    Sets directionality of parallel links. If two links are parallel, they</span>
+<span class="sd">    share the same end nodes. If the direction of one of the links is known,</span>
+<span class="sd">    the other must be set in a direction to avoide creating a cycle within</span>
 <span class="sd">    the graph. This function thus prevents cycles from being created and in</span>
 <span class="sd">    general should be run after any link direction is set.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -1598,6 +1648,7 @@
 <span class="sd">    knownlink : int</span>
 <span class="sd">        Link id of link whose direction has been set to check for parallel</span>
 <span class="sd">        links.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -1606,25 +1657,26 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># alg = 2</span>
     <span class="n">alg</span> <span class="o">=</span> <span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;parallels&#39;</span><span class="p">)</span>
-        
+
     <span class="k">if</span> <span class="s1">&#39;parallels&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span>
     <span class="n">lidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">knownlink</span><span class="p">)</span>
     <span class="n">docheck</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">for</span> <span class="n">parpairs</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;parallels&#39;</span><span class="p">]:</span>
         <span class="n">docheck</span> <span class="o">=</span> <span class="kc">False</span>
-        
+
         <span class="c1"># Determine the upstream and downstream nodes for the parallel set.</span>
-        <span class="k">if</span> <span class="n">knownlink</span> <span class="ow">in</span> <span class="n">parpairs</span><span class="p">:</span> <span class="c1"># If the knownlink is part of the set</span>
+        <span class="k">if</span> <span class="n">knownlink</span> <span class="ow">in</span> <span class="n">parpairs</span><span class="p">:</span>  <span class="c1"># If the knownlink is part of the set</span>
             <span class="n">dsnode</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">usnode</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span> <span class="c1"># If the knownlink is not part of the set</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># If the knownlink is not part of the set</span>
             <span class="n">dsnode</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">usnode</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-        
+
         <span class="c1"># Check if any parallel sets are connected to the known link</span>
         <span class="n">ppnodes</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">parpairs</span><span class="p">[</span><span class="mi">0</span><span class="p">])][:]</span>
         <span class="k">for</span> <span class="n">parlink</span> <span class="ow">in</span> <span class="n">parpairs</span><span class="p">:</span>
@@ -1637,19 +1689,21 @@
                     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">parlink</span><span class="p">),</span> <span class="n">usnode</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span> <span class="n">checkcontinuity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                     <span class="n">docheck</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">docheck</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_continuity</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">checknodes</span><span class="o">=</span><span class="n">ppnodes</span><span class="p">)</span>            
-            
-    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span>  </div>
-  
-    
-<div class="viewcode-block" id="get_link_vector"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.get_link_vector">[docs]</a><span class="k">def</span> <span class="nf">get_link_vector</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">imshape</span><span class="p">,</span> <span class="n">pixlen</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_continuity</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">checknodes</span><span class="o">=</span><span class="n">ppnodes</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
+
+
+<div class="viewcode-block" id="get_link_vector"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.get_link_vector">[docs]</a><span class="k">def</span> <span class="nf">get_link_vector</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">imshape</span><span class="p">,</span> <span class="n">pixlen</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">trim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the normalized vector of a link that indicates the direction of</span>
 <span class="sd">    flow through a link based on its connectivity. This function will first trim</span>
 <span class="sd">    the link by its endpoint (half)width values to mitigate cases where where wide</span>
 <span class="sd">    channels are connected to narrow channels.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Requires a link contain at least min_len_for_trim pixels post-trimming.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -1668,14 +1722,15 @@
 <span class="sd">        If True, links will be trimmed to remove possibly direction-biasing</span>
 <span class="sd">        end segments. If False, the untrimmed link endpoints will define the</span>
 <span class="sd">        vector direction. The default is False.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    link_vec : np.array</span>
 <span class="sd">        Two-element array describing the x and y components of the direction</span>
 <span class="sd">        vector describing the link.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">min_len_for_trim</span> <span class="o">=</span> <span class="mi">3</span> <span class="c1"># number of pixels remaining after trim to use trimmed version; else defaults to using endpoints</span>
+    <span class="n">min_len_for_trim</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># number of pixels remaining after trim to use trimmed version; else defaults to using endpoints</span>
 
     <span class="c1"># Get pixel coordinates of link</span>
     <span class="n">lidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
@@ -1685,7 +1740,7 @@
     <span class="k">if</span> <span class="n">trim</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="s1">&#39;wid_pix&#39;</span> <span class="ow">in</span> <span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
 
         <span class="c1"># Get the half-widths at the endpoints</span>
-        <span class="n">ep_wids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_pix&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">pixlen</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">ep_wids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_pix&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">pixlen</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
 
         <span class="c1"># Get the cumulative length of the link (forwards and reversed)</span>
         <span class="n">s_for</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">rc</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">rc</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
@@ -1701,9 +1756,9 @@
         <span class="k">if</span> <span class="n">f_idx</span> <span class="o">&lt;</span> <span class="n">r_idx</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">r_idx</span> <span class="o">-</span> <span class="n">f_idx</span> <span class="o">&gt;=</span> <span class="n">min_len_for_trim</span><span class="p">:</span>
                 <span class="n">rc</span> <span class="o">=</span> <span class="p">[</span><span class="n">rc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">f_idx</span><span class="p">:</span><span class="n">r_idx</span><span class="p">],</span> <span class="n">rc</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">f_idx</span><span class="p">:</span><span class="n">r_idx</span><span class="p">]]</span>
-            <span class="k">elif</span> <span class="n">f_idx</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">rc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">r_idx</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">rc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">r_idx</span> <span class="o">&gt;=</span> <span class="n">min_len_for_trim</span><span class="p">:</span> <span class="c1"># Trim only the beginning</span>
+            <span class="k">elif</span> <span class="n">f_idx</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">rc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">r_idx</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">rc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">r_idx</span> <span class="o">&gt;=</span> <span class="n">min_len_for_trim</span><span class="p">:</span>  <span class="c1"># Trim only the beginning</span>
                 <span class="n">rc</span> <span class="o">=</span> <span class="p">[</span><span class="n">rc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">f_idx</span><span class="p">:],</span> <span class="n">rc</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">f_idx</span><span class="p">:]]</span>
-            <span class="k">elif</span> <span class="n">f_idx</span> <span class="o">&gt;=</span> <span class="n">min_len_for_trim</span><span class="p">:</span> <span class="c1"># Trim only the end</span>
+            <span class="k">elif</span> <span class="n">f_idx</span> <span class="o">&gt;=</span> <span class="n">min_len_for_trim</span><span class="p">:</span>  <span class="c1"># Trim only the end</span>
                 <span class="n">rc</span> <span class="o">=</span> <span class="p">[</span><span class="n">rc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">r_idx</span><span class="p">],</span> <span class="n">rc</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">r_idx</span><span class="p">]]</span>
 
         <span class="c1"># Trim both ends if possible; else don&#39;t trim</span>
@@ -1720,20 +1775,22 @@
     <span class="k">return</span> <span class="n">link_vec</span></div>
 
 
-<div class="viewcode-block" id="set_by_known_flow_directions"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_by_known_flow_directions">[docs]</a><span class="k">def</span> <span class="nf">set_by_known_flow_directions</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">imshape</span><span class="p">,</span> <span class="n">angthresh</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">lenthresh</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nknown_thresh</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;known_fdr&#39;</span><span class="p">)):</span>
+<div class="viewcode-block" id="set_by_known_flow_directions"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_by_known_flow_directions">[docs]</a><span class="k">def</span> <span class="nf">set_by_known_flow_directions</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">imshape</span><span class="p">,</span> <span class="n">angthresh</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                 <span class="n">lenthresh</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nknown_thresh</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">alg</span><span class="o">=</span><span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;known_fdr&#39;</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets unknown link directions by determining which flow direction through</span>
 <span class="sd">    the link minimizes the overall change in flow direction at the connecting</span>
 <span class="sd">    nodes. For a set of links connected to a node, at least one of the links&#39;</span>
-<span class="sd">    directions must be known for this algorithm to be effective. Links are </span>
-<span class="sd">    set from longest to shortest, as longer links generally have less </span>
+<span class="sd">    directions must be known for this algorithm to be effective. Links are</span>
+<span class="sd">    set from longest to shortest, as longer links generally have less</span>
 <span class="sd">    uncertainty associated with their directions.</span>
-<span class="sd">    </span>
-<span class="sd">    A number of thresholds are provided as options to control the power of </span>
+
+<span class="sd">    A number of thresholds are provided as options to control the power of</span>
 <span class="sd">    the algorithm. This function should generally be applied iteratively,</span>
 <span class="sd">    beginning with the most restrictive thresholds and gradually relaxing</span>
 <span class="sd">    them.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -1746,13 +1803,14 @@
 <span class="sd">        Angle in radians to determine if an unknown link is parallel enough to</span>
 <span class="sd">        its connected known links to set its direction. The default is 2.</span>
 <span class="sd">    lenthresh : int, optional</span>
-<span class="sd">        Length in pixels of the minimum link length required to use this </span>
+<span class="sd">        Length in pixels of the minimum link length required to use this</span>
 <span class="sd">        algorithm to set its directionality. The default is 0.</span>
 <span class="sd">    nknown_thresh : int, optional</span>
 <span class="sd">        Number of known connected links required to use this algorithm to</span>
 <span class="sd">        set the unknown link&#39;s directionality. The default is 1.</span>
 <span class="sd">    alg : float, optional</span>
 <span class="sd">        Algorithm ID to assign to the set link. The default is 6.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>
@@ -1761,15 +1819,16 @@
 <span class="sd">    nodes : dict</span>
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="k">def</span> <span class="nf">get_candidates</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">lenthresh</span><span class="p">,</span> <span class="n">nknown_thresh</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns unknown links that have at least one known connected link</span>
 <span class="sd">        for setting by its direction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">unknown_links</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">unknown_links</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unknown_links</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
@@ -1805,27 +1864,26 @@
         <span class="n">forsort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dolinks</span><span class="p">,</span> <span class="n">n_known</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">lengths_pix</span><span class="p">]))</span>
 
         <span class="c1"># Apply nknown threshold</span>
-        <span class="n">forsort</span> <span class="o">=</span> <span class="n">forsort</span><span class="p">[</span><span class="n">forsort</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nknown_thresh</span><span class="p">]</span>
+        <span class="n">forsort</span> <span class="o">=</span> <span class="n">forsort</span><span class="p">[</span><span class="n">forsort</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nknown_thresh</span><span class="p">]</span>
 
         <span class="c1"># Apply (pixel) length threshold</span>
-        <span class="n">forsort</span> <span class="o">=</span> <span class="n">forsort</span><span class="p">[</span><span class="n">forsort</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">lenthresh</span><span class="p">]</span>
+        <span class="n">forsort</span> <span class="o">=</span> <span class="n">forsort</span><span class="p">[</span><span class="n">forsort</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">lenthresh</span><span class="p">]</span>
 
         <span class="c1"># Do the sorting</span>
-        <span class="n">forsort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">forsort</span><span class="p">[</span><span class="n">forsort</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()])</span>
+        <span class="n">forsort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">forsort</span><span class="p">[</span><span class="n">forsort</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()])</span>
 
         <span class="c1"># Now sort dolinks from longer to shorter</span>
-        <span class="n">ns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">forsort</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]))))</span>
+        <span class="n">ns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">forsort</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]))))</span>
         <span class="n">dolinks_sorted</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ns</span><span class="p">:</span>
-            <span class="n">tosort</span> <span class="o">=</span> <span class="n">forsort</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">forsort</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="n">n</span><span class="p">)[</span><span class="mi">0</span><span class="p">],:]</span>
-            <span class="n">tosort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">tosort</span><span class="p">[</span><span class="n">tosort</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()])</span>
-            <span class="n">dolinks_sorted</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tosort</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">tosort</span> <span class="o">=</span> <span class="n">forsort</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">forsort</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">n</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span>
+            <span class="n">tosort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">tosort</span><span class="p">[</span><span class="n">tosort</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()])</span>
+            <span class="n">dolinks_sorted</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tosort</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 
         <span class="c1"># Convert to int</span>
         <span class="n">dolinks_sorted</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">dls</span><span class="p">)</span> <span class="k">for</span> <span class="n">dls</span> <span class="ow">in</span> <span class="n">dolinks_sorted</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">dolinks_sorted</span>
-
 
     <span class="n">dolinks</span> <span class="o">=</span> <span class="n">get_candidates</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">lenthresh</span><span class="p">,</span> <span class="n">nknown_thresh</span><span class="p">)</span>
 
@@ -1871,21 +1929,21 @@
             <span class="n">in_dvec</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">out_dvec</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_links</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">in_dvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">in_links</span><span class="p">),</span><span class="mi">2</span><span class="p">))</span>
+                <span class="n">in_dvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">in_links</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">il</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">in_links</span><span class="p">):</span>
-                    <span class="n">in_dvec</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="o">-</span><span class="n">get_link_vector</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">il</span><span class="p">,</span> <span class="n">imshape</span><span class="p">)</span>
+                    <span class="n">in_dvec</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="n">get_link_vector</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">il</span><span class="p">,</span> <span class="n">imshape</span><span class="p">)</span>
                 <span class="n">in_dvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">in_dvec</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_links</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">out_dvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">out_links</span><span class="p">),</span><span class="mi">2</span><span class="p">))</span>
+                <span class="n">out_dvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">out_links</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">out_links</span><span class="p">):</span>
-                    <span class="n">out_dvec</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">get_link_vector</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">ol</span><span class="p">,</span> <span class="n">imshape</span><span class="p">)</span>
+                    <span class="n">out_dvec</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">get_link_vector</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">ol</span><span class="p">,</span> <span class="n">imshape</span><span class="p">)</span>
                 <span class="n">out_dvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">out_dvec</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
             <span class="c1"># Try both orientations of unknown link and compute the angles between</span>
             <span class="c1"># it and the known nodes</span>
             <span class="n">in_angs</span><span class="p">,</span> <span class="n">out_angs</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="c1"># 1 is into node, -1 is out of node</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]:</span>  <span class="c1"># 1 is into node, -1 is out of node</span>
                 <span class="n">ul_vec</span> <span class="o">=</span> <span class="n">m</span> <span class="o">*</span> <span class="n">ul_vec</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_dvec</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">in_angs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">([</span><span class="n">in_dvec</span><span class="p">,</span><span class="n">ul_vec</span><span class="p">]),</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">in_dvec</span><span class="p">,</span><span class="n">ul_vec</span><span class="p">))))</span>
@@ -1917,7 +1975,7 @@
                     <span class="n">us_node_guess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">usng</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">us_node_guess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span> <span class="c1"># Unknown link flows into node</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># Unknown link flows into node</span>
                 <span class="n">ang_guess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">in_par_angle</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">in_flip</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="n">us_node_guess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
@@ -1930,30 +1988,33 @@
         <span class="c1"># Ensure threshold is met</span>
         <span class="k">if</span> <span class="n">min_ang</span> <span class="o">&lt;</span> <span class="n">angthresh</span><span class="p">:</span>
             <span class="n">usnode</span> <span class="o">=</span> <span class="n">us_node_guess</span><span class="p">[</span><span class="n">ang_guess</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">min_ang</span><span class="p">)]</span>
-            <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">lidx</span><span class="p">,</span> <span class="n">usnode</span><span class="p">,</span> <span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span><span class="p">,</span> <span class="n">checkcontinuity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">lidx</span><span class="p">,</span> <span class="n">usnode</span><span class="p">,</span>
+                                    <span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span><span class="p">,</span> <span class="n">checkcontinuity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 <span class="sd">&quot;&quot;&quot; Functions below here are deprecated or unused, but might be useful later &quot;&quot;&quot;</span>
 <span class="sd">&quot;&quot;&quot; No testing performed &quot;&quot;&quot;</span>
+
+
 <span class="k">def</span> <span class="nf">set_no_backtrack</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    
+
     <span class="k">for</span> <span class="n">lid</span><span class="p">,</span> <span class="n">nconn</span><span class="p">,</span> <span class="n">cert</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">],</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">]):</span>
-        
+
         <span class="k">if</span> <span class="n">cert</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">continue</span>
-        
+
         <span class="k">if</span> <span class="n">nconn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">nconn</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]:</span>
             <span class="k">continue</span>
-        
+
         <span class="n">uslinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">nconn</span><span class="p">[</span><span class="mi">0</span><span class="p">])][:]</span>
         <span class="n">uslinks</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">lid</span><span class="p">)</span>
         <span class="n">dslinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">nconn</span><span class="p">[</span><span class="mi">1</span><span class="p">])][:]</span>
         <span class="n">dslinks</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">lid</span><span class="p">)</span>
-        
+
         <span class="n">us_certains</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">uslinks</span> <span class="k">if</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">ds_certains</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">dslinks</span> <span class="k">if</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
-        
+
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">us_certains</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">uslinks</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds_certains</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dslinks</span><span class="p">):</span>
             <span class="n">startnode</span> <span class="o">=</span> <span class="n">nconn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">removelink</span> <span class="o">=</span> <span class="n">lid</span>
@@ -1962,32 +2023,32 @@
             <span class="n">startnode</span> <span class="o">=</span> <span class="n">nconn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">removelink</span> <span class="o">=</span> <span class="n">lid</span>
             <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">set_shortest_no_backtrack</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">startnode</span><span class="p">,</span> <span class="n">removelink</span><span class="p">,</span> <span class="s1">&#39;us&#39;</span><span class="p">)</span>
-            
+
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span>
- 
-        
+
+
 <span class="k">def</span> <span class="nf">set_shortest_no_backtrack</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">startnode</span><span class="p">,</span> <span class="n">removelink</span><span class="p">,</span> <span class="n">usds</span><span class="p">):</span>
-    
+
     <span class="n">alg</span> <span class="o">=</span> <span class="mi">25</span>
-   
+
     <span class="c1"># Create networkX graph, adding weighted edges</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
     <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">lc</span><span class="p">,</span> <span class="n">wt</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">],</span> <span class="n">weights</span><span class="p">):</span>
         <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">lc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="n">wt</span><span class="p">)</span>
-    
+
     <span class="c1"># Remove the immediately upstream (or downstream) known link so flow cannot</span>
     <span class="c1"># travel the wrong direction</span>
     <span class="n">rem_edge</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">removelink</span><span class="p">)]</span>
     <span class="n">G</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">rem_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rem_edge</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    
+
     <span class="c1"># Find the endnode to travel to</span>
     <span class="k">if</span> <span class="n">usds</span> <span class="o">==</span> <span class="s1">&#39;ds&#39;</span><span class="p">:</span>
         <span class="n">endpoints</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">endpoints</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]</span>
-        
+
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">endpoints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">endnode</span> <span class="o">=</span> <span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1995,23 +2056,23 @@
         <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">endpoints</span><span class="p">:</span>
             <span class="n">len_to_ep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">dijkstra_path_length</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">startnode</span><span class="p">,</span> <span class="n">ep</span><span class="p">))</span>
         <span class="n">endnode</span> <span class="o">=</span> <span class="n">endpoints</span><span class="p">[</span><span class="n">len_to_ep</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">len_to_ep</span><span class="p">))]</span>
-            
+
     <span class="c1"># Get shortest path nodes</span>
     <span class="n">pathnodes</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">dijkstra_path</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">startnode</span><span class="p">,</span> <span class="n">endnode</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span>
-        
+
     <span class="c1"># Convert to link-to-link path</span>
     <span class="n">pathlinks</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pathnodes</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">pathnodes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
         <span class="n">ulinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">u</span><span class="p">)]</span>
         <span class="n">vlinks</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span>
         <span class="n">pathlinks</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ul</span> <span class="k">for</span> <span class="n">ul</span> <span class="ow">in</span> <span class="n">ulinks</span> <span class="k">if</span> <span class="n">ul</span> <span class="ow">in</span> <span class="n">vlinks</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-                            
+
     <span class="c1"># Set the directionality of each of the links</span>
     <span class="k">if</span> <span class="n">usds</span> <span class="o">==</span> <span class="s1">&#39;ds&#39;</span><span class="p">:</span>
         <span class="n">pathnodes</span> <span class="o">=</span> <span class="n">pathnodes</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">pathnodes</span> <span class="o">=</span> <span class="n">pathnodes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        
+
     <span class="k">for</span> <span class="n">usnode</span><span class="p">,</span> <span class="n">pl</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pathnodes</span><span class="p">,</span> <span class="n">pathlinks</span><span class="p">):</span>
         <span class="n">linkidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pl</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;certain&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -2024,8 +2085,8 @@
 
 <div class="viewcode-block" id="set_artificial_nodes"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_artificial_nodes">[docs]</a><span class="k">def</span> <span class="nf">set_artificial_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">checknodes</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This function is deprecated as of v0.3 and is no longer called. </span>
-<span class="sd">    </span>
+<span class="sd">    This function is deprecated as of v0.3 and is no longer called.</span>
+
 <span class="sd">    Set the directionality of links where aritificial nodes were added. For such</span>
 <span class="sd">    loops, flow will travel the same way through both sides of the loop (to avoid</span>
 <span class="sd">    cycles). Therefore, if one side is known, we can set the other side.</span>
@@ -2050,7 +2111,7 @@
 <span class="sd">        Network nodes and associated properties updated to set directionality</span>
 <span class="sd">        according to this algorithm.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">alg</span> <span class="o">=</span> <span class="mf">2.1</span>
 
     <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">checknodes</span><span class="p">:</span>
