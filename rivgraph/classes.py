@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 RivGraph (classes.py)
-=============
+=====================
 Classes for running rivgraph commands on your channel network.
 
 """
@@ -23,14 +23,21 @@ import rivgraph.deltas.delta_metrics as dm
 import rivgraph.rivers.river_directionality as rd
 import rivgraph.rivers.river_utils as ru
 
+
 class rivnetwork:
     """
-    The rivnetwork class organizes data and methods for channel networks. This is
-    a parent class to the delta and river classes which inherit rivnetwork methods and
-    attributes. This class thus represents the common elements of river and delta
-    channel networks.
+    Base rivnetwork class.
+
+    The rivnetwork class organizes data and methods for channel networks. This
+    is a parent class to the delta and river classes which inherit rivnetwork
+    methods and attributes. This class thus represents the common elements of
+    river and delta channel networks.
+
     """
-    def __init__(self, name, path_to_mask, results_folder=None, exit_sides=None, verbose=False):
+
+
+    def __init__(self, name, path_to_mask, results_folder=None,
+                 exit_sides=None, verbose=False):
         """
         Initializes a channelnetwork class.
 
@@ -38,13 +45,19 @@ class rivnetwork:
         Parameters
         ----------
         name : str
-            The name of the channel network; also defines the folder name for storing results.
+            The name of the channel network; also defines the folder name for
+            storing results.
         path_to_mask : str
-           Points to the channel network mask file path
-        results_folder : str
+            Points to the channel network mask file path
+        results_folder : str, optional
             Specifies a directory where results should be stored
-        exit_sides : str
-            Only required for river channel netowrks. A two-character string (from N, E, S, or W) that denotes which sides of the image the river intersects (upstream first) -- e.g. 'NS', 'EW', 'NW', etc.
+        exit_sides : str, optional
+            Only required for river channel netowrks. A two-character string
+            (from N, E, S, or W) that denotes which sides of the image the
+            river intersects (upstream first) -- e.g. 'NS', 'EW', 'NW', etc.
+        verbose : bool, optional
+            If True, print run information and warnings to the console, default
+            is False.
 
 
         Attributes
@@ -54,7 +67,8 @@ class rivnetwork:
         verbose : str
             [True] or False to specify if processing updates should be printed.
         d : osgeo.gdal.Dataset
-            object created by gdal.Open() that provides access to geotiff metadata
+            object created by gdal.Open() that provides access to geotiff
+            metadata
         mask_path : str
             filepath to the input binary channel network mask
         imshape : tuple
@@ -62,21 +76,27 @@ class rivnetwork:
         gt : tuple
             gdal-type Geotransform of the input mask geotiff
         wkt : str
-            well known text representation of coordinate reference system of input mask geotiff
+            well known text representation of coordinate reference system of
+            input mask geotiff
         epsg: int
             epsg code of the coordinate reference system of input mask geotiff
         unit: str
-            units of the coordinate reference system; typically 'degree' or 'meter'
+            units of the coordinate reference system; typically 'degree' or
+            'meter'
         pixarea: int or float
             area of each pixel, in units of 'unit'
         pixlen: int or float
             length of each pixel, assumes sides are equal-length
         paths: dict
-            dictionary of strings for managing where files should be read/written
+            dictionary of strings for managing where files should be
+            read/written
         exit_sides: str
-            two-character string denoting which sides of the image the channel network intersects (N,E,S, and/or W). Upstream side should be given first.
+            two-character string denoting which sides of the image the channel
+            network intersects (N,E,S, and/or W). Upstream side should be given
+            first.
         Imask: numpy.ndarray
-            binary mask found at mask_path loaded into a numpy array via gdal.Open().ReadAsArray(), dtype=np.bool
+            binary mask found at mask_path loaded into a numpy array via
+            `gdal.Open().ReadAsArray()`, dtype=np.bool
         links: dict
             Stores the links of the network and associated properties
         nodes: dict
@@ -93,12 +113,16 @@ class rivnetwork:
         if results_folder is not None:
             self.paths = io.prepare_paths(results_folder, name, path_to_mask)
         else:
-            self.paths = io.prepare_paths(os.path.dirname(os.path.abspath(path_to_mask)) , name, path_to_mask)
+            self.paths = io.prepare_paths(
+                            os.path.dirname(
+                                os.path.abspath(path_to_mask)), name,
+                                    path_to_mask)
         self.paths['input_mask'] = os.path.normpath(path_to_mask)
 
         # Handle georeferencing
         print(self.paths['input_mask'])
-        self.gdobj = gdal.Open(self.paths['input_mask'], gdal.GA_Update) # GA_Update required for setting dummy projection/geotransform
+        # GA_Update required for setting dummy projection/geotransform
+        self.gdobj = gdal.Open(self.paths['input_mask'], gdal.GA_Update)
         self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
 
         # Create dummy georeferencing if none is supplied
@@ -130,10 +154,11 @@ class rivnetwork:
 
     def compute_network(self):
         """
-        Computes the links and nodes of the channel network mask.  First skeletonizes
-        the mask if not already done, then resolves the skeleton's graph.
-        """
+        Computes the links and nodes of the channel network mask.
+        First skeletonizes the mask if not already done, then resolves the
+        skeleton's graph.
 
+        """
         if hasattr(self, 'Iskel') is False:
             self.skeletonize()
 
@@ -149,10 +174,11 @@ class rivnetwork:
     def compute_distance_transform(self):
         """
         Computes the distance transform of the channel network mask.
-        """
 
+        """
         # Load the distance transform if it already exists
-        if 'Idist' in self.paths.keys() and os.path.isfile(self.paths['Idist']) is True:
+        if 'Idist' in self.paths.keys() and \
+            os.path.isfile(self.paths['Idist']) is True:
             self.Idist = gdal.Open(self.paths['Idist']).ReadAsArray()
         else:
             if self.verbose is True:
@@ -168,8 +194,8 @@ class rivnetwork:
         """
         Computes widths and lengths of each link in the links dictionary and
         appends them as dictionary attributes.
-        """
 
+        """
         if hasattr(self, 'links') is False:
             self.compute_network()
 
@@ -180,7 +206,8 @@ class rivnetwork:
             print('Computing link widths and lengths...', end='')
 
         # Widths and lengths are appended to links dict
-        self.links = lnu.link_widths_and_lengths(self.links, self.Idist, pixlen=self.pixlen)
+        self.links = lnu.link_widths_and_lengths(self.links, self.Idist,
+                                                 pixlen=self.pixlen)
 
         if self.verbose is True:
             print('done.')
@@ -188,29 +215,32 @@ class rivnetwork:
 
     def compute_junction_angles(self, weight=None):
         """
-        Computes the angle at nodes where only three links are connected. Directions
-        must be assigned before angles can be computed. Also defines each 3-link
-        node as 'confluence' or 'bifurcation' and appends this designation to
-        the nodes dictionary.
+        Computes the angle at nodes where only three links are connected.
+        Directions must be assigned before angles can be computed. Also defines
+        each 3-link node as 'confluence' or 'bifurcation' and appends this
+        designation to the nodes dictionary.
 
         Parameters
         ----------
         weight : str
-            [None], 'exp' (exponential), or 'lin' (linear) to determine the decay
-            of the weights the contributions of pixels as we move away from the
-            junction node.
-        """
+            [None], 'exp' (exponential), or 'lin' (linear) to determine the
+            decay of the weights the contributions of pixels as we move away
+            from the junction node.
 
+        """
         if 'certain' not in self.links.keys():
             print('Junction angles cannot be computed before link directions are set.')
         else:
-            self.nodes = lnu.junction_angles(self.links, self.nodes, self.imshape, self.pixlen, weight=weight)
-            
-            
-    def get_islands(self, props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length', 'surrounding_links']):
+            self.nodes = lnu.junction_angles(self.links, self.nodes,
+                                             self.imshape, self.pixlen,
+                                             weight=weight)
+
+
+    def get_islands(self, props=['area', 'maxwidth', 'major_axis_length',
+                                 'minor_axis_length', 'surrounding_links']):
         """
         Finds all the islands in the binary mask and computes their morphological
-        properties. Can be used to help "clean" masks of small islands. 
+        properties. Can be used to help "clean" masks of small islands.
 
         Parameters
         ----------
@@ -218,15 +248,15 @@ class rivnetwork:
             Properties to compute for each island. Properties can be any of those
             provided by rivgraph.im_utils.regionprops.
             The default is ['area', 'maxwidth', 'major_axis_length', 'minor_axis_length'].
-       
+
         Returns
         -------
         islands : geopandas GeoDataFrame
              Contains the polygons of each island with the requested property
-             attributes as columns. An additional 'remove' attribute is 
-             initialized to make thresholding easier. 
+             attributes as columns. An additional 'remove' attribute is
+             initialized to make thresholding easier.
+
         """
-        
         do_surr = False
         if 'surrounding_links' in props:
             props.remove('surrounding_links')
@@ -237,30 +267,30 @@ class rivnetwork:
 
         if self.verbose is True:
             print('Getting island properties...', end='')
-        
+
         islands, Iislands = mu.get_island_properties(self.Imask, self.pixlen, self.pixarea, self.crs, self.gt, props)
-        
+
         if self.verbose is True:
             print('done.')
-        
+
         if do_surr is True:
             if hasattr(self.links, 'wid_adj') is False:
                 self.compute_link_width_and_length()
-            
+
             if self.verbose is True:
                 print('Computing surrounding links for each island...', end='')
 
             islands = mu.surrounding_link_properties(self.links, self.nodes, self.Imask, islands, Iislands, self.pixlen, self.pixarea)
-        
+
             if self.verbose is True:
                 print('done.')
 
         # Add a column to be used for thresholding
         islands['remove'] = [False for i in range(len(islands))]
-        
+
         return islands, Iislands
-        
-        
+
+
     def plot(self, *kwargs, axis=None):
         """
         Generates matplotlib plots of the network.
@@ -271,6 +301,7 @@ class rivnetwork:
             If [None], both of the following plots will be generated:
             'network': links and nodes are plotted, labeled with their ids
             'directions': links are plotted with their directionality indicated
+
         """
         ## TODO: add error handling for wrong plotting commands
 
@@ -309,8 +340,8 @@ class rivnetwork:
         path : str
             path--including extension--to network .pkl file. If [None], file
             written to path found in paths['network_pickle']
-        """
 
+        """
         if path==None and hasattr(self, 'paths') is False:
             print('No path is available to load the network.')
         elif path is None:
@@ -361,8 +392,9 @@ class rivnetwork:
         Returns
         -------
         A : numpy.ndarray
-             an NxN matrix representing the connectivity of the graph, where N is the
-             number of nodes in the network. See adjacency matrix for more details.
+            an NxN matrix representing the connectivity of the graph, where N
+            is the number of nodes in the network. See adjacency matrix for more details.
+
         """
         # Create (weighted) adjacency matrix networkx object
         G = dm.graphiphy(self.links, self.nodes, weight=weight)
@@ -383,17 +415,28 @@ class rivnetwork:
         ----------
         export : str
             Determines which features to export. Choose from:
-                all (exports all available vector data)
-                network (links and nodes)
-                links
-                nodes
-                centerline (river classes only)
-                mesh (centerline mesh, river classes only)
-                centerline_smooth (river classes only)
+
+            - all (exports all available vector data)
+
+            - network (links and nodes)
+
+            - links
+
+            - nodes
+
+            - centerline (river classes only)
+
+            - mesh (centerline mesh, river classes only)
+
+            - centerline_smooth (river classes only)
+            
         ftype : str
             Sets the output file format. Choose from:
-                json (GeoJSON)
-                shp  (ESRI Shapefile)
+
+            - json (GeoJSON)
+
+            - shp  (ESRI Shapefile)
+
         """
         # Get extension for requested output type
         if ftype == 'json':
@@ -458,6 +501,7 @@ class rivnetwork:
                 'directions' - network burned into a raster with link directions from 0 (upstream) to 1 (downstream))
                 'skeleton'  - skeletonized mask
                 'distance' - distance-transformed mask
+
         """
         valid_exports = ['directions', 'distance', 'skeleton']
         if export not in valid_exports:
@@ -519,7 +563,6 @@ class delta(rivnetwork):
             RivGraph will output processing progress if 'True'. Default is 'False'.
 
         """
-
         rivnetwork.__init__(self, name, path_to_mask, results_folder, verbose=verbose)
 
 
@@ -528,7 +571,6 @@ class delta(rivnetwork):
         Skeletonizes the delta binary mask.
 
         """
-
         if hasattr(self, 'Imask') is False:
             raise AttributeError('Mask array was not provided or was unreadable.')
 
@@ -557,18 +599,18 @@ class delta(rivnetwork):
         ----------
         path_shoreline : str, optional
             Path to shoreline shapefile/geosjon. The default is None but will
-            check for the file at paths['shoreline'].
+            check for the file at `paths['shoreline']`.
         path_inletnodes : str, optional
             Path to inlet nodes shapefile/geojson. The default is None but will
-            check for the file at paths['inlet_nodes'].
+            check for the file at `paths['inlet_nodes']`.
 
 
         Returns
         -------
-        None, but saves pruned links and nodes dictionaries to class object.
+        :
+            None, but saves pruned links and nodes dictionaries to class object.
 
         """
-
         try:
             if path_shoreline is None:
                 path_shoreline = self.paths['shoreline']
@@ -587,8 +629,8 @@ class delta(rivnetwork):
     def assign_flow_directions(self):
         """
         Computes flow directions for each link in the delta channel network.
-        """
 
+        """
         if hasattr(self, 'links') is False:
             raise AttributeError('Network has not yet been computed.')
 
@@ -607,8 +649,8 @@ class delta(rivnetwork):
     def compute_topologic_metrics(self):
         """
         Computes a suite of connectivity and network metrics for a delta channel network.
-        """
 
+        """
         if hasattr(self, 'links') is False:
             raise AttributeError('Network has not yet been computed.')
 
@@ -623,12 +665,11 @@ class river(rivnetwork):
     A class to manage and organize data and methods for analyzing a braided river channel network.
     This class inherets all the attributes and methods of the rivnewtwork class, but also includes delta-specific attributes and methods.
 
-    ...
 
     Attributes
     ----------
     Iskel : np.ndarray
-        image of the skeletonized binary mask
+        Image of the skeletonized binary mask
     topo_metrics : dict
         Contains a number of connectivity and network metrics.
     centerline : tuple of two numpy.ndarrays
@@ -659,10 +700,12 @@ class river(rivnetwork):
     assign_flow_direcions()
         Computes flow directions for each link in the delta channel network.
     set_flow_dirs_manually()
-        Reads a user-created .csv file found at paths['fixlinks_csv'] to set flow directions of specified liks.
+        Reads a user-created .csv file found at `paths['fixlinks_csv']` to set flow directions of specified links.
+
     """
 
-    def __init__(self, name, path_to_mask, results_folder=None, exit_sides=None, verbose=False):
+    def __init__(self, name, path_to_mask, results_folder=None,
+                 exit_sides=None, verbose=False):
 
         if exit_sides is None:
             raise Warning('Must provide exit_sides for river class.')
@@ -673,8 +716,8 @@ class river(rivnetwork):
     def skeletonize(self):
         """
         Skeletonizes the river binary mask.
-        """
 
+        """
         if hasattr(self, 'Imask') is False:
             raise AttributeError('Mask array was not provided or was unreadable.')
 
@@ -695,8 +738,8 @@ class river(rivnetwork):
     def prune_network(self):
         """
         Prunes the computed river network.
-        """
 
+        """
         if hasattr(self, 'links') is False:
             raise AttributeError('Could not prune river. Check that network has been computed.')
 
@@ -709,8 +752,8 @@ class river(rivnetwork):
     def compute_centerline(self):
         """
         Computes the centerline of the holes-filled river binary image.
-        """
 
+        """
         if self.verbose is True:
             print('Computing centerline...', end='')
 
@@ -728,11 +771,11 @@ class river(rivnetwork):
         of sorts. The mesh is useful for computing spatial statistics as a function
         of downstream distance. The resulting mesh captures the low-frequency
         characteristic of the river corridor.
-        
+
         This tool is tricky to fully automate, and the user may need to play
         with the smoothing and bufferdist parameters if errors are thrown or
         the result is not satisfying.
-        
+
         Parameters
         ----------
         grid_spacing : float
@@ -745,8 +788,8 @@ class river(rivnetwork):
             Defines the offset distance of the left- and right-valleylines from
             from the centerline. Units correspond to those of the CRS of the
             input mask.
+
         """
-        
         # Need a centerline
         if hasattr(self, 'centerline') is False:
             self.compute_centerline()
@@ -757,7 +800,7 @@ class river(rivnetwork):
                 self.compute_network()
             if hasattr(self.links, 'wid_adj') is False:
                 self.compute_link_width_and_length()
-           
+
             # self.avg_chan_width = np.mean(self.links['wid_a1dj'])
             self.avg_chan_width = np.sum(self.Imask) * self.pixarea / np.sum(self.links['len_adj'])
 
@@ -769,12 +812,12 @@ class river(rivnetwork):
         if buf_halfwidth is None:
             # Compute the maximum valley width in pixels
             if hasattr(self, 'max_valley_width_pixels') is False:
-                
+
                 if self.verbose is True:
                     print('Computing maximum valley width...', end='')
-               
+
                 self.max_valley_width_pixels = ru.max_valley_width(self.Imask)
-                
+
                 if self.verbose is True:
                     print('done.')
 
@@ -794,8 +837,8 @@ class river(rivnetwork):
         """
         Automatically sets flow directions for each link in a braided river
         channel network.
-        """
 
+        """
         if 'inlets' not in self.nodes.keys():
             raise AttributeError('Cannot assign flow directions until prune_network() has been run.')
 
@@ -815,7 +858,3 @@ class river(rivnetwork):
 
         if self.verbose is True:
             print('done.')
-
-
-
-

@@ -36,10 +36,6 @@ rivgraph
    :members:
    :special-members:
 
-.. automodule:: rivgraph.ordered_set
-   :members:
-   :special-members:
-
 .. automodule:: rivgraph.walk
    :members:
    :special-members:

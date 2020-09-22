@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Input/Output Utilities (io_utils.py)
-========
+====================================
 
 Functions for input/output.
 
@@ -11,7 +11,8 @@ Created on Sun Sep 16 15:15:18 2018
 """
 import os
 import pickle
-import ogr, osr
+import ogr
+import osr
 import gdal
 import numpy as np
 import pandas as pd
@@ -39,8 +40,8 @@ def prepare_paths(path_results, name, path_mask):
     paths : dict
         Contains all the export paths. Not all will be necessarily used, but
         all possible exports' paths are contained.
-    """
 
+    """
     basepath = os.path.normpath(path_results)
 
     # Create results folder if it doesn't exist
@@ -84,7 +85,6 @@ def pickle_links_and_nodes(links, nodes, path_out):
     None.
 
     """
-
     with open(path_out, 'wb') as f:
         pickle.dump([links, nodes], f)
 
@@ -107,9 +107,8 @@ def unpickle_links_and_nodes(path_pickle):
         Network nodes and associated properties.
 
     """
-
     import sys
-    from rivgraph import ordered_set    
+    from rivgraph import ordered_set
     sys.modules['ordered_set'] = ordered_set
 
     with open(path_pickle, 'rb') as f:
@@ -134,7 +133,6 @@ def get_driver(path_file):
         Driver string specifying file format when using geopandas' to_file().
 
     """
-    
     # Write geodataframe to file
     ext = path_file.split('.')[-1]
     if ext == 'json':
@@ -170,10 +168,9 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
     None.
 
     """
-
     nodexy = np.unravel_index(nodes['idx'], dims)
     x, y = gu.xy_to_coords(nodexy[1], nodexy[0], gt)
-    all_nodes = [Point(x,y) for x, y in zip(x,y)]
+    all_nodes = [Point(x, y) for x, y in zip(x, y)]
 
     # Create GeoDataFrame for storing geometries and attributes
     gdf = gpd.GeoDataFrame(geometry=all_nodes)
@@ -187,7 +184,7 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
         if k in store_as_num:
             gdf[k] = [c for c in nodes[k]]
         else:
-            gdf[k] = [str(c).replace('[','').replace(']','') for c in nodes[k]]
+            gdf[k] = [str(c).replace('[', '').replace(']', '') for c in nodes[k]]
 
     # Write geodataframe to file
     gdf.to_file(path_export, driver=get_driver(path_export))
@@ -197,10 +194,9 @@ def links_to_geofile(links, dims, gt, crs, path_export):
     """
     Saves the links of the network to a georeferencedshapefile or geojson.
     Computed link properties are saved as attributes when available. Note that
-    the 'wid_pix' property, which stores the width at each pixel along the 
+    the 'wid_pix' property, which stores the width at each pixel along the
     link, may be truncated depending on its length and the filetype.
     The filetype is specified by the export path.
-
 
     Parameters
     ----------
@@ -221,13 +217,12 @@ def links_to_geofile(links, dims, gt, crs, path_export):
     None.
 
     """
-
     # Create line objects to write to shapefile
     all_links = []
     for link in links['idx']:
         xy = np.unravel_index(link, dims)
         x, y = gu.xy_to_coords(xy[1], xy[0], gt)
-        all_links.append(LineString(zip(x,y)))
+        all_links.append(LineString(zip(x, y)))
 
     # Create GeoDataFrame for storing geometries and attributes
     gdf = gpd.GeoDataFrame(geometry=all_links)
@@ -242,9 +237,9 @@ def links_to_geofile(links, dims, gt, crs, path_export):
         if k in store_as_num:
             gdf[k] = [c for c in links[k]]
         elif k == 'wid_pix':
-            gdf[k] = [str(c.tolist()).replace('[','').replace(']','') for c in links[k]]
+            gdf[k] = [str(c.tolist()).replace('[', '').replace(']', '') for c in links[k]]
         else:
-            gdf[k] = [str(c).replace('[','').replace(']','') for c in links[k]]
+            gdf[k] = [str(c).replace('[', '').replace(']', '') for c in links[k]]
 
     # Write geodataframe to file
     gdf.to_file(path_export, driver=get_driver(path_export))
@@ -283,7 +278,9 @@ def centerline_to_geovector(cl, crs, path_export):
     cl_df.to_file(path_export, driver=get_driver(path_export))
 
 
-def write_geotiff(raster, gt, wkt, path_export, dtype=gdal.GDT_UInt16, options=['COMPRESS=LZW'], nbands=1, nodata=None, color_table=None):
+def write_geotiff(raster, gt, wkt, path_export, dtype=gdal.GDT_UInt16,
+                  options=['COMPRESS=LZW'], nbands=1, nodata=None,
+                  color_table=None):
     """
     Writes a georeferenced raster to disk.
 
@@ -295,7 +292,7 @@ def write_geotiff(raster, gt, wkt, path_export, dtype=gdal.GDT_UInt16, options=[
     gt : tuple
         GDAL geotransform for the raster. Often this can simply be copied from
         another geotiff via gdal.Open(path_to_geotiff).GetGeoTransform(). Can
-        also be constructed following the gdal convention of 
+        also be constructed following the gdal convention of
         (leftmost coordinate, pixel width, xskew, uppermost coordinate, pixel height, yskew).
         For non-rotated images, the skews will be zero.
     wkt : str
@@ -304,12 +301,12 @@ def write_geotiff(raster, gt, wkt, path_export, dtype=gdal.GDT_UInt16, options=[
     path_export : str
         Path with extension of the geotiff to export.
     dtype : gdal.GDT_XXX, optional
-        Gdal data type. Options for XXX include Byte, UInt16, UInt32, Int32, 
+        Gdal data type. Options for XXX include Byte, UInt16, UInt32, Int32,
         Float32, Float64 and complex types CInt16, Cint32, CFloat32 and CFloat64.
         If storing decimal data, use a Float type, binary data use Byte type.
         The default is gdal.GDT_UInt16 (non-float).
     options : list of strings, optional
-        Options that can be fed to gdal dataset creator. See YYY for what 
+        Options that can be fed to gdal dataset creator. See YYY for what
         can be specified by options.
         The default is ['COMPRESS=LZW'].
     nbands : int, optional
@@ -319,7 +316,7 @@ def write_geotiff(raster, gt, wkt, path_export, dtype=gdal.GDT_UInt16, options=[
         value will be considered. The default is None.
     color_table : gdal.ColorTable, optional
         Color table to append to the geotiff. Can use colortable() function
-        to create, or create a custom type with gdal.ColorTable(). 
+        to create, or create a custom type with gdal.ColorTable().
         Note that color_tables can only be specified for Byte and UInt16 datatypes.
         The default is None.
 
@@ -338,13 +335,14 @@ def write_geotiff(raster, gt, wkt, path_export, dtype=gdal.GDT_UInt16, options=[
     # Prepare destination file
     driver = gdal.GetDriverByName("GTiff")
     if options != None:
-        dest = driver.Create(path_export, width, height, nbands, dtype, options)
+        dest = driver.Create(path_export, width, height, nbands, dtype,
+                             options)
     else:
         dest = driver.Create(path_export, width, height, nbands, dtype)
 
     # Write output raster
     for b in range(nbands):
-        dest.GetRasterBand(b+1).WriteArray(raster[:,:,b])
+        dest.GetRasterBand(b+1).WriteArray(raster[:, :, b])
 
         if nodata is not None:
             dest.GetRasterBand(b+1).SetNoDataValue(nodata)
@@ -372,7 +370,7 @@ def colortable(ctype):
     Parameters
     ----------
     ctype : str
-        Specifies the type of colortable to return. Choose from 
+        Specifies the type of colortable to return. Choose from
         {'binary', 'skel', 'mask', 'tile', or 'GSW'}.
 
     Returns
@@ -385,29 +383,29 @@ def colortable(ctype):
     color_table = gdal.ColorTable()
 
     if ctype == 'binary':
-        # Some examples / last value is alpha (transparency). 
-        color_table.SetColorEntry( 0, (0, 0, 0, 0) )
-        color_table.SetColorEntry( 1, (255, 255, 255, 100))
+        # Some examples / last value is alpha (transparency).
+        color_table.SetColorEntry(0, (0, 0, 0, 0))
+        color_table.SetColorEntry(1, (255, 255, 255, 100))
     elif ctype == 'skel':
-        color_table.SetColorEntry( 0, (0, 0, 0, 0) )
-        color_table.SetColorEntry( 1, (255, 0, 255, 100))
+        color_table.SetColorEntry(0, (0, 0, 0, 0))
+        color_table.SetColorEntry(1, (255, 0, 255, 100))
     elif ctype == 'mask':
-        color_table.SetColorEntry( 0, (0, 0, 0, 0) )
-        color_table.SetColorEntry( 1, (0, 128, 0, 100))
+        color_table.SetColorEntry(0, (0, 0, 0, 0))
+        color_table.SetColorEntry(1, (0, 128, 0, 100))
     elif ctype == 'tile':
-        color_table.SetColorEntry( 0, (0, 0, 0, 0) )
-        color_table.SetColorEntry( 1, (0, 0, 255, 100))
+        color_table.SetColorEntry(0, (0, 0, 0, 0))
+        color_table.SetColorEntry(1, (0, 0, 255, 100))
     elif ctype == 'GSW':
-        color_table.SetColorEntry( 0, (0, 0, 0, 0) )
-        color_table.SetColorEntry( 1, (0, 0, 0, 0) )
-        color_table.SetColorEntry( 2, (176, 224, 230, 100))
+        color_table.SetColorEntry(0, (0, 0, 0, 0))
+        color_table.SetColorEntry(1, (0, 0, 0, 0))
+        color_table.SetColorEntry(2, (176, 224, 230, 100))
 
     return color_table
 
 
 def shapely_list_to_geovectors(shplist, crs, path_export):
     """
-    Exports a list of shapely geometries to a GIS-ingestilbe format.
+    Exports a list of shapely geometries to a GIS-ingestible format.
 
     Parameters
     ----------
@@ -436,7 +434,7 @@ def write_linkdirs_geotiff(links, gdobj, path_export):
     Pixels in each link are interpolated between 0 and 1 such that the upstream
     pixel is 0 and the downstream-most pixel is 1. In a GIS, color can then
     be set to visualize flow directionality.
-   
+
 
     Parameters
     ----------
@@ -446,7 +444,7 @@ def write_linkdirs_geotiff(links, gdobj, path_export):
         GDAL object correspondng to the original mask from which links were
         derived.
     path_export : str
-        Path, including .tif extension, where the directions geotiff is 
+        Path, including .tif extension, where the directions geotiff is
         written.
 
     Returns
@@ -454,7 +452,6 @@ def write_linkdirs_geotiff(links, gdobj, path_export):
     None.
 
     """
-
     # Initialize plotting raster
     I = gdobj.ReadAsArray()
     I = np.ones((gdobj.RasterYSize, gdobj.RasterXSize), dtype=np.float32)*-1
@@ -462,7 +459,7 @@ def write_linkdirs_geotiff(links, gdobj, path_export):
     # Loop through links and store each pixel's interpolated value
     for lidcs in links['idx']:
         n = len(lidcs)
-        vals = np.linspace(0,1, n)
+        vals = np.linspace(0, 1, n)
         rcidcs = np.unravel_index(lidcs, I.shape)
         I[rcidcs] = vals
 
@@ -486,7 +483,7 @@ def create_manual_dir_csv(path_csv):
     None.
 
     """
-    df = pd.DataFrame(columns=['link_id','usnode'])
+    df = pd.DataFrame(columns=['link_id', 'usnode'])
     df.to_csv(path_csv, index=False)
 
 
@@ -517,7 +514,7 @@ def coords_from_geovector(path_geovector):
 def coords_to_geovector(coords, epsg, path_export):
     """
     Exports coordinates to a Point shapefile.
-        
+
     Parameters
     ----------
     coords : list-like of list-likes
@@ -532,7 +529,7 @@ def coords_to_geovector(coords, epsg, path_export):
     None.
 
     """
-    ## TODO: This should be replaced by a geodataframe creation, but no use cases
+    # TODO: This should be replaced by a geodataframe creation, but no use cases
     # yet...
 
 
@@ -570,4 +567,3 @@ def coords_to_geovector(coords, epsg, path_export):
 
     # Save and close everything
     datasource = layer = feat = geom = None
-
