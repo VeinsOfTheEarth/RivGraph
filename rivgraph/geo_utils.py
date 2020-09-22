@@ -1,6 +1,6 @@
 """
 Georeferencing Utilities (geo_utils.py)
-========
+=======================================
 
 Utilities for reading, writing, managing, processing, manipulating, etc.
 geographic data including tiffs, vrts, shapefiles, etc.
@@ -19,7 +19,7 @@ import rivgraph.io_utils as io
 def get_unit(crs):
     """
     Returns the units for a projection defined by an EPSG code.
-    See https://en.wikibooks.org/wiki/PROJ.4#Units for a list of unit string 
+    See https://en.wikibooks.org/wiki/PROJ.4#Units for a list of unit string
     maps.
 
     Parameters
@@ -37,14 +37,14 @@ def get_unit(crs):
     warnings.simplefilter(action='ignore', category=UserWarning)
     p4 = crs.to_proj4()
     warnings.simplefilter(action='default', category=UserWarning)
-   
+
     projkey = p4[p4.index('+proj=') + len('+proj='):].split(' ')[0]
-    
+
     if projkey == 'longlat':
         unit = 'degree'
     else:
         unitstr = p4[p4.index('+units=') + len('+units='):].split(' ')[0]
-    
+
         p4units = {'m' : 'meter',
                    'cm' : 'centimeter',
                    'dm' : 'decimenter',
@@ -54,12 +54,12 @@ def get_unit(crs):
                    'mi' : 'international statute mile',
                    'mm' : 'millimeter',
                    'yd' : 'international yard'}
-    
+
         if unitstr in p4units.keys():
             unit = p4units[unitstr]
-        else: 
+        else:
             unit = unitstr
-            raise Warning('Unit type {} not understood.'.format(unitstr)) 
+            raise Warning('Unit type {} not understood.'.format(unitstr))
 
     return unit
 
@@ -83,7 +83,7 @@ def geotiff_vals_from_coords(coords, gd_obj):
 
 
     # Lat/lon to row/col
-    rowcol = coords_to_xy(coords[:,0], coords[:,1], gd_obj.GetGeoTransform())
+    rowcol = coords_to_xy(coords[:, 0], coords[:, 1], gd_obj.GetGeoTransform())
 
     # Pull value from vrt at row/col
     vals = []
@@ -105,7 +105,8 @@ def coords_to_xy(xs, ys, gt):
     ys : list or np.array()
         Specifies the N-S coordinates (latitude).
     gt : tuple
-        6-element tuple gdal GeoTransform. (uL_x, x_res, rotation, ul_y, rotation, y_res).
+        6-element tuple gdal GeoTransform.
+        (uL_x, x_res, rotation, ul_y, rotation, y_res).
         Automatically created by gdal's GetGeoTransform() method.
 
     Returns
@@ -154,10 +155,13 @@ def xy_to_coords(xs, ys, gt):
 
     Arguments
     ---------
-    (xs, ys) : (np.array(), np.array())
-        Specifies the coordinates to transform.
+    xs : np.array
+        Specifies the x-coordinates to transform.
+    ys : np.array
+        Specifies the y-coordinates to transform.
     gt : tuple
-        6-element tuple gdal GeoTransform. (uL_x, x_res, rotation, ul_y, rotation, y_res).
+        6-element tuple gdal GeoTransform.
+        (uL_x, x_res, rotation, ul_y, rotation, y_res).
         Automatically created by gdal's GetGeoTransform() method.
 
     Returns
@@ -179,8 +183,10 @@ def transform_coords(xs, ys, inputEPSG, outputEPSG):
 
     Arguments
     ---------
-    (xs, ys) : (np.array(), np.array())
-        Specifies the coordinates to transform.
+    xs : np.array
+        Specifies the x-coordinates to transform.
+    ys : np.array
+        Specifies the y-coordinates to transform.
     inputEPSG : int
         epsg code corresponding to xs, ys
     outputEPSG : int
@@ -189,10 +195,10 @@ def transform_coords(xs, ys, inputEPSG, outputEPSG):
     Returns
     ----------
     xy : np.array()
-        Two element array of transformed (x, y) coordinates. xy[0] are 
+        Two element array of transformed (x, y) coordinates. xy[0] are
         transformed x coordinates, xy[1] are transformed y coordinates.
     """
-    
+
     proj = Transformer.from_crs(inputEPSG, outputEPSG, always_xy=True)
     xt, yt = proj.transform(xs, ys)
     xy = np.array((xt, yt))
@@ -235,18 +241,19 @@ def crop_geotif(tif, cropto='first_nonzero', npad=0, outpath=None):
     tiffull = tif_obj.ReadAsArray()
 
     if cropto == 'first_nonzero':
-        idcs = np.where(tiffull>0)
+        idcs = np.where(tiffull > 0)
         t = np.min(idcs[0])
         b = np.max(idcs[0]) + 1
         l = np.min(idcs[1])
         r = np.max(idcs[1]) + 1
 
     # Crop the tiff
-    tifcropped = tiffull[t:b,l:r]
+    tifcropped = tiffull[t:b, l:r]
 
     # Pad the tiff (if necessary)
     if npad != 0:
-        tifcropped = np.pad(tifcropped, npad, mode='constant', constant_values=False)
+        tifcropped = np.pad(tifcropped, npad, mode='constant',
+                            constant_values=False)
 
     # Create a new geotransform by adjusting the origin (upper-left-most point)
     gt = tif_obj.GetGeoTransform()
@@ -262,9 +269,10 @@ def crop_geotif(tif, cropto='first_nonzero', npad=0, outpath=None):
                'TILED=YES']
 
     # Only compress if we're working with a non-float
-    if datatype in [1, 2, 3, 4, 5]: # Int types: see the list at the end of this file
+    if datatype in [1, 2, 3, 4, 5]:  # Int types: see the list at the end of this file
         options.append('COMPRESS=LZW')
 
-    io.write_geotiff(tifcropped, crop_gt, tif_obj.GetProjection(), output_file, dtype=datatype, options=options)
+    io.write_geotiff(tifcropped, crop_gt, tif_obj.GetProjection(), output_file,
+                     dtype=datatype, options=options)
 
     return output_file
