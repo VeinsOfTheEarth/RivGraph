@@ -44,67 +44,32 @@ These tasks represent what is needed before we "officially" release RivGraph via
 - [x] How to fix flow directions (shown in braided river example, section 7.1)
 - [x] Function for removing artificial nodes. Restructured code to not add these automatically, but can be added with a [function](https://github.com/jonschwenk/RivGraph/blob/9bc320239443ea7b1673307f77f4edb86251aaf9/rivgraph/ln_utils.py#L724).
 - [x] [Unit testing](https://github.com/jonschwenk/RivGraph/tree/master/tests)
+- [x] Function documentation
 - [ ] How to prepare masks for inputs
 - [ ] Where to get masks
 - [ ] How to draw shorelines
-- [ ] Function documentation - nearing completion 9/16/2020
 
 
 Contacting us
 -------------
 
-The best way to get in touch is to [open an issue](https://github.com/jonschwenk/rivgraph/issues/new) or comment
-  on any open issue or pull request. Otherwise, send an email to j.........k@gmail.com
-  
+The best way to get in touch is to [open an issue](https://github.com/jonschwenk/rivgraph/issues/new) or comment on any open issue or pull request. Otherwise, send an email to j.........k@gmail.com
+
 
 Contributing
 ------------
-We welcome all forms of user contributions including feature requests, bug reports, code, documentation requests,
-and code. Simply open an issue in the [Tracker](https://github.com/jonschwenk/RivGraph/issues) or send an email to j........k@gmail.com. 
-For code development contributions, please contact us via email to be added to our slack channel where we can
-hash out a plan for your contribution.
-
-Imposter syndrome disclaimer
-++++++++++++++++++++++++++++
-
-*This disclaimer was adapted from the
-[MetPy project](https://github.com/Unidata/MetPy).*
-
-We want your help. No, really.
-
-There may be a little voice inside your head that is telling you that you're
-not ready to be an open source contributor; that your skills aren't nearly good
-enough to contribute.
-What could you possibly offer?
-
-We assure you that the little voice in your head is wrong.
-
-*Being a contributor doesn't just mean writing code*
-Equally important contributions include:
-writing or proof-reading documentation, suggesting or implementing tests, or
-even giving feedback about the project (including giving feedback about the
-contribution process).
-If you're coming to the project with fresh eyes, you might see the errors and
-assumptions that seasoned contributors have glossed over.
-If you can write any code at all, you can contribute code to open source.
-We are constantly trying out new skills, making mistakes, and learning from
-those mistakes.
-That's how we all improve and we are happy to help others learn.
-
-
+If you think you're not skilled or experienced enough to contribute, think again! We agree wholeheartedly with the sentiments expressed by this [Imposter syndrome disclaimer](https://github.com/Unidata/MetPy#contributing). We welcome all forms of user contributions including feature requests, bug reports, code, documentation requests, and code. Simply open an issue in the [tracker](https://github.com/jonschwenk/RivGraph/issues). For code development contributions, please contact us via email to be added to our slack channel where we can hash out a plan for your contribution. 
 
 Citing RivGraph
 ------------
 
-Citations help us justify the effort that goes into building and maintaining this project. If you
-used RivGraph for your research, please consider citing us.
+Citations help us justify the effort that goes into building and maintaining this project. If you used RivGraph for your research, please consider citing us.
 
 As of 5/26/2020, please cite our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html) and/or our [AGU Presentation](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph). We hope to soon publish RivGraph in the Journal of Open Source Software.
 
 License
 -------
 
-This is free software: you can redistribute it and/or modify it under the terms
-of the **BSD 3-clause License**. A copy of this license is provided in [LICENSE.txt](https://github.com/jonschwenk/RivGraph/blob/master/LICENSE.txt).
+This is free software: you can redistribute it and/or modify it under the terms of the **BSD 3-clause License**. A copy of this license is provided in [LICENSE.txt](https://github.com/jonschwenk/RivGraph/blob/master/LICENSE.txt).
 
 RivGraph has been assigned number C19049 by the Feynman Center for Innovation.
