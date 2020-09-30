@@ -23,7 +23,7 @@ You may then want to install Spyder or your preferred IDE. Conda should fetch al
 If you want to install RivGraph into an already-existing environment, you can run <pre><code>conda activate myenv
 conda install rivgraph -c jschwenk</code></pre>
 
-**Note**: While packaged for all platforms, we have currently only tested the win64 and linux-64 platforms.
+**Note**: While packaged for all platforms, we have currently only tested the win32, win64, and linux-64 platforms.
 
 Savvy users have been able to install RivGraph from this Github repo, but usually not without dependency headaches. See the [environment file](https://github.com/jonschwenk/RivGraph/blob/master/environment.yml) for dependencies.
 
@@ -55,6 +55,42 @@ Contacting us
 
 The best way to get in touch is to [open an issue](https://github.com/jonschwenk/rivgraph/issues/new) or comment
   on any open issue or pull request. Otherwise, send an email to j.........k@gmail.com
+  
+Contributing
+------------
+We welcome all forms of user contributions including feature requests, bug reports, code, documentation requests,
+and code. Simply open an issue in the [Tracker](https://github.com/jonschwenk/RivGraph/issues) or send an email to j........k@gmail.com. 
+For code development contributions, please contact us via email to be added to our slack channel where we can
+hash out a plan for your contribution.
+
+
+Imposter syndrome disclaimer
+++++++++++++++++++++++++++++
+*This disclaimer is from the*
+`MetPy project <https://github.com/Unidata/MetPy>`__.
+
+**We want your help.** No, really.
+
+There may be a little voice inside your head that is telling you that you're
+not ready to be an open source contributor; that your skills aren't nearly good
+enough to contribute.
+What could you possibly offer?
+
+We assure you that the little voice in your head is wrong.
+
+**Being a contributor doesn't just mean writing code**.
+Equally important contributions include:
+writing or proof-reading documentation, suggesting or implementing tests, or
+even giving feedback about the project (including giving feedback about the
+contribution process).
+If you're coming to the project with fresh eyes, you might see the errors and
+assumptions that seasoned contributors have glossed over.
+If you can write any code at all, you can contribute code to open source.
+We are constantly trying out new skills, making mistakes, and learning from
+those mistakes.
+That's how we all improve and we are happy to help others learn.
+
+
 
 Citing RivGraph
 ------------
