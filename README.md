@@ -56,6 +56,7 @@ Contacting us
 The best way to get in touch is to [open an issue](https://github.com/jonschwenk/rivgraph/issues/new) or comment
   on any open issue or pull request. Otherwise, send an email to j.........k@gmail.com
   
+
 Contributing
 ------------
 We welcome all forms of user contributions including feature requests, bug reports, code, documentation requests,
@@ -69,7 +70,7 @@ Imposter syndrome disclaimer
 *This disclaimer is from the*
 `MetPy project <https://github.com/Unidata/MetPy>`__.
 
-**We want your help.** No, really.
+We want your help. No, really.
 
 There may be a little voice inside your head that is telling you that you're
 not ready to be an open source contributor; that your skills aren't nearly good
@@ -78,7 +79,7 @@ What could you possibly offer?
 
 We assure you that the little voice in your head is wrong.
 
-**Being a contributor doesn't just mean writing code**.
+*Being a contributor doesn't just mean writing code*
 Equally important contributions include:
 writing or proof-reading documentation, suggesting or implementing tests, or
 even giving feedback about the project (including giving feedback about the
