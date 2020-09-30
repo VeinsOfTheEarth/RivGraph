@@ -64,8 +64,7 @@ and code. Simply open an issue in the [Tracker](https://github.com/jonschwenk/Ri
 For code development contributions, please contact us via email to be added to our slack channel where we can
 hash out a plan for your contribution.
 
-
-Imposter syndrome disclaimer 
+Imposter syndrome disclaimer
 ++++++++++++++++++++++++++++
 
 *This disclaimer was adapted from the
