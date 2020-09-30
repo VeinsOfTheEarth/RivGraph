@@ -10,6 +10,8 @@ import os
 import sys
 # mocking
 sys.modules['gdal'] = Mock()
+import gdal
+gdal.GDT_UInt16 = 'GDT_UInt16'
 sys.modules['numpy'] = Mock()
 sys.modules['scikit-image'] = Mock()
 sys.modules['opencv-python'] = Mock()
