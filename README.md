@@ -65,11 +65,11 @@ For code development contributions, please contact us via email to be added to o
 hash out a plan for your contribution.
 
 
-Imposter syndrome disclaimer
+Imposter syndrome disclaimer 
 ++++++++++++++++++++++++++++
 
-*This disclaimer was adapted from the*
-`MetPy project <https://github.com/Unidata/MetPy>`__.
+*This disclaimer was adapted from the
+[MetPy project](https://github.com/Unidata/MetPy).*
 
 We want your help. No, really.
 
