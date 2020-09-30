@@ -67,7 +67,8 @@ hash out a plan for your contribution.
 
 Imposter syndrome disclaimer
 ++++++++++++++++++++++++++++
-*This disclaimer is from the*
+
+*This disclaimer was adapted from the*
 `MetPy project <https://github.com/Unidata/MetPy>`__.
 
 We want your help. No, really.
