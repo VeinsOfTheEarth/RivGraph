@@ -10,13 +10,13 @@ authors:
   - name:Jon Schwenk^[Corresponding author]
     orcid: 0000-0001-5803-9686
     affiliation: "1"
-  - name:Jay Hariharan
-    orcid: xxx
+  - name: Jayaram Hariharan
+    orcid: 0000-0002-1343-193X
     affiliation: "2"
 affiliations:
  - name: Los Alamos National Laboratory, Divison of Earth and Enviornmental Sciences
    index: 1
- - name: University of Texas at Austin
+ - name: Department of Civil, Architectural and Environmental Engineering, The University of Texas at Austin
    index: 2
 
 date: 29 September 2020
@@ -34,7 +34,7 @@ Aside from toy problems and demonstrations, the majority of problems require
 efficient numerical tools, many of which require the same base code (e.g., for
 performing numerical orbit integration).
 
-# Statement of need 
+# Statement of need
 
 `Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
 enables wrapping low-level languages (e.g., C) for speed without losing
@@ -97,11 +97,11 @@ Fenced code blocks are rendered with syntax highlighting:
 ```python
 for n in range(10):
     yield f(n)
-```	
+```
 
 # Acknowledgements
 
-RivGraph has received financial support from NSF, DOE, and Los Alamos National Laboratory's
+RivGraph has received financial support from NSF, under EAR-1719670, DOE, and Los Alamos National Laboratory's
 Lab Directed Research and Development program. Special thanks to Prof. Efi
 Foufoula-Georgiou for providing funding for RivGraph's early development.
 
