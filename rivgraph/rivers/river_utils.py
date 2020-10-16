@@ -1214,6 +1214,7 @@ class centerline():
 
         return x, y, vers
 
+
     def smooth(self, window=None, n=1, k=3, x=None, y=None):
         """
         Smooths the x and y coordinates of the centerline using a k-th order
