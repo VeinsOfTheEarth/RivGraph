@@ -97,7 +97,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="rivgraph.html">rivgraph</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">deltas</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">deltas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#delta-directionality">delta_directionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#delta-metrics">delta_metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#delta-utils">delta_utils</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="rivers.html">rivers</a></li>
 </ul>
 </li>
@@ -170,7 +175,452 @@
             
   <div class="section" id="deltas">
 <span id="id1"></span><h1>deltas<a class="headerlink" href="#deltas" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-rivgraph.deltas.delta_directionality"></span><span class="target" id="module-rivgraph.deltas.delta_metrics"></span><span class="target" id="module-rivgraph.deltas.delta_utils"></span></div>
+<span class="target" id="module-rivgraph.deltas.delta_directionality"></span><div class="section" id="delta-directionality">
+<h2>delta_directionality<a class="headerlink" href="#delta-directionality" title="Permalink to this headline">¶</a></h2>
+<p>Created on Sun Nov 18 19:26:01 2018</p>
+<p>&#64;author: Jon</p>
+<dl class="function">
+<dt id="rivgraph.deltas.delta_directionality.dir_synthetic_DEM">
+<code class="descclassname">rivgraph.deltas.delta_directionality.</code><code class="descname">dir_synthetic_DEM</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_directionality.html#dir_synthetic_DEM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_directionality.dir_synthetic_DEM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a synthetic DEM using inlet/outlet locations.</p>
+<p>Builds a synthetic DEM by considering inlets as “hills” and outlets as
+“depressions.” This synthetic is then used to compute the “slope”
+of each link, which is added to the links dictionary. Additionally,
+direction guesses for each link’s flow are computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of binary mask as (nrows, ncols).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties including a ‘slope’.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_directionality.fix_delta_cycle">
+<code class="descclassname">rivgraph.deltas.delta_directionality.</code><code class="descname">fix_delta_cycle</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>cyc_links</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_directionality.html#fix_delta_cycle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_directionality.fix_delta_cycle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to resolve a single cycle.</p>
+<p>Attempts to resolve a single cycle within a delta network. The general
+logic is that all link directions of the cycle are un-set except for those
+set by highly-reliable algorithms, and a modified direction-setting
+recipe is implemented to re-set these algorithms. This was developed
+according to the most commonly-encountered cases for real deltas, but could
+certainly be improved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>cyc_links</strong> (<em>list</em>) – Link ids comprising the cycle to fix.</p></li>
+<li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of binary mask as (nrows, ncols).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with cycle fixed, if possible.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with cycle fixed, if possible.</p></li>
+<li><p><strong>fixed</strong> (<em>bool</em>) – True if the cycle was resolved, else False.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_directionality.fix_delta_cycles">
+<code class="descclassname">rivgraph.deltas.delta_directionality.</code><code class="descname">fix_delta_cycles</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_directionality.html#fix_delta_cycles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_directionality.fix_delta_cycles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to resolve cycles within the network.</p>
+<p>Attempts to resolve all cycles within the delta network. This function
+is essentially a wrapper for <a class="reference internal" href="#rivgraph.deltas.delta_directionality.fix_delta_cycle" title="rivgraph.deltas.delta_directionality.fix_delta_cycle"><code class="xref py py-func docutils literal notranslate"><span class="pre">fix_delta_cycle()</span></code></a>, which is where the
+heavy lifting is actually done. This function finds cycles, calls
+<a class="reference internal" href="#rivgraph.deltas.delta_directionality.fix_delta_cycle" title="rivgraph.deltas.delta_directionality.fix_delta_cycle"><code class="xref py py-func docutils literal notranslate"><span class="pre">fix_delta_cycle()</span></code></a> on each one, then aggregates the results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of binary mask as (nrows, ncols).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with all possible cycles fixed.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with all possible cycles fixed.</p></li>
+<li><p><strong>allfixed</strong> (<em>bool</em>) – True if all cycles were resolved, else False.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_directionality.hull_coords">
+<code class="descclassname">rivgraph.deltas.delta_directionality.</code><code class="descname">hull_coords</code><span class="sig-paren">(</span><em>xy</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_directionality.html#hull_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_directionality.hull_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute convex hull of a set of input points.</p>
+<p>Computes the convex hull of a set of input points. Arranges the convex
+hull coordinates in a clockwise manner and removes the longest edge.
+This function is required by <code class="xref py py-func docutils literal notranslate"><span class="pre">dir_synthetic_dem()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>xy</strong> (<em>np.array</em>) – Two element array. First element contains x coordinates, second
+contains y coordinates of points to compute a convex hull around.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>hull_coords</strong> – Nx2 array of coordinates defining the convex hull of the input points.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_directionality.set_initial_directionality">
+<code class="descclassname">rivgraph.deltas.delta_directionality.</code><code class="descname">set_initial_directionality</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_directionality.html#set_initial_directionality"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_directionality.set_initial_directionality" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make initial attempt to set flow directions.</p>
+<p>Makes an initial attempt to set all flow directions within the network.
+This represents the core of the “delta recipe” described in the following
+open access paper:
+<a class="reference external" href="https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf">https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf</a>
+However, note that as RivGraph develops, this recipe may no longer match
+the one presented in that paper. The recipe chains together a number of
+exploitative algorithms to iteratively set flow directions for the most
+certain links first.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of binary mask as (nrows, ncols).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with initial directions set.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with initial directions set.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_directionality.set_link_directions">
+<code class="descclassname">rivgraph.deltas.delta_directionality.</code><code class="descname">set_link_directions</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>imshape</em>, <em>manual_set_csv=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_directionality.html#set_link_directions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_directionality.set_link_directions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set each link direction in a network.</p>
+<p>This function sets the direction of each link within the network. It
+calls a number of helping functions and uses a somewhat-complicated logic
+to achieve this. The algorithms and logic is described in this open-access
+paper: <a class="reference external" href="https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf">https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.pdf</a></p>
+<p>Every time this is run, all directionality information is reset and
+recomputed. This includes checking for manually set links via the provided
+csv.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of binary mask as (nrows, ncols).</p></li>
+<li><p><strong>manual_set_csv</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to a user-provided csv file of known link directions. The default
+is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with all directions set.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with all directions set.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<span class="target" id="module-rivgraph.deltas.delta_metrics"></span><div class="section" id="delta-metrics">
+<h2>delta_metrics<a class="headerlink" href="#delta-metrics" title="Permalink to this headline">¶</a></h2>
+<p>Created on Mon May 21 09:00:01 2018</p>
+<p>&#64;author: Jon</p>
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.compute_delta_metrics">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">compute_delta_metrics</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#compute_delta_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.compute_delta_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute delta metrics.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.delta_nER">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">delta_nER</code><span class="sig-paren">(</span><em>deltavars</em>, <em>N=500</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#delta_nER"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.delta_nER" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute nonlocal entropy rate.</p>
+<p>Compute the nonlocal entrop rate (nER) corresponding to the delta
+(including flux partition) represented by adjacency matrix A, and compares
+its value with the nER resulting from randomizing the flux partition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><em>pExc</em> – the probability that the value of nER for a randomization of the fluxes
+on the topology dictated by A exceeds the actual value of nER. If the
+value of pExc is lower than 0.10, we considered that the actual partition
+of fluxes is an extreme value of nER</p></li>
+<li><p><em>nER_Delta</em> – the nonlinear entropy rate for the provided adjacency matrix</p></li>
+<li><p><em>nER_randA</em> – the nonlinear entropy rates for the N randomized deltas</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.delta_subN_F">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">delta_subN_F</code><span class="sig-paren">(</span><em>A</em>, <em>epsilon=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#delta_subN_F"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.delta_subN_F" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute steady state flux distribution.</p>
+<p>Computes the steady state flux distribution in the delta nodes when the
+system is fed with a constant unity influx from the Apex. Also defines the
+subnetworks apex-to-outlet.
+The SubN is an NxM matrix, where N is number of nodes and M is the number
+of outlets. For each mth outlet, its contributing subnetwork is given by
+the nonzero entries in SubN. The values in SubN are the degree of
+“belongingness” of each node to its subnetwork. If SubN(m,n) = 0, the m’th
+node does not belong to the n’th subnetwork; but if SubN(m,n) = 1, the m’th
+node belongs <em>only</em> to the n’th subnetwork. The values in SubN may be
+interpreted as the percentage of tracers that pass through node m that
+eventually make their way to the outlet of subnetwork n.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.dyn_entropy_based_dyn">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">dyn_entropy_based_dyn</code><span class="sig-paren">(</span><em>deltavars</em>, <em>epsilon=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#dyn_entropy_based_dyn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.dyn_entropy_based_dyn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute dynamic mutual information and dynamic conditional entropy.</p>
+<p>Computes the Dynamic Mutual Information (DMI) and the Dynamic
+Conditional Entropy for each subnetwork.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.dyn_flux_sharing_index">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">dyn_flux_sharing_index</code><span class="sig-paren">(</span><em>deltavars</em>, <em>epsilon=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#dyn_flux_sharing_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.dyn_flux_sharing_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the flux sharing index.</p>
+<p>Computes the Flux Sharing Index (LSI) which quantifies the overlapping
+(in terms of flux) of each subnetwork with other subnetworks in the
+delta.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.dyn_leakage_index">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">dyn_leakage_index</code><span class="sig-paren">(</span><em>deltavars</em>, <em>epsilon=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#dyn_leakage_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.dyn_leakage_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the leakage index.</p>
+<p>Computes the LI which accounts for the fraction of flux in subnetwork i
+leaked to other subnetworks.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.dyn_pairwise_dep">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">dyn_pairwise_dep</code><span class="sig-paren">(</span><em>deltavars</em>, <em>epsilon=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#dyn_pairwise_dep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.dyn_pairwise_dep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute subnetwork dynamic pairwise dependence.</p>
+<p>Computes the subnetwork to subnetwork dynamic pairwise dependence (DPD)
+which quantifies the overlapping for all pairs of subnetworks in terms of
+flux.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.ensure_single_inlet">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">ensure_single_inlet</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#ensure_single_inlet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.ensure_single_inlet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure only a single apex node exists.</p>
+<p>All the delta metrics here require a single apex node, and that that node
+be connected to at least two downstream links. This function ensures these
+conditions are met; where there are multiple inlets, the widest is chosen.
+This function also ensures that the inlet node is attached to at least two
+links–this is important for computing un-biased delta metrics.
+The links and nodes dicts are copied so they remain unaltered; the altered
+copies are returned.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.find_inlet_outlet_nodes">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">find_inlet_outlet_nodes</code><span class="sig-paren">(</span><em>A</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#find_inlet_outlet_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.find_inlet_outlet_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find inlet and outlet nodes.</p>
+<p>Given an input adjacency matrix (A), returns the inlet and outlet nodes.
+The graph should contain a single apex
+(i.e. run ensure_single_inlet first).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.graphiphy">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">graphiphy</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#graphiphy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.graphiphy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a networkx graph.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.graphshortestpath">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">graphshortestpath</code><span class="sig-paren">(</span><em>A</em>, <em>start</em>, <em>finish</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#graphshortestpath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.graphshortestpath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the shortest path.</p>
+<p>Uses networkx functions to find the shortest path along a graph defined
+by A; path is simply defined as the number of links. Actual length not
+considered. Number of links in the shortest path is returned.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.intermediate_vars">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">intermediate_vars</code><span class="sig-paren">(</span><em>G</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#intermediate_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.intermediate_vars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute interemediate variables and matrices.</p>
+<p>Computes the intermediate variables and matrices required to compute
+delta metrics. This function prevents the re-computation of many matrices
+required in the metric functions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.nl_entropy_rate">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">nl_entropy_rate</code><span class="sig-paren">(</span><em>A</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#nl_entropy_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.nl_entropy_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute nonlocal entropy rate.</p>
+<p>Computes the nonlocal entropy rate (nER) corresponding to the delta
+(inlcuding flux partition) represented by matrix A</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.normalize_adj_matrix">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">normalize_adj_matrix</code><span class="sig-paren">(</span><em>G</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#normalize_adj_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.normalize_adj_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize adjacency matrix.</p>
+<p>Normalizes a graph’s adjacency matrix so the sum of weights of each row
+equals one. G is a networkx Graph with weights assigned.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.top_entropy_based_topo">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">top_entropy_based_topo</code><span class="sig-paren">(</span><em>deltavars</em>, <em>epsilon=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#top_entropy_based_topo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.top_entropy_based_topo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute topologic mutual information and conditional entropies.</p>
+<p>Computes the Topologic Mutual Information (TMI) and the Topologic
+Conditional Entropy for each subnetwork.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.top_link_sharing_index">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">top_link_sharing_index</code><span class="sig-paren">(</span><em>deltavars</em>, <em>epsilon=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#top_link_sharing_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.top_link_sharing_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the link sharing index.</p>
+<p>Computes the Link Sharing Index (LSI) which quantifies the overlapping
+(in terms of links) of each subnetwork with other subnetworks in the
+delta.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.top_number_alternative_paths">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">top_number_alternative_paths</code><span class="sig-paren">(</span><em>deltavars</em>, <em>epsilon=1e-15</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#top_number_alternative_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.top_number_alternative_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute number of alternative paths.</p>
+<p>Computes the number of alternative paths (Nap) in the combinatorics sense
+from the Apex to each of the shoreline outlets.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.top_resistance_distance">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">top_resistance_distance</code><span class="sig-paren">(</span><em>deltavars</em>, <em>epsilon=1e-15</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#top_resistance_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.top_resistance_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the topologic resistance distance.</p>
+<p>NOTE! TopoDist was not supplied with this function–can use networkX to
+compute shortest path but need to know what “shortest” means
+This function will not work until TopoDist is resolved.
+Computes the resistance distance (RD) from the Apex to each of the
+shoreline outlets. The value of RD between two nodes is the effective
+resistance between the two nodes when each link in the network is replaced
+by a 1 ohm resistor.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.top_s2s_topo_pairwise_dep">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">top_s2s_topo_pairwise_dep</code><span class="sig-paren">(</span><em>deltavars</em>, <em>epsilon=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#top_s2s_topo_pairwise_dep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.top_s2s_topo_pairwise_dep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute subnetwork topologic pairwise dependence.</p>
+<p>This  function computes the Subnetwork to Subnetwork Topologic Pairwise
+Dependence (TPD) which quantifies the overlapping for all pairs of
+subnetworks in terms of links.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-rivgraph.deltas.delta_utils"></span><div class="section" id="delta-utils">
+<h2>delta_utils<a class="headerlink" href="#delta-utils" title="Permalink to this headline">¶</a></h2>
+<p>A collection of functions for pruning a delta channel network.</p>
+<dl class="function">
+<dt id="rivgraph.deltas.delta_utils.clip_by_shoreline">
+<code class="descclassname">rivgraph.deltas.delta_utils.</code><code class="descname">clip_by_shoreline</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>shoreline_shp</em>, <em>gdobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_utils.html#clip_by_shoreline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_utils.clip_by_shoreline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clips links by a provided shoreline shapefile. The largest network is
+presumed to be the delta network and is thus retained. The network should
+have been de-spurred before running this function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – stores the network’s links and their properties</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – stores the network’s nodes and their properties</p></li>
+<li><p><strong>shoreline_shp</strong> (<em>str</em>) – path to the shapefile of shoreline polyline</p></li>
+<li><p><strong>gdobj</strong> (<em>osgeo.gdal.Dataset</em>) – gdal object corresponding to the georeferenced input binary channel mask</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – links dictionary representing network clipped by the shoreline</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – nodes dictionary representing network clipped by the shoreline.
+‘outlets’ has been added to the dictionary to store a list of outlet
+node ids</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_utils.find_inlet_nodes">
+<code class="descclassname">rivgraph.deltas.delta_utils.</code><code class="descname">find_inlet_nodes</code><span class="sig-paren">(</span><em>nodes</em>, <em>inlets_shp</em>, <em>gdobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_utils.html#find_inlet_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_utils.find_inlet_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load inlets from a shapefile.</p>
+<p>Loads the user-defined inlet nodes point shapefile and uses it to identify
+the inlet nodes within the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – stores the network’s links and their properties</p></li>
+<li><p><strong>inlets_shp</strong> (<em>str</em>) – path to the shapefile of inlet locations (point shapefile)</p></li>
+<li><p><strong>gdobj</strong> (<em>osgeo.gdal.Dataset</em>) – gdal object corresponding to the georeferenced input binary channel
+mask</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>nodes</strong> – nodes dictionary with ‘inlets’ key containing list of inlet node ids</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_utils.prune_delta">
+<code class="descclassname">rivgraph.deltas.delta_utils.</code><code class="descname">prune_delta</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>shoreline_shp</em>, <em>inlets_shp</em>, <em>gdobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_utils.html#prune_delta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_utils.prune_delta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prune a delta network.</p>
+<p>Clips a delta channel network given an inlet and shoreline shapefile and
+removes spurious links.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – stores the network’s links and their properties</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – stores the network’s nodes and their properties</p></li>
+<li><p><strong>shoreline_shp</strong> (<em>str</em>) – path to the shoreline shapefile (polyline)</p></li>
+<li><p><strong>inlets_shp</strong> (<em>str</em>) – path to the shapefile of inlet locations (point shapefile)</p></li>
+<li><p><strong>gdobj</strong> (<em>osgeo.gdal.Dataset</em>) – gdal object corresponding to the georeferenced input binary channel
+mask</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – updated links dictionary</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – updated nodes dictionary</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
 
 
            </div>
