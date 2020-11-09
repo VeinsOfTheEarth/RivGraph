@@ -1,0 +1,37 @@
+# This workflow installs and tests the RivGraph package
+
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.6]
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+    steps:
+      - uses: conda-incubator/setup-miniconda@v1.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          mamba-version: "*"
+          channels: conda-forge, defaults
+      - uses: actions/checkout@v2
+      - name: install RivGraph + dependencies
+        shell: bash -l {0}
+        run: |
+          mamba env create -q --file environment.yml
+          conda activate rivgraph
+          conda uninstall rivgraph
+          sudo apt-get install gnutls-bin
+          pip install pytest pytest-timeout pytest-cov coveralls
+          python setup.py install
+      - name: run unit tests and get coverage
+        run: |
+          pytest --cov-config=.coveragerc --cov=rivgraph/
+          coveralls
