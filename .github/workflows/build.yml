@@ -30,8 +30,11 @@ jobs:
           conda uninstall rivgraph
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
-
           pytest --cov-config=.coveragerc --cov=rivgraph/
+      - name: get coverage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
           coveralls
 
   windows-build:
@@ -59,7 +62,6 @@ jobs:
           conda uninstall rivgraph
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
-
           pytest --cov-config=.coveragerc --cov=rivgraph/
 
   macos-build:
@@ -87,5 +89,4 @@ jobs:
           conda uninstall rivgraph
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
-
           pytest --cov-config=.coveragerc --cov=rivgraph/
