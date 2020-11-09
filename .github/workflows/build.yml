@@ -28,9 +28,10 @@ jobs:
           mamba env create -q --file environment.yml
           conda activate rivgraph
           conda uninstall rivgraph
-          pip install pytest pytest-timeout pytest-cov coveralls
+          pip install pytest pytest-timeout pytest-cov coveralls coverage
           python setup.py install
-          pytest --cov-config=.coveragerc --cov=rivgraph/ -o coverage.xml
+          coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
+          coverage xml -o coverage.xml
       - name: generate coverage report
         uses: danielpalme/ReportGenerator-GitHub-Action@4.7.1
         with:
