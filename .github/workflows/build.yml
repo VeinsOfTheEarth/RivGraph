@@ -32,7 +32,7 @@ jobs:
           python setup.py install
           coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
       - name: coveralls
-        uses: coverallsapp/github-action@master
+      - uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         run: |
