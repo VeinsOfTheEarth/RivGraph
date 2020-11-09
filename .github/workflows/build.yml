@@ -31,10 +31,10 @@ jobs:
           pip install pytest pytest-timeout pytest-cov coveralls coverage
           python setup.py install
           coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
-      - name: coveralls
       - uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: coveralls
         run: |
           coveralls
 
