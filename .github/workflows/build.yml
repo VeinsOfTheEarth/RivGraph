@@ -1,0 +1,87 @@
+# This workflow installs and tests the RivGraph package
+
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  ubunutu-build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.6]
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+    steps:
+      - uses: conda-incubator/setup-miniconda@v2.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          mamba-version: "*"
+          channels: conda-forge, defaults
+      - uses: actions/checkout@v2
+      - name: install RivGraph + dependencies, then unit test
+        shell: bash -l {0}
+        run: |
+          mamba env create -q --file environment.yml
+          conda activate rivgraph
+          conda uninstall rivgraph
+          pip install pytest pytest-timeout pytest-cov coveralls coverage
+          python setup.py install
+          coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
+
+  windows-build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        python-version: [3.6]
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+    steps:
+      - uses: conda-incubator/setup-miniconda@v2.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          miniconda-version: "latest"
+          channels: conda-forge, defaults
+      - uses: actions/checkout@v2
+      - name: install RivGraph + dependencies, then unit test
+        shell: bash -l {0}
+        run: |
+          conda env create -q --file environment.yml
+          conda activate rivgraph
+          conda uninstall rivgraph
+          pip install pytest pytest-timeout pytest-cov coveralls
+          python setup.py install
+          pytest --cov-config=.coveragerc --cov=rivgraph/
+
+  macos-build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
+        python-version: [3.6]
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+    steps:
+      - uses: conda-incubator/setup-miniconda@v2.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          mamba-version: "*"
+          channels: conda-forge, defaults
+      - uses: actions/checkout@v2
+      - name: install RivGraph + dependencies, then unit test
+        shell: sh -l {0}
+        run: |
+          mamba env create -q --file environment.yml
+          conda activate rivgraph
+          conda uninstall rivgraph
+          pip install pytest pytest-timeout pytest-cov coveralls
+          python setup.py install
+          pytest --cov-config=.coveragerc --cov=rivgraph/
