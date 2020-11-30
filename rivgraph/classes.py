@@ -2,7 +2,7 @@
 """
 RivGraph (classes.py)
 =====================
-Classes for running rivgraph commands on your channel network.
+Classes for running rivgraph commands on your channel network or centerline.
 
 """
 import os
@@ -11,10 +11,13 @@ import numpy as np
 import networkx as nx
 from pyproj.crs import CRS
 from scipy.ndimage.morphology import distance_transform_edt
+from matplotlib import pyplot as plt
+import geopandas as gpd
+from shapely.geometry import LineString
+from scipy import signal
 import rivgraph.io_utils as io
 import rivgraph.geo_utils as gu
 import rivgraph.mask_to_graph as m2g
-import rivgraph.im_utils as im
 import rivgraph.ln_utils as lnu
 import rivgraph.mask_utils as mu
 import rivgraph.deltas.delta_utils as du
@@ -22,6 +25,7 @@ import rivgraph.deltas.delta_directionality as dd
 import rivgraph.deltas.delta_metrics as dm
 import rivgraph.rivers.river_directionality as rd
 import rivgraph.rivers.river_utils as ru
+import rivgraph.rivers.centerline_utils as cu
 
 
 class rivnetwork:
@@ -858,3 +862,439 @@ class river(rivnetwork):
 
         if self.verbose is True:
             print('done.')
+
+
+class centerline():
+
+    def __init__(self, x, y, attribs=None, crs=None):
+        """
+        attribs is a dictionary with attributes; can be single values like
+        average channel width or one value per coordinate like local width.
+        """
+        # Store original coordinates
+        self.xo = x
+        self.yo = y
+        
+        # Store crs info if provided
+        self.crs = crs
+
+        # Store attributes
+        if attribs:
+            for a in attribs.keys():
+
+                try:
+                    alen = len(attribs[a])
+                except Exception:
+                    alen = 1
+
+                if alen == 1 or alen == len(x):
+                    setattr(self, a, attribs[a])
+                else:
+                    print('Attribute {} does not have the proper length and is not being stored.'.format(a))
+
+    def __get_x_and_y(self):
+
+        if hasattr(self, 'xrs'):
+            x = self.xrs
+            y = self.yrs
+            vers = 'resampled'
+        elif hasattr(self, 'xs'):
+            x = self.xs
+            y = self.ys
+            vers = 'smooth'
+        else:
+            x = self.xo
+            y = self.yo
+            vers = 'original'
+
+        return x, y, vers
+
+
+    def smooth(self, window=None, n=1, k=3, x=None, y=None):
+        """
+        Smooths the x and y coordinates of the centerline using a k-th order
+        Savitzky-Golay filter.
+
+        window refers to the number of points to use in the moving window;
+        must be odd n is the number of times to perform the smoothing.
+        """
+        if x is None:
+            x, y, _ = self.__get_x_and_y()
+
+        if window is None:
+            if hasattr(self, 'window_cl'):
+                window = self.window_cl
+            else:
+                print('Must provide a smoothing window.')
+                return
+
+        # Ensure window is integer and odd
+        window = int(window)
+        if window % 2 == 0:
+            window = window + 1
+
+        self.xs = signal.savgol_filter(x, window_length=window, polyorder=k,
+                                       mode='interp')
+        self.ys = signal.savgol_filter(y, window_length=window, polyorder=k,
+                                       mode='interp')
+
+        # Could make this recursive but if a non-default x,y are passed in, it would not function as expected
+        if n > 1:
+            for i in range(1,n-1):
+                self.xs = signal.savgol_filter(self.xs, window_length=window,
+                                               polyorder=3, mode='interp')
+                self.ys = signal.savgol_filter(self.ys, window_length=window,
+                                               polyorder=3, mode='interp')
+
+    def resample(self, N, x=None, y=None):
+        """
+        If no arguments are provided for x and y, will resample the smoothed
+        coordinates if available, else will resample the original coordinates.
+
+        N is the number of points that the resulting centerline
+        should contain.
+        """
+        if x is None:
+            x, y, _ = self.__get_x_and_y()
+
+        xy, spline = cu.evenly_space_line(x, y, npts=N)
+        self.xrs = xy[0]
+        self.yrs = xy[1]
+
+    def s(self, x=None, y=None):
+
+        if x is None:
+            x, y, _ = self.__get_x_and_y()
+
+        sss, _ = cu.s_ds(x, y)
+        return sss
+
+    def ds(self, x=None, y=None):
+
+        if x is None:
+            x, y, _ = self.__get_x_and_y()
+
+        _, dss = cu.s_ds(x, y)
+        return dss
+
+    def C(self, x=None, y=None):
+        """
+        Important: curvatures are negativized to match the zs approach
+        """
+        if x is None:
+            x, y, _ = self.__get_x_and_y()
+
+        Cs, _, _ = cu.curvars(x, y, unwrap=True)
+        Cs = np.insert(Cs, 0, 0)
+        return -Cs
+
+    def Csmooth(self, window=None, x=None, y=None):
+
+        if window is None:
+            if hasattr(self, 'window_C'):
+                window = self.window_C
+            else:
+                print('Must provide a smoothing window.')
+                return
+
+        Cs = self.C()
+        Cs = signal.savgol_filter(Cs, window_length=window, polyorder=3,
+                                  mode='interp')
+#            Cs = signal.medfilt(Cs,kernel_size=5)
+        return Cs
+
+    def infs(self, N, x=None, y=None):
+        """
+        Finds inflection points.
+
+        N is the number of expected inflection points. It can be estimated
+        from N ~= centerline length / 10W, but visual inspection is usually
+        best.
+        """
+
+        if x is None:
+            x, y, _ = self.__get_x_and_y()
+
+        # Use centerline oversmoothing to find inflection points
+        self.infs_os, _ = cu.inflection_pts_oversmooth(x, y, n_infs=N)
+
+    def infsC(self, x=None, y=None):
+
+        if not hasattr(self, 'C'):
+            self.curvature()
+
+        # Use curvature to find inflection points
+        self.infs_C = cu.inflection_points(self.C)
+
+
+    def intersection_points(self, x2, y2, x1=None, y1=None):
+
+        if x1 is None:
+            x1, y1, _ = self.__get_x_and_y()
+
+        ls1 = LineString(zip(x1, y1))
+        ls2 = LineString(zip(x2, y2))
+        ls_intersections = ls1.intersection(ls2)
+        self.ints_all = np.unique(np.sort([np.argmin(np.sqrt((x1-pt.coords.xy[0][0])**2 + (y1-pt.coords.xy[1][0])**2)) for pt in ls_intersections])) # locations of zero migration
+
+        # Map the intersection points so that there is one point for every
+        # pair of inflection points in inf_os
+        # If there is only one intersection point, use it.
+        # If none, use the first inflection point?
+        # If multiple, use the one closest to the first inflection point
+        if hasattr(self, 'infs_os'):
+
+            s = self.s()
+
+            # Compute the average bend length from the inflection points
+            ints = []
+            s = self.s()
+#            abl = (s[self.infs_os[-1]] - s[self.infs_os[0]])/(len(self.infs_os)-1)
+
+            for i in range(len(self.infs_os)):
+
+                i0 = self.infs_os[i]
+
+                # Find nearest intersection point for first inflection
+                if i == 0:
+                    intidx = np.argmin(np.abs(s[i0] - s[self.ints_all]))
+                    ints.append(self.ints_all[intidx])
+
+                # Else find the nearest interesection point that is downstream of the bend's first inflection point
+                else:
+                    possible_ints = self.ints_all[self.ints_all > ints[i-1]]
+                    dists = np.abs(s[possible_ints] - s[i0])
+                    ints.append(possible_ints[np.argmin(dists)])
+
+                if i == len(self.infs_os)-1:
+                    break
+
+            self.ints = np.array(ints)
+
+        else:
+            print('Could not map intersections to inflection point pairs because infs_os not computed. Run infs() first.')
+            
+            
+    def mig_rate_transect_matching(self, x2, y2, dt_years, path_matchers, x1=None, y1=None, mig_spacing=None, window=None, path_mig_vectors=None):
+        """
+        Compute migration rate using "transect matching". Requires a user to
+        provide a geovector file (e.g. shapefile, geopackage, etc.) of that 
+        contains transects that intersect both centerlines at their common
+        points.
+        
+        Also computes a smoothed version of the migration rates, and a smoothed 
+        version with cutoff-affected points set to NaN.
+        """
+
+        # If no migration rate smoothing parameter is provided, use the same
+        # one used for smoothing curvatures, else window size is 5.
+        if window is None:
+            if hasattr(self, 'window_C'):
+                window = self.window_C
+            else:
+                window = 5  # must be greater than the polyorder, which is 3 by default
+        
+        if x1 is None:
+            x1, y1, _ = self.__get_x_and_y()
+                    
+        # If no spacing is provided, use 1/8 channel width
+        if mig_spacing is None:
+            mig_spacing = self.W/8
+
+        self.mr_tm, pts_cl1, pts_cl2 = cu.cl_migration_transect_matching(path_matchers, x1, y1, x2, y2, dt_years, mig_spacing)
+        
+        # Export migration vectors if path provided
+        if path_mig_vectors is not None:
+            if self.crs is None:
+                print('Cannot export migration vectors until crs is set.')
+            else:
+                # Migration vectors export
+                mvs = []
+                for p1, p2 in zip(pts_cl1, pts_cl2):
+                    mvs.append(LineString((p1, p2)))
+                gdf_mvs = gpd.GeoDataFrame(geometry=mvs, crs=self.crs)
+                gdf_mvs.to_file(path_mig_vectors, driver=io.get_driver(path_mig_vectors))
+
+         
+        # Smooth the migration rates
+        self.mr_tm_sm = signal.savgol_filter(self.mr_tm, window_length=window,
+                                             polyorder=3, mode='interp')
+
+        # Set cutoff-affected and erodibility-affected bends to NaN
+        self.mr_tm_nan = self.mr_tm.copy()
+        self.mr_tm_sm_nan = self.mr_tm_sm.copy()
+        if hasattr(self, 'cut_ids'):
+            for c in self.cut_ids:
+                self.mr_tm_nan[self.infs_os[c]:self.infs_os[c+1]] = np.NaN
+                self.mr_tm_sm_nan[self.infs_os[c]:self.infs_os[c+1]] = np.NaN
+
+        if hasattr(self, 'erode_ids'):
+            for e in self.erode_ids:
+                self.mr_tm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
+                self.mr_tm_sm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
+
+        
+    def mig_rate_zs(self, x2, y2, dt_years, x1=None, y1=None, window=None):
+        """
+        Compute migration rate using Sylvester et al's method of
+        dynamic time warping. Also computes a smoothed version of the 
+        migration rates, and a smoothed version with cutoff-affected
+        points set to NaN.
+        """
+        if x1 is None:
+            x1, y1, _ = self.__get_x_and_y()
+
+        # If no migration rate smoothing parameter is provided, use the same
+        # one used for smoothing curvatures, else window size is 5.
+        if window is None:
+            if hasattr(self, 'window_C'):
+                window = self.window_C
+            else:
+                window = 5  # must be greater than the polyorder, which is 3 by default
+
+        import os
+        import sys
+        script_dir = r"C:\Users\Jon\Desktop\Research\Koyukukon\Normalize migration rates\Code\curvaturepy-master"
+        sys.path.append(os.path.abspath(script_dir))
+        import cline_analysis as ca
+
+        self.mr_zs, self.mrs_zs, self.p_zs, self.q_zs = ca.get_migr_rate(x1, x2, y1, y2, dt_years, 0)
+
+        # Smooth the migration rates
+        self.mr_zs_sm = signal.savgol_filter(self.mr_zs, window_length=window,
+                                             polyorder=3, mode='interp')
+
+        # Set cutoff-affected and erodibility-affected bends to NaN
+        self.mr_zs_nan = self.mr_zs.copy()
+        self.mr_zs_sm_nan = self.mr_zs_sm.copy()
+        if hasattr(self, 'cut_ids'):
+            for c in self.cut_ids:
+                self.mr_zs_nan[self.infs_os[c]:self.infs_os[c+1]] = np.NaN
+                self.mr_zs_sm_nan[self.infs_os[c]:self.infs_os[c+1]] = np.NaN
+
+        if hasattr(self, 'erode_ids'):
+            for e in self.erode_ids:
+                self.mr_zs_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
+                self.mr_zs_sm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
+
+    def plot(self, x=None, y=None):
+
+        if x is None:
+            x, y, version = self.__get_x_and_y()
+        else:
+            version = ''
+
+        fig, ax = plt.subplots()
+        legend = []
+        ax.plot(x, y, 'k')
+        legend.append(version + ' centerline')
+
+        if hasattr(self, 'infs_os'):
+            ax.plot(x[self.infs_os], y[self.infs_os], 'rs')
+            legend.append('inflection points')
+
+        if hasattr(self, 'ints_all'):
+            ax.plot(x[self.ints_all],  y[self.ints_all], 'go')
+            legend.append('intersection points')
+
+        if hasattr(self, 'ints'):
+            ax.plot(x[self.ints], y[self.ints], 'b^')
+            legend.append('intersection points (mapped)')
+
+        plt.legend(legend)
+        plt.axis('equal')
+
+    def zs_plot(self, window=None):
+        """
+        Copied verbatim from https://github.com/zsylvester/curvaturepy/blob/master/Purus_2_migration_rates.ipynb
+        Slight modifications for meshing in the centerline class.
+        """
+
+        if hasattr(self, 'infs_os') is False:
+            print('Must compute inflection points first.')
+            return
+
+        if hasattr(self, 'ints') is False:
+            print('Must compute intersections first.')
+            return
+
+        if hasattr(self, 'mr_zs_nan') is False:
+            print('Must compute migration rates first.')
+            return
+#            elif hasattr(self, 'mr_zs_sm_nan'):
+#                migr_rate = self.mr_zs_sm_nan
+        else:
+            migr_rate = self.mr_zs_nan
+
+        if hasattr(self, 'cut_ids') is False:
+            cutoff_inds = []
+        else:
+            cutoff_inds = self.cut_ids
+
+        if hasattr(self, 'erode_ids') is False:
+            erodibility_inds = []
+        else:
+            erodibility_inds = self.erode_ids
+
+        if window is None:
+            if hasattr(self, 'window_C'):
+                window = self.window_C
+            else:
+                print('Must provide a smoothing window.')
+                return
+
+        LZC = self.infs_os
+        LZM = self.ints
+        s = self.s()
+        curv = self.Csmooth()
+        W = self.W
+
+        fig, ax1 = plt.subplots(figsize=(18,4))
+#            plt.tight_layout()
+
+        y1 = 0.7
+        y2 = 0.0
+        y3 = -0.87
+        y4 = -1.25
+
+        for i in range(0,len(LZC)-1,2):
+            xcoords = [s[LZC[i]],s[LZC[i+1]],s[LZC[i+1]],s[LZM[i+1]],s[LZM[i+1]],s[LZM[i]],s[LZM[i]],s[LZC[i]]]
+            ycoords = [y1,y1,y2,y3,y4,y4,y3,y2]
+            ax1.fill(xcoords,ycoords,color=[0.85,0.85,0.85],zorder=0)
+
+        ax1.fill_between(s, 0, curv*W)
+        ax2 = ax1.twinx()
+        ax2.fill_between(s, 0, migr_rate, facecolor='green')
+
+        ax1.plot([0,max(s)],[0,0],'k--')
+        ax2.plot([0,max(s)],[0,0],'k--')
+
+        ax1.set_ylim(y4,y1)
+        ax2.set_ylim(-15,40)
+        ax1.set_xlim(s[LZC[0]],s[-1])
+
+        for i in erodibility_inds:
+            xcoords = [s[LZC[i]],s[LZC[i+1]],s[LZC[i+1]],s[LZM[i+1]],s[LZM[i+1]],s[LZM[i]],s[LZM[i]],s[LZC[i]]]
+            ycoords = [y1,y1,y2,y3,y4,y4,y3,y2]
+            ax1.fill(xcoords,ycoords,color=[1.0,0.85,0.85],zorder=0)
+
+        for i in cutoff_inds:
+            xcoords = [s[LZC[i]],s[LZC[i+1]],s[LZC[i+1]],s[LZM[i+1]],s[LZM[i+1]],s[LZM[i]],s[LZM[i]],s[LZC[i]]]
+            ycoords = [y1,y1,y2,y3,y4,y4,y3,y2]
+            ax1.fill(xcoords,ycoords,color=[0.85,1.0,0.85],zorder=0)
+
+        for i in range(len(LZC)-1):
+            if np.sum(np.isnan(migr_rate[LZM[i]:LZM[i+1]]))>0:
+                xcoords = [s[LZC[i]],s[LZC[i+1]],s[LZC[i+1]],s[LZM[i+1]],s[LZM[i+1]],s[LZM[i]],s[LZM[i]],s[LZC[i]]]
+                ycoords = [y1,y1,y2,y3,y4,y4,y3,y2]
+                ax1.fill(xcoords,ycoords,color='w')
+
+        for i in range(len(LZC)-1):
+            if np.sum(np.isnan(migr_rate[LZM[i]:LZM[i+1]]))>0:
+                xcoords = [s[LZC[i]],s[LZC[i+1]],s[LZC[i+1]],s[LZM[i+1]],s[LZM[i+1]],s[LZM[i]],s[LZM[i]],s[LZC[i]]]
+                ycoords = [35,35,20.7145,0,-15,-15,0,20.7145]
+                ax2.fill(xcoords,ycoords,color='w')
+
+        for i in range(0,len(LZC)-1,2):
+            ax1.text(s[LZC[i]],0.5,str(i),fontsize=12)
+

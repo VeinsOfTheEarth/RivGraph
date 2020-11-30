@@ -13,17 +13,16 @@ from fastdtw import fastdtw
 from scipy.ndimage.morphology import distance_transform_edt
 import shapely
 from shapely.geometry import LineString, Polygon
-import scipy.interpolate as si
 from scipy import signal
 from scipy.spatial.distance import cdist, euclidean
 from matplotlib import pyplot as plt
 import geopandas as gpd
 
-
 from rivgraph.ordered_set import OrderedSet
 import rivgraph.im_utils as iu
 import rivgraph.mask_to_graph as m2g
 import rivgraph.ln_utils as lnu
+import rivgraph.rivers.centerline_utils as cu
 
 
 def prune_river(links, nodes, exit_sides, Iskel, gdobj):
@@ -347,222 +346,6 @@ def mask_to_centerline(Imask, es):
     return coords, pix_width
 
 
-def resample_line(xs, ys, npts=None, nknots=None, k=3):
-    """
-    Resample a line.
-
-    Resamples a line defined by x,y coordinates such that coordinates are
-    evenly-spaced.
-    If the optional npts parameter is not specified, the
-    line will be resampled with the same number of points as the input
-    coordinates.
-    k refers to order of spline that is fit to coordinates for resampling.
-
-    """
-    # FitPack in si.splprep can't handle duplicate points in the line, so remove them
-    no_dupes = np.array(np.where(np.abs(np.diff(xs)) +
-                        np.abs(np.diff(ys)) > 0)[0], dtype=np.int)
-    xs_nd = np.r_[xs[no_dupes], xs[-1]]
-    ys_nd = np.r_[ys[no_dupes], ys[-1]]
-
-    # Get indices of knots
-    if nknots is None:
-        nknots = len(xs_nd)
-    knot_indices = np.linspace(0, len(xs_nd), nknots, dtype=np.int)
-    knot_indices[knot_indices > len(xs_nd) - 1] = len(xs_nd) - 1
-    knot_indices = np.unique(knot_indices)
-
-    # Create spline
-    spline, _ = si.splprep([xs_nd[knot_indices], ys_nd[knot_indices]], k=k)
-
-    # Evaluate spline
-    if npts is None:
-        npts = len(xs)
-    t = np.linspace(0, 1, npts)
-    resampled_coords = si.splev(t, spline)
-
-    return resampled_coords, spline
-
-
-def evenly_space_line(xs, ys, npts=None, k=3, s=0):
-    """
-    Resample evenly.
-
-    Resamples a curve defined by x,y coordinates such that coordinates are
-    evenly-spaced.
-    If the optional npts parameter is not specified, the
-    line will be resampled with the same number of points as the input
-    coordinates.
-    k refers to order of spline that is fit to coordinates for resampling.
-    xs, ys must be numpy arrays.
-
-    """
-    # FitPack in si.splprep can't handle duplicate points in the line, so remove them
-    shapely_line = LineString(zip(xs, ys))
-    shapely_line = shapely_line.simplify(0)
-    xs_nd, ys_nd = np.array(shapely_line.coords.xy[0]), np.array(shapely_line.coords.xy[1])
-
-    # Create spline
-    spline, _ = si.splprep([xs_nd, ys_nd], k=k, s=s)
-
-    # Evaluate spline
-    if npts is None:
-        npts = len(xs)
-    t = np.linspace(0, 1, npts)
-    resampled_coords = si.splev(t, spline)
-
-    return resampled_coords, spline
-
-
-def offset_linestring(linestring, distance, side):
-    """
-    Offset a linestring.
-
-    Parameters
-    ----------
-    linestring :
-        shapely linestring
-    distance :
-        distance to offset linestring
-    side :
-        'left' or 'right' to specify which side to compute offset
-    """
-
-    # Perform the offset
-    offset = linestring.parallel_offset(distance, side)
-
-    # Ensure that offset is not a MultiLineString by deleting all but the longest linestring
-    if type(offset) is shapely.geometry.multilinestring.MultiLineString:
-        ls_lengths = [ls.length for ls in offset]
-        offset = offset[ls_lengths.index(max(ls_lengths))]
-        print('Multilinestring returned in offset_linestring; clipped to longest but check output.')
-
-    # Ensure offset linestring is oriented the same as the input linestring
-    xy_orig_start = (linestring.coords.xy[0][0], linestring.coords.xy[1][0])
-
-    # Get endpoint coordinates of offset linestring
-    xy_offset_start = (offset.coords.xy[0][0], offset.coords.xy[1][0])
-    xy_offset_end = (offset.coords.xy[0][-1], offset.coords.xy[1][-1])
-
-    if np.sum(np.sqrt((xy_orig_start[0]-xy_offset_start[0])**2 +
-                      (xy_orig_start[1]-xy_offset_start[1])**2)) > np.sum(np.sqrt((xy_orig_start[0]-xy_offset_end[0])**2 + (xy_orig_start[1]-xy_offset_end[1])**2)):
-        offset = LineString(offset.coords[::-1])
-
-    return offset
-
-
-def inflection_pts_oversmooth(xs, ys, n_infs):
-    """
-    Compute inflection points.
-
-    Computes inflection points as the intersection of a line given by
-    xs, ys and its (over)smoothed version.
-
-    Parameters
-    ----------
-    xs :
-        np-type array of x-coordinates
-    ys :
-        np-type array of y-coordinates
-    n_infs :
-        approx how many inflection points are expected? This sets the
-        degree of smoothing. For meandering rivers, n_infs can be
-        approximated by the relationship: wavelength = 10W, for average
-        width W.
-
-    """
-    def generate_smoothing_windows(start, stop, nbreaks, polyorder=3):
-        """
-        Generate smoothing window sizes.
-
-        Generate an array of window sizes for smoothing. Each value must be
-        greater than the polyorder of the smoother and be odd.
-        """
-
-        smoothwins = np.linspace(start, stop, nbreaks, dtype=np.int)
-
-        # Window must be greater than polyorder
-        smoothwins[smoothwins < polyorder] = polyorder + 1
-        # Window must be odd
-        smoothwins[smoothwins % 2 == 0] = smoothwins[smoothwins % 2 == 0] + 1
-        smoothwins = np.unique(smoothwins)
-
-        return smoothwins
-
-    def smoothing_iterator(xs, ys, smoothing_windows, n_infs, polyorder):
-
-        for i, sw in enumerate(smoothing_windows):
-
-            # Smooth the line's coordinates
-            xs_sm = signal.savgol_filter(xs, window_length=sw,
-                                         polyorder=polyorder, mode='interp')
-            ys_sm = signal.savgol_filter(ys, window_length=sw,
-                                         polyorder=polyorder, mode='interp')
-
-            # Conver to shapely objects for intersection detection
-            ls = LineString([(x, y) for x, y in zip(xs, ys)])
-            ls_sm = LineString([(x, y) for x, y in zip(xs_sm, ys_sm)])
-
-            intersects = ls.intersection(ls_sm)
-            if type(intersects) is shapely.geometry.point.Point:  # Points have no length so check
-                n_ints = 1
-            else:
-                n_ints = len(ls.intersection(ls_sm))
-
-            if n_ints < n_infs:
-                break
-
-        return smoothing_windows[i-1], smoothing_windows[i]
-
-    # Set polyorder for smoother; could be included as a parameter
-    polyorder = 3
-
-    # Find the smoothing window that provides a number of intersections closest
-    # to the provided n_infs
-    prepost_tolerance = 10  # difference between smoothing window sizes to stop iterating
-    prev = 0  # initial minimum smoothing window size
-    post = len(xs)/5  # initial maximum smoothing window size
-    while post - prev > prepost_tolerance:
-        s_windows = generate_smoothing_windows(prev, post, 25, polyorder=3)
-        prev, post = smoothing_iterator(xs, ys, s_windows, n_infs, polyorder)
-
-        ## TODO: should add a counter/tracker to ensure n_infs can actually be
-        # obtained and avoid an infinite loop
-
-    # Use the optimized smoothing window to smooth the signal
-    window = post
-    xs_sm = signal.savgol_filter(xs, window_length=window, polyorder=polyorder,
-                                 mode='interp')
-    ys_sm = signal.savgol_filter(ys, window_length=window, polyorder=polyorder,
-                                 mode='interp')
-
-    # Cast coordinates as shapely LineString objects
-    ls = LineString([(x, y) for x, y in zip(xs, ys)])
-    ls_sm = LineString([(x, y) for x, y in zip(xs_sm, ys_sm)])
-
-    # Compute intersection points between original and oversmoothed centerline
-    int_pts = ls.intersection(ls_sm)
-    int_coords = np.array([(int_pts[i].coords.xy[0][0],
-                            int_pts[i].coords.xy[1][0]) for i in range(len(int_pts))])
-
-    # Map the intersecting coordinates to the indices of the original signal
-    idx = []
-    for ic in int_coords:
-        idx.append(np.argmin(np.sqrt((ic[0]-xs)**2+(ic[1]-ys)**2)))
-    idx = np.sort(idx)
-
-#    plt.close('all')
-#    plt.plot(xs_sm,ys_sm)
-#    plt.plot(xs,ys)
-#    plt.plot(xs[idx], ys[idx], '.')
-#    plt.axis('equal')
-
-    # Package oversmoothed coordinates for export
-    smoothline = np.array([xs_sm, ys_sm])
-
-    return idx, smoothline
-
-
 def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param=1):
     """
     Generate a centerline mesh.
@@ -594,7 +377,7 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
         coords = np.transpose(coords)
 
     # Get lengths along centerline
-    s, ds = s_ds(coords[:, 0], coords[:, 1])
+    s, ds = cu.s_ds(coords[:, 0], coords[:, 1])
 
     # Mirror centerline manually since scipy fucks it up - only flip the axis that has the largest displacement
     # Mirroring done to avoid edge effects when smoothing
@@ -618,14 +401,14 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
     # plt.axis('equal')
 
     # Re-sample centerline to even spacing
-    s, _ = s_ds(xs_sm, ys_sm)
+    s, _ = cu.s_ds(xs_sm, ys_sm)
     npts = int(s[-1]/grid_spacing)
-    xy_rs, _ = evenly_space_line(xs_sm, ys_sm, npts)
+    xy_rs, _ = cu.evenly_space_line(xs_sm, ys_sm, npts)
     xs_rs = xy_rs[0]
     ys_rs = xy_rs[1]
 
     # Get angles at each point along centerline
-    C, A, s = curvars(xs_rs, ys_rs, unwrap=True)
+    C, A, s = cu.curvars(xs_rs, ys_rs, unwrap=True)
 
     # Draw perpendiculars at each centerline point
     mesh_hwidth = meshwidth/2
@@ -804,6 +587,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
 
         return dist_to_int, cl_clip, ep_clip
 
+
     def iterative_cl_pt_mapping(cl, bufdists, side):
 
         mapper = []
@@ -815,8 +599,8 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
 
             new = shapely_offset_ls(cl, bd, side)
 
-            Co, Ao, so = curvars(old.coords.xy[0], old.coords.xy[1])
-            Cn, An, sn = curvars(new.coords.xy[0], new.coords.xy[1])
+            Co, Ao, so = cu.curvars(old.coords.xy[0], old.coords.xy[1])
+            Cn, An, sn = cu.curvars(new.coords.xy[0], new.coords.xy[1])
 
             Ao = np.insert(Ao, 0, 0)
             An = np.insert(An, 0, 0)
@@ -830,6 +614,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
             old = new
 
         return lines, mapper
+
 
     def get_transect_indices_along_buffered_lines(cl, mapper):
         """
@@ -856,6 +641,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
             pts[i] = idxlist
 
         return pts
+    
 
     def get_transect_endpoints_xy(lpts, rpts):
         """
@@ -875,16 +661,17 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
 
         return endpoints
 
+
     def shapely_offset_ls(ls, dist, side):
         """
         Just a wrapper around shapely's offset_linestring() function. That
         function adds little barbs sometimes to the end of the offset
         linestring. This function detects and removes those.
         """
-        offset = offset_linestring(ls, dist, side)
+        offset = cu.offset_linestring(ls, dist, side)
 
         # Look for barbs by finding abrupt angle changes
-        _, A, _ = curvars(offset.coords.xy[0], offset.coords.xy[1])
+        _, A, _ = cu.curvars(offset.coords.xy[0], offset.coords.xy[1])
         possibles = np.where(np.abs(np.diff(A)) > 1.5)[0]  # Threshold set at 1.5 radians
 
         if len(possibles) == 0:
@@ -929,7 +716,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
 
         return(xs_o2, ys_o2)
 
-    """ Function code begins here """
+    """ Main function code begins here """
     # obj = ind
     # coords = obj.centerline
     # avg_chan_width = obj.avg_chan_width
@@ -945,7 +732,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
     ys_o = coords[:, 1]
 
     # Set smoothing window size based on smoothing parameter and centerline length
-    s, ds = s_ds(xs_o, ys_o)
+    s, ds = cu.s_ds(xs_o, ys_o)
     window_len = int(smoothing * s[-1] / np.mean(ds))
     window_len = int(min(len(xs_o)/5, window_len))  # Smoothing window cannot be longer than 1/5 the centerline
     if window_len % 2 == 0:  # Window must be odd
@@ -1065,478 +852,6 @@ def max_valley_width(Imask):
     max_valley_width = np.max(Idist) * 2
 
     return max_valley_width
-
-
-def curvars(xs, ys, unwrap=True):
-
-    """
-    Compute curvature (and intermediate variables) for a given set of x,y
-    coordinates.
-    """
-    xs = np.array(xs)
-    ys = np.array(ys)
-
-    xAi0 = xs[:-1]
-    xAi1 = xs[1:]
-    yAi0 = ys[:-1]
-    yAi1 = ys[1:]
-
-    # Compute angles between x,y nodes
-#    A = np.arctan(np.divide(yAi1-yAi0,xAi1-xAi0))
-    A = np.arctan2(yAi1-yAi0, xAi1-xAi0)
-
-    if unwrap is not True:
-        Acopy = A.copy()
-
-    # Fix phase jumps in angle larger than pi
-    A = np.unwrap(A)
-
-    # Compute distance and cumulative distance between nodes
-    s, ds = s_ds(xs, ys)
-    s = np.delete(s, 0)
-
-    # Compute curvature via central differencing
-    # See: http://terpconnect.umd.edu/~toh/spectrum/Differentiation.html
-    sd = np.zeros([len(s)])
-    sd[0] = s[2]
-    sd[1:] = s[0:-1]
-
-    su = np.zeros([len(s)])
-    su[0:-1] = s[1:]
-    su[-1] = s[-3]
-
-    Ad = np.zeros([len(s)])
-    Ad[0] = A[2]
-    Ad[1:] = A[0:-1]
-
-    Au = np.zeros([len(s)])
-    Au[0:-1] = A[1:]
-    Au[-1] = A[-3]
-
-    # Curvatures - checked against Matlab implementation, OK
-    C = -np.divide((np.divide(Au-A, su-s)*(s-sd)+np.divide(A-Ad, s-sd)*(su-s)), (su-sd))
-
-    if unwrap is not True:
-        Areturn = Acopy
-    else:
-        Areturn = A
-
-    return C, Areturn, s
-
-
-def s_ds(xs, ys):
-
-    ds = np.sqrt((np.diff(xs))**2+(np.diff(ys))**2)
-    s = np.insert(np.cumsum(ds), 0, 0)
-
-    return s, ds
-
-
-def smooth_curvatures(C, cvtarget, tolerance=10):
-    """
-    Smoothes a curvature signal until the coefficient of variation of its
-    differenced curvatures is within tolerance percent.
-    """
-    from scipy.stats import variation
-
-    smoothstep = int(len(C)/100)
-    window = smoothstep
-    if window % 2 == 0:  # Window must be odd
-        window = window + 1
-
-    cv = 10000
-    while abs((cv-cvtarget)/cv*100) > tolerance:
-        Cs = signal.savgol_filter(C, window_length=window, polyorder=3,
-                                  mode='interp')
-        cv = variation(np.diff(Cs))
-
-        window = window + smoothstep
-        if window % 2 == 0:  # Window must be odd
-            window = window + 1
-
-        if window > len(C)/2:
-            print('Could not find solution.')
-            return Cs
-
-    return Cs
-
-
-def inflection_points(C):
-    """
-    Returns the inflection points for an input curvature signal.
-    """
-    infs1 = np.where(np.logical_and(C[1:] > 0, C[:-1] < 0))[0] + 1
-    infs2 = np.where(np.logical_and(C[1:] < 0, C[:-1] > 0))[0] + 1
-    infs = np.sort(np.concatenate((infs1, infs2)))
-
-    return infs
-
-
-class centerline():
-
-    def __init__(self, x, y, attribs=None):
-        """
-        attribs is a dictionary with attributes; can be single values like
-        average channel width or one value per coordinate like local width.
-        """
-        # Store original coordinates
-        self.xo = x
-        self.yo = y
-
-        # Store attributes
-        if attribs:
-            for a in attribs.keys():
-
-                try:
-                    alen = len(attribs[a])
-                except Exception:
-                    alen = 1
-
-                if alen == 1 or alen == len(x):
-                    setattr(self, a, attribs[a])
-                else:
-                    print('Attribute () does not have the proper length and is not being stored.'.format(a))
-
-    def __get_x_and_y(self):
-
-        if hasattr(self, 'xrs'):
-            x = self.xrs
-            y = self.yrs
-            vers = 'resampled'
-        elif hasattr(self, 'xs'):
-            x = self.xs
-            y = self.ys
-            vers = 'smooth'
-        else:
-            x = self.xo
-            y = self.yo
-            vers = 'original'
-
-        return x, y, vers
-
-
-    def smooth(self, window=None, n=1, k=3, x=None, y=None):
-        """
-        Smooths the x and y coordinates of the centerline using a k-th order
-        Savitzky-Golay filter.
-
-        window refers to the number of points to use in the moving window;
-        must be odd n is the number of times to perform the smoothing.
-        """
-        if x is None:
-            x, y, _ = self.__get_x_and_y()
-
-        if window is None:
-            if hasattr(self, 'window_cl'):
-                window = self.window_cl
-            else:
-                print('Must provide a smoothing window.')
-                return
-
-        # Ensure window is integer and odd
-        window = int(window)
-        if window % 2 == 0:
-            window = window + 1
-
-        self.xs = signal.savgol_filter(x, window_length=window, polyorder=k,
-                                       mode='interp')
-        self.ys = signal.savgol_filter(y, window_length=window, polyorder=k,
-                                       mode='interp')
-
-        # Could make this recursive but if a non-default x,y are passed in, it would not function as expected
-        if n > 1:
-            for i in range(1,n-1):
-                self.xs = signal.savgol_filter(self.xs, window_length=window,
-                                               polyorder=3, mode='interp')
-                self.ys = signal.savgol_filter(self.ys, window_length=window,
-                                               polyorder=3, mode='interp')
-
-    def resample(self, N, x=None, y=None):
-        """
-        If no arguments are provided for x and y, will resample the smoothed
-        coordinates if available, else will resample the original coordinates.
-
-        N is the number of points that the resulting centerline
-        should contain.
-        """
-        if x is None:
-            x, y, _ = self.__get_x_and_y()
-
-        xy, spline = evenly_space_line(x, y, npts=N)
-        self.xrs = xy[0]
-        self.yrs = xy[1]
-
-    def s(self, x=None, y=None):
-
-        if x is None:
-            x, y, _ = self.__get_x_and_y()
-
-        sss, _ = s_ds(x, y)
-        return sss
-
-    def ds(self, x=None, y=None):
-
-        if x is None:
-            x, y, _ = self.__get_x_and_y()
-
-        _, dss = s_ds(x, y)
-        return dss
-
-    def C(self, x=None, y=None):
-        """
-        Important: curvatures are negativized to match the zs approach
-        """
-        if x is None:
-            x, y, _ = self.__get_x_and_y()
-
-        Cs, _, _ = curvars(x, y, unwrap=True)
-        Cs = np.insert(Cs, 0, 0)
-        return -Cs
-
-    def Csmooth(self, window=None, x=None, y=None):
-
-        if window is None:
-            if hasattr(self, 'window_C'):
-                window = self.window_C
-            else:
-                print('Must provide a smoothing window.')
-                return
-
-        Cs = self.C()
-        Cs = signal.savgol_filter(Cs, window_length=window, polyorder=3,
-                                  mode='interp')
-#            Cs = signal.medfilt(Cs,kernel_size=5)
-        return Cs
-
-    def infs(self, N, x=None, y=None):
-        """
-        Finds inflection points.
-
-        N is the number of expected inflection points. It can be estimated
-        from N ~= centerline length / 10W, but visual inspection is usually
-        best.
-        """
-
-        if x is None:
-            x, y, _ = self.__get_x_and_y()
-
-        # Use centerline oversmoothing to find inflection points
-        self.infs_os, _ = inflection_pts_oversmooth(x, y, n_infs=N)
-
-    def infsC(self, x=None, y=None):
-
-        if not hasattr(self, 'C'):
-            self.curvature()
-
-        # Use curvature to find inflection points
-        self.infs_C = inflection_points(self.C)
-
-    def intersection_points(self, x2, y2, x1=None, y1=None):
-
-        if x1 is None:
-            x1, y1, _ = self.__get_x_and_y()
-
-        ls1 = LineString(zip(x1, y1))
-        ls2 = LineString(zip(x2, y2))
-        ls_intersections = ls1.intersection(ls2)
-        self.ints_all = np.unique(np.sort([np.argmin(np.sqrt((x1-pt.coords.xy[0][0])**2 + (y1-pt.coords.xy[1][0])**2)) for pt in ls_intersections])) # locations of zero migration
-
-        # Map the intersection points so that there is one point for every
-        # pair of inflection points in inf_os
-        # If there is only one intersection point, use it.
-        # If none, use the first inflection point?
-        # If multiple, use the one closest to the first inflection point
-        if hasattr(self, 'infs_os'):
-
-            s = self.s()
-
-            # Compute the average bend length from the inflection points
-            ints = []
-            s = self.s()
-            abl = (s[self.infs_os[-1]] - s[self.infs_os[0]])/(len(self.infs_os)-1)
-
-            for i in range(len(self.infs_os)):
-
-                i0 = self.infs_os[i]
-
-                # Find nearest intersection point for first inflection
-                if i == 0:
-                    intidx = np.argmin(np.abs(s[i0] - s[self.ints_all]))
-                    ints.append(self.ints_all[intidx])
-
-                # Else find the nearest interesection point that is downstream of the bend's first inflection point
-                else:
-                    possible_ints = self.ints_all[self.ints_all > ints[i-1]]
-                    dists = np.abs(s[possible_ints] - s[i0])
-                    ints.append(possible_ints[np.argmin(dists)])
-
-                if i == len(self.infs_os)-1:
-                    break
-
-            self.ints = np.array(ints)
-
-        else:
-            print('Could not map intersections to inflection point pairs because infs_os not computed. Run infs() first.')
-
-    def mig_rate_zs(self, x2, y2, dt_years, x1=None, y1=None, window=None):
-        """
-        Compute migration rate using Sylvester et al's method of
-        dynamic time warping.
-        """
-        if x1 is None:
-            x1, y1, _ = self.__get_x_and_y()
-
-        if window is None:
-            if hasattr(self, 'window_C'):
-                window = self.window_C
-            else:
-                window = 5  # must be greater than the polyorder, which is 3 by default
-
-        import os
-        import sys
-        script_dir = r"C:\Users\Jon\Desktop\Research\Koyukukon\Normalize migration rates\Code\curvaturepy-master"
-        sys.path.append(os.path.abspath(script_dir))
-        import cline_analysis as ca
-
-        self.mr_zs, self.mrs_zs, self.p_zs, self.q_zs = ca.get_migr_rate(x1, x2, y1, y2, dt_years, 0)
-
-        # Smooth
-        self.mr_zs_sm = signal.savgol_filter(self.mr_zs, window_length=window,
-                                             polyorder=3, mode='interp')
-
-        # Set cutoff-affected and erodibility-affected bends to NaN
-        self.mr_zs_nan = self.mr_zs.copy()
-        self.mr_zs_sm_nan = self.mr_zs_sm.copy()
-        if hasattr(self, 'cut_ids'):
-            for c in self.cut_ids:
-                self.mr_zs_nan[self.infs_os[c]:self.infs_os[c+1]] = np.NaN
-                self.mr_zs_sm_nan[self.infs_os[c]:self.infs_os[c+1]] = np.NaN
-
-        if hasattr(self, 'erode_ids'):
-            for e in self.erode_ids:
-                self.mr_zs_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
-                self.mr_zs_sm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
-
-    def plot(self, x=None, y=None):
-
-        if x is None:
-            x, y, version = self.__get_x_and_y()
-        else:
-            version = ''
-
-        fig, ax = plt.subplots()
-        legend = []
-        ax.plot(x, y, 'k')
-        legend.append(version + ' centerline')
-
-        if hasattr(self, 'infs_os'):
-            ax.plot(x[self.infs_os], y[self.infs_os], 'rs')
-            legend.append('inflection points')
-
-        if hasattr(self, 'ints_all'):
-            ax.plot(x[self.ints_all],  y[self.ints_all], 'go')
-            legend.append('intersection points')
-
-        if hasattr(self, 'ints'):
-            ax.plot(x[self.ints], y[self.ints], 'b^')
-            legend.append('intersection points (mapped)')
-
-        plt.legend(legend)
-        plt.axis('equal')
-
-    def zs_plot(self, window=None):
-        """
-        Copied verbatim from https://github.com/zsylvester/curvaturepy/blob/master/Purus_2_migration_rates.ipynb
-        Slight modifications for meshing in the centerline class.
-        """
-
-        if hasattr(self, 'infs_os') is False:
-            print('Must compute inflection points first.')
-            return
-
-        if hasattr(self, 'ints') is False:
-            print('Must compute intersections first.')
-            return
-
-        if hasattr(self, 'mr_zs_nan') is False:
-            print('Must compute migration rates first.')
-            return
-#            elif hasattr(self, 'mr_zs_sm_nan'):
-#                migr_rate = self.mr_zs_sm_nan
-        else:
-            migr_rate = self.mr_zs_nan
-
-        if hasattr(self, 'cut_ids') is False:
-            cutoff_inds = []
-        else:
-            cutoff_inds = self.cut_ids
-
-        if hasattr(self, 'erode_ids') is False:
-            erodibility_inds = []
-        else:
-            erodibility_inds = self.erode_ids
-
-        if window is None:
-            if hasattr(self, 'window_C'):
-                window = self.window_C
-            else:
-                print('Must provide a smoothing window.')
-                return
-
-        LZC = self.infs_os
-        LZM = self.ints
-        s = self.s()
-        curv = self.Csmooth()
-        W = self.W
-
-        fig, ax1 = plt.subplots(figsize=(18,4))
-#            plt.tight_layout()
-
-        y1 = 0.7
-        y2 = 0.0
-        y3 = -0.87
-        y4 = -1.25
-
-        for i in range(0,len(LZC)-1,2):
-            xcoords = [s[LZC[i]],s[LZC[i+1]],s[LZC[i+1]],s[LZM[i+1]],s[LZM[i+1]],s[LZM[i]],s[LZM[i]],s[LZC[i]]]
-            ycoords = [y1,y1,y2,y3,y4,y4,y3,y2]
-            ax1.fill(xcoords,ycoords,color=[0.85,0.85,0.85],zorder=0)
-
-        ax1.fill_between(s, 0, curv*W)
-        ax2 = ax1.twinx()
-        ax2.fill_between(s, 0, migr_rate, facecolor='green')
-
-        ax1.plot([0,max(s)],[0,0],'k--')
-        ax2.plot([0,max(s)],[0,0],'k--')
-
-        ax1.set_ylim(y4,y1)
-        ax2.set_ylim(-15,40)
-        ax1.set_xlim(s[LZC[0]],s[-1])
-
-        for i in erodibility_inds:
-            xcoords = [s[LZC[i]],s[LZC[i+1]],s[LZC[i+1]],s[LZM[i+1]],s[LZM[i+1]],s[LZM[i]],s[LZM[i]],s[LZC[i]]]
-            ycoords = [y1,y1,y2,y3,y4,y4,y3,y2]
-            ax1.fill(xcoords,ycoords,color=[1.0,0.85,0.85],zorder=0)
-
-        for i in cutoff_inds:
-            xcoords = [s[LZC[i]],s[LZC[i+1]],s[LZC[i+1]],s[LZM[i+1]],s[LZM[i+1]],s[LZM[i]],s[LZM[i]],s[LZC[i]]]
-            ycoords = [y1,y1,y2,y3,y4,y4,y3,y2]
-            ax1.fill(xcoords,ycoords,color=[0.85,1.0,0.85],zorder=0)
-
-        for i in range(len(LZC)-1):
-            if np.sum(np.isnan(migr_rate[LZM[i]:LZM[i+1]]))>0:
-                xcoords = [s[LZC[i]],s[LZC[i+1]],s[LZC[i+1]],s[LZM[i+1]],s[LZM[i+1]],s[LZM[i]],s[LZM[i]],s[LZC[i]]]
-                ycoords = [y1,y1,y2,y3,y4,y4,y3,y2]
-                ax1.fill(xcoords,ycoords,color='w')
-
-        for i in range(len(LZC)-1):
-            if np.sum(np.isnan(migr_rate[LZM[i]:LZM[i+1]]))>0:
-                xcoords = [s[LZC[i]],s[LZC[i+1]],s[LZC[i+1]],s[LZM[i+1]],s[LZM[i+1]],s[LZM[i]],s[LZM[i]],s[LZC[i]]]
-                ycoords = [35,35,20.7145,0,-15,-15,0,20.7145]
-                ax2.fill(xcoords,ycoords,color='w')
-
-        for i in range(0,len(LZC)-1,2):
-            ax1.text(s[LZC[i]],0.5,str(i),fontsize=12)
 
 
 def compute_eBI(path_meshlines, path_links, method='local'):

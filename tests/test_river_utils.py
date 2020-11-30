@@ -11,6 +11,8 @@ from inspect import getsourcefile
 basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
 sys.path.insert(0, basepath)
 from rivgraph.rivers import river_utils as ru
+from rivgraph.rivers import centerline_utils as cu
+from rivgraph.classes import centerline
 
 
 class TestFindInletsOutlets:
@@ -99,7 +101,7 @@ def test_offset_linestring():
     line = shapely.wkt.loads("LINESTRING (0.615 -0.7176374373233079, 0.44875 -0.6083988835322591, 0.30875 -0.491886287971077, 0.19625 -0.3892309735881384, 0.11 -0.276535372660264, 0.04875 -0.1824690907834349, 0.0125 -0.04856212366768966, 0 0)")
     offset = 0.91
     offset_line = line.parallel_offset(offset, side='right')
-    OLS = ru.offset_linestring(line, offset, 'right')
+    OLS = cu.offset_linestring(line, offset, 'right')
 
     # make assertions
     assert type(offset_line) == shapely.geometry.multilinestring.MultiLineString
@@ -110,7 +112,7 @@ def test_curvars():
     """Test unwrap==False."""
     xs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     ys = [1, 4, 9, 16, 25, 16, 9, 4, 1, 0]
-    C, Areturn, s = ru.curvars(xs, ys, unwrap=False)
+    C, Areturn, s = cu.curvars(xs, ys, unwrap=False)
 
     # make assertions
     assert np.shape(C) == (9,)
@@ -125,9 +127,9 @@ def test_inflection_pts():
     """Test inflection_points()."""
     xs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     ys = [1, 4, 9, 16, 25, 16, 9, 4, 1, 0]
-    C, _, _ = ru.curvars(xs, ys, unwrap=False)
+    C, _, _ = cu.curvars(xs, ys, unwrap=False)
     # run function
-    infs = ru.inflection_points(C)
+    infs = cu.inflection_points(C)
 
     # make assertion
     assert np.all(infs == np.array([3, 5]))
@@ -166,7 +168,7 @@ class TestCenterline:
         """Init the class."""
         x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
-        CL = ru.centerline(x, y)
+        CL = centerline(x, y)
         # make assertions
         assert np.all(CL.xo == x)
         assert np.all(CL.yo == y)
@@ -177,7 +179,7 @@ class TestCenterline:
         y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
         attribs = {}
         attribs['width'] = 10.
-        CL = ru.centerline(x, y, attribs)
+        CL = centerline(x, y, attribs)
         # make assertions
         assert np.all(CL.xo == x)
         assert np.all(CL.yo == y)
@@ -189,7 +191,7 @@ class TestCenterline:
         y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
         attribs = {}
         attribs['width'] = np.ones((11,))*10
-        CL = ru.centerline(x, y, attribs)
+        CL = centerline(x, y, attribs)
         # make assertions
         assert np.all(CL.xo == x)
         assert np.all(CL.yo == y)
@@ -199,7 +201,7 @@ class TestCenterline:
         """Test get xy function."""
         x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
-        CL = ru.centerline(x, y)
+        CL = centerline(x, y)
         x, y, vers = CL._centerline__get_x_and_y()
         # make assertions
         assert np.all(x == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
@@ -215,7 +217,7 @@ class TestCenterline:
         attribs = {}
         attribs['xrs'] = xrs
         attribs['yrs'] = yrs
-        CL = ru.centerline(x, y, attribs=attribs)
+        CL = centerline(x, y, attribs=attribs)
         x, y, vers = CL._centerline__get_x_and_y()
         # make assertions
         assert np.all(x == [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
@@ -231,7 +233,7 @@ class TestCenterline:
         attribs = {}
         attribs['xs'] = xs
         attribs['ys'] = ys
-        CL = ru.centerline(x, y, attribs=attribs)
+        CL = centerline(x, y, attribs=attribs)
         x, y, vers = CL._centerline__get_x_and_y()
         # make assertions
         assert np.all(x == [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
@@ -242,7 +244,7 @@ class TestCenterline:
         """Test the s() function."""
         x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
-        CL = ru.centerline(x, y)
+        CL = centerline(x, y)
         sss = CL.s()
         # make assertions
         assert np.all(sss == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
@@ -251,7 +253,7 @@ class TestCenterline:
         """Test the ds() function."""
         x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1]
-        CL = ru.centerline(x, y)
+        CL = centerline(x, y)
         dss = CL.ds()
         # make assertions
         assert np.all(dss == [1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])
@@ -260,7 +262,7 @@ class TestCenterline:
         """Test the C() function."""
         x = [0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 0]
         y = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        CL = ru.centerline(x, y)
+        CL = centerline(x, y)
         Cs = CL.C()
         # make assertions
         assert pytest.approx(Cs == np.array([-0., 0., 0., 0., 0.,
@@ -272,13 +274,13 @@ def test_sine_curvature():
     """Use a sine wave to compute curvature."""
     xs = np.linspace(0, 100, 101)
     ys = np.sin(xs) + 5
-    C, Areturn, sdist = ru.curvars(xs, ys)
+    C, Areturn, sdist = cu.curvars(xs, ys)
     # make some simple assertions about shape of outputs
     assert C.shape == (100,)
     assert Areturn.shape == (100,)
     assert sdist.shape == (100,)
     # now define this as a centerline
-    CL = ru.centerline(xs, ys)
+    CL = centerline(xs, ys)
     # smooth the centerline
     CL.window_cl = 10
     CL.smooth(n=2)
@@ -298,7 +300,7 @@ def test_smooth_nowindow():
     """smooth() without providing a window."""
     xs = np.linspace(0, 100, 101)
     ys = np.sin(xs) + 5
-    CL = ru.centerline(xs, ys)
+    CL = centerline(xs, ys)
     # set up capture string
     capturedOutput = io.StringIO()
     sys.stdout = capturedOutput
@@ -314,7 +316,7 @@ def test_sine_csmooth():
     """Use a sine wave to compute curvature."""
     xs = np.linspace(0, 100, 101)
     ys = np.sin(xs) + 5
-    CL = ru.centerline(xs, ys)
+    CL = centerline(xs, ys)
     CL.window_C = 11
     # smooth the centerline
     Cs = CL.Csmooth()
@@ -326,7 +328,7 @@ def test_csmooth_nowindow():
     """csmooth() without providing a window."""
     xs = np.linspace(0, 100, 101)
     ys = np.sin(xs) + 5
-    CL = ru.centerline(xs, ys)
+    CL = centerline(xs, ys)
     # set up capture string
     capturedOutput = io.StringIO()
     sys.stdout = capturedOutput
@@ -342,7 +344,7 @@ def test_sine_plot():
     """Use sine wave to test plotting of CenterLine."""
     xs = np.linspace(0, 100, 101)
     ys = np.sin(xs) + 5
-    CL = ru.centerline(xs, ys)
+    CL = centerline(xs, ys)
     CL.plot()
     plt.savefig(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/sinewave.png')))
     plt.close()
@@ -354,7 +356,7 @@ def test_long_sine():
     """Stretched sine wave."""
     xs = np.linspace(0, 10000, 10001)
     ys = 20*(np.sin(xs/1000) + 50)
-    idx, smoothline = ru.inflection_pts_oversmooth(xs, ys, 40)
+    idx, smoothline = cu.inflection_pts_oversmooth(xs, ys, 40)
     # make assertions
     assert idx[-1] == 10000
     assert np.shape(smoothline) == (2, 10001)
@@ -364,7 +366,7 @@ def test_long_sine_CLinfs():
     """Long sine wave into CL and using infs function."""
     xs = np.linspace(0, 10000, 10001)
     ys = 20*(np.sin(xs/1000) + 50)
-    CL = ru.centerline(xs, ys)
+    CL = centerline(xs, ys)
     CL.infs(40)
     # make assertion
     assert CL.infs_os[-1] == 10000
@@ -374,7 +376,7 @@ def test_plot_withattrs():
     """Testing CenterLine plotting with various attributes."""
     xs = np.linspace(0, 100, 101)
     ys = np.sin(xs) + 5
-    CL = ru.centerline(xs, ys)
+    CL = centerline(xs, ys)
     CL.infs_os = [0]
     CL.ints_all = [1]
     CL.ints = [2]
@@ -389,7 +391,7 @@ def test_zs_noinflection():
     """zs_plot without inflection points."""
     xs = np.linspace(0, 100, 101)
     ys = np.sin(xs) + 5
-    CL = ru.centerline(xs, ys)
+    CL = centerline(xs, ys)
     # set up capture string
     capturedOutput = io.StringIO()
     sys.stdout = capturedOutput
@@ -405,7 +407,7 @@ def test_zs_noints():
     """zs_plot without intersection points."""
     xs = np.linspace(0, 100, 101)
     ys = np.sin(xs) + 5
-    CL = ru.centerline(xs, ys)
+    CL = centerline(xs, ys)
     CL.infs_os = [1]
     # set up capture string
     capturedOutput = io.StringIO()
@@ -422,7 +424,7 @@ def test_zs_nomigrates():
     """zs_plot without migration rates."""
     xs = np.linspace(0, 100, 101)
     ys = np.sin(xs) + 5
-    CL = ru.centerline(xs, ys)
+    CL = centerline(xs, ys)
     CL.infs_os = [1]
     CL.ints = [2]
     # set up capture string

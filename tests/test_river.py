@@ -11,6 +11,7 @@ sys.path.insert(0, basepath)
 from rivgraph.classes import river
 from rivgraph import geo_utils
 from rivgraph.rivers import river_utils as ru
+from rivgraph.rivers import centerline_utils as cu
 
 
 def test_compute_network(test_river, known_river):
@@ -162,7 +163,7 @@ def test_max_valley_width(test_river):
 
 def test_resample_line(test_river):
     """Test resample_line()."""
-    resampled_coords, spline = ru.resample_line(test_river.centerline[0],
+    resampled_coords, spline = cu.resample_line(test_river.centerline[0],
                                                 test_river.centerline[1])
 
     # make assertions
@@ -172,7 +173,7 @@ def test_resample_line(test_river):
 
 def test_evenly_space_line(test_river):
     """Test evenly_space_line()."""
-    resampled_coords, spline = ru.evenly_space_line(test_river.centerline[0],
+    resampled_coords, spline = cu.evenly_space_line(test_river.centerline[0],
                                                     test_river.centerline[1])
 
     # make assertions
