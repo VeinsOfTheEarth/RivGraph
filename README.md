@@ -2,15 +2,30 @@
 [![Coverage Status](https://coveralls.io/repos/github/jonschwenk/RivGraph/badge.svg?branch=master)](https://coveralls.io/github/jonschwenk/RivGraph?branch=master)
 ![docs](https://github.com/jonschwenk/RivGraph/workflows/docs/badge.svg)
 <br />
+
 About
 -----
-RivGraph is a python package that provides tools for converting a binary mask of a channel network into a graph (i.e. a set of connected links and nodes). One major component of RivGraph is its ability to automatically set flow directions in each link of the network. It also computes morphologic metrics (lengths, widths, branching angles, etc.) and topologic metrics. RivGraph also contains a smattering of other tools and features, including some functions for helping clean and prepare your binary mask.
+RivGraph is a Python package that provides tools for converting a binary mask of a channel network into a directed, weighted graph (i.e. a set of connected links and nodes). 
+
+![Core functionality of RivGraph.\label{fig:corefunctions}](https://github.com/jonschwenk/RivGraph/blob/master/examples/images/rivgraph_overview.PNG)
+
+The figure above demonstrates the core components of RivGraph, but many other features are provided, including:
+
+- Morphologic metrics (lengths, widths, branching angles, braiding indices)
+- Algebraic representations of the channel network graph
+- Topologic metrics (both topologic and dynamic such as alternative paths, flux sharing, entropies, mutual information, etc.)
+- Tools for cleaning and preparing your binary channel network mask
+- Island detection, metrics, and filtering
+- Mesh generation for characterizing along-river characteristics
+- (beta) Tools for centerline migration analysis
+
+All of RivGraph's functionality maintains and respects georeferencing information. If you start with a georeferenced mask (e.g. a GeoTIFF), RivGraph exports your results in the CRS (coordinate reference system) of your mask for convenient mapping, analysis, and fusion with other datasets in a GIS.
+
+You can see some description of RivGraph's functionality via this [AGU poster](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph), and the flow directionality logic and validation is described in our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html). Examples demonstrating the basic RivGraph features are available for a [delta channel network](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb) and a [braided river](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb).
 
 Check out the [documentation](https://jonschwenk.github.io/RivGraph/).
 
-You can see some of RivGraph's functionality via this [AGU poster](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph), and the flow directionality logic and validation is described in our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html).
-
-As of 5/26/2020, we are working on buttoning down RivGraph, including documentation, examples, and packaging. Please check back soon, and feel free to interact by opening an issue or emailing j........k@gmail.com. Now is a good time to add feature requests!
+As of 11/29/2020, we are working on buttoning down RivGraph, including additional documentation, examples, and packaging. Please check back soon, and feel free to interact by opening an issue or emailing j........k@gmail.com. Now is a good time to add feature requests!
 
 Installing
 -----
@@ -29,7 +44,7 @@ Savvy users have been able to install RivGraph from this Github repo, but usuall
 
 How to use?
 -----
-We are working on documentation and examples. Your best bet for getting started is to reproduce the [Colville delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb) or the [Brahmaputra river example](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb). Otherwise, use RivGraph by creating either a delta or a river class, then applying the associated methods. Look at the [classes.py](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/classes.py) script to get a sense for what methods are available, and what they're actually doing.
+We are working on adding more documentation and examples. Your best bet for getting started is to reproduce the [Colville delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb) or the [Brahmaputra river example](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb). Otherwise, use RivGraph by creating either a delta or a river class, then applying the associated methods. Look at the [classes.py](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/classes.py) script to get a sense for what methods are available and what they're actually doing.
 
 **Note**: there are many functions under the hood that may be useful to you. Check out the [im_utils script](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py) (image utilities) in particular for functions to help whip your mask into shape!
 
