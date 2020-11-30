@@ -427,57 +427,11 @@ don’t require an exceptionally wide mesh (i.e. not much change).</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="rivgraph.rivers.river_utils.curvars">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">curvars</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>unwrap=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#curvars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.curvars" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute curvature (and intermediate variables) for a given set of x,y
-coordinates.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.evenly_space_line">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">evenly_space_line</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>npts=None</em>, <em>k=3</em>, <em>s=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#evenly_space_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.evenly_space_line" title="Permalink to this definition">¶</a></dt>
-<dd><p>Resample evenly.</p>
-<p>Resamples a curve defined by x,y coordinates such that coordinates are
-evenly-spaced.
-If the optional npts parameter is not specified, the
-line will be resampled with the same number of points as the input
-coordinates.
-k refers to order of spline that is fit to coordinates for resampling.
-xs, ys must be numpy arrays.</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="rivgraph.rivers.river_utils.find_inlet_outlet_nodes">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">find_inlet_outlet_nodes</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>exit_sides</em>, <em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#find_inlet_outlet_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.find_inlet_outlet_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Append inlet and outlet nodes to the node dictionary.</p>
 <p>Appends the inlet and outlet nodes to the nodes dictionary. Only works for
 rivers; deltas must be treated differently.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.inflection_points">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">inflection_points</code><span class="sig-paren">(</span><em>C</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#inflection_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.inflection_points" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the inflection points for an input curvature signal.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.inflection_pts_oversmooth">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">inflection_pts_oversmooth</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>n_infs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#inflection_pts_oversmooth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.inflection_pts_oversmooth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute inflection points.</p>
-<p>Computes inflection points as the intersection of a line given by
-xs, ys and its (over)smoothed version.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>xs</strong> – np-type array of x-coordinates</p></li>
-<li><p><strong>ys</strong> – np-type array of y-coordinates</p></li>
-<li><p><strong>n_infs</strong> – approx how many inflection points are expected? This sets the
-degree of smoothing. For meandering rivers, n_infs can be
-approximated by the relationship: wavelength = 10W, for average
-width W.</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="function">
@@ -547,43 +501,9 @@ line to mirror.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="rivgraph.rivers.river_utils.offset_linestring">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">offset_linestring</code><span class="sig-paren">(</span><em>linestring</em>, <em>distance</em>, <em>side</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#offset_linestring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.offset_linestring" title="Permalink to this definition">¶</a></dt>
-<dd><p>Offset a linestring.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>linestring</strong> – shapely linestring</p></li>
-<li><p><strong>distance</strong> – distance to offset linestring</p></li>
-<li><p><strong>side</strong> – ‘left’ or ‘right’ to specify which side to compute offset</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
 <dt id="rivgraph.rivers.river_utils.prune_river">
 <code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">prune_river</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>exit_sides</em>, <em>Iskel</em>, <em>gdobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#prune_river"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.prune_river" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prune river network.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.resample_line">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">resample_line</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>npts=None</em>, <em>nknots=None</em>, <em>k=3</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#resample_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.resample_line" title="Permalink to this definition">¶</a></dt>
-<dd><p>Resample a line.</p>
-<p>Resamples a line defined by x,y coordinates such that coordinates are
-evenly-spaced.
-If the optional npts parameter is not specified, the
-line will be resampled with the same number of points as the input
-coordinates.
-k refers to order of spline that is fit to coordinates for resampling.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.smooth_curvatures">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">smooth_curvatures</code><span class="sig-paren">(</span><em>C</em>, <em>cvtarget</em>, <em>tolerance=10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#smooth_curvatures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.smooth_curvatures" title="Permalink to this definition">¶</a></dt>
-<dd><p>Smoothes a curvature signal until the coefficient of variation of its
-differenced curvatures is within tolerance percent.</p>
 </dd></dl>
 
 <dl class="function">

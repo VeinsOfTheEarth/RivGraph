@@ -173,17 +173,16 @@
 <span class="kn">from</span> <span class="nn">scipy.ndimage.morphology</span> <span class="kn">import</span> <span class="n">distance_transform_edt</span>
 <span class="kn">import</span> <span class="nn">shapely</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Polygon</span>
-<span class="kn">import</span> <span class="nn">scipy.interpolate</span> <span class="k">as</span> <span class="nn">si</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">cdist</span><span class="p">,</span> <span class="n">euclidean</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 
-
 <span class="kn">from</span> <span class="nn">rivgraph.ordered_set</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
 <span class="kn">import</span> <span class="nn">rivgraph.im_utils</span> <span class="k">as</span> <span class="nn">iu</span>
 <span class="kn">import</span> <span class="nn">rivgraph.mask_to_graph</span> <span class="k">as</span> <span class="nn">m2g</span>
 <span class="kn">import</span> <span class="nn">rivgraph.ln_utils</span> <span class="k">as</span> <span class="nn">lnu</span>
+<span class="kn">import</span> <span class="nn">rivgraph.rivers.centerline_utils</span> <span class="k">as</span> <span class="nn">cu</span>
 
 
 <div class="viewcode-block" id="prune_river"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.prune_river">[docs]</a><span class="k">def</span> <span class="nf">prune_river</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">exit_sides</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">):</span>
@@ -507,222 +506,6 @@
     <span class="k">return</span> <span class="n">coords</span><span class="p">,</span> <span class="n">pix_width</span></div>
 
 
-<div class="viewcode-block" id="resample_line"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.resample_line">[docs]</a><span class="k">def</span> <span class="nf">resample_line</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">npts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nknots</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Resample a line.</span>
-
-<span class="sd">    Resamples a line defined by x,y coordinates such that coordinates are</span>
-<span class="sd">    evenly-spaced.</span>
-<span class="sd">    If the optional npts parameter is not specified, the</span>
-<span class="sd">    line will be resampled with the same number of points as the input</span>
-<span class="sd">    coordinates.</span>
-<span class="sd">    k refers to order of spline that is fit to coordinates for resampling.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># FitPack in si.splprep can&#39;t handle duplicate points in the line, so remove them</span>
-    <span class="n">no_dupes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span> <span class="o">+</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ys</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
-    <span class="n">xs_nd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">xs</span><span class="p">[</span><span class="n">no_dupes</span><span class="p">],</span> <span class="n">xs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-    <span class="n">ys_nd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">ys</span><span class="p">[</span><span class="n">no_dupes</span><span class="p">],</span> <span class="n">ys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-
-    <span class="c1"># Get indices of knots</span>
-    <span class="k">if</span> <span class="n">nknots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nknots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs_nd</span><span class="p">)</span>
-    <span class="n">knot_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs_nd</span><span class="p">),</span> <span class="n">nknots</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
-    <span class="n">knot_indices</span><span class="p">[</span><span class="n">knot_indices</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs_nd</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs_nd</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="n">knot_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">knot_indices</span><span class="p">)</span>
-
-    <span class="c1"># Create spline</span>
-    <span class="n">spline</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">si</span><span class="o">.</span><span class="n">splprep</span><span class="p">([</span><span class="n">xs_nd</span><span class="p">[</span><span class="n">knot_indices</span><span class="p">],</span> <span class="n">ys_nd</span><span class="p">[</span><span class="n">knot_indices</span><span class="p">]],</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
-
-    <span class="c1"># Evaluate spline</span>
-    <span class="k">if</span> <span class="n">npts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">npts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">npts</span><span class="p">)</span>
-    <span class="n">resampled_coords</span> <span class="o">=</span> <span class="n">si</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">spline</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">resampled_coords</span><span class="p">,</span> <span class="n">spline</span></div>
-
-
-<div class="viewcode-block" id="evenly_space_line"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.evenly_space_line">[docs]</a><span class="k">def</span> <span class="nf">evenly_space_line</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">npts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Resample evenly.</span>
-
-<span class="sd">    Resamples a curve defined by x,y coordinates such that coordinates are</span>
-<span class="sd">    evenly-spaced.</span>
-<span class="sd">    If the optional npts parameter is not specified, the</span>
-<span class="sd">    line will be resampled with the same number of points as the input</span>
-<span class="sd">    coordinates.</span>
-<span class="sd">    k refers to order of spline that is fit to coordinates for resampling.</span>
-<span class="sd">    xs, ys must be numpy arrays.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># FitPack in si.splprep can&#39;t handle duplicate points in the line, so remove them</span>
-    <span class="n">shapely_line</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">))</span>
-    <span class="n">shapely_line</span> <span class="o">=</span> <span class="n">shapely_line</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">xs_nd</span><span class="p">,</span> <span class="n">ys_nd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shapely_line</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shapely_line</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="c1"># Create spline</span>
-    <span class="n">spline</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">si</span><span class="o">.</span><span class="n">splprep</span><span class="p">([</span><span class="n">xs_nd</span><span class="p">,</span> <span class="n">ys_nd</span><span class="p">],</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
-
-    <span class="c1"># Evaluate spline</span>
-    <span class="k">if</span> <span class="n">npts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">npts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">npts</span><span class="p">)</span>
-    <span class="n">resampled_coords</span> <span class="o">=</span> <span class="n">si</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">spline</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">resampled_coords</span><span class="p">,</span> <span class="n">spline</span></div>
-
-
-<div class="viewcode-block" id="offset_linestring"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.offset_linestring">[docs]</a><span class="k">def</span> <span class="nf">offset_linestring</span><span class="p">(</span><span class="n">linestring</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">side</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Offset a linestring.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    linestring :</span>
-<span class="sd">        shapely linestring</span>
-<span class="sd">    distance :</span>
-<span class="sd">        distance to offset linestring</span>
-<span class="sd">    side :</span>
-<span class="sd">        &#39;left&#39; or &#39;right&#39; to specify which side to compute offset</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Perform the offset</span>
-    <span class="n">offset</span> <span class="o">=</span> <span class="n">linestring</span><span class="o">.</span><span class="n">parallel_offset</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">side</span><span class="p">)</span>
-
-    <span class="c1"># Ensure that offset is not a MultiLineString by deleting all but the longest linestring</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span> <span class="ow">is</span> <span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">multilinestring</span><span class="o">.</span><span class="n">MultiLineString</span><span class="p">:</span>
-        <span class="n">ls_lengths</span> <span class="o">=</span> <span class="p">[</span><span class="n">ls</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">ls</span> <span class="ow">in</span> <span class="n">offset</span><span class="p">]</span>
-        <span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span><span class="p">[</span><span class="n">ls_lengths</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">ls_lengths</span><span class="p">))]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Multilinestring returned in offset_linestring; clipped to longest but check output.&#39;</span><span class="p">)</span>
-
-    <span class="c1"># Ensure offset linestring is oriented the same as the input linestring</span>
-    <span class="n">xy_orig_start</span> <span class="o">=</span> <span class="p">(</span><span class="n">linestring</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">linestring</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-
-    <span class="c1"># Get endpoint coordinates of offset linestring</span>
-    <span class="n">xy_offset_start</span> <span class="o">=</span> <span class="p">(</span><span class="n">offset</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">offset</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">xy_offset_end</span> <span class="o">=</span> <span class="p">(</span><span class="n">offset</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">offset</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">xy_orig_start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">xy_offset_start</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
-                      <span class="p">(</span><span class="n">xy_orig_start</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">xy_offset_start</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">xy_orig_start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">xy_offset_end</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">xy_orig_start</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">xy_offset_end</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)):</span>
-        <span class="n">offset</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">offset</span><span class="o">.</span><span class="n">coords</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="k">return</span> <span class="n">offset</span></div>
-
-
-<div class="viewcode-block" id="inflection_pts_oversmooth"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.inflection_pts_oversmooth">[docs]</a><span class="k">def</span> <span class="nf">inflection_pts_oversmooth</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">n_infs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute inflection points.</span>
-
-<span class="sd">    Computes inflection points as the intersection of a line given by</span>
-<span class="sd">    xs, ys and its (over)smoothed version.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    xs :</span>
-<span class="sd">        np-type array of x-coordinates</span>
-<span class="sd">    ys :</span>
-<span class="sd">        np-type array of y-coordinates</span>
-<span class="sd">    n_infs :</span>
-<span class="sd">        approx how many inflection points are expected? This sets the</span>
-<span class="sd">        degree of smoothing. For meandering rivers, n_infs can be</span>
-<span class="sd">        approximated by the relationship: wavelength = 10W, for average</span>
-<span class="sd">        width W.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">generate_smoothing_windows</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">nbreaks</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generate smoothing window sizes.</span>
-
-<span class="sd">        Generate an array of window sizes for smoothing. Each value must be</span>
-<span class="sd">        greater than the polyorder of the smoother and be odd.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">smoothwins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">nbreaks</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
-
-        <span class="c1"># Window must be greater than polyorder</span>
-        <span class="n">smoothwins</span><span class="p">[</span><span class="n">smoothwins</span> <span class="o">&lt;</span> <span class="n">polyorder</span><span class="p">]</span> <span class="o">=</span> <span class="n">polyorder</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="c1"># Window must be odd</span>
-        <span class="n">smoothwins</span><span class="p">[</span><span class="n">smoothwins</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">smoothwins</span><span class="p">[</span><span class="n">smoothwins</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">smoothwins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">smoothwins</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">smoothwins</span>
-
-    <span class="k">def</span> <span class="nf">smoothing_iterator</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">smoothing_windows</span><span class="p">,</span> <span class="n">n_infs</span><span class="p">,</span> <span class="n">polyorder</span><span class="p">):</span>
-
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sw</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">smoothing_windows</span><span class="p">):</span>
-
-            <span class="c1"># Smooth the line&#39;s coordinates</span>
-            <span class="n">xs_sm</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">sw</span><span class="p">,</span>
-                                         <span class="n">polyorder</span><span class="o">=</span><span class="n">polyorder</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
-            <span class="n">ys_sm</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">sw</span><span class="p">,</span>
-                                         <span class="n">polyorder</span><span class="o">=</span><span class="n">polyorder</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
-
-            <span class="c1"># Conver to shapely objects for intersection detection</span>
-            <span class="n">ls</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)])</span>
-            <span class="n">ls_sm</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">)])</span>
-
-            <span class="n">intersects</span> <span class="o">=</span> <span class="n">ls</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">ls_sm</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">intersects</span><span class="p">)</span> <span class="ow">is</span> <span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">Point</span><span class="p">:</span>  <span class="c1"># Points have no length so check</span>
-                <span class="n">n_ints</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">n_ints</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ls</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">ls_sm</span><span class="p">))</span>
-
-            <span class="k">if</span> <span class="n">n_ints</span> <span class="o">&lt;</span> <span class="n">n_infs</span><span class="p">:</span>
-                <span class="k">break</span>
-
-        <span class="k">return</span> <span class="n">smoothing_windows</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">smoothing_windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-
-    <span class="c1"># Set polyorder for smoother; could be included as a parameter</span>
-    <span class="n">polyorder</span> <span class="o">=</span> <span class="mi">3</span>
-
-    <span class="c1"># Find the smoothing window that provides a number of intersections closest</span>
-    <span class="c1"># to the provided n_infs</span>
-    <span class="n">prepost_tolerance</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># difference between smoothing window sizes to stop iterating</span>
-    <span class="n">prev</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># initial minimum smoothing window size</span>
-    <span class="n">post</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span><span class="o">/</span><span class="mi">5</span>  <span class="c1"># initial maximum smoothing window size</span>
-    <span class="k">while</span> <span class="n">post</span> <span class="o">-</span> <span class="n">prev</span> <span class="o">&gt;</span> <span class="n">prepost_tolerance</span><span class="p">:</span>
-        <span class="n">s_windows</span> <span class="o">=</span> <span class="n">generate_smoothing_windows</span><span class="p">(</span><span class="n">prev</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">prev</span><span class="p">,</span> <span class="n">post</span> <span class="o">=</span> <span class="n">smoothing_iterator</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">s_windows</span><span class="p">,</span> <span class="n">n_infs</span><span class="p">,</span> <span class="n">polyorder</span><span class="p">)</span>
-
-        <span class="c1">## TODO: should add a counter/tracker to ensure n_infs can actually be</span>
-        <span class="c1"># obtained and avoid an infinite loop</span>
-
-    <span class="c1"># Use the optimized smoothing window to smooth the signal</span>
-    <span class="n">window</span> <span class="o">=</span> <span class="n">post</span>
-    <span class="n">xs_sm</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="n">polyorder</span><span class="p">,</span>
-                                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
-    <span class="n">ys_sm</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="n">polyorder</span><span class="p">,</span>
-                                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
-
-    <span class="c1"># Cast coordinates as shapely LineString objects</span>
-    <span class="n">ls</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)])</span>
-    <span class="n">ls_sm</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">)])</span>
-
-    <span class="c1"># Compute intersection points between original and oversmoothed centerline</span>
-    <span class="n">int_pts</span> <span class="o">=</span> <span class="n">ls</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">ls_sm</span><span class="p">)</span>
-    <span class="n">int_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">int_pts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
-                            <span class="n">int_pts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">int_pts</span><span class="p">))])</span>
-
-    <span class="c1"># Map the intersecting coordinates to the indices of the original signal</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">ic</span> <span class="ow">in</span> <span class="n">int_coords</span><span class="p">:</span>
-        <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">ic</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">xs</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">ic</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">ys</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-
-<span class="c1">#    plt.close(&#39;all&#39;)</span>
-<span class="c1">#    plt.plot(xs_sm,ys_sm)</span>
-<span class="c1">#    plt.plot(xs,ys)</span>
-<span class="c1">#    plt.plot(xs[idx], ys[idx], &#39;.&#39;)</span>
-<span class="c1">#    plt.axis(&#39;equal&#39;)</span>
-
-    <span class="c1"># Package oversmoothed coordinates for export</span>
-    <span class="n">smoothline</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">])</span>
-
-    <span class="k">return</span> <span class="n">idx</span><span class="p">,</span> <span class="n">smoothline</span></div>
-
-
 <div class="viewcode-block" id="centerline_mesh"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.centerline_mesh">[docs]</a><span class="k">def</span> <span class="nf">centerline_mesh</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">width_chan</span><span class="p">,</span> <span class="n">meshwidth</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="p">,</span> <span class="n">smoothing_param</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a centerline mesh.</span>
@@ -754,7 +537,7 @@
         <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
 
     <span class="c1"># Get lengths along centerline</span>
-    <span class="n">s</span><span class="p">,</span> <span class="n">ds</span> <span class="o">=</span> <span class="n">s_ds</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">s</span><span class="p">,</span> <span class="n">ds</span> <span class="o">=</span> <span class="n">cu</span><span class="o">.</span><span class="n">s_ds</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
 
     <span class="c1"># Mirror centerline manually since scipy fucks it up - only flip the axis that has the largest displacement</span>
     <span class="c1"># Mirroring done to avoid edge effects when smoothing</span>
@@ -778,14 +561,14 @@
     <span class="c1"># plt.axis(&#39;equal&#39;)</span>
 
     <span class="c1"># Re-sample centerline to even spacing</span>
-    <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">s_ds</span><span class="p">(</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">)</span>
+    <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cu</span><span class="o">.</span><span class="n">s_ds</span><span class="p">(</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">)</span>
     <span class="n">npts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">grid_spacing</span><span class="p">)</span>
-    <span class="n">xy_rs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">evenly_space_line</span><span class="p">(</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">,</span> <span class="n">npts</span><span class="p">)</span>
+    <span class="n">xy_rs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cu</span><span class="o">.</span><span class="n">evenly_space_line</span><span class="p">(</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">,</span> <span class="n">npts</span><span class="p">)</span>
     <span class="n">xs_rs</span> <span class="o">=</span> <span class="n">xy_rs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">ys_rs</span> <span class="o">=</span> <span class="n">xy_rs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># Get angles at each point along centerline</span>
-    <span class="n">C</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">curvars</span><span class="p">(</span><span class="n">xs_rs</span><span class="p">,</span> <span class="n">ys_rs</span><span class="p">,</span> <span class="n">unwrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">C</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">cu</span><span class="o">.</span><span class="n">curvars</span><span class="p">(</span><span class="n">xs_rs</span><span class="p">,</span> <span class="n">ys_rs</span><span class="p">,</span> <span class="n">unwrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Draw perpendiculars at each centerline point</span>
     <span class="n">mesh_hwidth</span> <span class="o">=</span> <span class="n">meshwidth</span><span class="o">/</span><span class="mi">2</span>
@@ -964,6 +747,7 @@
 
         <span class="k">return</span> <span class="n">dist_to_int</span><span class="p">,</span> <span class="n">cl_clip</span><span class="p">,</span> <span class="n">ep_clip</span>
 
+
     <span class="k">def</span> <span class="nf">iterative_cl_pt_mapping</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">bufdists</span><span class="p">,</span> <span class="n">side</span><span class="p">):</span>
 
         <span class="n">mapper</span> <span class="o">=</span> <span class="p">[]</span>
@@ -975,8 +759,8 @@
 
             <span class="n">new</span> <span class="o">=</span> <span class="n">shapely_offset_ls</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">bd</span><span class="p">,</span> <span class="n">side</span><span class="p">)</span>
 
-            <span class="n">Co</span><span class="p">,</span> <span class="n">Ao</span><span class="p">,</span> <span class="n">so</span> <span class="o">=</span> <span class="n">curvars</span><span class="p">(</span><span class="n">old</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">old</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">Cn</span><span class="p">,</span> <span class="n">An</span><span class="p">,</span> <span class="n">sn</span> <span class="o">=</span> <span class="n">curvars</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">new</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">Co</span><span class="p">,</span> <span class="n">Ao</span><span class="p">,</span> <span class="n">so</span> <span class="o">=</span> <span class="n">cu</span><span class="o">.</span><span class="n">curvars</span><span class="p">(</span><span class="n">old</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">old</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">Cn</span><span class="p">,</span> <span class="n">An</span><span class="p">,</span> <span class="n">sn</span> <span class="o">=</span> <span class="n">cu</span><span class="o">.</span><span class="n">curvars</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">new</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
             <span class="n">Ao</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Ao</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">An</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">An</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -990,6 +774,7 @@
             <span class="n">old</span> <span class="o">=</span> <span class="n">new</span>
 
         <span class="k">return</span> <span class="n">lines</span><span class="p">,</span> <span class="n">mapper</span>
+
 
     <span class="k">def</span> <span class="nf">get_transect_indices_along_buffered_lines</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">mapper</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1016,6 +801,7 @@
             <span class="n">pts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">idxlist</span>
 
         <span class="k">return</span> <span class="n">pts</span>
+    
 
     <span class="k">def</span> <span class="nf">get_transect_endpoints_xy</span><span class="p">(</span><span class="n">lpts</span><span class="p">,</span> <span class="n">rpts</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1035,16 +821,17 @@
 
         <span class="k">return</span> <span class="n">endpoints</span>
 
+
     <span class="k">def</span> <span class="nf">shapely_offset_ls</span><span class="p">(</span><span class="n">ls</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">side</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Just a wrapper around shapely&#39;s offset_linestring() function. That</span>
 <span class="sd">        function adds little barbs sometimes to the end of the offset</span>
 <span class="sd">        linestring. This function detects and removes those.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">offset</span> <span class="o">=</span> <span class="n">offset_linestring</span><span class="p">(</span><span class="n">ls</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">side</span><span class="p">)</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">cu</span><span class="o">.</span><span class="n">offset_linestring</span><span class="p">(</span><span class="n">ls</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">side</span><span class="p">)</span>
 
         <span class="c1"># Look for barbs by finding abrupt angle changes</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">curvars</span><span class="p">(</span><span class="n">offset</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">offset</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cu</span><span class="o">.</span><span class="n">curvars</span><span class="p">(</span><span class="n">offset</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">offset</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">possibles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">A</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">1.5</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Threshold set at 1.5 radians</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">possibles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1089,7 +876,7 @@
 
         <span class="k">return</span><span class="p">(</span><span class="n">xs_o2</span><span class="p">,</span> <span class="n">ys_o2</span><span class="p">)</span>
 
-    <span class="sd">&quot;&quot;&quot; Function code begins here &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Main function code begins here &quot;&quot;&quot;</span>
     <span class="c1"># obj = ind</span>
     <span class="c1"># coords = obj.centerline</span>
     <span class="c1"># avg_chan_width = obj.avg_chan_width</span>
@@ -1105,7 +892,7 @@
     <span class="n">ys_o</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># Set smoothing window size based on smoothing parameter and centerline length</span>
-    <span class="n">s</span><span class="p">,</span> <span class="n">ds</span> <span class="o">=</span> <span class="n">s_ds</span><span class="p">(</span><span class="n">xs_o</span><span class="p">,</span> <span class="n">ys_o</span><span class="p">)</span>
+    <span class="n">s</span><span class="p">,</span> <span class="n">ds</span> <span class="o">=</span> <span class="n">cu</span><span class="o">.</span><span class="n">s_ds</span><span class="p">(</span><span class="n">xs_o</span><span class="p">,</span> <span class="n">ys_o</span><span class="p">)</span>
     <span class="n">window_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">smoothing</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ds</span><span class="p">))</span>
     <span class="n">window_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xs_o</span><span class="p">)</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="n">window_len</span><span class="p">))</span>  <span class="c1"># Smoothing window cannot be longer than 1/5 the centerline</span>
     <span class="k">if</span> <span class="n">window_len</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Window must be odd</span>
@@ -1225,478 +1012,6 @@
     <span class="n">max_valley_width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Idist</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
 
     <span class="k">return</span> <span class="n">max_valley_width</span></div>
-
-
-<div class="viewcode-block" id="curvars"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.curvars">[docs]</a><span class="k">def</span> <span class="nf">curvars</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">unwrap</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute curvature (and intermediate variables) for a given set of x,y</span>
-<span class="sd">    coordinates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
-    <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span>
-
-    <span class="n">xAi0</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">xAi1</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-    <span class="n">yAi0</span> <span class="o">=</span> <span class="n">ys</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">yAi1</span> <span class="o">=</span> <span class="n">ys</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-
-    <span class="c1"># Compute angles between x,y nodes</span>
-<span class="c1">#    A = np.arctan(np.divide(yAi1-yAi0,xAi1-xAi0))</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">yAi1</span><span class="o">-</span><span class="n">yAi0</span><span class="p">,</span> <span class="n">xAi1</span><span class="o">-</span><span class="n">xAi0</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">unwrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">Acopy</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-
-    <span class="c1"># Fix phase jumps in angle larger than pi</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
-
-    <span class="c1"># Compute distance and cumulative distance between nodes</span>
-    <span class="n">s</span><span class="p">,</span> <span class="n">ds</span> <span class="o">=</span> <span class="n">s_ds</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-    <span class="c1"># Compute curvature via central differencing</span>
-    <span class="c1"># See: http://terpconnect.umd.edu/~toh/spectrum/Differentiation.html</span>
-    <span class="n">sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)])</span>
-    <span class="n">sd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-    <span class="n">sd</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="n">su</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)])</span>
-    <span class="n">su</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-    <span class="n">su</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
-
-    <span class="n">Ad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)])</span>
-    <span class="n">Ad</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-    <span class="n">Ad</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="n">Au</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)])</span>
-    <span class="n">Au</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-    <span class="n">Au</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
-
-    <span class="c1"># Curvatures - checked against Matlab implementation, OK</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">Au</span><span class="o">-</span><span class="n">A</span><span class="p">,</span> <span class="n">su</span><span class="o">-</span><span class="n">s</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">sd</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">A</span><span class="o">-</span><span class="n">Ad</span><span class="p">,</span> <span class="n">s</span><span class="o">-</span><span class="n">sd</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">su</span><span class="o">-</span><span class="n">s</span><span class="p">)),</span> <span class="p">(</span><span class="n">su</span><span class="o">-</span><span class="n">sd</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="n">unwrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">Areturn</span> <span class="o">=</span> <span class="n">Acopy</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">Areturn</span> <span class="o">=</span> <span class="n">A</span>
-
-    <span class="k">return</span> <span class="n">C</span><span class="p">,</span> <span class="n">Areturn</span><span class="p">,</span> <span class="n">s</span></div>
-
-
-<span class="k">def</span> <span class="nf">s_ds</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">):</span>
-
-    <span class="n">ds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ys</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">ds</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">s</span><span class="p">,</span> <span class="n">ds</span>
-
-
-<div class="viewcode-block" id="smooth_curvatures"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.smooth_curvatures">[docs]</a><span class="k">def</span> <span class="nf">smooth_curvatures</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">cvtarget</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Smoothes a curvature signal until the coefficient of variation of its</span>
-<span class="sd">    differenced curvatures is within tolerance percent.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">variation</span>
-
-    <span class="n">smoothstep</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
-    <span class="n">window</span> <span class="o">=</span> <span class="n">smoothstep</span>
-    <span class="k">if</span> <span class="n">window</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Window must be odd</span>
-        <span class="n">window</span> <span class="o">=</span> <span class="n">window</span> <span class="o">+</span> <span class="mi">1</span>
-
-    <span class="n">cv</span> <span class="o">=</span> <span class="mi">10000</span>
-    <span class="k">while</span> <span class="nb">abs</span><span class="p">((</span><span class="n">cv</span><span class="o">-</span><span class="n">cvtarget</span><span class="p">)</span><span class="o">/</span><span class="n">cv</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">:</span>
-        <span class="n">Cs</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-                                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
-        <span class="n">cv</span> <span class="o">=</span> <span class="n">variation</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">Cs</span><span class="p">))</span>
-
-        <span class="n">window</span> <span class="o">=</span> <span class="n">window</span> <span class="o">+</span> <span class="n">smoothstep</span>
-        <span class="k">if</span> <span class="n">window</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Window must be odd</span>
-            <span class="n">window</span> <span class="o">=</span> <span class="n">window</span> <span class="o">+</span> <span class="mi">1</span>
-
-        <span class="k">if</span> <span class="n">window</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not find solution.&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">Cs</span>
-
-    <span class="k">return</span> <span class="n">Cs</span></div>
-
-
-<div class="viewcode-block" id="inflection_points"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.inflection_points">[docs]</a><span class="k">def</span> <span class="nf">inflection_points</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns the inflection points for an input curvature signal.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">infs1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">C</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="n">infs2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">C</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="n">infs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">infs1</span><span class="p">,</span> <span class="n">infs2</span><span class="p">)))</span>
-
-    <span class="k">return</span> <span class="n">infs</span></div>
-
-
-<span class="k">class</span> <span class="nc">centerline</span><span class="p">():</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">attribs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        attribs is a dictionary with attributes; can be single values like</span>
-<span class="sd">        average channel width or one value per coordinate like local width.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Store original coordinates</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">xo</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">yo</span> <span class="o">=</span> <span class="n">y</span>
-
-        <span class="c1"># Store attributes</span>
-        <span class="k">if</span> <span class="n">attribs</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">attribs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">alen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">attribs</span><span class="p">[</span><span class="n">a</span><span class="p">])</span>
-                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="n">alen</span> <span class="o">=</span> <span class="mi">1</span>
-
-                <span class="k">if</span> <span class="n">alen</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">alen</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">attribs</span><span class="p">[</span><span class="n">a</span><span class="p">])</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Attribute () does not have the proper length and is not being stored.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
-
-    <span class="k">def</span> <span class="nf">__get_x_and_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;xrs&#39;</span><span class="p">):</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xrs</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">yrs</span>
-            <span class="n">vers</span> <span class="o">=</span> <span class="s1">&#39;resampled&#39;</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;xs&#39;</span><span class="p">):</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ys</span>
-            <span class="n">vers</span> <span class="o">=</span> <span class="s1">&#39;smooth&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xo</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">yo</span>
-            <span class="n">vers</span> <span class="o">=</span> <span class="s1">&#39;original&#39;</span>
-
-        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">vers</span>
-
-
-    <span class="k">def</span> <span class="nf">smooth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Smooths the x and y coordinates of the centerline using a k-th order</span>
-<span class="sd">        Savitzky-Golay filter.</span>
-
-<span class="sd">        window refers to the number of points to use in the moving window;</span>
-<span class="sd">        must be odd n is the number of times to perform the smoothing.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_x_and_y</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;window_cl&#39;</span><span class="p">):</span>
-                <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_cl</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must provide a smoothing window.&#39;</span><span class="p">)</span>
-                <span class="k">return</span>
-
-        <span class="c1"># Ensure window is integer and odd</span>
-        <span class="n">window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">window</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">window</span> <span class="o">=</span> <span class="n">window</span> <span class="o">+</span> <span class="mi">1</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">xs</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
-                                       <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ys</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
-                                       <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Could make this recursive but if a non-default x,y are passed in, it would not function as expected</span>
-        <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">xs</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window</span><span class="p">,</span>
-                                               <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ys</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ys</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window</span><span class="p">,</span>
-                                               <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        If no arguments are provided for x and y, will resample the smoothed</span>
-<span class="sd">        coordinates if available, else will resample the original coordinates.</span>
-
-<span class="sd">        N is the number of points that the resulting centerline</span>
-<span class="sd">        should contain.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_x_and_y</span><span class="p">()</span>
-
-        <span class="n">xy</span><span class="p">,</span> <span class="n">spline</span> <span class="o">=</span> <span class="n">evenly_space_line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">npts</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">xrs</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">yrs</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="nf">s</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_x_and_y</span><span class="p">()</span>
-
-        <span class="n">sss</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">s_ds</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">sss</span>
-
-    <span class="k">def</span> <span class="nf">ds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_x_and_y</span><span class="p">()</span>
-
-        <span class="n">_</span><span class="p">,</span> <span class="n">dss</span> <span class="o">=</span> <span class="n">s_ds</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">dss</span>
-
-    <span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Important: curvatures are negativized to match the zs approach</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_x_and_y</span><span class="p">()</span>
-
-        <span class="n">Cs</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">curvars</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">unwrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">Cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Cs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="k">return</span> <span class="o">-</span><span class="n">Cs</span>
-
-    <span class="k">def</span> <span class="nf">Csmooth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;window_C&#39;</span><span class="p">):</span>
-                <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_C</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must provide a smoothing window.&#39;</span><span class="p">)</span>
-                <span class="k">return</span>
-
-        <span class="n">Cs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">()</span>
-        <span class="n">Cs</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">Cs</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-                                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
-<span class="c1">#            Cs = signal.medfilt(Cs,kernel_size=5)</span>
-        <span class="k">return</span> <span class="n">Cs</span>
-
-    <span class="k">def</span> <span class="nf">infs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds inflection points.</span>
-
-<span class="sd">        N is the number of expected inflection points. It can be estimated</span>
-<span class="sd">        from N ~= centerline length / 10W, but visual inspection is usually</span>
-<span class="sd">        best.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_x_and_y</span><span class="p">()</span>
-
-        <span class="c1"># Use centerline oversmoothing to find inflection points</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">inflection_pts_oversmooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_infs</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">infsC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">curvature</span><span class="p">()</span>
-
-        <span class="c1"># Use curvature to find inflection points</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">infs_C</span> <span class="o">=</span> <span class="n">inflection_points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">intersection_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y1</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="n">x1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_x_and_y</span><span class="p">()</span>
-
-        <span class="n">ls1</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">))</span>
-        <span class="n">ls2</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">))</span>
-        <span class="n">ls_intersections</span> <span class="o">=</span> <span class="n">ls1</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">ls2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ints_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">x1</span><span class="o">-</span><span class="n">pt</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y1</span><span class="o">-</span><span class="n">pt</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">ls_intersections</span><span class="p">]))</span> <span class="c1"># locations of zero migration</span>
-
-        <span class="c1"># Map the intersection points so that there is one point for every</span>
-        <span class="c1"># pair of inflection points in inf_os</span>
-        <span class="c1"># If there is only one intersection point, use it.</span>
-        <span class="c1"># If none, use the first inflection point?</span>
-        <span class="c1"># If multiple, use the one closest to the first inflection point</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;infs_os&#39;</span><span class="p">):</span>
-
-            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">()</span>
-
-            <span class="c1"># Compute the average bend length from the inflection points</span>
-            <span class="n">ints</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">()</span>
-            <span class="n">abl</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="n">s</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">)):</span>
-
-                <span class="n">i0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-
-                <span class="c1"># Find nearest intersection point for first inflection</span>
-                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">intidx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">i0</span><span class="p">]</span> <span class="o">-</span> <span class="n">s</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ints_all</span><span class="p">]))</span>
-                    <span class="n">ints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ints_all</span><span class="p">[</span><span class="n">intidx</span><span class="p">])</span>
-
-                <span class="c1"># Else find the nearest interesection point that is downstream of the bend&#39;s first inflection point</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">possible_ints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ints_all</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ints_all</span> <span class="o">&gt;</span> <span class="n">ints</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-                    <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">possible_ints</span><span class="p">]</span> <span class="o">-</span> <span class="n">s</span><span class="p">[</span><span class="n">i0</span><span class="p">])</span>
-                    <span class="n">ints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">possible_ints</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">dists</span><span class="p">)])</span>
-
-                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                    <span class="k">break</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">ints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ints</span><span class="p">)</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not map intersections to inflection point pairs because infs_os not computed. Run infs() first.&#39;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">mig_rate_zs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">dt_years</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Compute migration rate using Sylvester et al&#39;s method of</span>
-<span class="sd">        dynamic time warping.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">x1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_x_and_y</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;window_C&#39;</span><span class="p">):</span>
-                <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_C</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">window</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># must be greater than the polyorder, which is 3 by default</span>
-
-        <span class="kn">import</span> <span class="nn">os</span>
-        <span class="kn">import</span> <span class="nn">sys</span>
-        <span class="n">script_dir</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;C:\Users\Jon\Desktop\Research\Koyukukon\Normalize migration rates\Code\curvaturepy-master&quot;</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">script_dir</span><span class="p">))</span>
-        <span class="kn">import</span> <span class="nn">cline_analysis</span> <span class="k">as</span> <span class="nn">ca</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">mr_zs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mrs_zs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_zs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">q_zs</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">get_migr_rate</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">dt_years</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-        <span class="c1"># Smooth</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mr_zs_sm</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mr_zs</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window</span><span class="p">,</span>
-                                             <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Set cutoff-affected and erodibility-affected bends to NaN</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mr_zs_nan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mr_zs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mr_zs_sm_nan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mr_zs_sm</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;cut_ids&#39;</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_ids</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">mr_zs_nan</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">c</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">mr_zs_sm_nan</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">c</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;erode_ids&#39;</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">erode_ids</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">mr_zs_nan</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">e</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">e</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">mr_zs_sm_nan</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">e</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">e</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span>
-
-    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_x_and_y</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-
-        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-        <span class="n">legend</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
-        <span class="n">legend</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">version</span> <span class="o">+</span> <span class="s1">&#39; centerline&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;infs_os&#39;</span><span class="p">):</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">],</span> <span class="s1">&#39;rs&#39;</span><span class="p">)</span>
-            <span class="n">legend</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;inflection points&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ints_all&#39;</span><span class="p">):</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ints_all</span><span class="p">],</span>  <span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ints_all</span><span class="p">],</span> <span class="s1">&#39;go&#39;</span><span class="p">)</span>
-            <span class="n">legend</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;intersection points&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ints&#39;</span><span class="p">):</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ints</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ints</span><span class="p">],</span> <span class="s1">&#39;b^&#39;</span><span class="p">)</span>
-            <span class="n">legend</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;intersection points (mapped)&#39;</span><span class="p">)</span>
-
-        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">legend</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">zs_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Copied verbatim from https://github.com/zsylvester/curvaturepy/blob/master/Purus_2_migration_rates.ipynb</span>
-<span class="sd">        Slight modifications for meshing in the centerline class.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;infs_os&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must compute inflection points first.&#39;</span><span class="p">)</span>
-            <span class="k">return</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ints&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must compute intersections first.&#39;</span><span class="p">)</span>
-            <span class="k">return</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;mr_zs_nan&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must compute migration rates first.&#39;</span><span class="p">)</span>
-            <span class="k">return</span>
-<span class="c1">#            elif hasattr(self, &#39;mr_zs_sm_nan&#39;):</span>
-<span class="c1">#                migr_rate = self.mr_zs_sm_nan</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">migr_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mr_zs_nan</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;cut_ids&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">cutoff_inds</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">cutoff_inds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_ids</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;erode_ids&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">erodibility_inds</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">erodibility_inds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">erode_ids</span>
-
-        <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;window_C&#39;</span><span class="p">):</span>
-                <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_C</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must provide a smoothing window.&#39;</span><span class="p">)</span>
-                <span class="k">return</span>
-
-        <span class="n">LZC</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span>
-        <span class="n">LZM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ints</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">()</span>
-        <span class="n">curv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Csmooth</span><span class="p">()</span>
-        <span class="n">W</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span>
-
-        <span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
-<span class="c1">#            plt.tight_layout()</span>
-
-        <span class="n">y1</span> <span class="o">=</span> <span class="mf">0.7</span>
-        <span class="n">y2</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">y3</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.87</span>
-        <span class="n">y4</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.25</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">LZC</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>
-            <span class="n">xcoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]]]</span>
-            <span class="n">ycoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">y1</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">y2</span><span class="p">,</span><span class="n">y3</span><span class="p">,</span><span class="n">y4</span><span class="p">,</span><span class="n">y4</span><span class="p">,</span><span class="n">y3</span><span class="p">,</span><span class="n">y2</span><span class="p">]</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">xcoords</span><span class="p">,</span><span class="n">ycoords</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mf">0.85</span><span class="p">,</span><span class="mf">0.85</span><span class="p">,</span><span class="mf">0.85</span><span class="p">],</span><span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-        <span class="n">ax1</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">curv</span><span class="o">*</span><span class="n">W</span><span class="p">)</span>
-        <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
-        <span class="n">ax2</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">migr_rate</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">)</span>
-
-        <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="nb">max</span><span class="p">(</span><span class="n">s</span><span class="p">)],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;k--&#39;</span><span class="p">)</span>
-        <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="nb">max</span><span class="p">(</span><span class="n">s</span><span class="p">)],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;k--&#39;</span><span class="p">)</span>
-
-        <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">y4</span><span class="p">,</span><span class="n">y1</span><span class="p">)</span>
-        <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span><span class="mi">40</span><span class="p">)</span>
-        <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">erodibility_inds</span><span class="p">:</span>
-            <span class="n">xcoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]]]</span>
-            <span class="n">ycoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">y1</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">y2</span><span class="p">,</span><span class="n">y3</span><span class="p">,</span><span class="n">y4</span><span class="p">,</span><span class="n">y4</span><span class="p">,</span><span class="n">y3</span><span class="p">,</span><span class="n">y2</span><span class="p">]</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">xcoords</span><span class="p">,</span><span class="n">ycoords</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.85</span><span class="p">,</span><span class="mf">0.85</span><span class="p">],</span><span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cutoff_inds</span><span class="p">:</span>
-            <span class="n">xcoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]]]</span>
-            <span class="n">ycoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">y1</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">y2</span><span class="p">,</span><span class="n">y3</span><span class="p">,</span><span class="n">y4</span><span class="p">,</span><span class="n">y4</span><span class="p">,</span><span class="n">y3</span><span class="p">,</span><span class="n">y2</span><span class="p">]</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">xcoords</span><span class="p">,</span><span class="n">ycoords</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mf">0.85</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.85</span><span class="p">],</span><span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">LZC</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">migr_rate</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]]))</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-                <span class="n">xcoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]]]</span>
-                <span class="n">ycoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">y1</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">y2</span><span class="p">,</span><span class="n">y3</span><span class="p">,</span><span class="n">y4</span><span class="p">,</span><span class="n">y4</span><span class="p">,</span><span class="n">y3</span><span class="p">,</span><span class="n">y2</span><span class="p">]</span>
-                <span class="n">ax1</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">xcoords</span><span class="p">,</span><span class="n">ycoords</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">LZC</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">migr_rate</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]]))</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-                <span class="n">xcoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZM</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]]]</span>
-                <span class="n">ycoords</span> <span class="o">=</span> <span class="p">[</span><span class="mi">35</span><span class="p">,</span><span class="mi">35</span><span class="p">,</span><span class="mf">20.7145</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">20.7145</span><span class="p">]</span>
-                <span class="n">ax2</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">xcoords</span><span class="p">,</span><span class="n">ycoords</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">LZC</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>
-            <span class="n">ax1</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="mf">0.5</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="compute_eBI"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.compute_eBI">[docs]</a><span class="k">def</span> <span class="nf">compute_eBI</span><span class="p">(</span><span class="n">path_meshlines</span><span class="p">,</span> <span class="n">path_links</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">):</span>
