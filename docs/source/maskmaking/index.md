@@ -1,3 +1,5 @@
+.. _maskmaking:
+
 # Maskmaker, Maskmaker Make Me a Mask
 
 ![](C:\Users\Jon\Documents\GitHub\RivGraph\examples\images\lena_mask.PNG)
