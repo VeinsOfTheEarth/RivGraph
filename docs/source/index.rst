@@ -1,7 +1,9 @@
 Welcome to RivGraph's documentation!
 ====================================
 
-.. todo:: some intro about RivGraph
+RivGraph provides two classes that you can instantiate with your binary channel mask: *delta* and (braided) *river*. These classes contain methods that may be applied to execute network extractions, perform analyses, and write (georeferenced) results. While most of RivGraph's processing is automated, deltaic channel networks require the user to also create and provide a shoreline and inlet nodes shapefiles. Guidance for how to create these can be found `here <todo>`_. Take a look at the `FAQ  <todo>`_for quick answers.
+
+If the documentation you seek is not herein, please open a request via the `Issue Tracker <https://github.com/jonschwenk/RivGraph/issues>`_. `Detailed examples <https://github.com/jonschwenk/RivGraph/tree/master/examples>`_ for use are available, and most functions have been documented following a modified `numpy docstring format <https://numpydoc.readthedocs.io/en/latest/format.html>`_. 
 
 Documentation
 -------------
@@ -13,5 +15,6 @@ Documentation
    background/index
    install/index
    examples/index
+   maskmaking/index
    contributing/index
    apiref/index
