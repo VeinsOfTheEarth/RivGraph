@@ -10,9 +10,9 @@ The Birth of RivGraph
 
 In 2016, I walked into the postdoc office at the Saint Anthony Falls Laboratory to see deltas on display as 8.5 x 11 sheets of paper 
 taped together with hand-drawn markings all over. My colleagues Alejandro Tejedor and Anthony Longjas were trying to whip these deltas
-into shape for a series of papers (`1 <https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016577%4010.1002/%28ISSN%291944-7973.CONART1>`_, `2 <https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016604>`_) introducing a new way to think about deltas: through the lens of their channel networks. As I 
+into shape for a series of papers (`1 <https://doi.org/10.1002/2014WR016604>`_, `2 <https://doi.org/10.1002/2014WR016604>`_) introducing a new way to think about deltas: through the lens of their channel networks. As I 
 looked at their handiwork, I couldn't help thinking that there must be a better way. My own research at the time had led me to develop 
-`RivMAP <https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2016EA000196>`_, a Matlab toolbox for analyzing the morphodynamics of meandering rivers using binary masks. And so RivGraph was born as a small set of Matlab scripts with very limited functionality.
+`RivMAP <https://doi.org/10.1002/2016EA000196>`_, a Matlab toolbox for analyzing the morphodynamics of meandering rivers using binary masks. And so RivGraph was born as a small set of Matlab scripts with very limited functionality.
 
 I finished my PhD with RivGraph in a barely-formed state, and followed my adviser, `Efi <http://efi.eng.uci.edu/>`_, to UC-Irvine for a short postdoc. Alex and Anthony were pushing the deltas work even further, and I kept adding scripts to RivGraph. The inevitable idea was hatched to analyze dozens of deltas worldwide, and eventually became a `successful proposal <https://www.nsf.gov/awardsearch/showAward?AWD_ID=1812019>`_. In the meantime, I took a postdoc position at Los Alamos
 National Laboratory with an eye toward global river morphodynamics. My arrival at LANL marked the beginning of my Python journey, and
@@ -44,7 +44,7 @@ solution is correspondingly complicated, but does a pretty good job. We `publish
 
 The third novel component of RivGraph is its abilty to generate an along-channel mesh that approximately follows a river's centerline
 while transecting the centerline approximately perpendicularly. This was a surprisingly tricky function to get right, and I'm not even
-sure it's *there* yet. The first iteration of this appeared in RivMAP, and there have probably been 3-4 method changes before settling on the current version, which uses Dynamic Time Warping (thanks `Zoltan et. al <https://pubs.geoscienceworld.org/gsa/geology/article/47/3/263/568705/High-curvatures-drive-river-meandering>`_ for introducing this to me, although I still contend that it's inappropriate to use for measuring channel migration rates) to iteratively map vertices on buffered centerlines away from the original.
+sure it's *there* yet. The first iteration of this appeared in RivMAP, and there have probably been 3-4 method changes before settling on the current version, which uses Dynamic Time Warping (thanks `Zoltan et. al <https://doi.org/10.1130/G45608.1>`_ for introducing this to me, although I still contend that it's inappropriate to use for measuring channel migration rates) to iteratively map vertices on buffered centerlines away from the original.
 
 **********
 What else?
