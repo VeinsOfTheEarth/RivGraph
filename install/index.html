@@ -98,6 +98,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../maskmaking/index.html">Maskmaking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../apiref/index.html">API Reference</a></li>
 </ul>
@@ -171,24 +172,29 @@
 <p class="admonition-title">Note</p>
 <p><em>RivGraph</em> requires the installation of common geospatial Python packages such as <a class="reference external" href="https://gdal.org/">GDAL</a>.
 These packages can be difficult to install properly and often create dependency errors.
-For these reasons we recommend using <a class="reference external" href="https://www.anaconda.com/products/individual">Anaconda</a> to create a virtual environment for <em>RivGraph</em>, and to manage the installation of Python libraries as it will handle package versions and dependencies for you.</p>
+Because of this, we recommend using <a class="reference external" href="https://www.anaconda.com/products/individual">Anaconda</a> to create a virtual environment for <em>RivGraph</em>, and to manage the installation of Python libraries as it will handle package versions and dependencies for you.</p>
 </div>
 <div class="section" id="installation-via-conda">
 <h2>Installation via <em>conda</em><a class="headerlink" href="#installation-via-conda" title="Permalink to this headline">¶</a></h2>
 <p>The latest ‘stable’ version of <em>RivGraph</em> can be installed via <cite>conda</cite>.
 We recommend installing <em>RivGraph</em> into a fresh conda environment to minimize the risk of dependency clashes.
-The easiest way to do this is by first downloading the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/environment.yml">environment.yml</a>, opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:</p>
+The easiest way to do this is by first downloading the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/environment.yml">environment.yml</a>, (right-click, “Save As…”) opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ conda env create --file /path/to/environment.yml
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
 <p>The default environment name is ‘rivgraph’ (per the <cite>environment.yml</cite> file), but you can change the environment file to name it anything you like.</p>
 </div>
 <p>If you would rather install <em>RivGraph</em> into a pre-existing environment “myenv”, you can use the following commands:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">myenv</span>
 <span class="n">conda</span> <span class="n">install</span> <span class="n">rivgraph</span> <span class="o">-</span><span class="n">c</span> <span class="n">jschwenk</span>
 </pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><em>RivGraph</em> dependencies may be pinned to specific versions of packages (e.g. geopandas 0.7) that may not mesh with your existing environment.
+Check the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/environment.yml">dependencies file</a> for these cases.</p>
 </div>
 </div>
 <div class="section" id="installation-from-source">
@@ -202,13 +208,13 @@ The easiest way to do this is by first downloading the <a class="reference exter
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python setup.py install
 </pre></div>
 </div>
-<p>to install the RivGraph package.</p>
+<p>to install the <em>RivGraph</em> package.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If you encounter an error during step 2, check that you’ve installed the required dependencies.
 A list of the <em>RivGraph</em> dependencies can be found in the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/environment.yml">environment.yml</a> file.</p>
 </div>
-<p>3. To test your installation, you can run the unit tests with the following command:</p>
+<p>3. To test your installation, from the cloned folder you can run the unit tests with the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pytest
 </pre></div>
 </div>

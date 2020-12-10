@@ -92,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../background/index.html">Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Installation Instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../maskmaking/index.html">Maskmaking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apiref/index.html">API Reference</a></li>
 </ul>
@@ -162,8 +163,10 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Image Utilities (im_utils.py)</span>
 <span class="sd">=============================</span>
-<span class="sd">Almost all the functions that manipulate images within this file require that</span>
-<span class="sd">the images be binary.</span>
+
+<span class="sd">.. note::</span>
+<span class="sd">    Almost all the functions that manipulate images within this file require that the images be binary.</span>
+
 
 <span class="sd">Many of these functions are wrappers around functionality found in skimage or</span>
 <span class="sd">opencv that either add additonal functionality or provide convenience.</span>
@@ -464,6 +467,7 @@
 <span class="sd">    column and row.</span>
 
 <span class="sd">    Returns are ordered as</span>
+<span class="sd">    </span>
 <span class="sd">    [0 1 2</span>
 <span class="sd">     3   4</span>
 <span class="sd">     5 6 7]</span>
@@ -579,6 +583,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the coordinates of a neighbor of a pixel given the index of the</span>
 <span class="sd">    desired neighbor. Indices should be provided according to</span>
+<span class="sd">    </span>
 <span class="sd">    [0 1 2</span>
 <span class="sd">     3   4</span>
 <span class="sd">     5 6 7].</span>

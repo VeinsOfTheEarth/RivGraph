@@ -92,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../background/index.html">Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Installation Instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../maskmaking/index.html">Maskmaking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apiref/index.html">API Reference</a></li>
 </ul>
@@ -160,8 +161,8 @@
   <h1>Source code for rivgraph.directionality</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Directionality Utils (directionality.py)</span>
-<span class="sd">========================================</span>
+<span class="sd">Directionality Utilities (directionality.py)</span>
+<span class="sd">============================================</span>
 
 <span class="sd">Created on Wed Nov  7 11:38:16 2018</span>
 <span class="sd">@author: Jon</span>
@@ -2093,6 +2094,7 @@
 <span class="sd">    Method 1 sets a broken link if its counterpart is known.</span>
 <span class="sd">    Method 2 sets a side of the loop if the other side is known.</span>
 <span class="sd">    Method 3 sets both sides if the input to one of the end nodes is known.</span>
+<span class="sd">    </span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -2102,6 +2104,7 @@
 <span class="sd">    checknodes : int or str, optional</span>
 <span class="sd">        Node ids to check for presence of settable artificial links. If &#39;all&#39;,</span>
 <span class="sd">        all nodes in the network are checked.</span>
+<span class="sd">    </span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>

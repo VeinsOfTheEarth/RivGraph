@@ -94,18 +94,19 @@
 <li class="toctree-l1"><a class="reference internal" href="../background/index.html">Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install/index.html">Installation Instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../maskmaking/index.html">Maskmaking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">rivgraph</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#rivgraph-classes-py">RivGraph (classes.py)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#directionality-utils-directionality-py">Directionality Utils (directionality.py)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#directionality-utilities-directionality-py">Directionality Utilities (directionality.py)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#georeferencing-utilities-geo-utils-py">Georeferencing Utilities (geo_utils.py)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#image-utilities-im-utils-py">Image Utilities (im_utils.py)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#input-output-utilities-io-utils-py">Input/Output Utilities (io_utils.py)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#network-utilities-ln-utils-py">Network Utilities (ln_utils.py)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mask-to-graph-utilities-mask-to-graph-py">Mask to Graph Utilities (mask_to_graph.py)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mask-filtering-utils-mask-utils-py">Mask Filtering Utils (mask_utils.py)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#skelton-walking-utils-walk-py">Skelton Walking Utils (walk.py)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skeleton-walking-utils-walk-py">Skeleton Walking Utils (walk.py)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="deltas.html">deltas</a></li>
@@ -1071,8 +1072,8 @@ written to path found in paths[‘network_pickle’]</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.directionality"></span><div class="section" id="directionality-utils-directionality-py">
-<h2>Directionality Utils (directionality.py)<a class="headerlink" href="#directionality-utils-directionality-py" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.directionality"></span><div class="section" id="directionality-utilities-directionality-py">
+<h2>Directionality Utilities (directionality.py)<a class="headerlink" href="#directionality-utilities-directionality-py" title="Permalink to this headline">¶</a></h2>
 <p>Created on Wed Nov  7 11:38:16 2018
 &#64;author: Jon</p>
 <dl class="function">
@@ -1555,18 +1556,18 @@ loops, flow will travel the same way through both sides of the loop (to avoid
 cycles). Therefore, if one side is known, we can set the other side.
 Method 1 sets a broken link if its counterpart is known.
 Method 2 sets a side of the loop if the other side is known.
-Method 3 sets both sides if the input to one of the end nodes is known.
-:param links: Network links and associated properties.
-:type links: dict
-:param nodes: Network nodes and associated properties.
-:type nodes: dict
-:param checknodes: Node ids to check for presence of settable artificial links. If ‘all’,</p>
-<blockquote>
-<div><p>all nodes in the network are checked.</p>
-</div></blockquote>
+Method 3 sets both sides if the input to one of the end nodes is known.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
+<li><p><strong>checknodes</strong> (<em>int</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Node ids to check for presence of settable artificial links. If ‘all’,
+all nodes in the network are checked.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties updated to set directionality
 according to this algorithm.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties updated to set directionality
@@ -1946,8 +1947,10 @@ Automatically created by gdal’s GetGeoTransform() method.</p></li>
 </div>
 <span class="target" id="module-rivgraph.im_utils"></span><div class="section" id="image-utilities-im-utils-py">
 <h2>Image Utilities (im_utils.py)<a class="headerlink" href="#image-utilities-im-utils-py" title="Permalink to this headline">¶</a></h2>
-<p>Almost all the functions that manipulate images within this file require that
-the images be binary.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Almost all the functions that manipulate images within this file require that the images be binary.</p>
+</div>
 <p>Many of these functions are wrappers around functionality found in skimage or
 opencv that either add additonal functionality or provide convenience.</p>
 <dl class="function">
@@ -2301,12 +2304,12 @@ nlargest blobs. The default is ‘remove’.</p></li>
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">neighbor_idcs</code><span class="sig-paren">(</span><em>c</em>, <em>r</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#neighbor_idcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.neighbor_idcs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the column, row coordinats of all eight neighbors of a given
 column and row.</p>
-<p>Returns are ordered as
-[0 1 2</p>
-<blockquote>
-<div><p>3   4
+<p>Returns are ordered as</p>
+<dl class="simple">
+<dt>[0 1 2</dt><dd><p>3   4
 5 6 7]</p>
-</div></blockquote>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -2350,12 +2353,12 @@ edge cases.</p>
 <dt id="rivgraph.im_utils.neighbor_xy">
 <code class="descclassname">rivgraph.im_utils.</code><code class="descname">neighbor_xy</code><span class="sig-paren">(</span><em>c</em>, <em>r</em>, <em>idx</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/im_utils.html#neighbor_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.im_utils.neighbor_xy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the coordinates of a neighbor of a pixel given the index of the
-desired neighbor. Indices should be provided according to
-[0 1 2</p>
-<blockquote>
-<div><p>3   4
+desired neighbor. Indices should be provided according to</p>
+<dl class="simple">
+<dt>[0 1 2</dt><dd><p>3   4
 5 6 7].</p>
-</div></blockquote>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3758,8 +3761,8 @@ of a provided center coordinate given the pixel resolution (pixlen).</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-rivgraph.walk"></span><div class="section" id="skelton-walking-utils-walk-py">
-<h2>Skelton Walking Utils (walk.py)<a class="headerlink" href="#skelton-walking-utils-walk-py" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-rivgraph.walk"></span><div class="section" id="skeleton-walking-utils-walk-py">
+<h2>Skeleton Walking Utils (walk.py)<a class="headerlink" href="#skeleton-walking-utils-walk-py" title="Permalink to this headline">¶</a></h2>
 <p>Functions for walking along skeletons and finding branchpoints.</p>
 <p>Created on Mon Sep 10 09:39:19 2018</p>
 <dl class="function">
