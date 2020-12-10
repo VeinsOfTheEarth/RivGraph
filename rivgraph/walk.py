@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Skelton Walking Utils (walk.py)
+Skeleton Walking Utils (walk.py)
 ===============================
 Functions for walking along skeletons and finding branchpoints.
 

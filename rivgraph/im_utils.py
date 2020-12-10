@@ -2,8 +2,10 @@
 """
 Image Utilities (im_utils.py)
 =============================
-Almost all the functions that manipulate images within this file require that
-the images be binary.
+
+.. note::
+    Almost all the functions that manipulate images within this file require that the images be binary.
+
 
 Many of these functions are wrappers around functionality found in skimage or
 opencv that either add additonal functionality or provide convenience.
@@ -304,6 +306,7 @@ def neighbor_idcs(c, r):
     column and row.
 
     Returns are ordered as
+    
     [0 1 2
      3   4
      5 6 7]
@@ -419,6 +422,7 @@ def neighbor_xy(c, r, idx):
     """
     Returns the coordinates of a neighbor of a pixel given the index of the
     desired neighbor. Indices should be provided according to
+    
     [0 1 2
      3   4
      5 6 7].

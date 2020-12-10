@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Directionality Utils (directionality.py)
-========================================
+Directionality Utilities (directionality.py)
+============================================
 
 Created on Wed Nov  7 11:38:16 2018
 @author: Jon
@@ -1933,6 +1933,7 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
     Method 1 sets a broken link if its counterpart is known.
     Method 2 sets a side of the loop if the other side is known.
     Method 3 sets both sides if the input to one of the end nodes is known.
+    
     Parameters
     ----------
     links : dict
@@ -1942,6 +1943,7 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
     checknodes : int or str, optional
         Node ids to check for presence of settable artificial links. If 'all',
         all nodes in the network are checked.
+    
     Returns
     -------
     links : dict

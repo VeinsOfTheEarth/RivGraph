@@ -61,8 +61,7 @@ extensions = ['sphinx.ext.autodoc',
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
-# The suffix(es) of source filenames.
-source_suffix = ['.rst', '.md']
+source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = 'index'
@@ -98,9 +97,6 @@ pygments_style = 'default'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
-
-# Trying to fix link checking breaking on build - see https://github.com/sphinx-doc/sphinx/issues/7369
-user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -185,3 +181,12 @@ autodoc_mock_imports = ['numpy', 'scikit-image', 'opencv-python', 'pandas',
                         'networkx', 'geopandas', 'pyproj', 'shapely', 'fiona',
                         'matplotlib', 'gdal', 'scipy', 'skimage', 'cv2',
                         'rivgraph']
+
+# -- Options for linkcheck -------------------------------------------
+
+# Some links are throwing 403s for unknown reasons; we simply skip checking them here.
+linkcheck_ignore = [r'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016577%4010.1002/%28ISSN%291944-7973.CONART1',
+		    r'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016604',
+		    r'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2016EA000196',
+		    r'https://pubs.geoscienceworld.org/gsa/geology/article/47/3/263/568705/High-curvatures-drive-river-meandering']
+

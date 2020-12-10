@@ -1,0 +1,1010 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>rivgraph.deltas.delta_metrics &mdash; RivGraph 0.3 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart/index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../background/index.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/index.html">Installation Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../maskmaking/index.html">Maskmaking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apiref/index.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">RivGraph</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>rivgraph.deltas.delta_metrics</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for rivgraph.deltas.delta_metrics</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">delta_metrics</span>
+<span class="sd">=============</span>
+<span class="sd">Created on Mon May 21 09:00:01 2018</span>
+
+<span class="sd">@author: Jon</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">rivgraph.directionality</span> <span class="k">as</span> <span class="nn">dy</span>
+<span class="kn">import</span> <span class="nn">rivgraph.ln_utils</span> <span class="k">as</span> <span class="nn">lnu</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This script contains algorithms that were ported from Matlab scripts provided</span>
+<span class="sd">by Alejandro Tejedor to compute topologic and dynamic metrics on deltas. The</span>
+<span class="sd">provided Matlab script required the bioinformatics toolbox; here we use</span>
+<span class="sd">networkx to achieve the same result. Ported by Jon Schwenk.</span>
+<span class="sd">The conversion was tested by computing metrics for the Wax Lake Delta</span>
+<span class="sd">(provided by AT) and the Yenesei Delta (provided by JS)--perfect agreement</span>
+<span class="sd">was found for all metrics, for both deltas, using both the original Matlab</span>
+<span class="sd">scripts and the Python functions provided here.</span>
+<span class="sd">JS has made some efficiency improvments to the code; otherwise most variable</span>
+<span class="sd">names and code structure was matched to the original Matlab scripts.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="compute_delta_metrics"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.compute_delta_metrics">[docs]</a><span class="k">def</span> <span class="nf">compute_delta_metrics</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute delta metrics.&quot;&quot;&quot;</span>
+    <span class="c1"># Delta metrics require a single apex node</span>
+    <span class="n">links_m</span><span class="p">,</span> <span class="n">nodes_m</span> <span class="o">=</span> <span class="n">ensure_single_inlet</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
+
+    <span class="c1"># Ensure we have a directed, acyclic graph; also include widths as weights</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">graphiphy</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;wid_adj&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">nx</span><span class="o">.</span><span class="n">is_directed_acyclic_graph</span><span class="p">(</span><span class="n">G</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Cannot proceed with metrics as graph is not acyclic.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Compute the intermediate variables required to compute delta metrics</span>
+    <span class="n">deltavars</span> <span class="o">=</span> <span class="n">intermediate_vars</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+
+    <span class="c1"># Compute metrics</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">ner</span><span class="p">,</span> <span class="n">pexc</span><span class="p">,</span> <span class="n">ner_randomized</span> <span class="o">=</span> <span class="n">delta_nER</span><span class="p">(</span><span class="n">deltavars</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;nonlin_entropy_rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ner</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;nER_prob_exceedence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pexc</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;nER_randomized&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ner_randomized</span>
+    <span class="n">TMI</span><span class="p">,</span> <span class="n">TCE</span> <span class="o">=</span> <span class="n">top_entropy_based_topo</span><span class="p">(</span><span class="n">deltavars</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;top_mutual_info&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">TMI</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;top_conditional_entropy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">TCE</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;top_link_sharing_idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">top_link_sharing_index</span><span class="p">(</span><span class="n">deltavars</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;n_alt_paths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">top_number_alternative_paths</span><span class="p">(</span><span class="n">deltavars</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;resistance_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">top_resistance_distance</span><span class="p">(</span><span class="n">deltavars</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;top_pairwise_dependence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">top_s2s_topo_pairwise_dep</span><span class="p">(</span><span class="n">deltavars</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;flux_sharing_idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dyn_flux_sharing_index</span><span class="p">(</span><span class="n">deltavars</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;leakage_idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dyn_leakage_index</span><span class="p">(</span><span class="n">deltavars</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;dyn_pairwise_dependence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dyn_pairwise_dep</span><span class="p">(</span><span class="n">deltavars</span><span class="p">)</span>
+    <span class="n">DMI</span><span class="p">,</span> <span class="n">DCE</span> <span class="o">=</span> <span class="n">dyn_entropy_based_dyn</span><span class="p">(</span><span class="n">deltavars</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;dyn_mutual_info&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DMI</span>
+    <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;dyn_conditional_entropy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DCE</span>
+
+    <span class="k">return</span> <span class="n">metrics</span></div>
+
+
+<div class="viewcode-block" id="graphiphy"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.graphiphy">[docs]</a><span class="k">def</span> <span class="nf">graphiphy</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a networkx graph.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">weight</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Provided weight key not in nodes dictionary.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="n">weight</span><span class="p">]</span>
+
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">lc</span><span class="p">,</span> <span class="n">wt</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">],</span> <span class="n">weights</span><span class="p">):</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">lc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="n">wt</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">G</span></div>
+
+
+<div class="viewcode-block" id="normalize_adj_matrix"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.normalize_adj_matrix">[docs]</a><span class="k">def</span> <span class="nf">normalize_adj_matrix</span><span class="p">(</span><span class="n">G</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normalize adjacency matrix.</span>
+
+<span class="sd">    Normalizes a graph&#39;s adjacency matrix so the sum of weights of each row</span>
+<span class="sd">    equals one. G is a networkx Graph with weights assigned.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># First, get adjacency matrix</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_numpy_array</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="c1"># Normalize each node</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">rowsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="k">if</span> <span class="n">rowsum</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">A</span><span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="p">:])</span>
+
+    <span class="k">return</span> <span class="n">A</span></div>
+
+
+<div class="viewcode-block" id="intermediate_vars"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.intermediate_vars">[docs]</a><span class="k">def</span> <span class="nf">intermediate_vars</span><span class="p">(</span><span class="n">G</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute interemediate variables and matrices.</span>
+
+<span class="sd">    Computes the intermediate variables and matrices required to compute</span>
+<span class="sd">    delta metrics. This function prevents the re-computation of many matrices</span>
+<span class="sd">    required in the metric functions.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">deltavars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="c1"># The weighted adjacency matrix (A) of a Directed Acyclic Graph (DAG) has</span>
+    <span class="c1"># entries a_{uv} that correspond to the fraction of the flux</span>
+    <span class="c1"># present at node v that flows through the channel (vu). Flux partitioning</span>
+    <span class="c1"># is done via channel widths.</span>
+    <span class="c1"># Compute normalized weighted adjacency matrix</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">normalize_adj_matrix</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+
+    <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># Apex and outlet nodes</span>
+    <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;apex&#39;</span><span class="p">],</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">find_inlet_outlet_nodes</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w&#39;</span><span class="p">])</span>
+
+    <span class="sd">&quot;&quot;&quot; Weighted Adj &quot;&quot;&quot;</span>
+    <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;F_w&#39;</span><span class="p">],</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_w&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta_subN_F</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w&#39;</span><span class="p">])</span>
+
+    <span class="sd">&quot;&quot;&quot; Weighted transitional&quot;&quot;&quot;</span>
+    <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w_trans&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))))</span>
+    <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;F_w_trans&#39;</span><span class="p">],</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_w_trans&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta_subN_F</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w_trans&#39;</span><span class="p">])</span>
+
+    <span class="sd">&quot;&quot;&quot; Unweighted Adj&quot;&quot;&quot;</span>
+    <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_uw&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;F_uw&#39;</span><span class="p">],</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_uw&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta_subN_F</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_uw&#39;</span><span class="p">])</span>
+
+    <span class="sd">&quot;&quot;&quot; Unweighted transitional&quot;&quot;&quot;</span>
+    <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_uw_trans&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_uw&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_uw&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))))</span>
+    <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;F_uw_trans&#39;</span><span class="p">],</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_uw_trans&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta_subN_F</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_uw_trans&#39;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">deltavars</span></div>
+
+
+<div class="viewcode-block" id="ensure_single_inlet"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.ensure_single_inlet">[docs]</a><span class="k">def</span> <span class="nf">ensure_single_inlet</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ensure only a single apex node exists.</span>
+
+<span class="sd">    All the delta metrics here require a single apex node, and that that node</span>
+<span class="sd">    be connected to at least two downstream links. This function ensures these</span>
+<span class="sd">    conditions are met; where there are multiple inlets, the widest is chosen.</span>
+<span class="sd">    This function also ensures that the inlet node is attached to at least two</span>
+<span class="sd">    links--this is important for computing un-biased delta metrics.</span>
+<span class="sd">    The links and nodes dicts are copied so they remain unaltered; the altered</span>
+<span class="sd">    copies are returned.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Copy links and nodes so we preserve the originals</span>
+    <span class="n">links_edit</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">links_edit</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">links</span><span class="p">)</span>
+    <span class="n">nodes_edit</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">nodes_edit</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+
+    <span class="c1"># Find the widest inlet</span>
+    <span class="n">in_wids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]:</span>
+        <span class="n">linkid</span> <span class="o">=</span> <span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">linkidx</span> <span class="o">=</span> <span class="n">links_edit</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">linkid</span><span class="p">)</span>
+        <span class="n">in_wids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">links_edit</span><span class="p">[</span><span class="s1">&#39;wid_adj&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">])</span>
+    <span class="n">widest_inlet_idx</span> <span class="o">=</span> <span class="n">in_wids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">in_wids</span><span class="p">))</span>
+    <span class="n">inlets_to_remove</span> <span class="o">=</span> <span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">][:]</span>
+
+    <span class="c1"># Remove inlet nodes and links until continuity is no longer broken</span>
+    <span class="n">badnodes</span> <span class="o">=</span> <span class="n">dy</span><span class="o">.</span><span class="n">check_continuity</span><span class="p">(</span><span class="n">links_edit</span><span class="p">,</span> <span class="n">nodes_edit</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">badnodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Provided (links, nodes) has source or sink at nodes: </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">badnodes</span><span class="p">))</span>
+
+    <span class="c1"># Keep the widest inlet - delete all others (and remove their subnetworks)</span>
+    <span class="n">main_inlet</span> <span class="o">=</span> <span class="n">inlets_to_remove</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">widest_inlet_idx</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inlets_to_remove</span><span class="p">:</span>
+        <span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">badnodes</span> <span class="o">=</span> <span class="n">dy</span><span class="o">.</span><span class="n">check_continuity</span><span class="p">(</span><span class="n">links_edit</span><span class="p">,</span> <span class="n">nodes_edit</span><span class="p">)</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">badnodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">badnode</span> <span class="o">=</span> <span class="n">badnodes</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="c1"># Remove the links connected to the bad node:</span>
+            <span class="c1"># the hanging node will also be removed</span>
+            <span class="n">connlinks</span> <span class="o">=</span> <span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">badnode</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">cl</span> <span class="ow">in</span> <span class="n">connlinks</span><span class="p">:</span>
+                <span class="n">links_edit</span><span class="p">,</span> <span class="n">nodes_edit</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">delete_link</span><span class="p">(</span><span class="n">links_edit</span><span class="p">,</span>
+                                                         <span class="n">nodes_edit</span><span class="p">,</span> <span class="n">cl</span><span class="p">)</span>
+
+            <span class="n">badnodes</span> <span class="o">=</span> <span class="n">dy</span><span class="o">.</span><span class="n">check_continuity</span><span class="p">(</span><span class="n">links_edit</span><span class="p">,</span> <span class="n">nodes_edit</span><span class="p">)</span>
+
+    <span class="c1"># Ensure there are at least two links emanating from the inlet node</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">main_inlet</span><span class="p">)]</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">main_inlet_new</span> <span class="o">=</span> <span class="n">links_edit</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">links_edit</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">conn</span><span class="p">[</span><span class="mi">0</span><span class="p">])][:]</span>
+        <span class="n">main_inlet_new</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">main_inlet</span><span class="p">)</span>
+        <span class="n">links_edit</span><span class="p">,</span> <span class="n">nodes_edit</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">delete_link</span><span class="p">(</span><span class="n">links_edit</span><span class="p">,</span> <span class="n">nodes_edit</span><span class="p">,</span>
+                                                 <span class="n">conn</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Update new inlet node</span>
+        <span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">main_inlet</span><span class="p">)</span>
+        <span class="n">main_inlet</span> <span class="o">=</span> <span class="n">main_inlet_new</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">main_inlet</span><span class="p">]</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes_edit</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">main_inlet</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="n">links_edit</span><span class="p">,</span> <span class="n">nodes_edit</span></div>
+
+
+<div class="viewcode-block" id="find_inlet_outlet_nodes"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.find_inlet_outlet_nodes">[docs]</a><span class="k">def</span> <span class="nf">find_inlet_outlet_nodes</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find inlet and outlet nodes.</span>
+
+<span class="sd">    Given an input adjacency matrix (A), returns the inlet and outlet nodes.</span>
+<span class="sd">    The graph should contain a single apex</span>
+<span class="sd">    (i.e. run ensure_single_inlet first).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">apex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">apex</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;The graph contains more than one apex.&#39;</span><span class="p">)</span>
+    <span class="n">outlets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">apex</span><span class="p">,</span> <span class="n">outlets</span></div>
+
+
+<div class="viewcode-block" id="delta_subN_F"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.delta_subN_F">[docs]</a><span class="k">def</span> <span class="nf">delta_subN_F</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute steady state flux distribution.</span>
+
+<span class="sd">    Computes the steady state flux distribution in the delta nodes when the</span>
+<span class="sd">    system is fed with a constant unity influx from the Apex. Also defines the</span>
+<span class="sd">    subnetworks apex-to-outlet.</span>
+<span class="sd">    The SubN is an NxM matrix, where N is number of nodes and M is the number</span>
+<span class="sd">    of outlets. For each mth outlet, its contributing subnetwork is given by</span>
+<span class="sd">    the nonzero entries in SubN. The values in SubN are the degree of</span>
+<span class="sd">    &quot;belongingness&quot; of each node to its subnetwork. If SubN(m,n) = 0, the m&#39;th</span>
+<span class="sd">    node does not belong to the n&#39;th subnetwork; but if SubN(m,n) = 1, the m&#39;th</span>
+<span class="sd">    node belongs *only* to the n&#39;th subnetwork. The values in SubN may be</span>
+<span class="sd">    interpreted as the percentage of tracers that pass through node m that</span>
+<span class="sd">    eventually make their way to the outlet of subnetwork n.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ApexID</span><span class="p">,</span> <span class="n">OutletsID</span> <span class="o">=</span> <span class="n">find_inlet_outlet_nodes</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+    <span class="sd">&quot;&quot;&quot; Computing the steady-state flux, F &quot;&quot;&quot;</span>
+    <span class="c1"># To avoid boundary conditions and with the purpose of computing F, we</span>
+    <span class="c1"># create a cycled version of the graph by connecting the outlet nodes</span>
+    <span class="c1"># to the apex</span>
+    <span class="n">AC</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">AC</span><span class="p">[</span><span class="n">ApexID</span><span class="p">,</span> <span class="n">OutletsID</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># F is proportional to the eigenvector corresponding to the zero eigenvalue</span>
+    <span class="c1"># of L=I-AC</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">AC</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">AC</span><span class="p">,</span>
+                                             <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span>
+                                                <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">AC</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))))</span>
+    <span class="n">d</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+    <span class="c1"># Renormalize eigenvectors so that F at apex equals 1</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">v</span><span class="p">[:,</span> <span class="n">I</span><span class="p">]</span> <span class="o">/</span> <span class="n">v</span><span class="p">[</span><span class="n">ApexID</span><span class="p">,</span> <span class="n">I</span><span class="p">])</span>
+
+    <span class="sd">&quot;&quot;&quot; Computing subnetworks &quot;&quot;&quot;</span>
+    <span class="c1"># R is null space of L(Gr)=Din(Gr-Ar(Gr)) - where Gr is the reverse graph,</span>
+    <span class="c1"># Din the in-degree matrix, and Ar the adjacency matrix of Gr</span>
+    <span class="n">Ar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="n">Din</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Ar</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">Din</span> <span class="o">-</span> <span class="n">Ar</span>
+    <span class="n">d</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+    <span class="c1"># Renormalize eigenvectors to one</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="c1"># set values below epsilon to 0</span>
+        <span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">][</span><span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+
+    <span class="c1"># Null space basis</span>
+    <span class="n">SubN</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SubN</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">)</span>
+    <span class="n">SubN</span><span class="p">[</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">I</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">F</span><span class="p">),</span> <span class="n">SubN</span></div>
+
+
+<div class="viewcode-block" id="nl_entropy_rate"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.nl_entropy_rate">[docs]</a><span class="k">def</span> <span class="nf">nl_entropy_rate</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute nonlocal entropy rate.</span>
+
+<span class="sd">    Computes the nonlocal entropy rate (nER) corresponding to the delta</span>
+<span class="sd">    (inlcuding flux partition) represented by matrix A</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Compute steady-state flux and subnetwork structure</span>
+    <span class="n">F</span><span class="p">,</span> <span class="n">SubN</span> <span class="o">=</span> <span class="n">delta_subN_F</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">F</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+
+    <span class="c1"># Entropy per node</span>
+    <span class="n">Entropy</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">F</span><span class="p">)):</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SubN</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ent</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">SubN</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">I</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">SubN</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">I</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">ent</span> <span class="o">=</span> <span class="n">ent</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+        <span class="n">Entropy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ent</span><span class="p">)</span>
+
+    <span class="n">nER</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">F</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Entropy</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">nER</span></div>
+
+
+<div class="viewcode-block" id="delta_nER"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.delta_nER">[docs]</a><span class="k">def</span> <span class="nf">delta_nER</span><span class="p">(</span><span class="n">deltavars</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute nonlocal entropy rate.</span>
+
+<span class="sd">    Compute the nonlocal entrop rate (nER) corresponding to the delta</span>
+<span class="sd">    (including flux partition) represented by adjacency matrix A, and compares</span>
+<span class="sd">    its value with the nER resulting from randomizing the flux partition.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pExc :</span>
+<span class="sd">        the probability that the value of nER for a randomization of the fluxes</span>
+<span class="sd">        on the topology dictated by A exceeds the actual value of nER. If the</span>
+<span class="sd">        value of pExc is lower than 0.10, we considered that the actual partition</span>
+<span class="sd">        of fluxes is an extreme value of nER</span>
+<span class="sd">    nER_Delta :</span>
+<span class="sd">        the nonlinear entropy rate for the provided adjacency matrix</span>
+<span class="sd">    nER_randA :</span>
+<span class="sd">        the nonlinear entropy rates for the N randomized deltas</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w_trans&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">nER_Delta</span> <span class="o">=</span> <span class="n">nl_entropy_rate</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+    <span class="n">nER_randA</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">A_rand</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A_rand</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">rand_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+        <span class="n">A_rand</span><span class="p">[</span><span class="n">I</span><span class="p">]</span> <span class="o">=</span> <span class="n">rand_weights</span>
+        <span class="n">A_rand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">A_rand</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">A_rand</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))))</span>
+        <span class="n">nER_randA</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nl_entropy_rate</span><span class="p">(</span><span class="n">A_rand</span><span class="p">))</span>
+
+    <span class="n">pExc</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">nER_randA</span> <span class="o">&gt;</span> <span class="n">nER_Delta</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">nER_randA</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">nER_Delta</span><span class="p">,</span> <span class="n">pExc</span><span class="p">,</span> <span class="n">nER_randA</span></div>
+
+
+<div class="viewcode-block" id="top_entropy_based_topo"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.top_entropy_based_topo">[docs]</a><span class="k">def</span> <span class="nf">top_entropy_based_topo</span><span class="p">(</span><span class="n">deltavars</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute topologic mutual information and conditional entropies.</span>
+
+<span class="sd">    Computes the Topologic Mutual Information (TMI) and the Topologic</span>
+<span class="sd">    Conditional Entropy for each subnetwork.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">outlets</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Fluxes at each node F and subnetworks subN</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;F_uw_trans&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">F</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+    <span class="n">SubN</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_uw_trans&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Fluxes at links</span>
+    <span class="n">L_F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_uw_trans&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">F</span><span class="p">))</span>
+
+    <span class="n">TMI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">TCE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+
+        <span class="c1"># Nodes that belong to subnetwork i</span>
+        <span class="n">nodes_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SubN</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Nodes that don&#39;t belong to subnetwork i</span>
+        <span class="n">nodes_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SubN</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">outlet_SubN</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">outlets</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nodes_in</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Fluxes within subnetwork i - remove nodes_out</span>
+        <span class="n">subN_F</span> <span class="o">=</span> <span class="n">L_F</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">subN_F</span><span class="p">[:,</span> <span class="n">nodes_out</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">subN_F</span><span class="p">[</span><span class="n">nodes_out</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Compute fluxes leaving (Fn_out) and entering (Fn_in) each node in</span>
+        <span class="c1"># the subnetwork, and total flux in the subnetwork (FS)</span>
+        <span class="n">Fn_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">subN_F</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">Fn_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">subN_F</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">FS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">subN_F</span><span class="p">)</span>
+
+        <span class="c1"># Normalize all fluxes by FS</span>
+        <span class="n">subN_F</span> <span class="o">=</span> <span class="n">subN_F</span> <span class="o">/</span> <span class="n">FS</span>
+        <span class="n">Fn_out</span> <span class="o">=</span> <span class="n">Fn_out</span> <span class="o">/</span> <span class="n">FS</span>
+        <span class="n">Fn_in</span> <span class="o">=</span> <span class="n">Fn_in</span> <span class="o">/</span> <span class="n">FS</span>
+
+        <span class="c1"># Compute TMI and TCE</span>
+        <span class="n">TMI_sum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">TCE_sum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ni</span> <span class="ow">in</span> <span class="n">nodes_in</span><span class="p">:</span>
+            <span class="n">downN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">subN_F</span><span class="p">[:,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">downN</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">downN</span><span class="p">:</span>
+                    <span class="n">TMI_sum</span> <span class="o">=</span> <span class="n">TMI_sum</span> <span class="o">+</span> <span class="n">subN_F</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">*</span> \
+                              <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">subN_F</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">Fn_in</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">*</span> <span class="n">Fn_out</span><span class="p">[</span><span class="n">ni</span><span class="p">]))</span>
+                    <span class="n">TCE_sum</span> <span class="o">=</span> <span class="n">TCE_sum</span> <span class="o">-</span> <span class="n">subN_F</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">*</span> \
+                              <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">subN_F</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">*</span> \
+                              <span class="n">subN_F</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">/</span> <span class="n">Fn_in</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">/</span> <span class="n">Fn_out</span><span class="p">[</span><span class="n">ni</span><span class="p">])</span>
+        <span class="n">TMI</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlet_SubN</span>
+        <span class="n">TMI</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">TMI_sum</span>
+        <span class="n">TCE</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlet_SubN</span>
+        <span class="n">TCE</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">TCE_sum</span>
+
+    <span class="k">return</span> <span class="n">TMI</span><span class="p">,</span> <span class="n">TCE</span></div>
+
+
+<div class="viewcode-block" id="top_link_sharing_index"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.top_link_sharing_index">[docs]</a><span class="k">def</span> <span class="nf">top_link_sharing_index</span><span class="p">(</span><span class="n">deltavars</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the link sharing index.</span>
+
+<span class="sd">    Computes the Link Sharing Index (LSI) which quantifies the overlapping</span>
+<span class="sd">    (in terms of links) of each subnetwork with other subnetworks in the</span>
+<span class="sd">    delta.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">outlets</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Don&#39;t need weights</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_uw&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Set of links in the network (r, c)</span>
+    <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span><span class="o">==</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">NL</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">LinkBelong</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NL</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># SubN indicates which nodes belong to each subnetwork</span>
+    <span class="n">SubN</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_uw&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">NS</span> <span class="o">=</span> <span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">SubN_Links</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">sl</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">)]</span>
+
+    <span class="c1"># Evalueate LinkBelong and SubN_Links</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NL</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">SubN</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">SubN</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">LinkBelong</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">LinkBelong</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">SubN_Links</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="c1"># LSI is defined for each subnetwork as one minus the average</span>
+    <span class="c1"># inverse LinkBelong</span>
+    <span class="n">LSI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">NS</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">):</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SubN</span><span class="p">[</span><span class="n">outlets</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">LSI</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlets</span><span class="p">[</span><span class="n">I</span><span class="p">]</span>
+        <span class="n">LSI</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">LinkBelong</span><span class="p">[</span><span class="n">SubN_Links</span><span class="p">[</span><span class="n">k</span><span class="p">]])</span>
+
+    <span class="k">return</span> <span class="n">LSI</span></div>
+
+
+<div class="viewcode-block" id="top_number_alternative_paths"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.top_number_alternative_paths">[docs]</a><span class="k">def</span> <span class="nf">top_number_alternative_paths</span><span class="p">(</span><span class="n">deltavars</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">15</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute number of alternative paths.</span>
+
+<span class="sd">    Computes the number of alternative paths (Nap) in the combinatorics sense</span>
+<span class="sd">    from the Apex to each of the shoreline outlets.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">apexid</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;apex&#39;</span><span class="p">]</span>
+    <span class="n">outlets</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Don&#39;t need weights</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_uw&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># To compute Nap we need to find the null space of L==I*-A&#39;, where I* is</span>
+    <span class="c1"># the Identity matrix with zeros for the diagonal entries that correspond</span>
+    <span class="c1"># to the outlets.</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">D</span><span class="p">[</span><span class="n">outlets</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">D</span><span class="p">))</span> <span class="o">-</span> <span class="n">A</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">d</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="n">null_space_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">d</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">epsilon</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Renormalize eigenvectors of the null space to have one at the outlet entry</span>
+    <span class="n">vN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">v</span><span class="p">[:,</span> <span class="n">null_space_v</span><span class="p">])</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">null_space_v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">null_space_v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">vN</span><span class="p">[</span><span class="n">outlets</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">vN</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vN</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">vN</span><span class="p">[</span><span class="n">outlets</span><span class="p">[</span><span class="n">I</span><span class="p">],</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">paths</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlets</span><span class="p">[</span><span class="n">I</span><span class="p">]</span>
+        <span class="n">paths</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vN</span><span class="p">[</span><span class="n">apexid</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">paths</span></div>
+
+
+<div class="viewcode-block" id="top_resistance_distance"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.top_resistance_distance">[docs]</a><span class="k">def</span> <span class="nf">top_resistance_distance</span><span class="p">(</span><span class="n">deltavars</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">15</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the topologic resistance distance.</span>
+
+<span class="sd">    NOTE! TopoDist was not supplied with this function--can use networkX to</span>
+<span class="sd">    compute shortest path but need to know what &quot;shortest&quot; means</span>
+<span class="sd">    This function will not work until TopoDist is resolved.</span>
+<span class="sd">    Computes the resistance distance (RD) from the Apex to each of the</span>
+<span class="sd">    shoreline outlets. The value of RD between two nodes is the effective</span>
+<span class="sd">    resistance between the two nodes when each link in the network is replaced</span>
+<span class="sd">    by a 1 ohm resistor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">apexid</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;apex&#39;</span><span class="p">]</span>
+    <span class="n">outlets</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Don&#39;t need weights</span>
+    <span class="n">As</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_uw&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Compute the RD within each subnetwork</span>
+    <span class="n">SubN</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_w&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">RD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="c1"># Nodes that don&#39;t belong to subnetwork</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">SubN</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Zero columns and rows of nodes that are not present in subnetwork i</span>
+        <span class="n">As_i</span> <span class="o">=</span> <span class="n">As</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">As_i</span><span class="p">[</span><span class="n">I</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">As_i</span><span class="p">[:,</span> <span class="n">I</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># Laplacian L and its pseudoinverse</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">As_i</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">-</span> <span class="n">As_i</span>
+        <span class="n">invL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+
+        <span class="c1"># Compute RD</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SubN</span><span class="p">[</span><span class="n">outlets</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">o</span> <span class="o">=</span> <span class="n">outlets</span><span class="p">[</span><span class="n">I</span><span class="p">]</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">apexid</span>
+        <span class="n">RD</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">o</span>
+
+        <span class="c1"># Distance between the apex and the ith outlet</span>
+        <span class="n">TopoDist</span> <span class="o">=</span> <span class="n">graphshortestpath</span><span class="p">(</span><span class="n">As_i</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">o</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># RD is normalized by TopoDist to be able to compare networks of different size</span>
+        <span class="n">RD</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">invL</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">]</span> <span class="o">+</span> <span class="n">invL</span><span class="p">[</span><span class="n">o</span><span class="p">,</span> <span class="n">o</span><span class="p">]</span> <span class="o">-</span> <span class="n">invL</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">o</span><span class="p">]</span> <span class="o">-</span> \
+                   <span class="n">invL</span><span class="p">[</span><span class="n">o</span><span class="p">,</span> <span class="n">a</span><span class="p">])</span> <span class="o">/</span> <span class="n">TopoDist</span>
+
+    <span class="k">return</span> <span class="n">RD</span></div>
+
+
+<div class="viewcode-block" id="graphshortestpath"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.graphshortestpath">[docs]</a><span class="k">def</span> <span class="nf">graphshortestpath</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">finish</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the shortest path.</span>
+
+<span class="sd">    Uses networkx functions to find the shortest path along a graph defined</span>
+<span class="sd">    by A; path is simply defined as the number of links. Actual length not</span>
+<span class="sd">    considered. Number of links in the shortest path is returned.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">from_numpy_matrix</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="n">sp</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">shortest_path_length</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">finish</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sp</span></div>
+
+
+<div class="viewcode-block" id="top_s2s_topo_pairwise_dep"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.top_s2s_topo_pairwise_dep">[docs]</a><span class="k">def</span> <span class="nf">top_s2s_topo_pairwise_dep</span><span class="p">(</span><span class="n">deltavars</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute subnetwork topologic pairwise dependence.</span>
+
+<span class="sd">    This  function computes the Subnetwork to Subnetwork Topologic Pairwise</span>
+<span class="sd">    Dependence (TPD) which quantifies the overlapping for all pairs of</span>
+<span class="sd">    subnetworks in terms of links.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">outlets</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Don&#39;t need weights</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_uw&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Set of links</span>
+    <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">NL</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+    <span class="c1"># SubN indicates which nodes belong to each subnetwork</span>
+    <span class="n">SubN</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_uw&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">NS</span> <span class="o">=</span> <span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">SubN_Links</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">)]</span>
+
+    <span class="c1"># Evaluate SubN_Links</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NL</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">SubN</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">SubN</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">SubN_Links</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="c1"># Compute TDP</span>
+    <span class="n">TDP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">outlets</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">outlets</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">):</span>
+            <span class="n">TDP</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">SubN_Links</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">SubN_Links</span><span class="p">[</span><span class="n">k</span><span class="p">])))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">SubN_Links</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">TDP</span></div>
+
+
+<div class="viewcode-block" id="dyn_flux_sharing_index"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.dyn_flux_sharing_index">[docs]</a><span class="k">def</span> <span class="nf">dyn_flux_sharing_index</span><span class="p">(</span><span class="n">deltavars</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the flux sharing index.</span>
+
+<span class="sd">    Computes the Flux Sharing Index (LSI) which quantifies the overlapping</span>
+<span class="sd">    (in terms of flux) of each subnetwork with other subnetworks in the</span>
+<span class="sd">    delta.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">outlets</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Set of links in the network (r, c)</span>
+    <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">NL</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># SubN indicates which nodes belong to each subnetwork</span>
+    <span class="n">SubN</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_w&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">NS</span> <span class="o">=</span> <span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">SubN_Links</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">sl</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">)]</span>
+
+    <span class="c1"># Evalueate SubN_Links</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NL</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">SubN</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">SubN</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">SubN_Links</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="c1"># FSI is defined for each subnetwork as one minus the average inverse SubN</span>
+    <span class="n">FSI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">NS</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">):</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SubN</span><span class="p">[</span><span class="n">outlets</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">FSI</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlets</span><span class="p">[</span><span class="n">I</span><span class="p">]</span>
+            <span class="c1"># Downstream nodes of all the links in the subnetwork</span>
+            <span class="n">NodesD</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">SubN_Links</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span>
+            <span class="n">FSI</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">SubN</span><span class="p">[</span><span class="n">NodesD</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">FSI</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">FSI</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="k">return</span> <span class="n">FSI</span></div>
+
+
+<div class="viewcode-block" id="dyn_leakage_index"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.dyn_leakage_index">[docs]</a><span class="k">def</span> <span class="nf">dyn_leakage_index</span><span class="p">(</span><span class="n">deltavars</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the leakage index.</span>
+
+<span class="sd">    Computes the LI which accounts for the fraction of flux in subnetwork i</span>
+<span class="sd">    leaked to other subnetworks.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">apexid</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;apex&#39;</span><span class="p">]</span>
+    <span class="n">outlets</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Check that the inlet node is at a bifurcation</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">apexid</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span><span class="p">[:,</span> <span class="n">a</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: the apex of the delta has only one node downstream. It is recommended that there be at least two downstream links from the apex to avoid biases.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Fluxes at each node F and subnetworks subN</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;F_w&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">SubN</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_w&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Link fluxes</span>
+    <span class="n">L_F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w_trans&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">F</span><span class="p">))</span>
+
+    <span class="c1"># Mathematically LI is computed for each subnetwork as the difference on</span>
+    <span class="c1"># the fluxes at the nodes minus the links normalized by the total flux</span>
+    <span class="c1"># in the links</span>
+    <span class="n">LI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="c1"># Nodes that belong to subnetwork i</span>
+        <span class="n">nodes_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SubN</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Nodes that do not belong to subnetwork i</span>
+        <span class="n">nodes_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SubN</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">)</span>
+        <span class="n">outlet_subN</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">outlets</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nodes_in</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">outlet_subN</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">outlet_subN</span> <span class="o">=</span> <span class="n">outlet_subN</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="c1"># Fluxes within subnetwork i -- remove nodes_out</span>
+            <span class="n">subN_F</span> <span class="o">=</span> <span class="n">L_F</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">subN_F</span><span class="p">[:,</span> <span class="n">nodes_out</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">subN_F</span><span class="p">[</span><span class="n">nodes_out</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># Active links within subnetwork</span>
+            <span class="n">links_subN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">subN_F</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="c1"># Sum of the fluxes in all the li nks in the subnetwork</span>
+            <span class="n">sum_links</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">subN_F</span><span class="p">[</span><span class="n">links_subN</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">links_subN</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+            <span class="c1"># Sum of the fluxes in all the nodes (except the outlet--since it</span>
+            <span class="c1"># cannot leak out by definition)</span>
+            <span class="n">sum_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">F</span><span class="p">[</span><span class="n">nodes_in</span><span class="p">])</span> <span class="o">-</span> <span class="n">F</span><span class="p">[</span><span class="n">outlet_subN</span><span class="p">]</span>
+
+            <span class="n">LI</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlet_subN</span>
+            <span class="n">LI</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">sum_nodes</span> <span class="o">-</span> <span class="n">sum_links</span><span class="p">)</span> <span class="o">/</span> <span class="n">sum_nodes</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">LI</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="k">return</span> <span class="n">LI</span></div>
+
+
+<div class="viewcode-block" id="dyn_pairwise_dep"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.dyn_pairwise_dep">[docs]</a><span class="k">def</span> <span class="nf">dyn_pairwise_dep</span><span class="p">(</span><span class="n">deltavars</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute subnetwork dynamic pairwise dependence.</span>
+
+<span class="sd">    Computes the subnetwork to subnetwork dynamic pairwise dependence (DPD)</span>
+<span class="sd">    which quantifies the overlapping for all pairs of subnetworks in terms of</span>
+<span class="sd">    flux.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w_trans&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Set of links in the network (r, c)</span>
+    <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">NL</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># SubN indicates which nodes belong to each subnetwork</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;F_w_trans&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">SubN</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_w_trans&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">NS</span> <span class="o">=</span> <span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">SubN_Links</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">sl</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">)]</span>
+
+    <span class="c1"># Evalueate SubN_Links</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NL</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">SubN</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">SubN</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">SubN_Links</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="c1"># Link fluxes</span>
+    <span class="n">L_F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">F</span><span class="p">))</span>
+
+    <span class="c1"># Compute DPD</span>
+    <span class="n">DPD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">NS</span><span class="p">,</span> <span class="n">NS</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NS</span><span class="p">):</span>
+            <span class="n">link_intersect</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">SubN_Links</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">SubN_Links</span><span class="p">[</span><span class="n">k</span><span class="p">])))</span>
+            <span class="n">links_in_s</span> <span class="o">=</span> <span class="n">SubN_Links</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="n">DPD</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">L_F</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="n">link_intersect</span><span class="p">],</span>
+                               <span class="n">c</span><span class="p">[</span><span class="n">link_intersect</span><span class="p">]])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">L_F</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="n">links_in_s</span><span class="p">],</span>
+                                                            <span class="n">c</span><span class="p">[</span><span class="n">links_in_s</span><span class="p">]])</span>
+
+    <span class="k">return</span> <span class="n">DPD</span></div>
+
+
+<div class="viewcode-block" id="dyn_entropy_based_dyn"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.dyn_entropy_based_dyn">[docs]</a><span class="k">def</span> <span class="nf">dyn_entropy_based_dyn</span><span class="p">(</span><span class="n">deltavars</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute dynamic mutual information and dynamic conditional entropy.</span>
+
+<span class="sd">    Computes the Dynamic Mutual Information (DMI) and the Dynamic</span>
+<span class="sd">    Conditional Entropy for each subnetwork.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">outlets</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;A_w_trans&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Fluxes at each node F and subnetworks subN</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;F_w_trans&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">SubN</span> <span class="o">=</span> <span class="n">deltavars</span><span class="p">[</span><span class="s1">&#39;SubN_w_trans&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">F</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+    <span class="c1"># Fluxes at links</span>
+    <span class="n">L_F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">F</span><span class="p">))</span>
+
+    <span class="n">DMI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">DCE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">SubN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+
+        <span class="c1"># Nodes that belong to subnetwork i</span>
+        <span class="n">nodes_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SubN</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Nodes that don&#39;t belong to subnetwork i</span>
+        <span class="n">nodes_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SubN</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">outlet_SubN</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">outlets</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nodes_in</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Fluxes within subnetwork i - remove nodes_out</span>
+        <span class="n">subN_F</span> <span class="o">=</span> <span class="n">L_F</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">subN_F</span><span class="p">[:,</span> <span class="n">nodes_out</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">subN_F</span><span class="p">[</span><span class="n">nodes_out</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Compute fluxes leaving (Fn_out) and entering (Fn_in) each node in</span>
+        <span class="c1"># the subnetwork, and total flux in the subnetwork (FS)</span>
+        <span class="n">Fn_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">subN_F</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">Fn_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">subN_F</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">FS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">subN_F</span><span class="p">)</span>
+
+        <span class="c1"># Normalize all fluxes by FS</span>
+        <span class="n">subN_F</span> <span class="o">=</span> <span class="n">subN_F</span> <span class="o">/</span> <span class="n">FS</span>
+        <span class="n">Fn_out</span> <span class="o">=</span> <span class="n">Fn_out</span> <span class="o">/</span> <span class="n">FS</span>
+        <span class="n">Fn_in</span> <span class="o">=</span> <span class="n">Fn_in</span> <span class="o">/</span> <span class="n">FS</span>
+
+        <span class="c1"># Compute TMI and TCE</span>
+        <span class="n">DMI_sum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">DCE_sum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ni</span> <span class="ow">in</span> <span class="n">nodes_in</span><span class="p">:</span>
+            <span class="n">downN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">subN_F</span><span class="p">[:,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">downN</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">downN</span><span class="p">:</span>
+                    <span class="n">DMI_sum</span> <span class="o">=</span> <span class="n">DMI_sum</span> <span class="o">+</span> <span class="n">subN_F</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">*</span> \
+                              <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">subN_F</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">Fn_in</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">*</span> <span class="n">Fn_out</span><span class="p">[</span><span class="n">ni</span><span class="p">]))</span>
+                    <span class="n">DCE_sum</span> <span class="o">=</span> <span class="n">DCE_sum</span> <span class="o">-</span> <span class="n">subN_F</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">*</span> \
+                              <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">subN_F</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">*</span> <span class="n">subN_F</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">ni</span><span class="p">]</span> <span class="o">/</span> <span class="n">Fn_in</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">/</span> <span class="n">Fn_out</span><span class="p">[</span><span class="n">ni</span><span class="p">])</span>
+        <span class="n">DMI</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlet_SubN</span>
+        <span class="n">DMI</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">DMI_sum</span>
+        <span class="n">DCE</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlet_SubN</span>
+        <span class="n">DCE</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">DCE_sum</span>
+
+    <span class="k">return</span> <span class="n">DMI</span><span class="p">,</span> <span class="n">DCE</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, J. Schwenk &amp; J. Hariharan
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
