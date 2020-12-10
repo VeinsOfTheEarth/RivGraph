@@ -188,5 +188,7 @@ autodoc_mock_imports = ['numpy', 'scikit-image', 'opencv-python', 'pandas',
 linkcheck_ignore = [r'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016577%4010.1002/%28ISSN%291944-7973.CONART1',
 		    r'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016604',
 		    r'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2016EA000196',
-		    r'https://pubs.geoscienceworld.org/gsa/geology/article/47/3/263/568705/High-curvatures-drive-river-meandering']
+		    r'https://pubs.geoscienceworld.org/gsa/geology/article/47/3/263/568705/High-curvatures-drive-river-meandering',
+		    r'https://github.com/Unidata/MetPy#contributing',
+			]
 
