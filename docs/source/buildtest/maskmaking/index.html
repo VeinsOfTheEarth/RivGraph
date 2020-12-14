@@ -56,7 +56,7 @@
 
           
             
-            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+            <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -211,7 +211,7 @@
 <li><p>model/simulation outputs</p></li>
 </ul>
 </div></blockquote>
-<p>There are <em>many</em> methods available for creating masks automatically from remotely-sensed imagery. We won’t get into the details of those here, but note that machine learning has proved a very valuable tool for maskmaking. There are also simple, proven techniques available as well. The Brahmaputra masks above were created by thresholding the Landsat-derived NDVI (<a class="reference external" href="https://www.usgs.gov/core-science-systems/nli/landsat/landsat-normalized-difference-vegetation-index?qt-science_support_page_related_con=0#qt-science_support_page_related_con">Normalized Difference Vegetation Index</a>
+<p>There are <em>many</em> methods available for creating masks automatically from remotely-sensed imagery. We won’t get into the details of those here, but note that machine learning has proved a very valuable tool for maskmaking. There are also simple, proven techniques available as well. The Brahmaputra masks above were created by thresholding the Landsat-derived NDVI (<a class="reference external" href="https://www.usgs.gov/core-science-systems/nli/landsat/landsat-normalized-difference-vegetation-index">Normalized Difference Vegetation Index</a>
 ), which is a simple ratio of band values.</p>
 <p>Drawing a mask by hand is often not an ideal choice, but might be the most efficient way to move forward. In these cases, I would typically use QGIS to draw polygons that cover the channel network, then use the <a class="reference external" href="https://docs.qgis.org/2.8/en/docs/user_manual/processing_algs/gdalogr/gdal_conversion/rasterize.html">Rasterize</a>
 tool to convert the polygons to a binary raster (image). If you go this route, be sure to specify an appropriate coordinate reference system for your polygons in order to preserve the georeferencing information (don’t use EPSG:4326). You will also need to specify a pixel resolution for your mask upon conversion.</p>

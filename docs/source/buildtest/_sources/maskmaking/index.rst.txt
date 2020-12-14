@@ -56,7 +56,7 @@ Masks can come from a variety of sources, but in my experience there are three p
   - manually drawn by hand
   - model/simulation outputs
 
-There are *many* methods available for creating masks automatically from remotely-sensed imagery. We won't get into the details of those here, but note that machine learning has proved a very valuable tool for maskmaking. There are also simple, proven techniques available as well. The Brahmaputra masks above were created by thresholding the Landsat-derived NDVI (`Normalized Difference Vegetation Index <https://www.usgs.gov/core-science-systems/nli/landsat/landsat-normalized-difference-vegetation-index?qt-science_support_page_related_con=0#qt-science_support_page_related_con>`_
+There are *many* methods available for creating masks automatically from remotely-sensed imagery. We won't get into the details of those here, but note that machine learning has proved a very valuable tool for maskmaking. There are also simple, proven techniques available as well. The Brahmaputra masks above were created by thresholding the Landsat-derived NDVI (`Normalized Difference Vegetation Index <https://www.usgs.gov/core-science-systems/nli/landsat/landsat-normalized-difference-vegetation-index>`_
 ), which is a simple ratio of band values.
 
 Drawing a mask by hand is often not an ideal choice, but might be the most efficient way to move forward. In these cases, I would typically use QGIS to draw polygons that cover the channel network, then use the `Rasterize  <https://docs.qgis.org/2.8/en/docs/user_manual/processing_algs/gdalogr/gdal_conversion/rasterize.html>`_
