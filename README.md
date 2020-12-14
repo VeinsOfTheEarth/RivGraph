@@ -3,6 +3,8 @@
 ![docs](https://github.com/jonschwenk/RivGraph/workflows/docs/badge.svg)
 <br />
 
+![RivGraph logo](https://github.com/jonschwenk/RivGraph/blob/master/docs/logos/rg_logo_full.png)
+
 About
 -----
 
