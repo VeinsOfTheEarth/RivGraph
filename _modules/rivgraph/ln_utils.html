@@ -1030,8 +1030,8 @@
                 <span class="n">ct</span> <span class="o">=</span> <span class="n">ct</span> <span class="o">+</span> <span class="mi">1</span>
 
 
-        <span class="c1"># # Remove all the nodes with only two links attached</span>
-        <span class="c1"># links, nodes = remove_two_link_nodes(links, nodes, dontremove)</span>
+        <span class="c1"># Remove all the nodes with only two links attached</span>
+        <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">remove_two_link_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">dontremove</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ct</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">stopflag</span> <span class="o">=</span> <span class="mi">1</span>
@@ -1081,6 +1081,7 @@
                 <span class="c1"># See https://github.com/jonschwenk/RivGraph/issues/32</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">conn</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">nodes</span> <span class="o">=</span> <span class="n">delete_node</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">ct</span> <span class="o">=</span> <span class="n">ct</span> <span class="o">+</span> <span class="mi">1</span>
                     <span class="k">continue</span>
 
                 <span class="c1"># Delete the node</span>
@@ -1133,8 +1134,6 @@
                         <span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">],</span> <span class="n">lid_go</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">links</span><span class="p">[</span><span class="n">lk</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">lidx_go</span><span class="p">)</span>
-                        
-    
 
                 <span class="n">ct</span> <span class="o">=</span> <span class="n">ct</span> <span class="o">+</span> <span class="mi">1</span>
 

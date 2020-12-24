@@ -310,11 +310,6 @@
 <span class="sd">        node ids</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># links = d.links</span>
-    <span class="c1"># gdobj = d.gdobj</span>
-    <span class="c1"># nodes = d.nodes</span>
-    <span class="c1"># shoreline_shp = d.paths[&#39;shoreline&#39;]</span>
-
     <span class="c1"># Get links as geopandas dataframe</span>
     <span class="n">links_gdf</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">links_to_gpd</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">)</span>
 
@@ -327,7 +322,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Provided shoreline file does not have the same CRS as provided mask. Reprojecting.&#39;</span><span class="p">)</span>
 
 
-    <span class="c1">## Remove the links beyond the shoreline</span>
+    <span class="c1"># Remove the links beyond the shoreline</span>
     <span class="c1"># Intersect links with shoreline</span>
     <span class="n">shore_int</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">links_gdf</span><span class="p">,</span> <span class="n">shore_gdf</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="s1">&#39;intersects&#39;</span><span class="p">,</span>
                           <span class="n">lsuffix</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
@@ -349,7 +344,6 @@
 
         <span class="c1"># Intersection coordinates</span>
         <span class="n">int_points</span> <span class="o">=</span> <span class="n">links_gdf</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">][</span><span class="nb">list</span><span class="p">(</span><span class="n">links_gdf</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">clid</span><span class="p">)]</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">shore_gdf</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-
         <span class="k">if</span> <span class="n">int_points</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;Point&#39;</span><span class="p">:</span>
             <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">int_points</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">int_points</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
             <span class="n">min_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
@@ -367,7 +361,6 @@
         <span class="c1"># two parts of the (now broken) intersected link</span>
         <span class="c1"># First add the two new links</span>
         <span class="n">conn</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">lidx</span><span class="p">]</span>
-
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">conn</span><span class="p">:</span>
             <span class="n">nidx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
             <span class="n">nflatidx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">nidx</span><span class="p">]</span>
@@ -430,56 +423,6 @@
     <span class="c1"># Identify the outlet nodes and add to nodes dictionary</span>
     <span class="n">outlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">ncon</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ncon</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">ncon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">newlink_ids</span><span class="p">]</span>
     <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlets</span>
-
-    <span class="c1"># # Old method below here</span>
-    <span class="c1"># shape = (gdobj.RasterYSize, gdobj.RasterXSize)</span>
-
-    <span class="c1"># # Burn links to grid where value is link ID</span>
-    <span class="c1"># I = np.ones(shape, dtype=np.int64) * -1</span>
-    <span class="c1"># # 2-pixel links can be overwritten and disappear, so redo them at the end</span>
-    <span class="c1"># twopix = [lid for lid, idcs in zip(links[&#39;id&#39;], links[&#39;idx&#39;]) if len(idcs) &lt; 3]</span>
-    <span class="c1"># for lidx, lid in zip(links[&#39;idx&#39;], links[&#39;id&#39;]):</span>
-    <span class="c1">#     xy = np.unravel_index(lidx, shape)</span>
-    <span class="c1">#     I[xy[0], xy[1]] = lid</span>
-    <span class="c1"># if len(twopix) &gt; 0:</span>
-    <span class="c1">#     for tpl in twopix:</span>
-    <span class="c1">#         lindex = links[&#39;id&#39;].index(tpl)</span>
-    <span class="c1">#         lidx = links[&#39;idx&#39;][lindex]</span>
-    <span class="c1">#         xy = np.unravel_index(lidx, shape)</span>
-    <span class="c1">#         I[xy[0], xy[1]] = tpl</span>
-
-    <span class="c1"># # Binarize</span>
-    <span class="c1"># I_bin = np.array(I&gt;-1, dtype=np.bool)</span>
-    <span class="c1"># # Keep the blob that contains the inlet nodes</span>
-    <span class="c1"># # Get the pixel indices of the different connected blobs</span>
-    <span class="c1"># blobidcs = iu.blob_idcs(I_bin)</span>
-    <span class="c1"># # Find the blob that contains the inlets</span>
-    <span class="c1"># inlet_coords = []</span>
-    <span class="c1"># for i in nodes[&#39;inlets&#39;]:</span>
-    <span class="c1">#     inlet_coords.append(nodes[&#39;idx&#39;][nodes[&#39;id&#39;].index(i)])</span>
-    <span class="c1"># i_contains_inlets = []</span>
-    <span class="c1"># for i, bi in enumerate(blobidcs):</span>
-    <span class="c1">#     if set(inlet_coords).issubset(bi):</span>
-    <span class="c1">#         i_contains_inlets.append(i)</span>
-    <span class="c1"># # Error checking</span>
-    <span class="c1"># if len(i_contains_inlets) != 1:</span>
-    <span class="c1">#     raise RuntimeError(&#39;Inlets not contained in any portion of the skeleton.&#39;)</span>
-
-    <span class="c1"># # Keep only the pixels in the blob that contains the inlets</span>
-    <span class="c1"># keeppix = np.unravel_index(list(blobidcs[i_contains_inlets[0]]), I_bin.shape)</span>
-    <span class="c1"># Itemp = np.zeros(I.shape, dtype=np.bool)</span>
-    <span class="c1"># Itemp[keeppix[0], keeppix[1]] = True</span>
-    <span class="c1"># I[~Itemp] = -1</span>
-    <span class="c1"># keep_ids = set(np.unique(I))</span>
-    <span class="c1"># unwanted_ids = [lid for lid in links[&#39;id&#39;] if lid not in keep_ids]</span>
-
-    <span class="c1"># # Delete all the unwanted links</span>
-    <span class="c1"># for b in unwanted_ids:</span>
-    <span class="c1">#     links, nodes = lnu.delete_link(links, nodes, b)</span>
-
-    <span class="c1"># # Store outlets in nodes dict</span>
-    <span class="c1"># outlets = [nid for nid, ncon in zip(nodes[&#39;id&#39;], nodes[&#39;conn&#39;]) if len(ncon) == 1 and nid not in nodes[&#39;inlets&#39;]]</span>
-    <span class="c1"># nodes[&#39;outlets&#39;] = outlets</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 </pre></div>
