@@ -171,16 +171,8 @@
 <span class="kn">from</span> <span class="nn">pyproj.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
-
 <span class="kn">import</span> <span class="nn">rivgraph.geo_utils</span> <span class="k">as</span> <span class="nn">gu</span>
 <span class="kn">import</span> <span class="nn">rivgraph.ln_utils</span> <span class="k">as</span> <span class="nn">lnu</span>
-
-<span class="c1"># obj = c</span>
-<span class="c1"># links = obj.links</span>
-<span class="c1"># nodes = obj.nodes</span>
-<span class="c1"># shoreline_shp = r&quot;C:\Users\Jon\Anaconda3\envs\rivgraph\Lib\site-packages\rivgraph\tests\data\Colville\Colville_shoreline.shp&quot;</span>
-<span class="c1"># inlets_shp = r&quot;C:\Users\Jon\Anaconda3\envs\rivgraph\Lib\site-packages\rivgraph\tests\data\Colville\Colville_inlet_nodes.shp&quot;</span>
-<span class="c1"># gdobj = obj.gdobj</span>
 
 
 <div class="viewcode-block" id="prune_delta"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_utils.prune_delta">[docs]</a><span class="k">def</span> <span class="nf">prune_delta</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">shoreline_shp</span><span class="p">,</span> <span class="n">inlets_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">):</span>
@@ -225,7 +217,7 @@
     <span class="c1"># Remove spurs from network (this includes valid inlets and outlets)</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span>
                                         <span class="n">dontremove</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">])</span> <span class="o">+</span>
-                                                   <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]))</span>
+                                                    <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]))</span>
 
     <span class="c1"># Remove sets of links that are disconnected from inlets/outlets except for</span>
     <span class="c1"># a single bridge link (effectively re-pruning the network)</span>

@@ -3432,7 +3432,7 @@ and ‘conn’ keys at a minimum.</p></li>
 
 <dl class="function">
 <dt id="rivgraph.ln_utils.plot_network">
-<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">plot_network</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>Imask</em>, <em>name</em>, <em>axis=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#plot_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.plot_network" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rivgraph.ln_utils.</code><code class="descname">plot_network</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>Imask</em>, <em>name=None</em>, <em>label_links=True</em>, <em>label_nodes=True</em>, <em>axis=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/ln_utils.html#plot_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.ln_utils.plot_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the network with labeled link and node IDs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3440,7 +3440,9 @@ and ‘conn’ keys at a minimum.</p></li>
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
 <li><p><strong>Imask</strong> (<em>np.array</em>) – The original binary mask.</p></li>
-<li><p><strong>name</strong> (<em>str</em>) – Name of the channel network for labeling the plot.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the channel network for labeling the plot.</p></li>
+<li><p><strong>label_links</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, will label all links with their ids.</p></li>
+<li><p><strong>label_nodes</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, will label all nodes with their ids.</p></li>
 <li><p><strong>axis</strong> (<em>matplotlib.axex._subplots.AxesSubplot</em><em>, </em><em>optional</em>) – If provided, plotting will occur within the provided axis. Can be created
 with matplotlib.pyplot.subplots(). The default is None.</p></li>
 </ul>
