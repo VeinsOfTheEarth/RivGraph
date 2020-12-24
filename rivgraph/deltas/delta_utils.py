@@ -149,11 +149,6 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
         node ids
 
     """
-    # links = d.links
-    # gdobj = d.gdobj
-    # nodes = d.nodes
-    # shoreline_shp = d.paths['shoreline']
-
     # Get links as geopandas dataframe
     links_gdf = lnu.links_to_gpd(links, gdobj)
 
@@ -166,7 +161,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
         print('Provided shoreline file does not have the same CRS as provided mask. Reprojecting.')
 
 
-    ## Remove the links beyond the shoreline
+    # Remove the links beyond the shoreline
     # Intersect links with shoreline
     shore_int = gpd.sjoin(links_gdf, shore_gdf, op='intersects',
                           lsuffix='left')
@@ -188,7 +183,6 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
 
         # Intersection coordinates
         int_points = links_gdf['geometry'][list(links_gdf['id'].values).index(clid)].intersection(shore_gdf['geometry'][0])
-
         if int_points.type == 'Point':
             dists = np.sqrt((coords[0] - int_points.xy[0][0])**2 + (coords[1] - int_points.xy[1][0])**2)
             min_idx = np.argmin(dists)
@@ -206,7 +200,6 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
         # two parts of the (now broken) intersected link
         # First add the two new links
         conn = links['conn'][lidx]
-
         for c in conn:
             nidx = nodes['id'].index(c)
             nflatidx = nodes['idx'][nidx]
@@ -269,55 +262,5 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     # Identify the outlet nodes and add to nodes dictionary
     outlets = [nid for nid, ncon in zip(nodes['id'], nodes['conn']) if len(ncon)==1 and ncon[0] in newlink_ids]
     nodes['outlets'] = outlets
-
-    # # Old method below here
-    # shape = (gdobj.RasterYSize, gdobj.RasterXSize)
-
-    # # Burn links to grid where value is link ID
-    # I = np.ones(shape, dtype=np.int64) * -1
-    # # 2-pixel links can be overwritten and disappear, so redo them at the end
-    # twopix = [lid for lid, idcs in zip(links['id'], links['idx']) if len(idcs) < 3]
-    # for lidx, lid in zip(links['idx'], links['id']):
-    #     xy = np.unravel_index(lidx, shape)
-    #     I[xy[0], xy[1]] = lid
-    # if len(twopix) > 0:
-    #     for tpl in twopix:
-    #         lindex = links['id'].index(tpl)
-    #         lidx = links['idx'][lindex]
-    #         xy = np.unravel_index(lidx, shape)
-    #         I[xy[0], xy[1]] = tpl
-
-    # # Binarize
-    # I_bin = np.array(I>-1, dtype=np.bool)
-    # # Keep the blob that contains the inlet nodes
-    # # Get the pixel indices of the different connected blobs
-    # blobidcs = iu.blob_idcs(I_bin)
-    # # Find the blob that contains the inlets
-    # inlet_coords = []
-    # for i in nodes['inlets']:
-    #     inlet_coords.append(nodes['idx'][nodes['id'].index(i)])
-    # i_contains_inlets = []
-    # for i, bi in enumerate(blobidcs):
-    #     if set(inlet_coords).issubset(bi):
-    #         i_contains_inlets.append(i)
-    # # Error checking
-    # if len(i_contains_inlets) != 1:
-    #     raise RuntimeError('Inlets not contained in any portion of the skeleton.')
-
-    # # Keep only the pixels in the blob that contains the inlets
-    # keeppix = np.unravel_index(list(blobidcs[i_contains_inlets[0]]), I_bin.shape)
-    # Itemp = np.zeros(I.shape, dtype=np.bool)
-    # Itemp[keeppix[0], keeppix[1]] = True
-    # I[~Itemp] = -1
-    # keep_ids = set(np.unique(I))
-    # unwanted_ids = [lid for lid in links['id'] if lid not in keep_ids]
-
-    # # Delete all the unwanted links
-    # for b in unwanted_ids:
-    #     links, nodes = lnu.delete_link(links, nodes, b)
-
-    # # Store outlets in nodes dict
-    # outlets = [nid for nid, ncon in zip(nodes['id'], nodes['conn']) if len(ncon) == 1 and nid not in nodes['inlets']]
-    # nodes['outlets'] = outlets
 
     return links, nodes

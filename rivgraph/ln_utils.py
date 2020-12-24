@@ -869,8 +869,8 @@ def remove_all_spurs(links, nodes, dontremove=[]):
                 ct = ct + 1
 
 
-        # # Remove all the nodes with only two links attached
-        # links, nodes = remove_two_link_nodes(links, nodes, dontremove)
+        # Remove all the nodes with only two links attached
+        links, nodes = remove_two_link_nodes(links, nodes, dontremove)
 
         if ct == 0:
             stopflag = 1
@@ -920,6 +920,7 @@ def remove_two_link_nodes(links, nodes, dontremove):
                 # See https://github.com/jonschwenk/RivGraph/issues/32
                 if len(set(conn)) == 1:
                     nodes = delete_node(nodes, nid, warn=False)
+                    ct = ct + 1
                     continue
 
                 # Delete the node
@@ -972,8 +973,6 @@ def remove_two_link_nodes(links, nodes, dontremove):
                         links[lk] = np.delete(links[lk], lid_go)
                     else:
                         links[lk].pop(lidx_go)
-                        
-    
 
                 ct = ct + 1
 
