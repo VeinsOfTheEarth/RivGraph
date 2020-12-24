@@ -27,7 +27,6 @@ import rivgraph.rivers.river_directionality as rd
 import rivgraph.rivers.river_utils as ru
 import rivgraph.rivers.centerline_utils as cu
 
-
 class rivnetwork:
     """
     Base rivnetwork class.

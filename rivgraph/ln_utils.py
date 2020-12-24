@@ -862,17 +862,15 @@ def remove_all_spurs(links, nodes, dontremove=[]):
         for nid, con in zip(nodes['id'], nodes['conn']):
             m = mode(con)
             if m.count[0] > 1:
-
                 # Get link
                 looplink = m.mode[0]
-
                 # Delete link
                 links, nodes = delete_link(links, nodes, looplink)
                 ct = ct + 1
 
 
-        # Remove all the nodes with only two links attached
-        links, nodes = remove_two_link_nodes(links, nodes, dontremove)
+        # # Remove all the nodes with only two links attached
+        # links, nodes = remove_two_link_nodes(links, nodes, dontremove)
 
         if ct == 0:
             stopflag = 1
@@ -914,6 +912,15 @@ def remove_two_link_nodes(links, nodes, dontremove):
             conn = nodes['conn'][nidx][:]
             # We want to combine links where a node has only two connections
             if len(conn) == 2 and nid not in dontremove:
+                
+                # First check if the node is connected to itself. This can
+                # happen for small subnetworks where all the spurs have been
+                # removed, leaving an isolated loop. (Occurs in masks that 
+                # have not been filtered to the largest connected component.)
+                # See https://github.com/jonschwenk/RivGraph/issues/32
+                if len(set(conn)) == 1:
+                    nodes = delete_node(nodes, nid, warn=False)
+                    continue
 
                 # Delete the node
                 nodes = delete_node(nodes, nid, warn=False)
@@ -929,7 +936,11 @@ def remove_two_link_nodes(links, nodes, dontremove):
                 conn_stay = links['conn'][lstay_idx]
 
                 # Update node connectivty of go link (stay link doesn't need updating)
-                node_id_go = (set(conn_go) - set([nid])).pop()
+                try:
+                    node_id_go = (set(conn_go) - set([nid])).pop()
+                except:
+                    import pdb
+                    pdb.set_trace()
                 nodes['conn'][nodes['id'].index(node_id_go)].remove(lid_go)
                 nodes['conn'][nodes['id'].index(node_id_go)].append(lid_stay)
 
@@ -961,6 +972,8 @@ def remove_two_link_nodes(links, nodes, dontremove):
                         links[lk] = np.delete(links[lk], lid_go)
                     else:
                         links[lk].pop(lidx_go)
+                        
+    
 
                 ct = ct + 1
 
@@ -1423,7 +1436,7 @@ def plot_dirlinks(links, dims):
     return
 
 
-def plot_network(links, nodes, Imask, name, axis=None):
+def plot_network(links, nodes, Imask, name=None, label_links=True, label_nodes=True, axis=None):
     """
     Plots the network with labeled link and node IDs.
 
@@ -1435,8 +1448,12 @@ def plot_network(links, nodes, Imask, name, axis=None):
         Network nodes and associated properties.
     Imask : np.array
         The original binary mask.
-    name : str
+    name : str, optional
         Name of the channel network for labeling the plot.
+    label_links : bool, optional
+        If True, will label all links with their ids.
+    label_nodes : bool, optional
+        If True, will label all nodes with their ids.
     axis : matplotlib.axex._subplots.AxesSubplot, optional
         If provided, plotting will occur within the provided axis. Can be created
         with matplotlib.pyplot.subplots(). The default is None.
@@ -1446,7 +1463,6 @@ def plot_network(links, nodes, Imask, name, axis=None):
     None.
 
     """
-    # TODO: add legend for link and node ids
     imshape = Imask.shape
 
     # Colormap for binary mask
@@ -1466,17 +1482,21 @@ def plot_network(links, nodes, Imask, name, axis=None):
 
         rc = np.unravel_index(lidcs, imshape)
         axis.plot(rc[1], rc[0], 'darkgrey')
-        axis.text(rc[1][mididx], rc[0][mididx], lid, color='black')
+        if label_links is True:
+            axis.text(rc[1][mididx], rc[0][mididx], lid, color='black')
 
     # Plot and label nodes
     for nid, nidx in zip(nodes['id'], nodes['idx']):
 
         rc = np.unravel_index(nidx, imshape)
         axis.plot(rc[1], rc[0], '.', color='r')
-        axis.text(rc[1], rc[0], nid, color='r')
+        if label_nodes is True:
+            axis.text(rc[1], rc[0], nid, color='r')
 
     plt.axis('equal')
-    axis.set_title(name)
+
+    if name is not None:
+        axis.set_title(name)
 
     plt.show(block=False)
 

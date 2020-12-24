@@ -10,16 +10,8 @@ import geopandas as gpd
 from pyproj.crs import CRS
 import numpy as np
 import networkx as nx
-
 import rivgraph.geo_utils as gu
 import rivgraph.ln_utils as lnu
-
-# obj = c
-# links = obj.links
-# nodes = obj.nodes
-# shoreline_shp = r"C:\Users\Jon\Anaconda3\envs\rivgraph\Lib\site-packages\rivgraph\tests\data\Colville\Colville_shoreline.shp"
-# inlets_shp = r"C:\Users\Jon\Anaconda3\envs\rivgraph\Lib\site-packages\rivgraph\tests\data\Colville\Colville_inlet_nodes.shp"
-# gdobj = obj.gdobj
 
 
 def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
@@ -64,7 +56,7 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
     # Remove spurs from network (this includes valid inlets and outlets)
     links, nodes = lnu.remove_all_spurs(links, nodes,
                                         dontremove=list(nodes['inlets']) +
-                                                   list(nodes['outlets']))
+                                                    list(nodes['outlets']))
 
     # Remove sets of links that are disconnected from inlets/outlets except for
     # a single bridge link (effectively re-pruning the network)
