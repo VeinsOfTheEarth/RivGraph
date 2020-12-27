@@ -615,8 +615,8 @@ def regionprops(I, props, connectivity=2):
         Binary image containing blobs.
     props : list
         Properties to compute for each blob. Can include 'area', 'coords',
-        'perimeter', 'centroid', 'mean', 'perimeter', 'perim_len', 'convex_area',
-        'eccentricity', 'convex_area', 'major_axis_length', 'minor_axis_length',
+        'perimeter', 'centroid', 'mean', 'perim_len', 'convex_area',
+        'eccentricity', 'major_axis_length', 'minor_axis_length',
         'label'.
     connectivity : int, optional
         If 1, 4-connectivity will be used to determine connected blobs. If
@@ -633,26 +633,34 @@ def regionprops(I, props, connectivity=2):
         can be returned by specifying 'label' as a property.
 
     """
-    # TODO: Add a check that appropriate props are requested
+    # Check that appropriate props are requested
+    available_props = ['area', 'coords', 'perimeter', 'centroid', 'mean', 'perim_len',
+              'convex_area', 'eccentricity', 'major_axis_length',
+              'minor_axis_length', 'equivalent_diameter', 'label']
+    props_do = [p for p in props if p in available_props]
+    cant_do = set(props) - set(props_do)
+    if len(cant_do) > 0:
+        print('Cannot compute the following properties: {}'.format(cant_do))
+    
     Ilabeled = measure.label(I, background=0, connectivity=connectivity)
     properties = measure.regionprops(Ilabeled, intensity_image=I)
 
     out = {}
     # Get the coordinates of each blob in case we need them later
-    if 'coords' in props or 'perimeter' in props:
+    if 'coords' in props_do or 'perimeter' in props_do:
         coords = [p.coords for p in properties]
 
-    for prop in props:
+    for prop in props_do:
         if prop == 'area':
-            allprop = [p.area for p in properties]
+            out[prop] = np.array([p.area for p in properties])
         elif prop == 'coords':
-            allprop = coords
+            out[prop] = np.array(coords)
         elif prop == 'centroid':
-            allprop = [p.centroid for p in properties]
+            out[prop] = np.array([p.centroid for p in properties])
         elif prop == 'mean':
-            allprop = [p.mean_intensity for p in properties]
+            out[prop] = np.array([p.mean_intensity for p in properties])
         elif prop == 'perim_len':
-            allprop = [p.perimeter for p in properties]
+            out[prop] = np.array([p.perimeter for p in properties])
         elif prop == 'perimeter':
             perim = []
             for blob in coords:
@@ -664,7 +672,6 @@ def regionprops(I, props, connectivity=2):
 
                 # Convert to cv2-ingestable data type
                 Ip = np.array(Ip, dtype='uint8')
-
                 contours, _ = cv2.findContours(Ip, cv2.RETR_TREE,
                                                cv2.CHAIN_APPROX_NONE)
                 # IMPORTANT: findContours returns points as (x,y) rather than (row, col)
@@ -676,23 +683,21 @@ def regionprops(I, props, connectivity=2):
                     ccols.append(c[0][0] + cropped[0] - 1)
                 cont_np = np.transpose(np.array((crows, ccols)))  # format the output
                 perim.append(cont_np)
-            allprop = perim
+            out[prop] = perim
         elif prop == 'convex_area':
-            allprop = [p.convex_area for p in properties]
+            out[prop] = np.array([p.convex_area for p in properties])
         elif prop == 'eccentricity':
-            allprop = [p.eccentricity for p in properties]
+            out[prop] = np.array([p.eccentricity for p in properties])
         elif prop == 'equivalent_diameter':
-            allprop = [p.equivalent_diameter for p in properties]
+            out[prop] = np.array([p.equivalent_diameter for p in properties])
         elif prop == 'major_axis_length':
-            allprop = [p.major_axis_length for p in properties]
+            out[prop] = np.array([p.major_axis_length for p in properties])
         elif prop == 'minor_axis_length':
-            allprop = [p.minor_axis_length for p in properties]
+            out[prop] = np.array([p.minor_axis_length for p in properties])
         elif prop == 'label':
-            allprop = [p.label for p in properties]
+            out[prop] = np.array([p.label for p in properties])
         else:
             print('{} is not a valid property.'.format(prop))
-
-        out[prop] = np.array(allprop)
 
     return out, Ilabeled
 

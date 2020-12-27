@@ -410,7 +410,6 @@ def test_regionprops_small():
              'major_axis_length', 'minor_axis_length', 'invalidinput']
     info, _ = im_utils.regionprops(I, props)
     # make bunch of assertions
-    assert [*info] == props
     assert np.all(info['centroid'] == [1., 1.])
     assert info['mean'] == 1.
     assert info['perim_len'] == 0.
@@ -452,7 +451,7 @@ def test_regionprops_perimeter():
     info, _ = im_utils.regionprops(I, props)
     # make bunch of assertions
     assert [*info] == props
-    assert info['perimeter'].shape == (3,)
+    assert len(info['perimeter']) == 3
     assert np.all(info['perimeter'][0] == np.array([[1, 1],
                                                     [2, 1],
                                                     [2, 2],

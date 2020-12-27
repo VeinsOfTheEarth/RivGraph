@@ -243,7 +243,8 @@ class rivnetwork:
                                  'minor_axis_length', 'surrounding_links']):
         """
         Finds all the islands in the binary mask and computes their morphological
-        properties. Can be used to help "clean" masks of small islands.
+        properties. Can be used to help "clean" masks of small islands. Must
+        run compute_network() first.
 
         Parameters
         ----------

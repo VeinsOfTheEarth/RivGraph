@@ -129,7 +129,35 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props):
 
 def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
                                 pixlen, pixarea):
-    """Get surrounding link properties."""
+    """
+    Find the links surrounding each island and computes their properties. This
+    function is useful for filtering; e.g. when it is desired to remove islands
+    surrounded by very large channels.
+
+    Parameters
+    ----------
+    links : dict
+        Network links.
+    nodes : dict
+        Network nodes.
+    Imask : np.array
+        Binary mask of the channel network.
+    islands : geopandas.GeoDataframe
+        Contains island boundaries and associated properties. Created by 
+        get_island_properties().
+    Iislands : np.array
+        Image wherein each island has a unique integer ID.
+    pixlen : numeric
+        Nominal length of a pixel (i.e. its resolution).
+    pixarea : numeric
+        Nominal area of a pixel.
+
+    Returns
+    -------
+    islands : geopandas.GeoDataframe
+        DESCRIPTION.
+
+    """
     # obj = d
     # links = obj.links
     # nodes = obj.nodes
