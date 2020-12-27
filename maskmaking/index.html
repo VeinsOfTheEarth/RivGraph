@@ -96,9 +96,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Maskmaking</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#maskmaker-maskmaker-make-me-a-mask">Maskmaker, Maskmaker Make Me a Mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-a-mask">What is a mask?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-should-a-mask-capture">What should a mask capture?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#where-do-i-get-a-mask">Where do I get a mask?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#how-should-i-prepare-my-mask">How should I prepare my mask?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-do-i-edit-my-mask">How do I edit my mask?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#does-my-mask-need-to-be-georeferenced">Does my mask need to be georeferenced?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#can-my-mask-represent-something-that-isn-t-a-river">Can my mask represent something that isn’t a river?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-filetypes-are-supported-for-my-mask">What filetypes are supported for my mask?</a></li>
@@ -177,12 +178,13 @@
 <p class="centered">
 <strong>The Lena River Delta as seen by Bing Virtual Earth and its mask. Note that this mask is Landsat-derived so it does not correspond perfectly with the image on the left.</strong></p><div class="section" id="maskmaker-maskmaker-make-me-a-mask">
 <h2>Maskmaker, Maskmaker Make Me a Mask<a class="headerlink" href="#maskmaker-maskmaker-make-me-a-mask" title="Permalink to this headline">¶</a></h2>
-<p><em>RivGraph</em> requires that you provide a mask of your channel network. A mask is simply a binary image (only ones and zeros) where pixels belonging to the channel network are “on”, like the right panel of the Lena Delta above. In this document, we’ll cover the following:</p>
+<p><em>RivGraph</em> requires that you provide a mask of your channel network. In this document, we’ll cover the following:</p>
 <blockquote>
 <div><ul class="simple">
+<li><p><a class="reference internal" href="#whatismask"><span class="std std-ref">What is a mask?</span></a></p></li>
 <li><p><a class="reference internal" href="#maskcapture"><span class="std std-ref">What should a mask capture?</span></a></p></li>
 <li><p><a class="reference internal" href="#wheretoget"><span class="std std-ref">Where do I get a mask?</span></a></p></li>
-<li><p><a class="reference internal" href="#howtoprep"><span class="std std-ref">How should I prepare my mask?</span></a></p></li>
+<li><p><a class="reference internal" href="#howtoprep"><span class="std std-ref">How do I edit my mask?</span></a></p></li>
 <li><p><a class="reference internal" href="#georef"><span class="std std-ref">Does my mask need to be georeferenced?</span></a></p></li>
 <li><p><a class="reference internal" href="#nonriver"><span class="std std-ref">Can my mask represent something that isn’t a river?</span></a></p></li>
 <li><p><a class="reference internal" href="#supportedfiletypes"><span class="std std-ref">What filetypes are supported for my mask?</span></a></p></li>
@@ -192,6 +194,16 @@
 <p class="admonition-title">Important</p>
 <p>One thing to keep in mind: although <em>RivGraph</em> contains functions for pruning and otherwise modifying your channel network, it will always honor the mask you provide. You may need to iterate between altering your mask and <em>RivGraph</em>-ing it to achieve your desired results.
 “Garbage in, garbage out.”</p>
+</div>
+</div>
+<div class="section" id="what-is-a-mask">
+<span id="whatismask"></span><h2>What is a mask?<a class="headerlink" href="#what-is-a-mask" title="Permalink to this headline">¶</a></h2>
+<p>A mask is simply a binary image (only ones and zeros) where pixels belonging to the channel network are ones, like the right panel of the Lena Delta above. Before processing your mask with <em>RivGraph</em>, you should ensure that your mask contains <a class="reference external" href="https://github.com/jonschwenk/RivGraph/issues/34">no no-data</a>. One way to ensure this is to convert your mask to a boolean datatype, using for example numpy:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">Mask_binary</span> <span class="pre">=</span> <span class="pre">np.array(Mask,</span> <span class="pre">dtype=np.bool)</span></code></p>
+<p>The mask is the cornerstone for using <em>RivGraph</em>. You should always ensure that it contains the features you want and none of the ones you don’t.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Make sure to remove all the objects (connected “on” pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or <a class="reference external" href="https://github.com/jonschwenk/RivGraph/issues/32">errors</a>. Often, a quick way to achieve this is via the <code class="code docutils literal notranslate"><span class="pre">largest_blobs()</span></code> function in <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py">im_utils</a>, which will keep only the largest connected component.</p>
 </div>
 </div>
 <div class="section" id="what-should-a-mask-capture">
@@ -236,9 +248,25 @@ tool to convert the polygons to a binary raster (image). If you go this route, b
 <li><p><a class="reference external" href="https://github.com/isikdogan/deepwatermap">DeepWaterMap</a> is a trained deep convolutional neural network that you can apply to Landsat/Sentinel multispectral imagery to create your own masks. You can also improve DeepWaterMap’s base model by adding more training data. Requires some knowledge of Tensorflow.</p></li>
 </ul>
 </div>
-<div class="section" id="how-should-i-prepare-my-mask">
-<span id="howtoprep"></span><h2>How should I prepare my mask?<a class="headerlink" href="#how-should-i-prepare-my-mask" title="Permalink to this headline">¶</a></h2>
-<p>The quality of your mask directly translates to the quality of your channel network.</p>
+<div class="section" id="how-do-i-edit-my-mask">
+<span id="howtoprep"></span><h2>How do I edit my mask?<a class="headerlink" href="#how-do-i-edit-my-mask" title="Permalink to this headline">¶</a></h2>
+<p>As a mask is simply a single-band image, any pixel-based image editing software can be used for hand-editing (Photoshop, GIMP, MSPaint, etc.). However, there are a few issues with using these tools:</p>
+<ul class="simple">
+<li><p>These softwares will generally not preserve georeferencing information of your source image. You will have to add it back to the edited image.</p></li>
+<li><p>The softwares may have difficulty opening/editing a single-band image as opposed to the more standard RGB (3 band).</p></li>
+<li><p>Filetypes are sometimes not compatible between Python-exported images and these softwares and will thus require extra attention.</p></li>
+</ul>
+<p>I have found three effective ways to edit georeferenced masks. The one you choose depends on the quantity and quality of editing you need to achieve.</p>
+<ol class="arabic simple">
+<li><p>Edit your mask directly in QGIS.</p>
+<ol class="loweralpha simple">
+<li><p><a class="reference external" href="https://plugins.qgis.org/plugins/Serval/">Serval</a> plugin for QGIS allows for single-pixel manipulations. Good if you only need to edit a handful of pixels.</p></li>
+<li><p><a class="reference external" href="https://plugins.qgis.org/plugins/ThRasE/">ThRaSe</a> plugin for QGIS appears to have more sophisticated raster-editing capabilities, but I haven’t used it.</p></li>
+</ol>
+</li>
+<li><p><a class="reference external" href="https://www.getpaint.net/download.html">Paint.NET</a> is an image-editing software that preserves georeferencing information. It’s fairly basic and easy to use. If you have a significant amount of hand-editing to do, look into it.</p></li>
+<li><p>Use image processing tools in <em>RivGraph</em> to edit your mask. There are morphological operators like <code class="code docutils literal notranslate"><span class="pre">dilate()</span></code> and <code class="code docutils literal notranslate"><span class="pre">erode()</span></code>, <code class="code docutils literal notranslate"><span class="pre">regionprops()</span></code> for filtering objects based on their properties (areas, lengths, perimeters, etc.), and <code class="code docutils literal notranslate"><span class="pre">largest_blobs()</span></code> for keeping/removing the largest connected components in the mask. There is also a <code class="code docutils literal notranslate"><span class="pre">hand_clean()</span></code> utility that allows you to draw polygons one-at-a-time and specify their pixel values. I usually find these tools sufficient for cleaning a mask, regardless of the amount of editing required.</p></li>
+</ol>
 </div>
 <div class="section" id="does-my-mask-need-to-be-georeferenced">
 <span id="georef"></span><h2>Does my mask need to be georeferenced?<a class="headerlink" href="#does-my-mask-need-to-be-georeferenced" title="Permalink to this headline">¶</a></h2>
@@ -259,7 +287,7 @@ tool to convert the polygons to a binary raster (image). If you go this route, b
 </div>
 <div class="section" id="what-filetypes-are-supported-for-my-mask">
 <span id="supportedfiletypes"></span><h2>What filetypes are supported for my mask?<a class="headerlink" href="#what-filetypes-are-supported-for-my-mask" title="Permalink to this headline">¶</a></h2>
-<p>blah blah</p>
+<p>Any <a class="reference external" href="https://gdal.org/drivers/raster/index.html">gdal-readable filetype</a> should be fine. GeoTIFF is most common and recommended if possible.</p>
 </div>
 </div>
 

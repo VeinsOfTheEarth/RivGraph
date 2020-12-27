@@ -968,7 +968,8 @@ skeleton’s graph.</p>
 <dt id="rivgraph.classes.rivnetwork.get_islands">
 <code class="descname">get_islands</code><span class="sig-paren">(</span><em>props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length', 'surrounding_links']</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.get_islands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.get_islands" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds all the islands in the binary mask and computes their morphological
-properties. Can be used to help “clean” masks of small islands.</p>
+properties. Can be used to help “clean” masks of small islands. Must
+run compute_network() first.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>props</strong> (<em>list</em><em>, </em><em>optional</em>) – Properties to compute for each island. Properties can be any of those
@@ -2433,8 +2434,8 @@ properties are available here, but they can easily be added.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>I</strong> (<em>np.array</em>) – Binary image containing blobs.</p></li>
 <li><p><strong>props</strong> (<em>list</em>) – Properties to compute for each blob. Can include ‘area’, ‘coords’,
-‘perimeter’, ‘centroid’, ‘mean’, ‘perimeter’, ‘perim_len’, ‘convex_area’,
-‘eccentricity’, ‘convex_area’, ‘major_axis_length’, ‘minor_axis_length’,
+‘perimeter’, ‘centroid’, ‘mean’, ‘perim_len’, ‘convex_area’,
+‘eccentricity’, ‘major_axis_length’, ‘minor_axis_length’,
 ‘label’.</p></li>
 <li><p><strong>connectivity</strong> (<em>int</em><em>, </em><em>optional</em>) – If 1, 4-connectivity will be used to determine connected blobs. If
 2, 8-connectivity will be used. The default is 2.</p></li>
@@ -3759,7 +3760,29 @@ of a provided center coordinate given the pixel resolution (pixlen).</p>
 <dl class="function">
 <dt id="rivgraph.mask_utils.surrounding_link_properties">
 <code class="descclassname">rivgraph.mask_utils.</code><code class="descname">surrounding_link_properties</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>Imask</em>, <em>islands</em>, <em>Iislands</em>, <em>pixlen</em>, <em>pixarea</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_utils.html#surrounding_link_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_utils.surrounding_link_properties" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get surrounding link properties.</p>
+<dd><p>Find the links surrounding each island and computes their properties. This
+function is useful for filtering; e.g. when it is desired to remove islands
+surrounded by very large channels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – Network links.</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes.</p></li>
+<li><p><strong>Imask</strong> (<em>np.array</em>) – Binary mask of the channel network.</p></li>
+<li><p><strong>islands</strong> (<em>geopandas.GeoDataframe</em>) – Contains island boundaries and associated properties. Created by
+get_island_properties().</p></li>
+<li><p><strong>Iislands</strong> (<em>np.array</em>) – Image wherein each island has a unique integer ID.</p></li>
+<li><p><strong>pixlen</strong> (<em>numeric</em>) – Nominal length of a pixel (i.e. its resolution).</p></li>
+<li><p><strong>pixarea</strong> (<em>numeric</em>) – Nominal area of a pixel.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>islands</strong> – DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geopandas.GeoDataframe</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

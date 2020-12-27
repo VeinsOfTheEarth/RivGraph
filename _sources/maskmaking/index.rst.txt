@@ -14,9 +14,10 @@ Maskmaking
 Maskmaker, Maskmaker Make Me a Mask
 -----------------------------------
 
-*RivGraph* requires that you provide a mask of your channel network. A mask is simply a binary image (only ones and zeros) where pixels belonging to the channel network are "on", like the right panel of the Lena Delta above. In this document, we'll cover the following:
+*RivGraph* requires that you provide a mask of your channel network. In this document, we'll cover the following:
 
 
+ - :ref:`whatismask`
  - :ref:`maskcapture`
  - :ref:`wheretoget`
  - :ref:`howtoprep`
@@ -27,6 +28,20 @@ Maskmaker, Maskmaker Make Me a Mask
 .. important::
   One thing to keep in mind: although *RivGraph* contains functions for pruning and otherwise modifying your channel network, it will always honor the mask you provide. You may need to iterate between altering your mask and *RivGraph*-ing it to achieve your desired results.
   "Garbage in, garbage out."
+
+.. _whatismask:
+
+---------------
+What is a mask?
+---------------
+A mask is simply a binary image (only ones and zeros) where pixels belonging to the channel network are ones, like the right panel of the Lena Delta above. Before processing your mask with *RivGraph*, you should ensure that your mask contains `no no-data <https://github.com/jonschwenk/RivGraph/issues/34>`_. One way to ensure this is to convert your mask to a boolean datatype, using for example numpy:
+
+:code:`Mask_binary = np.array(Mask, dtype=np.bool)`
+
+The mask is the cornerstone for using *RivGraph*. You should always ensure that it contains the features you want and none of the ones you don't. 
+
+.. tip:: Make sure to remove all the objects (connected "on" pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or `errors <https://github.com/jonschwenk/RivGraph/issues/32>`_. Often, a quick way to achieve this is via the :code:`largest_blobs()` function in `im_utils <https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py>`_, which will keep only the largest connected component.
+
 
 
 .. _maskcapture:
@@ -92,10 +107,26 @@ Here are some resources that either provide masks or tools for you to make your 
 .. _howtoprep:
 
 -----------------------------
-How should I prepare my mask?
+How do I edit my mask?
 -----------------------------
 
-The quality of your mask directly translates to the quality of your channel network. 
+As a mask is simply a single-band image, any pixel-based image editing software can be used for hand-editing (Photoshop, GIMP, MSPaint, etc.). However, there are a few issues with using these tools:
+
+- These softwares will generally not preserve georeferencing information of your source image. You will have to add it back to the edited image.
+- The softwares may have difficulty opening/editing a single-band image as opposed to the more standard RGB (3 band).
+- Filetypes are sometimes not compatible between Python-exported images and these softwares and will thus require extra attention. 
+
+I have found three effective ways to edit georeferenced masks. The one you choose depends on the quantity and quality of editing you need to achieve.
+
+1) Edit your mask directly in QGIS.
+
+   a) `Serval  <https://plugins.qgis.org/plugins/Serval/>`_ plugin for QGIS allows for single-pixel manipulations. Good if you only need to edit a handful of pixels.
+
+   b) `ThRaSe  <https://plugins.qgis.org/plugins/ThRasE/>`_ plugin for QGIS appears to have more sophisticated raster-editing capabilities, but I haven't used it.
+
+2)  `Paint.NET <https://www.getpaint.net/download.html>`_ is an image-editing software that preserves georeferencing information. It's fairly basic and easy to use. If you have a significant amount of hand-editing to do, look into it.
+
+3) Use image processing tools in *RivGraph* to edit your mask. There are morphological operators like :code:`dilate()` and :code:`erode()`, :code:`regionprops()` for filtering objects based on their properties (areas, lengths, perimeters, etc.), and :code:`largest_blobs()` for keeping/removing the largest connected components in the mask. There is also a :code:`hand_clean()` utility that allows you to draw polygons one-at-a-time and specify their pixel values. I usually find these tools sufficient for cleaning a mask, regardless of the amount of editing required. 
 
 .. _georef:
 
@@ -128,8 +159,7 @@ Perhaps you'd like to vectorize a road network or a vascular system. This is pos
 What filetypes are supported for my mask?
 -----------------------------------------
 
-blah blah 
-
+Any `gdal-readable filetype <https://gdal.org/drivers/raster/index.html>`_ should be fine. GeoTIFF is most common and recommended if possible.
 
 
 

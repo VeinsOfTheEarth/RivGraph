@@ -290,7 +290,35 @@
 
 <div class="viewcode-block" id="surrounding_link_properties"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_utils.surrounding_link_properties">[docs]</a><span class="k">def</span> <span class="nf">surrounding_link_properties</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">Imask</span><span class="p">,</span> <span class="n">islands</span><span class="p">,</span> <span class="n">Iislands</span><span class="p">,</span>
                                 <span class="n">pixlen</span><span class="p">,</span> <span class="n">pixarea</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get surrounding link properties.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the links surrounding each island and computes their properties. This</span>
+<span class="sd">    function is useful for filtering; e.g. when it is desired to remove islands</span>
+<span class="sd">    surrounded by very large channels.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        Network links.</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        Network nodes.</span>
+<span class="sd">    Imask : np.array</span>
+<span class="sd">        Binary mask of the channel network.</span>
+<span class="sd">    islands : geopandas.GeoDataframe</span>
+<span class="sd">        Contains island boundaries and associated properties. Created by </span>
+<span class="sd">        get_island_properties().</span>
+<span class="sd">    Iislands : np.array</span>
+<span class="sd">        Image wherein each island has a unique integer ID.</span>
+<span class="sd">    pixlen : numeric</span>
+<span class="sd">        Nominal length of a pixel (i.e. its resolution).</span>
+<span class="sd">    pixarea : numeric</span>
+<span class="sd">        Nominal area of a pixel.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    islands : geopandas.GeoDataframe</span>
+<span class="sd">        DESCRIPTION.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># obj = d</span>
     <span class="c1"># links = obj.links</span>
     <span class="c1"># nodes = obj.nodes</span>
