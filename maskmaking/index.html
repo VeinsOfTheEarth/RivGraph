@@ -174,7 +174,7 @@
             
   <div class="section" id="maskmaking">
 <span id="id1"></span><h1>Maskmaking<a class="headerlink" href="#maskmaking" title="Permalink to this headline">¶</a></h1>
-<img alt="The Lena River Delta" class="align-center" src="maskmaking/../../images/lena_mask.PNG" />
+<img alt="The Lena River Delta" class="align-center" src="../_images/lena_mask.PNG" />
 <p class="centered">
 <strong>The Lena River Delta as seen by Bing Virtual Earth and its mask. Note that this mask is Landsat-derived so it does not correspond perfectly with the image on the left.</strong></p><div class="section" id="maskmaker-maskmaker-make-me-a-mask">
 <h2>Maskmaker, Maskmaker Make Me a Mask<a class="headerlink" href="#maskmaker-maskmaker-make-me-a-mask" title="Permalink to this headline">¶</a></h2>
@@ -270,7 +270,7 @@ tool to convert the polygons to a binary raster (image). If you go this route, b
 </div>
 <div class="section" id="does-my-mask-need-to-be-georeferenced">
 <span id="georef"></span><h2>Does my mask need to be georeferenced?<a class="headerlink" href="#does-my-mask-need-to-be-georeferenced" title="Permalink to this headline">¶</a></h2>
-<p>Most masks are already produced in a GIS context and are already geographically referenced. However,*RivGraph* does not require that your mask image be georeferenced (e.g. a GeoTIFF). If you provide a mask without any georeference information, <em>RivGraph</em> will assign it a “dummy” projection in order to proceed. This has no effect on the network extraction. However, it is strongly advised that you provide a georeferenced mask. There are three primary reasons for this:</p>
+<p>Most masks are already produced in a GIS context and are already geographically referenced. However, <em>RivGraph</em> does not require that your mask image be georeferenced (e.g. a GeoTIFF). If you provide a mask without any georeference information, <em>RivGraph</em> will assign it a “dummy” projection in order to proceed. This has no effect on the network extraction. However, it is strongly advised that you provide a georeferenced mask. There are three primary reasons for this:</p>
 <ol class="arabic simple">
 <li><p>The coordinate reference system (CRS) of your mask will be carried through all your analysis, meaning that shapefiles and GeoTIFFs you export using <em>RivGraph</em> will align perfectly with your mask. Additionally, your results will be easily importable into a GIS for further analysis or fusion with other geospatial data.</p></li>
 <li><p><em>RivGraph</em> computes morphologic metrics (length and width) using pixel coordinates. A georeferenced mask contains information about the units of the mask, and thus any metrics of physical distance will inherit these units. If your CRS is meters-based, your results will be in meters.</p></li>
