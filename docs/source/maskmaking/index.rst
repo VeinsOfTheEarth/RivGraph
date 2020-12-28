@@ -134,7 +134,7 @@ I have found three effective ways to edit georeferenced masks. The one you choos
 Does my mask need to be georeferenced?
 --------------------------------------
 
-Most masks are already produced in a GIS context and are already geographically referenced. However,*RivGraph* does not require that your mask image be georeferenced (e.g. a GeoTIFF). If you provide a mask without any georeference information, *RivGraph* will assign it a "dummy" projection in order to proceed. This has no effect on the network extraction. However, it is strongly advised that you provide a georeferenced mask. There are three primary reasons for this:
+Most masks are already produced in a GIS context and are already geographically referenced. However, *RivGraph* does not require that your mask image be georeferenced (e.g. a GeoTIFF). If you provide a mask without any georeference information, *RivGraph* will assign it a "dummy" projection in order to proceed. This has no effect on the network extraction. However, it is strongly advised that you provide a georeferenced mask. There are three primary reasons for this:
 
 1) The coordinate reference system (CRS) of your mask will be carried through all your analysis, meaning that shapefiles and GeoTIFFs you export using *RivGraph* will align perfectly with your mask. Additionally, your results will be easily importable into a GIS for further analysis or fusion with other geospatial data.
 
