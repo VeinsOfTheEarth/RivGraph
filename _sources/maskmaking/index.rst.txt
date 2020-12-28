@@ -4,7 +4,7 @@
 Maskmaking
 ==========
 
-.. image:: C:/Users/Jon/Documents/GitHub/RivGraph/examples/images/lena_mask.PNG
+.. image:: ../../images/lena_mask.PNG
   :alt: The Lena River Delta
   :align: center
 .. centered::
