@@ -14,6 +14,7 @@ import numpy as np
 from pyproj import Transformer
 import warnings
 import rivgraph.io_utils as io
+import rivgraph.im_utils as im
 
 
 def get_unit(crs):
@@ -276,3 +277,91 @@ def crop_geotif(tif, cropto='first_nonzero', npad=0, outpath=None):
                      dtype=datatype, options=options)
 
     return output_file
+
+
+def downsample_binary_geotiff(input_file, ds_factor, output_name, thresh=None):
+    """
+    Given binary geotiff, create a downsampled one.
+
+    Use :obj:`rivgraph.im_utils.downsample_binary_image()` and a bunch of
+    gdal bits to downsample a binary geotiff file to the specified relative
+    resolution. This new geotiff will have properly associated geoinformation
+    etc.
+    (to downsample a 2D array use the aforementioned function in im_utils).
+
+    Parameters
+    ----------
+    input_file : str
+        Path to input file (original geotiff) as a string
+
+    ds_factor : float
+        Downsampling factor. This is the relative resolution for the output
+        file. For example, to downsample to half of the resolution of the
+        original image, ds_factor should be set to 0.5. As this function is
+        for downsample, values >= 1 are invalid.
+
+    output_name : str
+        Path / output file name, should have extension .tif
+
+    thresh : float, optional
+        Optional input to :obj:`rivgraph.im_utils.downsample_binary_image()`.
+
+    Returns
+    -------
+    output_name : str
+        Path to the saved, downsampled geotiff.
+
+    """
+    # check ds_factor
+    if ds_factor >= 1.0:
+        raise ValueError('ds_factor must be < 1.')
+
+    # read original file
+    og = gdal.Open(input_file)
+    gm = og.GetGeoTransform()
+
+    # check array size for even downsampling
+    img = og.ReadAsArray()
+    img = img.astype(np.int32)
+    img_x, img_y = np.shape(img)
+    modfactor = 1/ds_factor
+    if (img_x % modfactor > 0) or (img_y % modfactor > 0):
+        if (img_x % modfactor) > 0:
+            img_x += img_x % modfactor
+        elif (img_y % modfactor) > 0:
+            img_y += img_y % modfactor
+    old_x, old_y = np.shape(img)
+
+    # amount to pad by
+    npad = np.max([(img_x - old_x), (img_y - old_y)]).astype(int)
+
+    # do padding
+    newimg = np.pad(img, npad, mode='constant')
+    newgm = (gm[0] - npad*gm[1], gm[1], gm[2],
+             gm[3] - npad*gm[5], gm[4], gm[5])
+
+    # rescaling
+    rs_x = int(img_x * ds_factor)  # number of x px
+    rs_y = int(img_y * ds_factor)  # number of y px
+    if thresh is None:
+        img_rs = im.downsample_binary_image(newimg, (rs_x, rs_y))
+    else:
+        img_rs = im.downsample_binary_image(newimg, (rs_x, rs_y), thresh)
+
+    # handle geotransformations and write the new geotif
+    driver = gdal.GetDriverByName("GTiff")  # set driver
+    # create new geotiff
+    dest = driver.Create(output_name, int(rs_y),
+                         int(rs_x), 1, gdal.GDT_Byte)
+    # adjust georeference information (mainly px size)
+    dest_gm = (newgm[0], (newgm[1]*img_x)/rs_x, newgm[2],
+               newgm[3], newgm[4], (newgm[5]*img_y)/rs_y)
+    dest.SetGeoTransform(dest_gm)  # assign georef info
+    dest.SetProjection(og.GetProjection())  # set projection from original
+    dest.GetRasterBand(1).WriteArray(img_rs)  # write new downsampled array
+
+    # flush cache and delete new object
+    dest.FlushCache()
+    dest = None
+
+    return output_name
