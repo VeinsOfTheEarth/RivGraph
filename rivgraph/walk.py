@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Skeleton Walking Utils (walk.py)
-===============================
+================================
 Functions for walking along skeletons and finding branchpoints.
 
 Created on Mon Sep 10 09:39:19 2018
@@ -411,6 +411,8 @@ def get_neighbors(idx, Iskel):
 
 def delete_link(linkid, links, nodes):
     """
+    Alias for `ln_utiles.delete_link()`. Retained for existing workflows.
+
     Delete a link from the links dictionary and update the nodes dictionary.
 
     Deletes a link from the links dictionary and updates the nodes dictionary
@@ -435,19 +437,7 @@ def delete_link(linkid, links, nodes):
         Network nodes and associated properties with the link deleted.
 
     """
-    #TODO: Replace this function with the one in ln_utils.
-
-    # Get index of link within links dict
-    lid = links['id'].index(linkid)
-
-    # Remove the link
-    links['idx'].pop(lid)
-    nodeidx = links['conn'].pop(lid)
-    links['id'].remove(linkid)
-
-    # Remove the link from node connectivity
-    for ni in nodeidx:
-        nodes['conn'][ni].remove(linkid)
+    links, nodes = lnu.delete_link(links, nodes, linkid)
 
     return links, nodes
 
