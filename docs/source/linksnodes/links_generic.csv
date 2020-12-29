@@ -1,0 +1,11 @@
+key, type, length, description
+id, orderedSet, N, unique link id assigned to each link not in a particular order and not guaranteed to skip some id’s
+conn, list of 2-element lists, N, node ids at link endpoints. After running directionality these are in order i.e. [us_nodeid ds_nodeid] 
+idx, list of lists of ints, N, list of the pixel coordinates in index format (via np.ravel_index using the shape of the input binary image) 
+n_networks, int, 1, number of networks identified
+parallels, list of lists, varies, each sublist contains all link ids of links forming a parallel set; i.e. links that start and end at the same node. 
+wid_pix, list of np.arrays, N, width at each pixel of each link (pixels defined by idx) 
+len, list, N, length of each link
+wid, list, N, average width of each link
+len_adj, list, N, length of each link adjusted for accuracy
+wid_adj, list, N, width of each link adjusted for accuracy
