@@ -1,0 +1,5 @@
+key, type, length, description
+maxang, np.array, N, ???
+cldists, np.array, N, number of mesh-generated transects each link intersects
+clangs, np.array, N, angle of the link with respect to the valley centerline in radians
+wid_pctdiff, np.array, N, percent difference between the widest and narrowest pixels in a link

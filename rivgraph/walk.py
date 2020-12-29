@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Skeleton Walking Utils (walk.py)
-===============================
+================================
 Functions for walking along skeletons and finding branchpoints.
 
 Created on Mon Sep 10 09:39:19 2018
@@ -448,6 +448,7 @@ def delete_link(linkid, links, nodes):
     # Remove the link from node connectivity
     for ni in nodeidx:
         nodes['conn'][ni].remove(linkid)
+
 
     return links, nodes
 

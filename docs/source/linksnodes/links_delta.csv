@@ -1,0 +1,2 @@
+key, type, length, description
+slope, list, N, slope computed from synthetic DEM; note that this has no physical basis and should not be interpreted as actual link slope

@@ -38,9 +38,9 @@ A mask is simply a binary image (only ones and zeros) where pixels belonging to 
 
 :code:`Mask_binary = np.array(Mask, dtype=np.bool)`
 
-The mask is the cornerstone for using *RivGraph*. You should always ensure that it contains the features you want and none of the ones you don't. 
+The mask is the cornerstone for using *RivGraph*. You should always ensure that it contains the features you want and none of the ones you don't.
 
-.. tip:: Make sure to remove all the objects (connected "on" pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or `errors <https://github.com/jonschwenk/RivGraph/issues/32>`_. Often, a quick way to achieve this is via the :code:`largest_blobs()` function in `im_utils <https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py>`_, which will keep only the largest connected component.
+.. tip:: Make sure to remove all the objects (connected "on" pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or `errors <https://github.com/jonschwenk/RivGraph/issues/32>`_. Often, a quick way to achieve this is via the :obj:`rivgraph.im_utils.largest_blobs()` function, which will keep only the largest connected component.
 
 
 
@@ -50,7 +50,7 @@ The mask is the cornerstone for using *RivGraph*. You should always ensure that 
 What should a mask capture?
 ---------------------------
 
-Above, we defined a mask as all the pixels "belonging to the channel network." But which pixels are part of the channel network? The obvious starting point is to consider all *surface water* pixels as defining the channel network. Is it important that your mask shows bankfull channels or includes small streams that may only be active during flood conditions? 
+Above, we defined a mask as all the pixels "belonging to the channel network." But which pixels are part of the channel network? The obvious starting point is to consider all *surface water* pixels as defining the channel network. Is it important that your mask shows bankfull channels or includes small streams that may only be active during flood conditions?
 
 
 .. image:: ../../images/brahma_masks_2004.PNG
@@ -78,14 +78,14 @@ Drawing a mask by hand is often not an ideal choice, but might be the most effic
 tool to convert the polygons to a binary raster (image). If you go this route, be sure to specify an appropriate coordinate reference system for your polygons in order to preserve the georeferencing information (don't use EPSG:4326). You will also need to specify a pixel resolution for your mask upon conversion.
 
 If you're analyzing the output of a simulation, it is unlikely that the simulation will provide binary channel masks as an output. In these cases, you will need to develop a way to identify the channel network from the available simulation results. For example, while developing the entropic Braided Index (`eBI <https://ui.adsabs.harvard.edu/abs/2019AGUFMEP51E2163T/abstract>`_
-), we used Delft3D simulations to test hypotheses about how the eBI changes under various sedimentation schemes. To make masks, we developed a combined depth + discharge threshold to identify which pixels were part of the "active river channel." 
+), we used Delft3D simulations to test hypotheses about how the eBI changes under various sedimentation schemes. To make masks, we developed a combined depth + discharge threshold to identify which pixels were part of the "active river channel."
 
 Here are some resources that either provide masks or tools for you to make your own.
 
 - Published masks:
 
   - `Arctic deltas <https://data.ess-dive.lbl.gov/view/doi:10.15485/1505624>`_, made with eCognition and Landsat imagery.
-  - `Indus and Brahmaputra Rivers <https://esurf.copernicus.org/articles/8/87/2020/#section6>`_, clipped from GRWL dataset. 
+  - `Indus and Brahmaputra Rivers <https://esurf.copernicus.org/articles/8/87/2020/#section6>`_, clipped from GRWL dataset.
   - `Global mask <https://zenodo.org/record/1297434>`_ of Landsat-derived rivers at "mean annual discharge." Has some issues at tile boundaries, and can be "feathery" along braided rivers, but not a bad global mask.
   - `Global Surface Water Dataset <https://global-surface-water.appspot.com/>`_ - provides all water pixels in the Landsat archive as monthly global images and as integrated-through-time images. For example, can threshold on the "Occurrence" product to make a mask. Use `Google Earth Engine <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_2_GlobalSurfaceWater>`_ to access and create your masks.
   - If you know of more, please mention them in the `Issue Tracker <https://github.com/jonschwenk/RivGraph/issues>`_!
@@ -98,7 +98,7 @@ Here are some resources that either provide masks or tools for you to make your 
 
 
 - You can relatively quickly train and apply ML models using `Google Earth Engine <https://earthengine.google.com/>`_, although the learning curve may be a little steep if you haven't used it before.
-  
+
 - `DeepWaterMap  <https://github.com/isikdogan/deepwatermap>`_ is a trained deep convolutional neural network that you can apply to Landsat/Sentinel multispectral imagery to create your own masks. You can also improve DeepWaterMap's base model by adding more training data. Requires some knowledge of Tensorflow.
 
 
@@ -114,7 +114,7 @@ As a mask is simply a single-band image, any pixel-based image editing software 
 
 - These softwares will generally not preserve georeferencing information of your source image. You will have to add it back to the edited image.
 - The softwares may have difficulty opening/editing a single-band image as opposed to the more standard RGB (3 band).
-- Filetypes are sometimes not compatible between Python-exported images and these softwares and will thus require extra attention. 
+- Filetypes are sometimes not compatible between Python-exported images and these softwares and will thus require extra attention.
 
 I have found three effective ways to edit georeferenced masks. The one you choose depends on the quantity and quality of editing you need to achieve.
 
@@ -126,7 +126,7 @@ I have found three effective ways to edit georeferenced masks. The one you choos
 
 2)  `Paint.NET <https://www.getpaint.net/download.html>`_ is an image-editing software that preserves georeferencing information. It's fairly basic and easy to use. If you have a significant amount of hand-editing to do, look into it.
 
-3) Use image processing tools in *RivGraph* to edit your mask. There are morphological operators like :code:`dilate()` and :code:`erode()`, :code:`regionprops()` for filtering objects based on their properties (areas, lengths, perimeters, etc.), and :code:`largest_blobs()` for keeping/removing the largest connected components in the mask. There is also a :code:`hand_clean()` utility that allows you to draw polygons one-at-a-time and specify their pixel values. I usually find these tools sufficient for cleaning a mask, regardless of the amount of editing required. 
+3) Use image processing tools in *RivGraph* to edit your mask. There are morphological operators like :obj:`rivgraph.im_utils.dilate()` and :obj:`rivgraph.im_utils.erode()`, :obj:`rivgraph.im_utils.regionprops()` for filtering objects based on their properties (areas, lengths, perimeters, etc.), and :obj:`rivgraph.im_utils.largest_blobs()` for keeping/removing the largest connected components in the mask. There is also a :obj:`rivgraph.im_utils.hand_clean()` utility that allows you to draw polygons one-at-a-time and specify their pixel values. I usually find these tools sufficient for cleaning a mask, regardless of the amount of editing required.
 
 .. _georef:
 
@@ -140,7 +140,7 @@ Most masks are already produced in a GIS context and are already geographically 
 
 2) *RivGraph* computes morphologic metrics (length and width) using pixel coordinates. A georeferenced mask contains information about the units of the mask, and thus any metrics of physical distance will inherit these units. If your CRS is meters-based, your results will be in meters.
 
-3) Some of *RivGraph*'s functionality under the hood requires some heuristic thresholds or parameters. While these were designed to be as CRS-agnostic as possible, these functions will undoubtedly perform better when pixels have known units. As an example, generating a mesh along a braided river corridor requires some parameters defining the size and smoothness of the mesh. Having a mask with physically-meaningful units makes this parameterization much simpler and more intuitive. 
+3) Some of *RivGraph*'s functionality under the hood requires some heuristic thresholds or parameters. While these were designed to be as CRS-agnostic as possible, these functions will undoubtedly perform better when pixels have known units. As an example, generating a mesh along a braided river corridor requires some parameters defining the size and smoothness of the mesh. Having a mask with physically-meaningful units makes this parameterization much simpler and more intuitive.
 
 .. warning::
   You should **avoid** degree-based CRSs (like EPSG:4326). This is because the length of a degree is not uniform, but varies with latitude. For example, at the equator, a degree of longitude is roughly 111 km. In Anchorage, Alaska, a degree of longitude is approximately 55 km. Effectively, degrees are meaningless units of physical measurements. A more prudent approach would be to first project your mask into a meters-based CRS (e.g. the appropriate `UTM zone <https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system>`_) before analysis with *RivGraph*.
@@ -151,7 +151,7 @@ Most masks are already produced in a GIS context and are already geographically 
 Can my mask represent something that isn't a river?
 ---------------------------------------------------
 
-Perhaps you'd like to vectorize a road network or a vascular system. This is possible to do with *RivGraph*. However, you will not be able to instantiate the convenient *delta* or *river* classes as they are designed only for river channel networks. Instead, you will need to poke around the API to figure out which functions will work for you. A good starting point is to skeletonize your mask with `skeletonize_mask <https://jonschwenk.github.io/RivGraph/apiref/rivgraph.html#rivgraph.mask_to_graph.skeletonize_mask>`_, then run `skel_to_graph  <jonschwenk.github.io/RivGraph/apiref/rivgraph.html#rivgraph.mask_to_graph.skel_to_graph>`_ to convert the skeleton to a set of links and nodes. If you have an interesting non-river use-case, please send an email to j........k@gmail.com and we can add it as an example.
+Perhaps you'd like to vectorize a road network or a vascular system. This is possible to do with *RivGraph*. However, you will not be able to instantiate the convenient *delta* or *river* classes as they are designed only for river channel networks. Instead, you will need to poke around the API to figure out which functions will work for you. A good starting point is to skeletonize your mask with :obj:`rivgraph.mask_to_graph.skeletonize_mask()` then run :obj:`rivgraph.mask_to_graph.skel_to_graph()` to convert the skeleton to a set of links and nodes. If you have an interesting non-river use-case, please send an email to j........k@gmail.com and we can add it as an example.
 
 .. _supportedfiletypes:
 
@@ -160,6 +160,3 @@ What filetypes are supported for my mask?
 -----------------------------------------
 
 Any `gdal-readable filetype <https://gdal.org/drivers/raster/index.html>`_ should be fine. GeoTIFF is most common and recommended if possible.
-
-
-

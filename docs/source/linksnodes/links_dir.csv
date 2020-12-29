@@ -1,0 +1,6 @@
+key, type, length, description
+certain, np.array, N, 1 if the link’s direction has been set else 0
+certain_order, np.array, N, describes the order in which links were set. Lower certain_order corresponds to earlier-set links.
+certain_alg, np.array, N, algorithm id of the algorithm ultimately used to set the link direction
+guess, list of lists, N, guesses of the upstream node id for each link; corresponds to guess_alg
+guess_alg, list of lists, N, algorithm id used to compute guess; corresponds to guess
