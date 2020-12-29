@@ -435,7 +435,7 @@ def delete_link(linkid, links, nodes):
         Network nodes and associated properties with the link deleted.
 
     """
-    #TODO: Replace this function with the one in ln_utils.	    links, nodes = lnu.delete_link(links, nodes, linkid)
+    #TODO: Replace this function with the one in ln_utils.
 
     # Get index of link within links dict
     lid = links['id'].index(linkid)
