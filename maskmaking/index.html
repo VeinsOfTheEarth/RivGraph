@@ -36,7 +36,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Contributing" href="../contributing/index.html" />
+    <link rel="next" title="Links and Node Dictionaries" href="../linksnodes/index.html" />
     <link rel="prev" title="Let’s demo RivGraph on the Brahmaputra River!" href="../examples/braided_river_example/braided_river_example.html" /> 
 </head>
 
@@ -105,6 +105,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#what-filetypes-are-supported-for-my-mask">What filetypes are supported for my mask?</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../linksnodes/index.html">Links and Node Dictionaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../apiref/index.html">API Reference</a></li>
 </ul>
@@ -203,7 +204,7 @@
 <p>The mask is the cornerstone for using <em>RivGraph</em>. You should always ensure that it contains the features you want and none of the ones you don’t.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Make sure to remove all the objects (connected “on” pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or <a class="reference external" href="https://github.com/jonschwenk/RivGraph/issues/32">errors</a>. Often, a quick way to achieve this is via the <code class="code docutils literal notranslate"><span class="pre">largest_blobs()</span></code> function in <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py">im_utils</a>, which will keep only the largest connected component.</p>
+<p>Make sure to remove all the objects (connected “on” pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or <a class="reference external" href="https://github.com/jonschwenk/RivGraph/issues/32">errors</a>. Often, a quick way to achieve this is via the <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.im_utils.largest_blobs" title="rivgraph.im_utils.largest_blobs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.largest_blobs()</span></code></a> function, which will keep only the largest connected component.</p>
 </div>
 </div>
 <div class="section" id="what-should-a-mask-capture">
@@ -265,7 +266,7 @@ tool to convert the polygons to a binary raster (image). If you go this route, b
 </ol>
 </li>
 <li><p><a class="reference external" href="https://www.getpaint.net/download.html">Paint.NET</a> is an image-editing software that preserves georeferencing information. It’s fairly basic and easy to use. If you have a significant amount of hand-editing to do, look into it.</p></li>
-<li><p>Use image processing tools in <em>RivGraph</em> to edit your mask. There are morphological operators like <code class="code docutils literal notranslate"><span class="pre">dilate()</span></code> and <code class="code docutils literal notranslate"><span class="pre">erode()</span></code>, <code class="code docutils literal notranslate"><span class="pre">regionprops()</span></code> for filtering objects based on their properties (areas, lengths, perimeters, etc.), and <code class="code docutils literal notranslate"><span class="pre">largest_blobs()</span></code> for keeping/removing the largest connected components in the mask. There is also a <code class="code docutils literal notranslate"><span class="pre">hand_clean()</span></code> utility that allows you to draw polygons one-at-a-time and specify their pixel values. I usually find these tools sufficient for cleaning a mask, regardless of the amount of editing required.</p></li>
+<li><p>Use image processing tools in <em>RivGraph</em> to edit your mask. There are morphological operators like <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.im_utils.dilate" title="rivgraph.im_utils.dilate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.dilate()</span></code></a> and <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.im_utils.erode" title="rivgraph.im_utils.erode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.erode()</span></code></a>, <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.im_utils.regionprops" title="rivgraph.im_utils.regionprops"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.regionprops()</span></code></a> for filtering objects based on their properties (areas, lengths, perimeters, etc.), and <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.im_utils.largest_blobs" title="rivgraph.im_utils.largest_blobs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.largest_blobs()</span></code></a> for keeping/removing the largest connected components in the mask. There is also a <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.im_utils.hand_clean" title="rivgraph.im_utils.hand_clean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.hand_clean()</span></code></a> utility that allows you to draw polygons one-at-a-time and specify their pixel values. I usually find these tools sufficient for cleaning a mask, regardless of the amount of editing required.</p></li>
 </ol>
 </div>
 <div class="section" id="does-my-mask-need-to-be-georeferenced">
@@ -283,7 +284,7 @@ tool to convert the polygons to a binary raster (image). If you go this route, b
 </div>
 <div class="section" id="can-my-mask-represent-something-that-isn-t-a-river">
 <span id="nonriver"></span><h2>Can my mask represent something that isn’t a river?<a class="headerlink" href="#can-my-mask-represent-something-that-isn-t-a-river" title="Permalink to this headline">¶</a></h2>
-<p>Perhaps you’d like to vectorize a road network or a vascular system. This is possible to do with <em>RivGraph</em>. However, you will not be able to instantiate the convenient <em>delta</em> or <em>river</em> classes as they are designed only for river channel networks. Instead, you will need to poke around the API to figure out which functions will work for you. A good starting point is to skeletonize your mask with <a class="reference external" href="https://jonschwenk.github.io/RivGraph/apiref/rivgraph.html#rivgraph.mask_to_graph.skeletonize_mask">skeletonize_mask</a>, then run <a class="reference external" href="jonschwenk.github.io/RivGraph/apiref/rivgraph.html#rivgraph.mask_to_graph.skel_to_graph">skel_to_graph</a> to convert the skeleton to a set of links and nodes. If you have an interesting non-river use-case, please send an email to j……..k&#64;gmail.com and we can add it as an example.</p>
+<p>Perhaps you’d like to vectorize a road network or a vascular system. This is possible to do with <em>RivGraph</em>. However, you will not be able to instantiate the convenient <em>delta</em> or <em>river</em> classes as they are designed only for river channel networks. Instead, you will need to poke around the API to figure out which functions will work for you. A good starting point is to skeletonize your mask with <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.mask_to_graph.skeletonize_mask" title="rivgraph.mask_to_graph.skeletonize_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.mask_to_graph.skeletonize_mask()</span></code></a> then run <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.mask_to_graph.skel_to_graph" title="rivgraph.mask_to_graph.skel_to_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.mask_to_graph.skel_to_graph()</span></code></a> to convert the skeleton to a set of links and nodes. If you have an interesting non-river use-case, please send an email to j……..k&#64;gmail.com and we can add it as an example.</p>
 </div>
 <div class="section" id="what-filetypes-are-supported-for-my-mask">
 <span id="supportedfiletypes"></span><h2>What filetypes are supported for my mask?<a class="headerlink" href="#what-filetypes-are-supported-for-my-mask" title="Permalink to this headline">¶</a></h2>
@@ -299,7 +300,7 @@ tool to convert the polygons to a binary raster (image). If you go this route, b
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../contributing/index.html" class="btn btn-neutral float-right" title="Contributing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../linksnodes/index.html" class="btn btn-neutral float-right" title="Links and Node Dictionaries" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../examples/braided_river_example/braided_river_example.html" class="btn btn-neutral float-left" title="Let’s demo RivGraph on the Brahmaputra River!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
