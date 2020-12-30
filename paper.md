@@ -45,7 +45,7 @@ We are aware of one other package that extracts network topology from channel ne
 - `compute_network()` : walks along the skeleton to resolve the links and nodes
 - `prune_network()` : removes portions of the network that do not contribute meaningfully to its topology, like spurs. For the `delta` class, user-provided shoreline and inlet nodes files are required so that `RivGraph` can prune the network to the shoreline.
 - `compute_link_width_and_length()` : adds width and length attributes to each link
-- `assign_flow_directions()` : uses the algorithms of [] to set the flow direction of each link in the network
+- `assign_flow_directions()` : uses the algorithms of @schwenk2020 to set the flow direction of each link in the network
 
 Additional methods are available for plotting, exporting GeoTIFFs and geovectors, saving/loading the network, converting to adjacency matrices, computing junction angles, and finding islands.
 
