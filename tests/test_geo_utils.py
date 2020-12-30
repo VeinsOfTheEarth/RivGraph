@@ -207,6 +207,16 @@ def test_downsampled_result():
     assert (ds_file.GetGeoTransform()[5]) == (og_file.GetGeoTransform()[5]*2)
 
 
+def test_downsample_w_pad():
+    """Test downsampling geotiff with some padding due to division."""
+    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
+    outpath = os.path.join(basepath, os.path.normpath('tests/results/known/downsampled.tif'))
+    # run downsampling function
+    ofile = geo_utils.downsample_binary_geotiff(g_path, 0.76, outpath)
+    # assert output
+    assert ofile == outpath
+
+
 def test_delete_files():
     """Delete files created by tests."""
     # delete created files at the end

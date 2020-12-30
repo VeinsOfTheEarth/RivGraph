@@ -326,10 +326,8 @@ def downsample_binary_geotiff(input_file, ds_factor, output_name, thresh=None):
     img_x, img_y = np.shape(img)
     modfactor = 1/ds_factor
     if (img_x % modfactor > 0) or (img_y % modfactor > 0):
-        if (img_x % modfactor) > 0:
-            img_x += img_x % modfactor
-        elif (img_y % modfactor) > 0:
-            img_y += img_y % modfactor
+        img_x += img_x % modfactor
+        img_y += img_y % modfactor
     old_x, old_y = np.shape(img)
 
     # amount to pad by
