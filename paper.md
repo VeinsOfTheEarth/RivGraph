@@ -1,26 +1,14 @@
 ----
 title: 'RivGraph: Automatic extraction and analysis of river and delta channel network topology'
-
 tags:
-
   - Python
-
   - rivers
-
   - deltas
-
   - image processing
-
   - networks
-
   - channel network extraction
-
-  - fluvial geomorphology
-
-    
-
+  - fluvial geomorphology 
 authors:
-
   - name: Jon Schwenk^[Corresponding author]
     orcid: 0000-0001-5803-9686
     affiliation: "1"
@@ -32,17 +20,14 @@ affiliations:
    index: 1
  - name: Department of Civil, Architectural and Environmental Engineering, The University of Texas at Austin
    index: 2
-
 date: 01 January 2021
 bibliography: paper.bib
-
+---
 
 # Summary
 River networks are the "veins of the Earth" that sustain life and landscapes by carrying and distributing water, sediment, and nutrients throughout ecosystems and communities. At the largest scale, river networks drain continents through tree-like *tributary* networks. At smaller scales, river deltas and braided rivers form loopy, complex *distributary* river networks via avulsions and bifurcations. In order to model flows through these networks or analyze network structure, the topology, or connectivity, of the network must be resolved. Additionally, morphologic properties of each river link such as length, width, and sinuosity, as well as the direction of flow through the link, inform how fluxes travel through the network's channels.
 
 `RivGraph` is a Python package that automates the extraction and characterization of river channel networks from a user-provided binary image, or mask, of a channel network. Masks may be derived from (typically remotely-sensed) imagery, simulations, or even hand-drawn. `RivGraph` will create explicit representations of the channel network by resolving river centerlines as links, and junctions as nodes. Flow directions are solved for each link of the network without using auxiliary data, e.g. a digital elevation model (DEM). Morphologic properties are computed as well, including link lengths, widths, sinuosities, branching angles, and braiding indices. If provided, `RivGraph` will preserve georeferencing information of the mask and will export results as ESRI shapefiles, geojsons, and GeoTIFFs for easy import into GIS software. `RivGraph` can also return extracted networks as `networkx` objects for convenient interfacing with the full-featured `networkx` package [@hagberg2008]. Finally, `RivGraph` offers a suite of topologic metrics that were specifically designed for river channel network analysis [@tejedor2015].
-
-
 
 # Statement of need
 
@@ -50,9 +35,7 @@ Satellite and aerial photography have provided unprecedented opportunities to st
 
 `RivGraph` has already been instrumental in a number of investigations. The development of the flow directions algorithms itself provided insights into the nature of river channel network structure in braided rivers and deltas [@schwenk2020]. For deltas specifically, `RivGraph`-extracted networks have been used to study how water and sediment are partitioned at bifurcations [@dong2020], to determine how distance to the channel network plays a controlling role on Arctic delta lake dynamics [@vulis2020], and to construct a network-based model of nitrate removal across the Wax Lake Delta [@knights2020]. For braided rivers, `RivGraph` was used to extract channel networks from hydrodynamic simulations in order to develop the novel "entropic braiding index" [@tejedor2019], and a function for computing the eBI (as well as the classic braiding index) for braided rivers is provided in `RivGraph`. The work of @marra2014 represented an effort to understand braided rivers through their topologies, although their networks were apparently extracted manually. Ongoing, yet-unpublished work is using `RivGraph` to study river dynamics, delta loopiness, and nutrient transport through Arctic deltas. 
 
-We are aware of one other package that extracts network topology from channel network masks. The  `Orinoco` Python package [@marshak] uses a fast marching method to resolve the channel network in contrast to `RivGraph`'s skeletonization approach. `Orinoco` lacks many of the features provided by `RivGraph` and has not been widely tested to-date. If a DEM of the channel network is available, the Lowpath [@hiatt2020] add-on to the [Topological Tools for Geomorphological Analysis](https://github.com/tue-alga/ttga) package may be of interest.  
-
-
+We are aware of one other package that extracts network topology from channel network masks. The  `Orinoco` Python package [@marshak2020] uses a fast marching method to resolve the channel network in contrast to `RivGraph`'s skeletonization approach. `Orinoco` lacks many of the features provided by `RivGraph` and has not been widely tested to-date. If a DEM of the channel network is available, the Lowpath [@hiatt2020] add-on to the [Topological Tools for Geomorphological Analysis](https://github.com/tue-alga/ttga) package may be of interest.
 
 # Functionality and Ease of Use
 
