@@ -1,4 +1,4 @@
-----
+---
 title: 'RivGraph: Automatic extraction and analysis of river and delta channel network topology'
 tags:
   - Python
