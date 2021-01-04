@@ -1099,11 +1099,7 @@
                 <span class="n">conn_stay</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">lstay_idx</span><span class="p">]</span>
 
                 <span class="c1"># Update node connectivty of go link (stay link doesn&#39;t need updating)</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">node_id_go</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">conn_go</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="n">nid</span><span class="p">]))</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="kn">import</span> <span class="nn">pdb</span>
-                    <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+                <span class="n">node_id_go</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">conn_go</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="n">nid</span><span class="p">]))</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
                 <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">node_id_go</span><span class="p">)]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">lid_go</span><span class="p">)</span>
                 <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">node_id_go</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lid_stay</span><span class="p">)</span>
 
