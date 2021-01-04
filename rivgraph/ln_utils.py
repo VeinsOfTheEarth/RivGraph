@@ -937,11 +937,7 @@ def remove_two_link_nodes(links, nodes, dontremove):
                 conn_stay = links['conn'][lstay_idx]
 
                 # Update node connectivty of go link (stay link doesn't need updating)
-                try:
-                    node_id_go = (set(conn_go) - set([nid])).pop()
-                except:
-                    import pdb
-                    pdb.set_trace()
+                node_id_go = (set(conn_go) - set([nid])).pop()
                 nodes['conn'][nodes['id'].index(node_id_go)].remove(lid_go)
                 nodes['conn'][nodes['id'].index(node_id_go)].append(lid_stay)
 
