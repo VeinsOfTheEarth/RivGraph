@@ -58,7 +58,7 @@ Braided rivers should be analyzed with the `river` class, which instead of a use
 - `compute_centerline()` : computes the centerline of the holes-filled river mask (not individual channels)
 - `compute_mesh()` : creates a mesh of evenly-spaced transects that are approximately perpendicular to the centerline. The user can specify the mesh spacing and transect width.
 
-![Figure 2. A RivGraph-generated mesh for a mask of the Indus River.](./examples/images/indus_mesh_paper.JPG){width=20%}
+![Figure 2. A RivGraph-generated mesh for a mask of the Indus River.](./examples/images/indus_mesh_paper.JPG){width=40%}
 
 ### Advanced Functionality
 
