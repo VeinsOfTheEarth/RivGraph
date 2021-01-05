@@ -29,7 +29,7 @@ River networks sustain life and landscapes by carrying and distributing water, s
 
 `RivGraph` is a Python package that automates the extraction and characterization of river channel networks from a user-provided binary image, or mask, of a channel network (Fig. \autoref{fig:corefunctions}). Masks may be derived from (typically remotely-sensed) imagery, simulations, or even hand-drawn. `RivGraph` will create explicit representations of the channel network by resolving river centerlines as links, and junctions as nodes. Flow directions are solved for each link of the network without using auxiliary data, e.g. a digital elevation model (DEM). Morphologic properties are computed as well, including link lengths, widths, sinuosities, branching angles, and braiding indices. If provided, `RivGraph` will preserve georeferencing information of the mask and will export results as ESRI shapefiles, GeoJSONs, and GeoTIFFs for easy import into GIS software. `RivGraph` can also return extracted networks as `networkx` objects for convenient interfacing with the full-featured `networkx` package [@hagberg2008]. Finally, `RivGraph` offers a suite of topologic metrics that were specifically designed for river channel network analysis [@tejedor2015].
 
-![The core functionality of RivGraph for a delta channel network.\label{fig:corefunctions}](https://github.com/jonschwenk/RivGraph/blob/master/examples/images/rivgraph_overview_white.jpg)
+![The core functionality of RivGraph for a delta channel network.\label{fig:corefunctions}](./examples/images/rivgraph_overview_white.png)
 
 # Statement of need
 
@@ -37,7 +37,7 @@ Satellite and aerial photography have provided unprecedented opportunities to st
 
 `RivGraph` has already been instrumental in a number of investigations. The development of the flow directions algorithms itself provided insights into the nature of river channel network structure in braided rivers and deltas [@schwenk2020]. For deltas specifically, `RivGraph`-extracted networks have been used to study how water and sediment are partitioned at bifurcations [@dong2020], to determine how distance to the channel network plays a controlling role on Arctic delta lake dynamics [@vulis2020], and to construct a network-based model of nitrate removal across the Wax Lake Delta [@knights2020]. For braided rivers, `RivGraph` was used to extract channel networks from hydrodynamic simulations in order to develop the novel "entropic braiding index" [@tejedor2019], and a function for computing the eBI (as well as the classic braiding index) for braided rivers is provided in `RivGraph`. The work of @marra2014 represented an effort to understand braided rivers through their topologies, although their networks were apparently extracted manually. Ongoing, yet-unpublished work is using `RivGraph` to study river dynamics, delta loopiness, and nutrient transport through Arctic deltas. 
 
-We are aware of one other package that extracts network topology from channel network masks. The  `Orinoco` Python package [@marshak2020] uses a fast marching method to resolve the channel network in contrast to `RivGraph`'s skeletonization approach. `Orinoco` uses only a shortest-path approach for setting flow directions rather than `RivGraph`'s exploitation of many morphologic features (including shortest path) to set flow directions. If a DEM of the channel network is available, the Lowpath [@hiatt2020] add-on to the [Topological Tools for Geomorphological Analysis](https://github.com/tue-alga/ttga) package may be of interest. `RivGraph`'s along-river mesh generation for braided rivers (\autoref:indusmesh) was inspired by RivMAP [@schwenk2017b].
+We are aware of one other package that extracts network topology from channel network masks. The  `Orinoco` Python package [@marshak2020] uses a fast marching method to resolve the channel network in contrast to `RivGraph`'s skeletonization approach. `Orinoco` uses only a shortest-path approach for setting flow directions rather than `RivGraph`'s exploitation of many morphologic features (including shortest path) to set flow directions. If a DEM of the channel network is available, the Lowpath [@hiatt2020] add-on to the [Topological Tools for Geomorphological Analysis](https://github.com/tue-alga/ttga) package may be of interest. `RivGraph`'s along-river mesh generation for braided rivers (Fig. \autoref:indusmesh) was inspired by RivMAP [@schwenk2017b].
 
 # Functionality and Ease of Use
 
@@ -58,7 +58,7 @@ Braided rivers should be analyzed with the `river` class, which instead of a use
 - `compute_centerline()` : computes the centerline of the holes-filled river mask (not individual channels)
 - `compute_mesh()` : creates a mesh of evenly-spaced transects that are approximately perpendicular to the centerline. The user can specify the mesh spacing and transect width.
 
-![A RivGraph-generated mesh for a mask of the Indus River.\label{fig:indusmesh}](https://github.com/jonschwenk/RivGraph/blob/master/examples/images/indus_mesh_paper.JPG)
+![A RivGraph-generated mesh for a mask of the Indus River.\label{fig:indusmesh}](./examples/images/indus_mesh_paper.JPG){width=755%}
 
 ### Advanced Functionality
 
