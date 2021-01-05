@@ -37,12 +37,14 @@ You may then want to install Spyder or your preferred IDE. Conda should fetch al
 If you want to install RivGraph into an already-existing environment, you can run <pre><code>conda activate myenv
 conda install rivgraph -c jschwenk</code></pre>
 
-**Note**: While packaged for all platforms, we have currently only tested the win32, win64, and linux-64 platforms.
+You may also [install RivGraph from this Github repo](https://jonschwenk.github.io/RivGraph/install/index.html#installation-from-source). 
 
-Savvy users have been able to install RivGraph from this Github repo, but usually not without dependency headaches. See the [environment file](https://github.com/jonschwenk/RivGraph/blob/master/environment.yml) for dependencies.
+Instructions for testing your installation are available [here](https://jonschwenk.github.io/RivGraph/install/index.html#installation-from-source).
 
 How to use?
 -----
+Please see the [documentation](https://jonschwenk.github.io/RivGraph/) for more detailed instructions.
+
 RivGraph requires that you provide a binary mask of your network. [This page](https://jonschwenk.github.io/RivGraph/maskmaking/index.html) provides some help, hints, and tools for finding or creating your mask. 
 
 To see what RivGraph does and how to operate it, you can work through the [Colville Delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb) or the [Brahmaputra River example](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb). Both examples include sample masks. 
@@ -50,32 +52,6 @@ To see what RivGraph does and how to operate it, you can work through the [Colvi
 RivGraph contains two primary classes (`delta` and `river`) that provide convenient methods for creating a processing workflow for a channel network. As the examples demonstrate, you can instantiate a delta or river class, then apply associated methods for each. After looking at the examples, take a look at [classes.py](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/classes.py) to understand what methods are available. 
 
 **Note**: there are many functions under the hood that may be useful to you. Check out the [im_utils script](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py) (image utilities) in particular for functions to help whip your mask into shape!
-
-The full API [documentation](https://jonschwenk.github.io/RivGraph/) is also a good resource.
-
-
-
-Task list
------
-These tasks represent what is needed before we "officially" release RivGraph via publication in the [Journal of Open Source Software](https://joss.theoj.org/).
-
-3/29/2020 - Task list created
-- [x] [Conda Packaging](anaconda.org/jschwenk/rivgraph) - Updates 5/25/2020
-- [x] [Delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb)
-- [x] [Braided river example](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb)
-- [x] How to fix flow directions (shown in braided river example, section 7.1)
-- [x] Function for removing artificial nodes. Restructured code to not add these automatically, but can be added with a [function](https://github.com/jonschwenk/RivGraph/blob/9bc320239443ea7b1673307f77f4edb86251aaf9/rivgraph/ln_utils.py#L724).
-- [x] [Unit testing](https://github.com/jonschwenk/RivGraph/tree/master/tests)
-- [x] Function documentation
-- [x] How to prepare masks for inputs
-- [x] Where to get masks
-- [ ] How to draw shorelines
-
-
-Contacting us
--------------
-
-The best way to get in touch is to [open an issue](https://github.com/jonschwenk/rivgraph/issues/new) or comment on any open issue or pull request. Otherwise, send an email to j.........k@gmail.com
 
 
 Contributing
@@ -89,8 +65,14 @@ Citations help us justify the effort that goes into building and maintaining thi
 
 As of 5/26/2020, please cite our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html) and/or our [AGU Presentation](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph). We hope to soon publish RivGraph in the Journal of Open Source Software.
 
+Contacting us
+-------------
+
+The best way to get in touch is to [open an issue](https://github.com/jonschwenk/rivgraph/issues/new) or comment on any open issue or pull request. Otherwise, send an email to j.........k@gmail.com
+
+
 License
--------
+------------
 
 This is free software: you can redistribute it and/or modify it under the terms of the **BSD 3-clause License**. A copy of this license is provided in [LICENSE.txt](https://github.com/jonschwenk/RivGraph/blob/master/LICENSE.txt).
 
