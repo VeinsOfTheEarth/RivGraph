@@ -80,7 +80,7 @@ Braided rivers should be analyzed with the `river` class, which instead of a use
 
 # Dependencies
 
-`RivGraph` relies on functionality from the following Python packages: GDAL [@gdal2020], NumPy [@harris2020], Matplotlib [@hunter2007], GeoPandas [@jordahl2020], Shapely [gillies2007], Fiona [@gillies2011], pyproj [@snow2020], scikit-image [@vanderwalt2014], OpenCV [@bradski2000], networkx [@hagberg2008], and fastdtw [@slaypni2020].
+`RivGraph` relies on functionality from the following Python packages: GDAL [@gdal2020], NumPy [@harris2020], Matplotlib [@hunter2007], GeoPandas [@jordahl2020], Shapely [@gillies2007], Fiona [@gillies2011], pyproj [@snow2020], scikit-image [@vanderwalt2014], OpenCV [@bradski2000], networkx [@hagberg2008], and fastdtw [@slaypni2020].
 
 # Acknowledgements
 
