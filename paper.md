@@ -78,6 +78,10 @@ Braided rivers should be analyzed with the `river` class, which instead of a use
 - `rivers/river_directionality` : river-specific algorithms for setting flow directions
 - `rivers/river_utils` : algorithms for pruning rivers and generating along-river meshes
 
+# Dependencies
+
+`RivGraph` relies on functionality from the following Python packages: GDAL [@gdal2020], NumPy [@harris2020], Matplotlib [@hunter2007], GeoPandas [@jordahl2020], Shapely [gillies2007], Fiona [@gillies2011], pyproj [@snow2020], scikit-image [@vanderwalt2014], OpenCV [@bradski2000], networkx [@hagberg2008], and fastdtw [@slaypni2020].
+
 # Acknowledgements
 
 We thank Efi Foufoula-Georgiou, Alejandro Tejedor, Anthony Longjas, Lawrence Vulius, Kensuke Naito, and Deon Knights for providing test cases and feedback for `RivGraph`'s development. We are also grateful to Anastasia Piliouras and Joel Rowland for providing valuable insights and subsequent testing of `RivGraph`'s flow directionality algorithms. 
