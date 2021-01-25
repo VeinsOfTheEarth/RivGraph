@@ -200,27 +200,56 @@ The easiest way to do this is by first downloading the <a class="reference exter
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p><em>RivGraph</em> dependencies may be pinned to specific versions of packages (e.g. geopandas 0.7) that may not mesh with your existing environment.
-Check the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/environment.yml">dependencies file</a> for these cases.</p>
+Check the <a class="reference external" href="../../../../environment.yml">environment file</a> for these cases.</p>
 </div>
 </div>
 <div class="section" id="installation-from-source">
 <h2>Installation from source<a class="headerlink" href="#installation-from-source" title="Permalink to this headline">¶</a></h2>
 <p>If you would prefer to install the <em>RivGraph</em> package from source, then follow these steps:</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><em>Rivgraph</em> uses many geospatial dependencies (e.g. GDAL) that can be
+difficult to install. Note that so long as the continuous integration
+workflows on GitHub are working (denoted by a green check next to the latest
+commit message on the source repository home page), the latest version of
+the source code is stable and installation from source will work if the
+dependencies are correctly installed.</p>
+</div>
 <p>1. Clone the repository</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/jonschwenk/RivGraph.git
 </pre></div>
 </div>
-<p>2. From the cloned folder, run the following in the command line:</p>
+<p>2. Install dependencies; note these can be installed via conda from the
+<a class="reference external" href="../../../../environment.yml">environment.yml</a> file, however a list is also
+provided below with links to the homepage for each dependency.</p>
+<dl class="simple">
+<dt><strong>RivGraph Dependencies:</strong></dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://www.python.org/">python</a> (tested on v3.6)</p></li>
+<li><p><a class="reference external" href="https://gdal.org/">GDAL</a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/">NumPy</a></p></li>
+<li><p><a class="reference external" href="https://geopandas.org/">GeoPandas</a> (v0.7.0)</p></li>
+<li><p><a class="reference external" href="https://scikit-image.org/">scikit-image</a></p></li>
+<li><p><a class="reference external" href="https://github.com/skvark/opencv-python">OpenCV</a></p></li>
+<li><p><a class="reference external" href="https://networkx.org/">NetworkX</a></p></li>
+<li><p><a class="reference external" href="https://matplotlib.org/">Matplotlib</a></p></li>
+<li><p><a class="reference external" href="https://pyproj4.github.io/pyproj/stable/">pyproj</a></p></li>
+<li><p><a class="reference external" href="https://shapely.readthedocs.io/en/latest/">Shapely</a></p></li>
+<li><p><a class="reference external" href="https://fiona.readthedocs.io/en/latest/">Fiona</a></p></li>
+<li><p><a class="reference external" href="https://github.com/slaypni/fastdtw">FastDTW</a></p></li>
+</ul>
+</dd>
+</dl>
+<p>3. From the cloned folder, run the following in the command line:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python setup.py install
 </pre></div>
 </div>
 <p>to install the <em>RivGraph</em> package.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If you encounter an error during step 2, check that you’ve installed the required dependencies.
-A list of the <em>RivGraph</em> dependencies can be found in the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/environment.yml">environment.yml</a> file.</p>
+<p>If you run into issues installing <em>RivGraph</em> at this stage, please check
+to see whether you’ve installed all of the required dependencies.</p>
 </div>
-<p>3. To test your installation, from the cloned folder you can run the unit tests with the following command:</p>
+<p>4. To test your installation, from the cloned folder you can run the unit tests with the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pytest
 </pre></div>
 </div>
