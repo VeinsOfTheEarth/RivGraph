@@ -205,10 +205,17 @@
     <span class="k">return</span> <span class="n">pixgon</span></div>
 
 
-<div class="viewcode-block" id="get_island_properties"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_utils.get_island_properties">[docs]</a><span class="k">def</span> <span class="nf">get_island_properties</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="n">pixlen</span><span class="p">,</span> <span class="n">pixarea</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">gt</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+<div class="viewcode-block" id="get_island_properties"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_utils.get_island_properties">[docs]</a><span class="k">def</span> <span class="nf">get_island_properties</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="n">pixlen</span><span class="p">,</span> <span class="n">pixarea</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">gt</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get island properties.&quot;&quot;&quot;</span>
+    <span class="c1"># Imask = d.Imask.copy()</span>
+    <span class="c1"># pixlen = d.pixlen</span>
+    <span class="c1"># pixarea = d.pixarea</span>
+    <span class="c1"># crs = d.crs</span>
+    <span class="c1"># gt = d.gt</span>
+    <span class="c1"># props = [&#39;area&#39;, &#39;maxwidth&#39;, &#39;major_axis_length&#39;,</span>
+    <span class="c1">#                              &#39;minor_axis_length&#39;, &#39;surrounding_links&#39;]</span>
+    
     <span class="c1"># maxwidth is an additional property</span>
-
     <span class="k">if</span> <span class="s1">&#39;maxwidth&#39;</span> <span class="ow">in</span> <span class="n">props</span><span class="p">:</span>
         <span class="n">props</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;maxwidth&#39;</span><span class="p">)</span>
         <span class="n">do_maxwidth</span> <span class="o">=</span> <span class="kc">True</span>
@@ -224,7 +231,7 @@
     <span class="n">Imaskpad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
     <span class="n">Imp_invert</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">Imaskpad</span><span class="p">)</span>
 
-    <span class="n">rp_islands</span><span class="p">,</span> <span class="n">Ilabeled</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">regionprops</span><span class="p">(</span><span class="n">Imp_invert</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="n">props</span><span class="p">)</span>
+    <span class="n">rp_islands</span><span class="p">,</span> <span class="n">Ilabeled</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">regionprops</span><span class="p">(</span><span class="n">Imp_invert</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="n">connectivity</span><span class="p">)</span>
 
     <span class="c1"># Make polygons of the island perimeters</span>
     <span class="c1"># Also get ids to match the labeled image</span>

@@ -972,15 +972,19 @@ skeleton’s graph.</p>
 
 <dl class="method">
 <dt id="rivgraph.classes.rivnetwork.get_islands">
-<code class="descname">get_islands</code><span class="sig-paren">(</span><em>props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length', 'surrounding_links']</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.get_islands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.get_islands" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_islands</code><span class="sig-paren">(</span><em>props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length', 'surrounding_links'], connectivity=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#rivnetwork.get_islands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.rivnetwork.get_islands" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds all the islands in the binary mask and computes their morphological
 properties. Can be used to help “clean” masks of small islands. Must
 run compute_network() first.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>props</strong> (<em>list</em><em>, </em><em>optional</em>) – Properties to compute for each island. Properties can be any of those
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>props</strong> (<em>list</em><em>, </em><em>optional</em>) – Properties to compute for each island. Properties can be any of those
 provided by rivgraph.im_utils.regionprops.
-The default is [‘area’, ‘maxwidth’, ‘major_axis_length’, ‘minor_axis_length’].</p>
+The default is [‘area’, ‘maxwidth’, ‘major_axis_length’, ‘minor_axis_length’].</p></li>
+<li><p><strong>connectivity</strong> (<em>int</em><em>, </em><em>optional</em>) – If 1, 4-connectivity will be used to determine connected blobs. If
+2, 8-connectivity will be used. The default is 2.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>islands</strong> – Contains the polygons of each island with the requested property
@@ -3752,7 +3756,7 @@ Also see <code class="xref py py-mod docutils literal notranslate"><span class="
 <p>&#64;author: Jon</p>
 <dl class="function">
 <dt id="rivgraph.mask_utils.get_island_properties">
-<code class="descclassname">rivgraph.mask_utils.</code><code class="descname">get_island_properties</code><span class="sig-paren">(</span><em>Imask</em>, <em>pixlen</em>, <em>pixarea</em>, <em>crs</em>, <em>gt</em>, <em>props</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_utils.html#get_island_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_utils.get_island_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rivgraph.mask_utils.</code><code class="descname">get_island_properties</code><span class="sig-paren">(</span><em>Imask</em>, <em>pixlen</em>, <em>pixarea</em>, <em>crs</em>, <em>gt</em>, <em>props</em>, <em>connectivity=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/mask_utils.html#get_island_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.mask_utils.get_island_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get island properties.</p>
 </dd></dl>
 

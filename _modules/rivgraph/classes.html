@@ -290,7 +290,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">path_to_mask</span><span class="p">)</span>
 
         <span class="c1"># Handle georeferencing</span>
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">])</span>
         <span class="c1"># GA_Update required for setting dummy projection/geotransform</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gdobj</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">],</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GA_Update</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imshape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gdobj</span><span class="o">.</span><span class="n">RasterYSize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdobj</span><span class="o">.</span><span class="n">RasterXSize</span><span class="p">)</span>
@@ -407,7 +406,8 @@
 
 
 <div class="viewcode-block" id="rivnetwork.get_islands"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.get_islands">[docs]</a>    <span class="k">def</span> <span class="nf">get_islands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;area&#39;</span><span class="p">,</span> <span class="s1">&#39;maxwidth&#39;</span><span class="p">,</span> <span class="s1">&#39;major_axis_length&#39;</span><span class="p">,</span>
-                                 <span class="s1">&#39;minor_axis_length&#39;</span><span class="p">,</span> <span class="s1">&#39;surrounding_links&#39;</span><span class="p">]):</span>
+                                 <span class="s1">&#39;minor_axis_length&#39;</span><span class="p">,</span> <span class="s1">&#39;surrounding_links&#39;</span><span class="p">],</span>
+                          <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds all the islands in the binary mask and computes their morphological</span>
 <span class="sd">        properties. Can be used to help &quot;clean&quot; masks of small islands. Must</span>
@@ -419,7 +419,10 @@
 <span class="sd">            Properties to compute for each island. Properties can be any of those</span>
 <span class="sd">            provided by rivgraph.im_utils.regionprops.</span>
 <span class="sd">            The default is [&#39;area&#39;, &#39;maxwidth&#39;, &#39;major_axis_length&#39;, &#39;minor_axis_length&#39;].</span>
-
+<span class="sd">        connectivity : int, optional</span>
+<span class="sd">            If 1, 4-connectivity will be used to determine connected blobs. If</span>
+<span class="sd">            2, 8-connectivity will be used. The default is 2. </span>
+<span class="sd">            </span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        islands : geopandas GeoDataFrame</span>
@@ -439,7 +442,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Getting island properties...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
-        <span class="n">islands</span><span class="p">,</span> <span class="n">Iislands</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">get_island_properties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixarea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gt</span><span class="p">,</span> <span class="n">props</span><span class="p">)</span>
+        <span class="n">islands</span><span class="p">,</span> <span class="n">Iislands</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">get_island_properties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixarea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gt</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="n">connectivity</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span>
