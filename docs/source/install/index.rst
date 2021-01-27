@@ -14,7 +14,7 @@ Installation via *conda*
 
 The latest 'stable' version of *RivGraph* can be installed via `conda`.
 We recommend installing *RivGraph* into a fresh conda environment to minimize the risk of dependency clashes.
-The easiest way to do this is by first downloading the `environment.yml <https://github.com/jonschwenk/RivGraph/blob/master/environment.yml>`_, (right-click, "Save As...") opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:
+The easiest way to do this is by first downloading the `environment.yml <https://github.com/jonschwenk/RivGraph/blob/master/environment.yml>`_ (go to link, click "Raw", then copy the contents into a text editor and save as 'environment.yml'), opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:
 ::
 
    $ conda env create --file /path/to/environment.yml
