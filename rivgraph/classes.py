@@ -123,7 +123,6 @@ class rivnetwork:
         self.paths['input_mask'] = os.path.normpath(path_to_mask)
 
         # Handle georeferencing
-        print(self.paths['input_mask'])
         # GA_Update required for setting dummy projection/geotransform
         self.gdobj = gdal.Open(self.paths['input_mask'], gdal.GA_Update)
         self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
@@ -240,7 +239,8 @@ class rivnetwork:
 
 
     def get_islands(self, props=['area', 'maxwidth', 'major_axis_length',
-                                 'minor_axis_length', 'surrounding_links']):
+                                 'minor_axis_length', 'surrounding_links'],
+                          connectivity=2):
         """
         Finds all the islands in the binary mask and computes their morphological
         properties. Can be used to help "clean" masks of small islands. Must
@@ -252,7 +252,10 @@ class rivnetwork:
             Properties to compute for each island. Properties can be any of those
             provided by rivgraph.im_utils.regionprops.
             The default is ['area', 'maxwidth', 'major_axis_length', 'minor_axis_length'].
-
+        connectivity : int, optional
+            If 1, 4-connectivity will be used to determine connected blobs. If
+            2, 8-connectivity will be used. The default is 2. 
+            
         Returns
         -------
         islands : geopandas GeoDataFrame
@@ -272,7 +275,7 @@ class rivnetwork:
         if self.verbose is True:
             print('Getting island properties...', end='')
 
-        islands, Iislands = mu.get_island_properties(self.Imask, self.pixlen, self.pixarea, self.crs, self.gt, props)
+        islands, Iislands = mu.get_island_properties(self.Imask, self.pixlen, self.pixarea, self.crs, self.gt, props, connectivity=connectivity)
 
         if self.verbose is True:
             print('done.')

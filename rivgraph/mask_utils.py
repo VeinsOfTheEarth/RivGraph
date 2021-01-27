@@ -38,10 +38,17 @@ def pixagon(c_cent, r_cent, pixlen):
     return pixgon
 
 
-def get_island_properties(Imask, pixlen, pixarea, crs, gt, props):
+def get_island_properties(Imask, pixlen, pixarea, crs, gt, props, connectivity=2):
     """Get island properties."""
+    # Imask = d.Imask.copy()
+    # pixlen = d.pixlen
+    # pixarea = d.pixarea
+    # crs = d.crs
+    # gt = d.gt
+    # props = ['area', 'maxwidth', 'major_axis_length',
+    #                              'minor_axis_length', 'surrounding_links']
+    
     # maxwidth is an additional property
-
     if 'maxwidth' in props:
         props.remove('maxwidth')
         do_maxwidth = True
@@ -57,7 +64,7 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props):
     Imaskpad = np.array(np.pad(Imask, 1, mode='constant'), dtype=np.bool)
     Imp_invert = np.invert(Imaskpad)
 
-    rp_islands, Ilabeled = iu.regionprops(Imp_invert, props=props)
+    rp_islands, Ilabeled = iu.regionprops(Imp_invert, props=props, connectivity=connectivity)
 
     # Make polygons of the island perimeters
     # Also get ids to match the labeled image

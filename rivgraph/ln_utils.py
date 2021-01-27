@@ -1518,9 +1518,6 @@ def links_to_gpd(links, gdobj):
     # Create geodataframe
     links_gpd = gpd.GeoDataFrame()
 
-    # Assign CRS
-    links_gpd.crs = CRS(gdobj.GetProjection())
-
     # Append geometries
     geoms = []
     for i, lidx in enumerate(links['idx']):
@@ -1532,5 +1529,9 @@ def links_to_gpd(links, gdobj):
     links_gpd['id'] = links['id']
     links_gpd['us node'] = [c[0] for c in links['conn']]
     links_gpd['ds node'] = [c[1] for c in links['conn']]
+    
+    # Assign CRS - done last to avoid DeprecationWarning - need geometry 
+    # to exist before assigning CRS.
+    links_gpd.crs = CRS(gdobj.GetProjection())
 
     return links_gpd
