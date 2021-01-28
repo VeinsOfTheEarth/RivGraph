@@ -24,7 +24,7 @@ The figure above demonstrates the core components of RivGraph, but many other fe
 
 All of RivGraph's functionality maintains and respects georeferencing information. If you start with a georeferenced mask (e.g. a GeoTIFF), RivGraph exports your results in the CRS (coordinate reference system) of your mask for convenient mapping, analysis, and fusion with other datasets in a GIS.
 
-You can see some description of RivGraph's functionality via this [AGU poster](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph), and the flow directionality logic and validation is described in our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html). Examples demonstrating the basic RivGraph features are available for a [delta channel network](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.py.ipynb) and a [braided river](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb).
+You can see some description of RivGraph's functionality via this [AGU poster](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph), and the flow directionality logic and validation is described in our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html). Examples demonstrating the basic RivGraph features are available for a [delta channel network](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb) and a [braided river](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb).
 
 Installing
 -----
