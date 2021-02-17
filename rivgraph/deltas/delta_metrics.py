@@ -74,8 +74,8 @@ def graphiphy(links, nodes, weight=None):
 
     G = nx.DiGraph()
     G.add_nodes_from(nodes['id'])
-    for lc, wt in zip(links['conn'], weights):
-        G.add_edge(lc[0], lc[1], weight=wt)
+    for lc, wt, lid in zip(links['conn'], weights, links['id']):
+        G.add_edge(lc[0], lc[1], weight=wt, linkid=lid)
 
     return G
 
@@ -114,6 +114,7 @@ def intermediate_vars(G):
     # entries a_{uv} that correspond to the fraction of the flux
     # present at node v that flows through the channel (vu). Flux partitioning
     # is done via channel widths.
+    
     # Compute normalized weighted adjacency matrix
     A = normalize_adj_matrix(G)
 

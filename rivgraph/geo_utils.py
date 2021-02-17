@@ -71,7 +71,7 @@ def geotiff_vals_from_coords(coords, gd_obj):
     Arguments
     ---------
     coords : np.array()
-        An Nx2 numpy array, where each row is a (lat, lon) pair.
+        An Nx2 numpy array, where each row is a (lon, lat) pair.
     gd_obj : osgeo.gdal.Dataset
         Geotiff object created with gdal.Open().
 

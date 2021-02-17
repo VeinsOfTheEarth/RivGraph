@@ -179,7 +179,7 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
     # Store attributes as strings (numpy types give fiona trouble)
     dontstore = ['idx']
     storekeys = [k for k in nodes.keys() if len(nodes[k]) == len(nodes['id']) and k not in dontstore]
-    store_as_num = ['id', 'idx', 'logflux', 'flux']
+    store_as_num = ['id', 'idx', 'logflux', 'flux', 'outletflux']
     for k in storekeys:
         if k in store_as_num:
             gdf[k] = [c for c in nodes[k]]
