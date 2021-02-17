@@ -241,8 +241,8 @@
 
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
     <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
-    <span class="k">for</span> <span class="n">lc</span><span class="p">,</span> <span class="n">wt</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">],</span> <span class="n">weights</span><span class="p">):</span>
-        <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">lc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="n">wt</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">lc</span><span class="p">,</span> <span class="n">wt</span><span class="p">,</span> <span class="n">lid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">],</span> <span class="n">weights</span><span class="p">,</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]):</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">lc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="n">wt</span><span class="p">,</span> <span class="n">linkid</span><span class="o">=</span><span class="n">lid</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">G</span></div>
 
@@ -281,6 +281,7 @@
     <span class="c1"># entries a_{uv} that correspond to the fraction of the flux</span>
     <span class="c1"># present at node v that flows through the channel (vu). Flux partitioning</span>
     <span class="c1"># is done via channel widths.</span>
+    
     <span class="c1"># Compute normalized weighted adjacency matrix</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">normalize_adj_matrix</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
 
