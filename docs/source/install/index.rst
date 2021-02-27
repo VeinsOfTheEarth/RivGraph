@@ -31,7 +31,7 @@ If you would rather install *RivGraph* into a pre-existing environment "myenv", 
 .. warning::
 
  *RivGraph* dependencies may be pinned to specific versions of packages (e.g. geopandas 0.7) that may not mesh with your existing environment.
- Check the `environment file <../../../../environment.yml>`_ for these cases.
+ Check the `environment file <https://github.com/jonschwenk/RivGraph/blob/master/environment.yml>`_ for these cases.
 
 Installation from source
 ------------------------
@@ -53,7 +53,7 @@ If you would prefer to install the *RivGraph* package from source, then follow t
    $ git clone https://github.com/jonschwenk/RivGraph.git
 
 2. Install dependencies; note these can be installed via conda from the
-`environment.yml <../../../../environment.yml>`_ file, however a list is also
+`environment.yml <https://github.com/jonschwenk/RivGraph/blob/master/environment.yml>`_ file, however a list is also
 provided below with links to the homepage for each dependency.
 
 **RivGraph Dependencies:**
@@ -81,7 +81,8 @@ to install the *RivGraph* package.
    If you run into issues installing *RivGraph* at this stage, please check
    to see whether you've installed all of the required dependencies.
 
-4. To test your installation, from the cloned folder you can run the unit tests with the following command:
+4. To test your installation, you need to install the `pytest <https://docs.pytest.org/en/stable/index.html>`_ package.
+Then from the cloned folder you can run the unit tests with the following command:
 ::
 
    $ pytest
