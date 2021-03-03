@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/jonschwenk/rivgraph.svg?branch=master)](https://api.travis-ci.org/jonschwenk/rivgraph)
+[![build](https://github.com/jonschwenk/RivGraph/actions/workflows/build.yml/badge.svg)](https://github.com/jonschwenk/RivGraph/actions/workflows/build.yml)
 [![Coverage Status](https://coveralls.io/repos/github/jonschwenk/RivGraph/badge.svg?branch=master)](https://coveralls.io/github/jonschwenk/RivGraph?branch=master)
 ![docs](https://github.com/jonschwenk/RivGraph/workflows/docs/badge.svg)
 <br />
