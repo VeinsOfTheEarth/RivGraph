@@ -4,8 +4,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python
-  - gdal<=3.1
+  - python=3.8
+  - gdal=3.1.4
   - numpy
   - geopandas=0.7.0
   - scikit-image
