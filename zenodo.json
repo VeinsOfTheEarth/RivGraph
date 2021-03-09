@@ -1,0 +1,33 @@
+{
+    "title": "RivGraph: Automatic extraction and analysis of river and delta channel network topology", 
+    "description": "<p>Minor bug fixes since v0.3, and pinned gdal to v3.1 as conda could not properly install gdal when creating the environment via environment.yml. Otherwise, no major changes. This version is being released in tandem with publication of RivGraph in the Journal of Open Source Software.</p>", 
+    "license": "BSD-3", 
+    "version": "v0.4", 
+    "upload_type": "software", 
+    "publication_date": "2021-03-09", 
+    "creators": [
+        {
+            "affiliation": "Los Alamos National Laboratory", 
+            "name": "Jon Schwenk",
+	    "ORCID": https://orcid.org/0000-0001-5803-9686
+        }, 
+        {
+            "affiliation": "University of Texas at Austin", 
+            "name": "J. Hariharan",
+            "ORCID": https://orcid.org/0000-0002-1343-193X
+        }
+    ], 
+    "access_right": "open", 
+    "related_identifiers": [
+        {
+            "scheme": "url", 
+            "identifier": "https://github.com/jonschwenk/RivGraph/tree/v0.4", 
+            "relation": "isSupplementTo"
+        }, 
+        {
+            "scheme": "doi", 
+            "identifier": "10.5281/zenodo.3661472", 
+            "relation": "isVersionOf"
+        }
+    ]
+}
