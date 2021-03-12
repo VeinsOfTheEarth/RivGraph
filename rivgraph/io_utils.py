@@ -13,7 +13,10 @@ import os
 import pickle
 import ogr
 import osr
-import gdal
+try:
+    from osgeo import gdal
+except ImportError:
+    import gdal
 import numpy as np
 import pandas as pd
 import geopandas as gpd

@@ -7,7 +7,10 @@ import numpy as np
 from rivgraph import geo_utils
 # import osr
 # import ogr
-import gdal
+try:
+    from osgeo import gdal
+except ImportError:
+    import gdal
 from pyproj import CRS
 
 from inspect import getsourcefile
