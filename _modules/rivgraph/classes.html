@@ -173,7 +173,10 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">gdal</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">gdal</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">gdal</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 <span class="kn">from</span> <span class="nn">pyproj.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
@@ -421,8 +424,8 @@
 <span class="sd">            The default is [&#39;area&#39;, &#39;maxwidth&#39;, &#39;major_axis_length&#39;, &#39;minor_axis_length&#39;].</span>
 <span class="sd">        connectivity : int, optional</span>
 <span class="sd">            If 1, 4-connectivity will be used to determine connected blobs. If</span>
-<span class="sd">            2, 8-connectivity will be used. The default is 2. </span>
-<span class="sd">            </span>
+<span class="sd">            2, 8-connectivity will be used. The default is 2.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        islands : geopandas GeoDataFrame</span>
@@ -603,7 +606,7 @@
 <span class="sd">            - mesh (centerline mesh, river classes only)</span>
 
 <span class="sd">            - centerline_smooth (river classes only)</span>
-<span class="sd">            </span>
+
 <span class="sd">        ftype : str</span>
 <span class="sd">            Sets the output file format. Choose from:</span>
 
@@ -1044,7 +1047,7 @@
         <span class="c1"># Store original coordinates</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xo</span> <span class="o">=</span> <span class="n">x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">yo</span> <span class="o">=</span> <span class="n">y</span>
-        
+
         <span class="c1"># Store crs info if provided</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">crs</span>
 
@@ -1243,16 +1246,16 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not map intersections to inflection point pairs because infs_os not computed. Run infs() first.&#39;</span><span class="p">)</span>
-            
-            
+
+
     <span class="k">def</span> <span class="nf">mig_rate_transect_matching</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">dt_years</span><span class="p">,</span> <span class="n">path_matchers</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mig_spacing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path_mig_vectors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute migration rate using &quot;transect matching&quot;. Requires a user to</span>
-<span class="sd">        provide a geovector file (e.g. shapefile, geopackage, etc.) of that </span>
+<span class="sd">        provide a geovector file (e.g. shapefile, geopackage, etc.) of that</span>
 <span class="sd">        contains transects that intersect both centerlines at their common</span>
 <span class="sd">        points.</span>
-<span class="sd">        </span>
-<span class="sd">        Also computes a smoothed version of the migration rates, and a smoothed </span>
+
+<span class="sd">        Also computes a smoothed version of the migration rates, and a smoothed</span>
 <span class="sd">        version with cutoff-affected points set to NaN.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1263,16 +1266,16 @@
                 <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_C</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">window</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># must be greater than the polyorder, which is 3 by default</span>
-        
+
         <span class="k">if</span> <span class="n">x1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_x_and_y</span><span class="p">()</span>
-                    
+
         <span class="c1"># If no spacing is provided, use 1/8 channel width</span>
         <span class="k">if</span> <span class="n">mig_spacing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">mig_spacing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">/</span><span class="mi">8</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mr_tm</span><span class="p">,</span> <span class="n">pts_cl1</span><span class="p">,</span> <span class="n">pts_cl2</span> <span class="o">=</span> <span class="n">cu</span><span class="o">.</span><span class="n">cl_migration_transect_matching</span><span class="p">(</span><span class="n">path_matchers</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">dt_years</span><span class="p">,</span> <span class="n">mig_spacing</span><span class="p">)</span>
-        
+
         <span class="c1"># Export migration vectors if path provided</span>
         <span class="k">if</span> <span class="n">path_mig_vectors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1285,7 +1288,7 @@
                 <span class="n">gdf_mvs</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">mvs</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
                 <span class="n">gdf_mvs</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">path_mig_vectors</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">get_driver</span><span class="p">(</span><span class="n">path_mig_vectors</span><span class="p">))</span>
 
-         
+
         <span class="c1"># Smooth the migration rates</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mr_tm_sm</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mr_tm</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window</span><span class="p">,</span>
                                              <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
@@ -1303,11 +1306,11 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">mr_tm_nan</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">e</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">e</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">mr_tm_sm_nan</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">e</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span><span class="p">[</span><span class="n">e</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span>
 
-        
+
     <span class="k">def</span> <span class="nf">mig_rate_zs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">dt_years</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute migration rate using Sylvester et al&#39;s method of</span>
-<span class="sd">        dynamic time warping. Also computes a smoothed version of the </span>
+<span class="sd">        dynamic time warping. Also computes a smoothed version of the</span>
 <span class="sd">        migration rates, and a smoothed version with cutoff-affected</span>
 <span class="sd">        points set to NaN.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1467,7 +1470,6 @@
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">LZC</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>
             <span class="n">ax1</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">LZC</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span><span class="mf">0.5</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-
 </pre></div>
 
            </div>
