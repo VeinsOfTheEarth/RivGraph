@@ -11,9 +11,14 @@ Created on Sun Sep 16 15:15:18 2018
 """
 import os
 import pickle
-import ogr
-import osr
-import gdal
+try:
+    from osgeo import gdal
+    from osgeo import ogr
+    from osgeo import osr
+except ImportError:
+    import gdal
+    import ogr
+    import osr
 import numpy as np
 import pandas as pd
 import geopandas as gpd

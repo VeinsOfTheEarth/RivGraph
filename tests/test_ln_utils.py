@@ -3,7 +3,10 @@
 import sys
 import os
 import io
-import gdal
+try:
+    from osgeo import gdal
+except ImportError:
+    import gdal
 # import numpy as np
 # import matplotlib.pyplot as plt
 
