@@ -63,7 +63,7 @@ Citing RivGraph
 
 Citations help us justify the effort that goes into building and maintaining this project. If you used RivGraph for your research, please consider citing us.
 
-As of 5/26/2020, please cite our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html) and/or our [AGU Presentation](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph). We hope to soon publish RivGraph in the Journal of Open Source Software.
+If you use RivGraph's flow directionality algorithms, please cite our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html). Additionally, if you publish work wherein RivGraph was used to process your data, please cite our [JOSS Paper](https://joss.theoj.org/papers/10.21105/joss.02952).
 
 Contacting us
 -------------
