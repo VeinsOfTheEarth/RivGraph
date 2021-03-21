@@ -937,11 +937,7 @@ def remove_two_link_nodes(links, nodes, dontremove):
                 conn_stay = links['conn'][lstay_idx]
 
                 # Update node connectivty of go link (stay link doesn't need updating)
-                try:
-                    node_id_go = (set(conn_go) - set([nid])).pop()
-                except:
-                    import pdb
-                    pdb.set_trace()
+                node_id_go = (set(conn_go) - set([nid])).pop()
                 nodes['conn'][nodes['id'].index(node_id_go)].remove(lid_go)
                 nodes['conn'][nodes['id'].index(node_id_go)].append(lid_stay)
 
@@ -1522,9 +1518,6 @@ def links_to_gpd(links, gdobj):
     # Create geodataframe
     links_gpd = gpd.GeoDataFrame()
 
-    # Assign CRS
-    links_gpd.crs = CRS(gdobj.GetProjection())
-
     # Append geometries
     geoms = []
     for i, lidx in enumerate(links['idx']):
@@ -1536,5 +1529,9 @@ def links_to_gpd(links, gdobj):
     links_gpd['id'] = links['id']
     links_gpd['us node'] = [c[0] for c in links['conn']]
     links_gpd['ds node'] = [c[1] for c in links['conn']]
+    
+    # Assign CRS - done last to avoid DeprecationWarning - need geometry 
+    # to exist before assigning CRS.
+    links_gpd.crs = CRS(gdobj.GetProjection())
 
     return links_gpd

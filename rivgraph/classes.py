@@ -6,7 +6,10 @@ Classes for running rivgraph commands on your channel network or centerline.
 
 """
 import os
-import gdal
+try:
+    from osgeo import gdal
+except ImportError:
+    import gdal
 import numpy as np
 import networkx as nx
 from pyproj.crs import CRS
@@ -123,7 +126,6 @@ class rivnetwork:
         self.paths['input_mask'] = os.path.normpath(path_to_mask)
 
         # Handle georeferencing
-        print(self.paths['input_mask'])
         # GA_Update required for setting dummy projection/geotransform
         self.gdobj = gdal.Open(self.paths['input_mask'], gdal.GA_Update)
         self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
@@ -240,7 +242,8 @@ class rivnetwork:
 
 
     def get_islands(self, props=['area', 'maxwidth', 'major_axis_length',
-                                 'minor_axis_length', 'surrounding_links']):
+                                 'minor_axis_length', 'surrounding_links'],
+                          connectivity=2):
         """
         Finds all the islands in the binary mask and computes their morphological
         properties. Can be used to help "clean" masks of small islands. Must
@@ -252,6 +255,9 @@ class rivnetwork:
             Properties to compute for each island. Properties can be any of those
             provided by rivgraph.im_utils.regionprops.
             The default is ['area', 'maxwidth', 'major_axis_length', 'minor_axis_length'].
+        connectivity : int, optional
+            If 1, 4-connectivity will be used to determine connected blobs. If
+            2, 8-connectivity will be used. The default is 2.
 
         Returns
         -------
@@ -272,7 +278,7 @@ class rivnetwork:
         if self.verbose is True:
             print('Getting island properties...', end='')
 
-        islands, Iislands = mu.get_island_properties(self.Imask, self.pixlen, self.pixarea, self.crs, self.gt, props)
+        islands, Iislands = mu.get_island_properties(self.Imask, self.pixlen, self.pixarea, self.crs, self.gt, props, connectivity=connectivity)
 
         if self.verbose is True:
             print('done.')
@@ -433,7 +439,7 @@ class rivnetwork:
             - mesh (centerline mesh, river classes only)
 
             - centerline_smooth (river classes only)
-            
+
         ftype : str
             Sets the output file format. Choose from:
 
@@ -874,7 +880,7 @@ class centerline():
         # Store original coordinates
         self.xo = x
         self.yo = y
-        
+
         # Store crs info if provided
         self.crs = crs
 
@@ -1073,16 +1079,16 @@ class centerline():
 
         else:
             print('Could not map intersections to inflection point pairs because infs_os not computed. Run infs() first.')
-            
-            
+
+
     def mig_rate_transect_matching(self, x2, y2, dt_years, path_matchers, x1=None, y1=None, mig_spacing=None, window=None, path_mig_vectors=None):
         """
         Compute migration rate using "transect matching". Requires a user to
-        provide a geovector file (e.g. shapefile, geopackage, etc.) of that 
+        provide a geovector file (e.g. shapefile, geopackage, etc.) of that
         contains transects that intersect both centerlines at their common
         points.
-        
-        Also computes a smoothed version of the migration rates, and a smoothed 
+
+        Also computes a smoothed version of the migration rates, and a smoothed
         version with cutoff-affected points set to NaN.
         """
 
@@ -1093,16 +1099,16 @@ class centerline():
                 window = self.window_C
             else:
                 window = 5  # must be greater than the polyorder, which is 3 by default
-        
+
         if x1 is None:
             x1, y1, _ = self.__get_x_and_y()
-                    
+
         # If no spacing is provided, use 1/8 channel width
         if mig_spacing is None:
             mig_spacing = self.W/8
 
         self.mr_tm, pts_cl1, pts_cl2 = cu.cl_migration_transect_matching(path_matchers, x1, y1, x2, y2, dt_years, mig_spacing)
-        
+
         # Export migration vectors if path provided
         if path_mig_vectors is not None:
             if self.crs is None:
@@ -1115,7 +1121,7 @@ class centerline():
                 gdf_mvs = gpd.GeoDataFrame(geometry=mvs, crs=self.crs)
                 gdf_mvs.to_file(path_mig_vectors, driver=io.get_driver(path_mig_vectors))
 
-         
+
         # Smooth the migration rates
         self.mr_tm_sm = signal.savgol_filter(self.mr_tm, window_length=window,
                                              polyorder=3, mode='interp')
@@ -1133,11 +1139,11 @@ class centerline():
                 self.mr_tm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
                 self.mr_tm_sm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
 
-        
+
     def mig_rate_zs(self, x2, y2, dt_years, x1=None, y1=None, window=None):
         """
         Compute migration rate using Sylvester et al's method of
-        dynamic time warping. Also computes a smoothed version of the 
+        dynamic time warping. Also computes a smoothed version of the
         migration rates, and a smoothed version with cutoff-affected
         points set to NaN.
         """
@@ -1297,4 +1303,3 @@ class centerline():
 
         for i in range(0,len(LZC)-1,2):
             ax1.text(s[LZC[i]],0.5,str(i),fontsize=12)
-
