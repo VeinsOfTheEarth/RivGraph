@@ -1,8 +1,8 @@
 [![build](https://github.com/jonschwenk/RivGraph/actions/workflows/build.yml/badge.svg)](https://github.com/jonschwenk/RivGraph/actions/workflows/build.yml)
 [![Coverage Status](https://coveralls.io/repos/github/jonschwenk/RivGraph/badge.svg?branch=master)](https://coveralls.io/github/jonschwenk/RivGraph?branch=master)
 ![docs](https://github.com/jonschwenk/RivGraph/workflows/docs/badge.svg)
-<br />
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.02952/status.svg)](https://doi.org/10.21105/joss.02952)
+<br />
 
 ![RivGraph logo](https://github.com/jonschwenk/RivGraph/blob/master/docs/logos/rg_logo_full.png)
 
