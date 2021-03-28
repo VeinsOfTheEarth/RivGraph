@@ -2,13 +2,14 @@
 [![Coverage Status](https://coveralls.io/repos/github/jonschwenk/RivGraph/badge.svg?branch=master)](https://coveralls.io/github/jonschwenk/RivGraph?branch=master)
 ![docs](https://github.com/jonschwenk/RivGraph/workflows/docs/badge.svg)
 <br />
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.02952/status.svg)](https://doi.org/10.21105/joss.02952)
 
 ![RivGraph logo](https://github.com/jonschwenk/RivGraph/blob/master/docs/logos/rg_logo_full.png)
 
 About
 -----
 
-RivGraph is a Python package that provides tools for converting a binary mask of a channel network into a directed, weighted graph (i.e. a set of connected links and nodes). 
+RivGraph is a Python package that provides tools for converting a binary mask of a channel network into a directed, weighted graph (i.e. a set of connected links and nodes).
 
 ![Core functionality of RivGraph.\label{fig:corefunctions}](https://github.com/jonschwenk/RivGraph/blob/master/examples/images/rivgraph_overview_white.PNG)
 
@@ -37,7 +38,7 @@ You may then want to install Spyder or your preferred IDE. Conda should fetch al
 If you want to install RivGraph into an already-existing environment, you can run <pre><code>conda activate myenv
 conda install rivgraph -c jschwenk</code></pre>
 
-You may also [install RivGraph from this Github repo](https://jonschwenk.github.io/RivGraph/install/index.html#installation-from-source). 
+You may also [install RivGraph from this Github repo](https://jonschwenk.github.io/RivGraph/install/index.html#installation-from-source).
 
 Instructions for testing your installation are available [here](https://jonschwenk.github.io/RivGraph/install/index.html#installation-from-source).
 
@@ -45,18 +46,18 @@ How to use?
 -----
 Please see the [documentation](https://jonschwenk.github.io/RivGraph/) for more detailed instructions.
 
-RivGraph requires that you provide a binary mask of your network. [This page](https://jonschwenk.github.io/RivGraph/maskmaking/index.html) provides some help, hints, and tools for finding or creating your mask. 
+RivGraph requires that you provide a binary mask of your network. [This page](https://jonschwenk.github.io/RivGraph/maskmaking/index.html) provides some help, hints, and tools for finding or creating your mask.
 
-To see what RivGraph does and how to operate it, you can work through the [Colville Delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb) or the [Brahmaputra River example](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb). Both examples include sample masks. 
+To see what RivGraph does and how to operate it, you can work through the [Colville Delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb) or the [Brahmaputra River example](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb). Both examples include sample masks.
 
-RivGraph contains two primary classes (`delta` and `river`) that provide convenient methods for creating a processing workflow for a channel network. As the examples demonstrate, you can instantiate a delta or river class, then apply associated methods for each. After looking at the examples, take a look at [classes.py](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/classes.py) to understand what methods are available. 
+RivGraph contains two primary classes (`delta` and `river`) that provide convenient methods for creating a processing workflow for a channel network. As the examples demonstrate, you can instantiate a delta or river class, then apply associated methods for each. After looking at the examples, take a look at [classes.py](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/classes.py) to understand what methods are available.
 
 **Note**: there are many functions under the hood that may be useful to you. Check out the [im_utils script](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py) (image utilities) in particular for functions to help whip your mask into shape!
 
 
 Contributing
 ------------
-If you think you're not skilled or experienced enough to contribute, think again! We agree wholeheartedly with the sentiments expressed by this [Imposter syndrome disclaimer](https://github.com/Unidata/MetPy#contributing). We welcome all forms of user contributions including feature requests, bug reports, code, documentation requests, and code. Simply open an issue in the [tracker](https://github.com/jonschwenk/RivGraph/issues). For code development contributions, please contact us via email to be added to our slack channel where we can hash out a plan for your contribution. 
+If you think you're not skilled or experienced enough to contribute, think again! We agree wholeheartedly with the sentiments expressed by this [Imposter syndrome disclaimer](https://github.com/Unidata/MetPy#contributing). We welcome all forms of user contributions including feature requests, bug reports, code, documentation requests, and code. Simply open an issue in the [tracker](https://github.com/jonschwenk/RivGraph/issues). For code development contributions, please contact us via email to be added to our slack channel where we can hash out a plan for your contribution.
 
 Citing RivGraph
 ------------
