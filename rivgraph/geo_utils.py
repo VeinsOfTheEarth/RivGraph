@@ -350,19 +350,11 @@ def downsample_binary_geotiff(input_file, ds_factor, output_name, thresh=None):
         img_rs = im.downsample_binary_image(newimg, (rs_x, rs_y), thresh)
 
     # handle geotransformations and write the new geotif
-    driver = gdal.GetDriverByName("GTiff")  # set driver
-    # create new geotiff
-    dest = driver.Create(output_name, int(rs_y),
-                         int(rs_x), 1, gdal.GDT_Byte)
     # adjust georeference information (mainly px size)
     dest_gm = (newgm[0], (newgm[1]*img_x)/rs_x, newgm[2],
                newgm[3], newgm[4], (newgm[5]*img_y)/rs_y)
-    dest.SetGeoTransform(dest_gm)  # assign georef info
-    dest.SetProjection(og.GetProjection())  # set projection from original
-    dest.GetRasterBand(1).WriteArray(img_rs)  # write new downsampled array
-
-    # flush cache and delete new object
-    dest.FlushCache()
-    dest = None
+    # save new geotiff
+    io.write_geotiff(img_rs, dest_gm, og.GetProjection(),
+                     output_name, dtype=gdal.GDT_Byte)
 
     return output_name
