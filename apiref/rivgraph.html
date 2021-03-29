@@ -1848,6 +1848,36 @@ geotiff.</p></li>
 </dd></dl>
 
 <dl class="function">
+<dt id="rivgraph.geo_utils.downsample_binary_geotiff">
+<code class="descclassname">rivgraph.geo_utils.</code><code class="descname">downsample_binary_geotiff</code><span class="sig-paren">(</span><em>input_file</em>, <em>ds_factor</em>, <em>output_name</em>, <em>thresh=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/geo_utils.html#downsample_binary_geotiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.geo_utils.downsample_binary_geotiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given binary geotiff, create a downsampled one.</p>
+<p>Use <a class="reference internal" href="#rivgraph.im_utils.downsample_binary_image" title="rivgraph.im_utils.downsample_binary_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.downsample_binary_image()</span></code></a> and a bunch of
+gdal bits to downsample a binary geotiff file to the specified relative
+resolution. This new geotiff will have properly associated geoinformation
+etc.
+(to downsample a 2D array use the aforementioned function in im_utils).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em>) – Path to input file (original geotiff) as a string</p></li>
+<li><p><strong>ds_factor</strong> (<em>float</em>) – Downsampling factor. This is the relative resolution for the output
+file. For example, to downsample to half of the resolution of the
+original image, ds_factor should be set to 0.5. As this function is
+for downsample, values &gt;= 1 are invalid.</p></li>
+<li><p><strong>output_name</strong> (<em>str</em>) – Path / output file name, should have extension .tif</p></li>
+<li><p><strong>thresh</strong> (<em>float</em><em>, </em><em>optional</em>) – Optional input to <a class="reference internal" href="#rivgraph.im_utils.downsample_binary_image" title="rivgraph.im_utils.downsample_binary_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.downsample_binary_image()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>output_name</strong> – Path to the saved, downsampled geotiff.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="rivgraph.geo_utils.geotiff_vals_from_coords">
 <code class="descclassname">rivgraph.geo_utils.</code><code class="descname">geotiff_vals_from_coords</code><span class="sig-paren">(</span><em>coords</em>, <em>gd_obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/geo_utils.html#geotiff_vals_from_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.geo_utils.geotiff_vals_from_coords" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns pixel values at specific coordinates from a geotiff object.</p>

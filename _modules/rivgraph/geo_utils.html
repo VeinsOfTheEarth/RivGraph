@@ -184,6 +184,7 @@
 <span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">Transformer</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">rivgraph.io_utils</span> <span class="k">as</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">rivgraph.im_utils</span> <span class="k">as</span> <span class="nn">im</span>
 
 
 <div class="viewcode-block" id="get_unit"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.geo_utils.get_unit">[docs]</a><span class="k">def</span> <span class="nf">get_unit</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
@@ -446,6 +447,84 @@
                      <span class="n">dtype</span><span class="o">=</span><span class="n">datatype</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">output_file</span></div>
+
+
+<div class="viewcode-block" id="downsample_binary_geotiff"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.geo_utils.downsample_binary_geotiff">[docs]</a><span class="k">def</span> <span class="nf">downsample_binary_geotiff</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">ds_factor</span><span class="p">,</span> <span class="n">output_name</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given binary geotiff, create a downsampled one.</span>
+
+<span class="sd">    Use :obj:`rivgraph.im_utils.downsample_binary_image()` and a bunch of</span>
+<span class="sd">    gdal bits to downsample a binary geotiff file to the specified relative</span>
+<span class="sd">    resolution. This new geotiff will have properly associated geoinformation</span>
+<span class="sd">    etc.</span>
+<span class="sd">    (to downsample a 2D array use the aforementioned function in im_utils).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_file : str</span>
+<span class="sd">        Path to input file (original geotiff) as a string</span>
+
+<span class="sd">    ds_factor : float</span>
+<span class="sd">        Downsampling factor. This is the relative resolution for the output</span>
+<span class="sd">        file. For example, to downsample to half of the resolution of the</span>
+<span class="sd">        original image, ds_factor should be set to 0.5. As this function is</span>
+<span class="sd">        for downsample, values &gt;= 1 are invalid.</span>
+
+<span class="sd">    output_name : str</span>
+<span class="sd">        Path / output file name, should have extension .tif</span>
+
+<span class="sd">    thresh : float, optional</span>
+<span class="sd">        Optional input to :obj:`rivgraph.im_utils.downsample_binary_image()`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    output_name : str</span>
+<span class="sd">        Path to the saved, downsampled geotiff.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check ds_factor</span>
+    <span class="k">if</span> <span class="n">ds_factor</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;ds_factor must be &lt; 1.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># read original file</span>
+    <span class="n">og</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+    <span class="n">gm</span> <span class="o">=</span> <span class="n">og</span><span class="o">.</span><span class="n">GetGeoTransform</span><span class="p">()</span>
+
+    <span class="c1"># check array size for even downsampling</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">og</span><span class="o">.</span><span class="n">ReadAsArray</span><span class="p">()</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">img_x</span><span class="p">,</span> <span class="n">img_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">modfactor</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">ds_factor</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">img_x</span> <span class="o">%</span> <span class="n">modfactor</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">img_y</span> <span class="o">%</span> <span class="n">modfactor</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">img_x</span> <span class="o">+=</span> <span class="n">img_x</span> <span class="o">%</span> <span class="n">modfactor</span>
+        <span class="n">img_y</span> <span class="o">+=</span> <span class="n">img_y</span> <span class="o">%</span> <span class="n">modfactor</span>
+    <span class="n">old_x</span><span class="p">,</span> <span class="n">old_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+    <span class="c1"># amount to pad by</span>
+    <span class="n">npad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([(</span><span class="n">img_x</span> <span class="o">-</span> <span class="n">old_x</span><span class="p">),</span> <span class="p">(</span><span class="n">img_y</span> <span class="o">-</span> <span class="n">old_y</span><span class="p">)])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="c1"># do padding</span>
+    <span class="n">newimg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">npad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span>
+    <span class="n">newgm</span> <span class="o">=</span> <span class="p">(</span><span class="n">gm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">npad</span><span class="o">*</span><span class="n">gm</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">gm</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">gm</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+             <span class="n">gm</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">npad</span><span class="o">*</span><span class="n">gm</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">gm</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">gm</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+
+    <span class="c1"># rescaling</span>
+    <span class="n">rs_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_x</span> <span class="o">*</span> <span class="n">ds_factor</span><span class="p">)</span>  <span class="c1"># number of x px</span>
+    <span class="n">rs_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_y</span> <span class="o">*</span> <span class="n">ds_factor</span><span class="p">)</span>  <span class="c1"># number of y px</span>
+    <span class="k">if</span> <span class="n">thresh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">img_rs</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">downsample_binary_image</span><span class="p">(</span><span class="n">newimg</span><span class="p">,</span> <span class="p">(</span><span class="n">rs_x</span><span class="p">,</span> <span class="n">rs_y</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">img_rs</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">downsample_binary_image</span><span class="p">(</span><span class="n">newimg</span><span class="p">,</span> <span class="p">(</span><span class="n">rs_x</span><span class="p">,</span> <span class="n">rs_y</span><span class="p">),</span> <span class="n">thresh</span><span class="p">)</span>
+
+    <span class="c1"># handle geotransformations and write the new geotif</span>
+    <span class="c1"># adjust georeference information (mainly px size)</span>
+    <span class="n">dest_gm</span> <span class="o">=</span> <span class="p">(</span><span class="n">newgm</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">newgm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">img_x</span><span class="p">)</span><span class="o">/</span><span class="n">rs_x</span><span class="p">,</span> <span class="n">newgm</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+               <span class="n">newgm</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">newgm</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="p">(</span><span class="n">newgm</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">img_y</span><span class="p">)</span><span class="o">/</span><span class="n">rs_y</span><span class="p">)</span>
+    <span class="c1"># save new geotiff</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">write_geotiff</span><span class="p">(</span><span class="n">img_rs</span><span class="p">,</span> <span class="n">dest_gm</span><span class="p">,</span> <span class="n">og</span><span class="o">.</span><span class="n">GetProjection</span><span class="p">(),</span>
+                     <span class="n">output_name</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">gdal</span><span class="o">.</span><span class="n">GDT_Byte</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output_name</span></div>
 </pre></div>
 
            </div>
