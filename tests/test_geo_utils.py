@@ -164,6 +164,62 @@ def test_croppad_geotiff_output():
     assert np.sum(o_file[:, -7]) > 0
 
 
+def test_downsample_bad_factor():
+    """Test downsampling geotiff with invalid ds_factor."""
+    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
+    outpath = os.path.join(basepath, os.path.normpath('tests/results/known/downsampled.tif'))
+    # run downsampling function and throw error
+    with pytest.raises(ValueError):
+        geo_utils.downsample_binary_geotiff(g_path, 2.0, outpath)
+
+
+def test_downsample_default_thresh():
+    """Test downsampling geotiff with default thresh."""
+    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
+    outpath = os.path.join(basepath, os.path.normpath('tests/results/known/downsampled.tif'))
+    # run downsampling function
+    ofile = geo_utils.downsample_binary_geotiff(g_path, 0.5, outpath)
+    # assert output
+    assert ofile == outpath
+
+
+def test_downsample_input_thresh():
+    """Test downsampling geotiff with defined thresh."""
+    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
+    outpath = os.path.join(basepath, os.path.normpath('tests/results/known/downsampled.tif'))
+    # run downsampling function
+    outfile = geo_utils.downsample_binary_geotiff(g_path, 0.5,
+                                                  outpath, thresh=0.1)
+    # assert output
+    assert outfile == outpath
+
+
+def test_downsampled_result():
+    """Test downsampled output."""
+    # original
+    og_file = gdal.Open(os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif')))
+    og_img = og_file.ReadAsArray()
+    # downsampled
+    ds_file = gdal.Open(os.path.join(basepath, os.path.normpath('tests/results/known/downsampled.tif')))
+    o_file = ds_file.ReadAsArray()
+    # check that downsampled size is smaller
+    assert np.shape(og_img)[0] > np.shape(o_file)[0]
+    assert np.shape(og_img)[1] > np.shape(o_file)[1]
+    # check pixel resolution - should be double the original
+    assert (ds_file.GetGeoTransform()[1]) == (og_file.GetGeoTransform()[1]*2)
+    assert (ds_file.GetGeoTransform()[5]) == (og_file.GetGeoTransform()[5]*2)
+
+
+def test_downsample_w_pad():
+    """Test downsampling geotiff with some padding due to division."""
+    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
+    outpath = os.path.join(basepath, os.path.normpath('tests/results/known/downsampled.tif'))
+    # run downsampling function
+    ofile = geo_utils.downsample_binary_geotiff(g_path, 0.76, outpath)
+    # assert output
+    assert ofile == outpath
+
+
 def test_delete_files():
     """Delete files created by tests."""
     # delete created files at the end
