@@ -1556,3 +1556,81 @@ def hand_clean(I, action='erase'):
         I[Imask==True] = 1
 
     return I
+
+
+def grow_blob(I, n=1, strel='square'):
+    
+    """
+    Grow labelled blobs using a specified kernel shape.
+    This is based on grey-scale morphological dilation, but will respect
+    boundaries rather than growing through them. 
+
+    Parameters
+    ----------
+    I : np.array
+        Greyscale image to grow.
+    n : int, optional
+        Number of times to apply the growth kernel. The default is 1.
+    strel : str, optional
+        Kernel shape. Follows skimage's options, but only 'square', 'plus', and
+        'disk' are supported. The default is 'square'.
+
+    Returns
+    -------
+    Id2 : np.array
+        Grown (essentially dilated) greyscale image. Same shape as I.
+
+    """
+
+    if n == 0:
+        return I
+
+    if strel == 'square':
+        selem = morphology.square(3)
+    elif strel == 'plus':
+        selem = morphology.diamond(1)
+    elif strel == 'disk':
+        selem = morphology.disk(3)
+
+    
+    Id = I.copy()
+    for i in np.arange(0, n):
+        
+        Id2 = morphology.dilation(Id, selem)
+        # oldarea = np.ravel_multi_index(np.nonzero(Id), Id.shape)
+        oldarea = np.nonzero(Id)
+
+        overlapid = np.nonzero(Id2[oldarea])[0] # Which values did you "grow into" 
+        oldarea2 = np.unravel_index(np.ravel_multi_index(oldarea, Id.shape)[overlapid], Id.shape)
+        # --> we can't overwrite those
+        Id2[oldarea2] = Id[oldarea2]
+        Id = Id2.copy()
+        return Id2
+
+    return Id2
+    
+    
+def rm_objects(I, lab):
+    """
+    Remove from the labelled image objects which have labels contained in lab
+    
+    Parameters
+    ----------
+    I   : np.array
+          Integer-valued labelled image to clean.
+    lab : n x 1 np.array,
+          label ids to remove.
+        
+    Returns
+    -------
+    Id. : np.array
+          Labelled image with lab id removed
+    
+    
+    """
+        
+    Id = I.copy()
+    for x in np.nditer(lab):
+        print(x)
+        Id[np.where(Id == x)] = 0
+    return Id
