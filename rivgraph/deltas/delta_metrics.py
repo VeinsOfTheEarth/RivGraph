@@ -76,7 +76,12 @@ def graphiphy(links, nodes, weight=None):
     G.add_nodes_from(nodes['id'])
     for lc, wt, lid in zip(links['conn'], weights, links['id']):
         G.add_edge(lc[0], lc[1], weight=wt, linkid=lid)
-
+    
+    # If there is more than 1 inlet return an error
+    inlets = np.sum(G, 0)
+    if np.size(np.where(colsums<1)) > 1:
+        raise RuntimeError('The graph contains more than one apex.')
+    
     return G
 
 
