@@ -79,7 +79,7 @@ def graphiphy(links, nodes, weight=None):
     
     # If there is more than 1 inlet return an error
     inlets = np.sum(G, 0)
-    if np.size(np.where(colsums<1)) > 1:
+    if np.size(np.where(inlets<1)) > 1:
         raise RuntimeError('The graph contains more than one apex.')
     
     return G
