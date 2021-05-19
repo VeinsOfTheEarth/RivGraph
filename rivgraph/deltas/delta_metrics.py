@@ -31,7 +31,7 @@ def compute_delta_metrics(links, nodes):
     links_m, nodes_m = ensure_single_inlet(links, nodes)
 
     # Ensure we have a directed, acyclic graph; also include widths as weights
-    G = graphiphy(links, nodes, weight='wid_adj')
+    G = graphiphy(links_m, nodes_m, weight='wid_adj')
 
     if nx.is_directed_acyclic_graph(G) is not True:
         raise RuntimeError('Cannot proceed with metrics as graph is not acyclic.')
@@ -62,6 +62,72 @@ def compute_delta_metrics(links, nodes):
     return metrics
 
 
+def ensure_single_inlet(links, nodes):
+    """
+    Ensure only a single apex node exists.
+
+    All the delta metrics here require a single apex node, and that that node
+    be connected to at least two downstream links. This function ensures these
+    conditions are met; where there are multiple inlets, the widest is chosen.
+    This function also ensures that the inlet node is attached to at least two
+    links--this is important for computing un-biased delta metrics.
+    The links and nodes dicts are copied so they remain unaltered; the altered
+    copies are returned.
+
+    """
+    # Copy links and nodes so we preserve the originals
+    links_edit = dict()
+    links_edit.update(links)
+    nodes_edit = dict()
+    nodes_edit.update(nodes)
+
+    # Find the widest inlet
+    in_wids = []
+    for i in nodes_edit['inlets']:
+        linkid = nodes_edit['conn'][nodes_edit['id'].index(i)][0]
+        linkidx = links_edit['id'].index(linkid)
+        in_wids.append(links_edit['wid_adj'][linkidx])
+    widest_inlet_idx = in_wids.index(max(in_wids))
+    inlets_to_remove = nodes_edit['inlets'][:]
+
+    # Remove inlet nodes and links until continuity is no longer broken
+    badnodes = dy.check_continuity(links_edit, nodes_edit)
+    if len(badnodes) > 0:
+        raise RuntimeError('Provided (links, nodes) has source or sink at nodes: {}.'.format(badnodes))
+
+    # Keep the widest inlet - delete all others (and remove their subnetworks)
+    main_inlet = inlets_to_remove.pop(widest_inlet_idx)
+    for i in inlets_to_remove:
+        nodes_edit['inlets'].remove(i)
+        badnodes = dy.check_continuity(links_edit, nodes_edit)
+        while len(badnodes) > 0:
+            badnode = badnodes.pop()
+            # Remove the links connected to the bad node:
+            # the hanging node will also be removed
+            connlinks = nodes_edit['conn'][nodes_edit['id'].index(badnode)]
+            for cl in connlinks:
+                links_edit, nodes_edit = lnu.delete_link(links_edit,
+                                                         nodes_edit, cl)
+
+            badnodes = dy.check_continuity(links_edit, nodes_edit)
+
+    # Ensure there are at least two links emanating from the inlet node
+    conn = nodes_edit['conn'][nodes_edit['id'].index(main_inlet)]
+    while len(conn) == 1:
+        main_inlet_new = links_edit['conn'][links_edit['id'].index(conn[0])][:]
+        main_inlet_new.remove(main_inlet)
+        links_edit, nodes_edit = lnu.delete_link(links_edit, nodes_edit,
+                                                 conn[0])
+
+        # Update new inlet node
+        nodes_edit['inlets'].remove(main_inlet)
+        main_inlet = main_inlet_new[0]
+        nodes_edit['inlets'] = nodes_edit['inlets'] + [main_inlet]
+        conn = nodes_edit['conn'][nodes_edit['id'].index(main_inlet)]
+
+    return links_edit, nodes_edit
+
+
 def graphiphy(links, nodes, weight=None):
     """Create a networkx graph."""
     if weight is not None and weight not in links.keys():
@@ -70,7 +136,13 @@ def graphiphy(links, nodes, weight=None):
     if weight is None:
         weights = np.ones((len(links['conn']), 1))
     else:
-        weights = links[weight]
+        weights = np.array(links[weight])
+        
+    # Check weights
+    print(np.sum(weights<=0))
+    if np.sum(weights<=0) > 0:
+        print('shit')
+        raise Warning('One or more of your weights is =< 0. This could cause problems later.')
 
     G = nx.DiGraph()
     G.add_nodes_from(nodes['id'])
@@ -140,71 +212,6 @@ def intermediate_vars(G):
 
     return deltavars
 
-
-def ensure_single_inlet(links, nodes):
-    """
-    Ensure only a single apex node exists.
-
-    All the delta metrics here require a single apex node, and that that node
-    be connected to at least two downstream links. This function ensures these
-    conditions are met; where there are multiple inlets, the widest is chosen.
-    This function also ensures that the inlet node is attached to at least two
-    links--this is important for computing un-biased delta metrics.
-    The links and nodes dicts are copied so they remain unaltered; the altered
-    copies are returned.
-
-    """
-    # Copy links and nodes so we preserve the originals
-    links_edit = dict()
-    links_edit.update(links)
-    nodes_edit = dict()
-    nodes_edit.update(nodes)
-
-    # Find the widest inlet
-    in_wids = []
-    for i in nodes_edit['inlets']:
-        linkid = nodes_edit['conn'][nodes_edit['id'].index(i)][0]
-        linkidx = links_edit['id'].index(linkid)
-        in_wids.append(links_edit['wid_adj'][linkidx])
-    widest_inlet_idx = in_wids.index(max(in_wids))
-    inlets_to_remove = nodes_edit['inlets'][:]
-
-    # Remove inlet nodes and links until continuity is no longer broken
-    badnodes = dy.check_continuity(links_edit, nodes_edit)
-    if len(badnodes) > 0:
-        raise RuntimeError('Provided (links, nodes) has source or sink at nodes: {}.'.format(badnodes))
-
-    # Keep the widest inlet - delete all others (and remove their subnetworks)
-    main_inlet = inlets_to_remove.pop(widest_inlet_idx)
-    for i in inlets_to_remove:
-        nodes_edit['inlets'].remove(i)
-        badnodes = dy.check_continuity(links_edit, nodes_edit)
-        while len(badnodes) > 0:
-            badnode = badnodes.pop()
-            # Remove the links connected to the bad node:
-            # the hanging node will also be removed
-            connlinks = nodes_edit['conn'][nodes_edit['id'].index(badnode)]
-            for cl in connlinks:
-                links_edit, nodes_edit = lnu.delete_link(links_edit,
-                                                         nodes_edit, cl)
-
-            badnodes = dy.check_continuity(links_edit, nodes_edit)
-
-    # Ensure there are at least two links emanating from the inlet node
-    conn = nodes_edit['conn'][nodes_edit['id'].index(main_inlet)]
-    while len(conn) == 1:
-        main_inlet_new = links_edit['conn'][links_edit['id'].index(conn[0])][:]
-        main_inlet_new.remove(main_inlet)
-        links_edit, nodes_edit = lnu.delete_link(links_edit, nodes_edit,
-                                                 conn[0])
-
-        # Update new inlet node
-        nodes_edit['inlets'].remove(main_inlet)
-        main_inlet = main_inlet_new[0]
-        nodes_edit['inlets'] = nodes_edit['inlets'] + [main_inlet]
-        conn = nodes_edit['conn'][nodes_edit['id'].index(main_inlet)]
-
-    return links_edit, nodes_edit
 
 
 def find_inlet_outlet_nodes(A):
