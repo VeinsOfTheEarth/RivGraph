@@ -16,6 +16,7 @@ Documentation
    install/index
    examples/index
    maskmaking/index
+   shoreline/index
    linksnodes/index
    contributing/index
    apiref/index

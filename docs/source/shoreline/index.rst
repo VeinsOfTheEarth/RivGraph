@@ -1,7 +1,7 @@
 .. _shoreline:
 
 ============================
-How to construct a shoreline
+Shoreline creation
 ============================
 
 Every delta analyzed by *RivGraph* requires that the user create a shoreline as well. This shoreline is used to determine the location of the outlet nodes of the network. Here, guidance is provided for how to create this shoreline for your delta mask.
