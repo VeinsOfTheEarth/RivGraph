@@ -1183,6 +1183,7 @@ class centerline():
                 self.mr_zs_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
                 self.mr_zs_sm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
 
+
     def plot(self, x=None, y=None):
 
         if x is None:
@@ -1209,6 +1210,7 @@ class centerline():
 
         plt.legend(legend)
         plt.axis('equal')
+
 
     def zs_plot(self, window=None):
         """

@@ -40,13 +40,6 @@ def pixagon(c_cent, r_cent, pixlen):
 
 def get_island_properties(Imask, pixlen, pixarea, crs, gt, props, connectivity=2):
     """Get island properties."""
-    # Imask = d.Imask.copy()
-    # pixlen = d.pixlen
-    # pixarea = d.pixarea
-    # crs = d.crs
-    # gt = d.gt
-    # props = ['area', 'maxwidth', 'major_axis_length',
-    #                              'minor_axis_length', 'surrounding_links']
     
     # maxwidth is an additional property
     if 'maxwidth' in props:
@@ -370,6 +363,7 @@ def thresholding_set1(islands, apex_width):
 
     # Thresholding
     remove = set()
+    
     # Global thresholding -- islands smaller than 1/10 the apex_wid^2
     area_thresh = (1/10 * apex_width)**2
     remove.update(np.where(islands.Area.values < area_thresh)[0].tolist())

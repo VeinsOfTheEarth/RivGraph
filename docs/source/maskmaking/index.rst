@@ -18,6 +18,7 @@ Maskmaker, Maskmaker Make Me a Mask
 
 
  - :ref:`whatismask`
+ - :ref:`maskconstraints`
  - :ref:`maskcapture`
  - :ref:`wheretoget`
  - :ref:`howtoprep`
@@ -42,6 +43,24 @@ The mask is the cornerstone for using *RivGraph*. You should always ensure that 
 
 .. tip:: Make sure to remove all the objects (connected "on" pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or `errors <https://github.com/jonschwenk/RivGraph/issues/32>`_. Often, a quick way to achieve this is via the :obj:`rivgraph.im_utils.largest_blobs()` function, which will keep only the largest connected component.
 
+
+.. _maskconstraints:
+
+-----------------------------------------------
+What does RivGraph expect my mask to look like?
+-----------------------------------------------
+*RivGraph* can handle two types of masks: deltas and braided (or single-threaded) rivers. 
+
+**All masks should contain a single connected component** (or blob). Before doing your analysis, use the :obj:`rivgraph.im_utils.largest_blobs()` to ensure you have only one connected component. This will remove any isolated portions of the mask. For example,
+
+.. code-block:: python3
+
+   from rivgraph import im_utils
+   Mask_one_blob = im_utils.largest_blobs(Mask, nlargest=1, action='keep')
+
+This will create an image wherein only the largest connected component remains (hopefully your channel network). 
+
+Delta masks often have a large waterbody (ocean or lake) connecting all the outlets. This is completely fine, as the waterbody will be removed in the pruning stage. 
 
 
 .. _maskcapture:
@@ -127,6 +146,7 @@ I have found three effective ways to edit georeferenced masks. The one you choos
 2)  `Paint.NET <https://www.getpaint.net/download.html>`_ is an image-editing software that preserves georeferencing information. It's fairly basic and easy to use. If you have a significant amount of hand-editing to do, look into it.
 
 3) Use image processing tools in *RivGraph* to edit your mask. There are morphological operators like :obj:`rivgraph.im_utils.dilate()` and :obj:`rivgraph.im_utils.erode()`, :obj:`rivgraph.im_utils.regionprops()` for filtering objects based on their properties (areas, lengths, perimeters, etc.), and :obj:`rivgraph.im_utils.largest_blobs()` for keeping/removing the largest connected components in the mask. There is also a :obj:`rivgraph.im_utils.hand_clean()` utility that allows you to draw polygons one-at-a-time and specify their pixel values. I usually find these tools sufficient for cleaning a mask, regardless of the amount of editing required.
+
 
 .. _georef:
 

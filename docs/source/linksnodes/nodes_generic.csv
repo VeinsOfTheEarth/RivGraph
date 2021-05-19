@@ -1,9 +1,9 @@
 key, type, length, description
-id, orderedSet, N, unique node id assigned to each node not in a particular order and not guaranteed to skip some id’s
-conn, list of lists, N, link ids of all links connected to this node
-idx, list of lists of ints, N, list of the pixel coordinates in index format (via np.ravel_index using the shape of the input binary image)
+id, orderedSet,M, unique node id assigned to each node not in a particular order and not guaranteed to skip some id’s
+conn, list of lists,M, link ids of all links connected to this node
+idx, list of lists of ints,M, list of the pixel coordinates in index format (via np.ravel_index using the shape of the input binary image)
 inlets, list of ints, varies, node ids of all nodes identified as inlets
 outlets, list of ints, varies, node ids of all nodes identified as outlets
-int_angle, np.array, N, most interior angle of links connected to each node in degrees; computed via :obj:`rivgraph.ln_utils.junction_angles()`
-jtype, np.array, N, junction type; either ‘c’ (confluence) or ‘b’ (bifurcation); computed via :obj:`rivgraph.ln_utils.junction_angles()`
-width_ratio, np.array, N, ratio of wider link/narrower link for the two links used to compute int_angle; computed via :obj:`rivgraph.ln_utils.junction_angles()`
+int_angle, np.array,M, most interior angle of links connected to each node in degrees; computed via :obj:`rivgraph.ln_utils.junction_angles()`
+jtype, np.array,M, junction type; either ‘c’ (confluence) or ‘b’ (bifurcation); computed via :obj:`rivgraph.ln_utils.junction_angles()`
+width_ratio, np.array,M, ratio of wider link/narrower link for the two links used to compute int_angle; computed via :obj:`rivgraph.ln_utils.junction_angles()`
