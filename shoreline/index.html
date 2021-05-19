@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>How to construct a shoreline &mdash; RivGraph 0.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../background/index.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/index.html">Installation Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../maskmaking/index.html">Maskmaking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../linksnodes/index.html">Links and Node Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apiref/index.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RivGraph</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>How to construct a shoreline</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/shoreline/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="how-to-construct-a-shoreline">
+<span id="shoreline"></span><h1>How to construct a shoreline<a class="headerlink" href="#how-to-construct-a-shoreline" title="Permalink to this headline">¶</a></h1>
+<p>Every delta analyzed by <em>RivGraph</em> requires that the user create a shoreline as well. This shoreline is used to determine the location of the outlet nodes of the network. Here, guidance is provided for how to create this shoreline for your delta mask.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#whyshoreline"><span class="std std-ref">Purpose of the shoreline</span></a></p></li>
+<li><p><a class="reference internal" href="#howshoreline"><span class="std std-ref">How do I make a shoreline?</span></a></p></li>
+</ul>
+</div></blockquote>
+<div class="section" id="purpose-of-the-shoreline">
+<span id="whyshoreline"></span><h2>Purpose of the shoreline<a class="headerlink" href="#purpose-of-the-shoreline" title="Permalink to this headline">¶</a></h2>
+<p>Consider the following mask and its skeleton:</p>
+<img alt="../_images/colville_mask_skel.PNG" src="../_images/colville_mask_skel.PNG" />
+<p>How can we identify the “ends” of the network–i.e. the outlet locations? There are two options; first, we could manually specify each outlet point individually. This is a viable option, but it is also tedious and does not lend itself well to automation. Instead, <em>RivGraph</em> takes a different approach that still requires manual input, but is robust, less tedious, and has the potential for automation.</p>
+<p>Instead of placing nodes individually, you will provide a shoreline shapefile (or any geopandas-readable PolyLine). <em>RivGraph</em> will intersect your shoreline with the skeleton (actually the vectorized links and nodes that make up the skeleton), place nodes at the connected intersection points, and trim away all the skeleton that lies outside the river network.</p>
+</div>
+<div class="section" id="how-do-i-make-a-shoreline">
+<span id="howshoreline"></span><h2>How do I make a shoreline?<a class="headerlink" href="#how-do-i-make-a-shoreline" title="Permalink to this headline">¶</a></h2>
+<p>There are numerous tools available to generate your shoreline, or you may automate a procedure. Here, we describe shoreline creation with QGIS, although other GIS software may also be used.</p>
+<ol class="arabic simple">
+<li><p>Generate the skeleton of your mask.</p></li>
+</ol>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rivgraph.classes</span> <span class="kn">import</span> <span class="n">delta</span>
+<span class="n">mydelta</span> <span class="o">=</span> <span class="n">delta</span><span class="p">(</span><span class="n">Mask</span><span class="p">,</span> <span class="n">path_to_results</span><span class="p">)</span>
+<span class="n">mydelta</span><span class="o">.</span><span class="n">skeletonize</span><span class="p">()</span>
+<span class="n">mydelta</span><span class="o">.</span><span class="n">to_geotiff</span><span class="p">(</span><span class="s1">&#39;skeleton&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><em>RivGraph</em> will write your georeferenced skeleton at <cite>path_to_results</cite>.</p>
+<ol class="arabic" start="2">
+<li><p>Drag your mask and skeleton into QGIS. You will see something like the above figure.</p></li>
+<li><p>Create a new layer in the <code class="docutils literal notranslate"><span class="pre">Layer</span> <span class="pre">-&gt;</span> <span class="pre">Create</span> <span class="pre">Layer</span> <span class="pre">-&gt;</span> <span class="pre">Create</span> <span class="pre">Shapefile</span> <span class="pre">Layer</span></code> dropdown.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Make sure to select <code class="docutils literal notranslate"><span class="pre">Line</span></code> for <code class="docutils literal notranslate"><span class="pre">Geometry</span> <span class="pre">Type</span></code>.</p></li>
+<li><p>Make sure to set the CRS of your new layer to be the same as your mask.</p></li>
+<li><p>Specify a filepath, preferably the same as <cite>path_to_results</cite>, but it can be anywhere.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Turn on editing for this layer by clicking the <code class="docutils literal notranslate"><span class="pre">Toggle</span> <span class="pre">Editing</span></code> icon.</p></li>
+<li><p>Create a new line feature using the <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">Line</span> <span class="pre">Feature</span></code> button.</p></li>
+</ol>
+<p>Now we’re at the point of actually drawing the shoreline. Our goal is to intersect all the skeleton links by the shoreline at locations where we’d like outlet nodes to be placed. Identify the first outlet of the mask, and begin drawing shoreline segments across your channels. Here are some tips:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The only thing that matters is where your shoreline intersects the outlet links. Don’t worry if your shoreline doesn’t actually follow the shore.</p></li>
+<li><p>I find it helpful to connect the ends of islands to define where to create shoreline nodes; this typically ensures you’re cutting across the correct part of the channel. See the figure below.</p></li>
+<li><p>Make sure your final shoreline cuts the skeleton into two disconnected components.</p></li>
+<li><p>Again, don’t worry about intersecting portions of the skeleton other than the outlet links.</p></li>
+<li><p>It gets easier with a little practice, and you may have to iterate a time or two to achieve your desired result.</p></li>
+</ul>
+</div></blockquote>
+<img alt="../_images/shoreline_howto1.PNG" class="align-center" src="../_images/shoreline_howto1.PNG" />
+<p>After we run <code class="docutils literal notranslate"><span class="pre">mydelta.prune_network()</span></code> (and specifying the proper paths for the shoreline and inlet nodes) with the shoreline above, we get the following result:</p>
+<img alt="../_images/shoreline_howto2.PNG" class="align-center" src="../_images/shoreline_howto2.PNG" />
+<p class="centered">
+<strong>The pruned network is in blue; the outlet nodes are yellow.</strong></p><p>Notice that all the spurious skeleton portions have been trimmed, as have all the links in the ocean. We also see outlet nodes have been placed exactly where the shoreline intersected the skeleton.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, J. Schwenk &amp; J. Hariharan.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

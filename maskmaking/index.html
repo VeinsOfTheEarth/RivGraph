@@ -100,6 +100,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Maskmaking</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#maskmaker-maskmaker-make-me-a-mask">Maskmaker, Maskmaker Make Me a Mask</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-is-a-mask">What is a mask?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-does-rivgraph-expect-my-mask-to-look-like">What does RivGraph expect my mask to look like?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-should-a-mask-capture">What should a mask capture?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#where-do-i-get-a-mask">Where do I get a mask?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-do-i-edit-my-mask">How do I edit my mask?</a></li>
@@ -188,6 +189,7 @@
 <blockquote>
 <div><ul class="simple">
 <li><p><a class="reference internal" href="#whatismask"><span class="std std-ref">What is a mask?</span></a></p></li>
+<li><p><a class="reference internal" href="#maskconstraints"><span class="std std-ref">What does RivGraph expect my mask to look like?</span></a></p></li>
 <li><p><a class="reference internal" href="#maskcapture"><span class="std std-ref">What should a mask capture?</span></a></p></li>
 <li><p><a class="reference internal" href="#wheretoget"><span class="std std-ref">Where do I get a mask?</span></a></p></li>
 <li><p><a class="reference internal" href="#howtoprep"><span class="std std-ref">How do I edit my mask?</span></a></p></li>
@@ -211,6 +213,17 @@
 <p class="admonition-title">Tip</p>
 <p>Make sure to remove all the objects (connected “on” pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or <a class="reference external" href="https://github.com/jonschwenk/RivGraph/issues/32">errors</a>. Often, a quick way to achieve this is via the <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.im_utils.largest_blobs" title="rivgraph.im_utils.largest_blobs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.largest_blobs()</span></code></a> function, which will keep only the largest connected component.</p>
 </div>
+</div>
+<div class="section" id="what-does-rivgraph-expect-my-mask-to-look-like">
+<span id="maskconstraints"></span><h2>What does RivGraph expect my mask to look like?<a class="headerlink" href="#what-does-rivgraph-expect-my-mask-to-look-like" title="Permalink to this headline">¶</a></h2>
+<p><em>RivGraph</em> can handle two types of masks: deltas and braided (or single-threaded) rivers.</p>
+<p><strong>All masks should contain a single connected component</strong> (or blob). Before doing your analysis, use the <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.im_utils.largest_blobs" title="rivgraph.im_utils.largest_blobs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.largest_blobs()</span></code></a> to ensure you have only one connected component. This will remove any isolated portions of the mask. For example,</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rivgraph</span> <span class="kn">import</span> <span class="n">im_utils</span>
+<span class="n">Mask_one_blob</span> <span class="o">=</span> <span class="n">im_utils</span><span class="o">.</span><span class="n">largest_blobs</span><span class="p">(</span><span class="n">Mask</span><span class="p">,</span> <span class="n">nlargest</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;keep&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will create an image wherein only the largest connected component remains (hopefully your channel network).</p>
+<p>Delta masks often have a large waterbody (ocean or lake) connecting all the outlets. This is completely fine, as the waterbody will be removed in the pruning stage.</p>
 </div>
 <div class="section" id="what-should-a-mask-capture">
 <span id="maskcapture"></span><h2>What should a mask capture?<a class="headerlink" href="#what-should-a-mask-capture" title="Permalink to this headline">¶</a></h2>
