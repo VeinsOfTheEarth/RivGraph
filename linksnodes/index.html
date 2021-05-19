@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Links and Node Dictionaries &mdash; RivGraph 0.4 documentation</title>
+  <title>Link and Node Dictionaries &mdash; RivGraph 0.4 documentation</title>
   
 
   
@@ -40,7 +40,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Contributing" href="../contributing/index.html" />
-    <link rel="prev" title="Maskmaking" href="../maskmaking/index.html" /> 
+    <link rel="prev" title="Shoreline creation" href="../shoreline/index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -98,7 +98,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../install/index.html">Installation Instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../maskmaking/index.html">Maskmaking</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Links and Node Dictionaries</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="../shoreline/index.html">Shoreline creation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Link and Node Dictionaries</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#the-links-dictionary">The Links Dictionary</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#links-key-values">Links Key Values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#accessing-link-values">Accessing Link Values</a></li>
@@ -161,7 +162,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Links and Node Dictionaries</li>
+      <li>Link and Node Dictionaries</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -180,8 +181,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="links-and-node-dictionaries">
-<span id="linksnodes"></span><h1>Links and Node Dictionaries<a class="headerlink" href="#links-and-node-dictionaries" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="link-and-node-dictionaries">
+<span id="linksnodes"></span><h1>Link and Node Dictionaries<a class="headerlink" href="#link-and-node-dictionaries" title="Permalink to this headline">¶</a></h1>
 <p>After defining a network in <em>RivGraph</em> with <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_network" title="rivgraph.classes.rivnetwork.compute_network"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.classes.rivnetwork.compute_network()</span></code></a>, two dictionaries will be created:
 <strong>links</strong> and <strong>nodes</strong>.
 This page of the documentation will describe the <em>keys</em> present in these dictionaries.</p>
@@ -197,7 +198,7 @@ This page of the documentation will describe the <em>keys</em> present in these 
 <span id="links"></span><h2>The Links Dictionary<a class="headerlink" href="#the-links-dictionary" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="links-key-values">
 <h3>Links Key Values<a class="headerlink" href="#links-key-values" title="Permalink to this headline">¶</a></h3>
-<p><strong>N</strong>, represents the number of links.</p>
+<p><strong>N</strong> represents the number of links.</p>
 <table class="docutils align-center" id="id1">
 <caption><span class="caption-text">Generic Link Keys</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
 <colgroup>
@@ -380,7 +381,7 @@ This page of the documentation will describe the <em>keys</em> present in these 
 <span id="nodes"></span><h2>The Nodes Dictionary<a class="headerlink" href="#the-nodes-dictionary" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="nodes-key-values">
 <h3>Nodes Key Values<a class="headerlink" href="#nodes-key-values" title="Permalink to this headline">¶</a></h3>
-<p><strong>N</strong>, represents the number of nodes.</p>
+<p><strong>M</strong> represents the number of nodes.</p>
 <table class="docutils align-center" id="id5">
 <caption><span class="caption-text">Generic Node Keys</span><a class="headerlink" href="#id5" title="Permalink to this table">¶</a></caption>
 <colgroup>
@@ -399,17 +400,17 @@ This page of the documentation will describe the <em>keys</em> present in these 
 <tbody>
 <tr class="row-even"><td><p>id</p></td>
 <td><p>orderedSet</p></td>
-<td><p>N</p></td>
+<td><p>M</p></td>
 <td><p>unique node id assigned to each node not in a particular order and not guaranteed to skip some id’s</p></td>
 </tr>
 <tr class="row-odd"><td><p>conn</p></td>
 <td><p>list of lists</p></td>
-<td><p>N</p></td>
+<td><p>M</p></td>
 <td><p>link ids of all links connected to this node</p></td>
 </tr>
 <tr class="row-even"><td><p>idx</p></td>
 <td><p>list of lists of ints</p></td>
-<td><p>N</p></td>
+<td><p>M</p></td>
 <td><p>list of the pixel coordinates in index format (via np.ravel_index using the shape of the input binary image)</p></td>
 </tr>
 <tr class="row-odd"><td><p>inlets</p></td>
@@ -424,17 +425,17 @@ This page of the documentation will describe the <em>keys</em> present in these 
 </tr>
 <tr class="row-odd"><td><p>int_angle</p></td>
 <td><p>np.array</p></td>
-<td><p>N</p></td>
+<td><p>M</p></td>
 <td><p>most interior angle of links connected to each node in degrees; computed via <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.ln_utils.junction_angles" title="rivgraph.ln_utils.junction_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.ln_utils.junction_angles()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p>jtype</p></td>
 <td><p>np.array</p></td>
-<td><p>N</p></td>
+<td><p>M</p></td>
 <td><p>junction type; either ‘c’ (confluence) or ‘b’ (bifurcation); computed via <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.ln_utils.junction_angles" title="rivgraph.ln_utils.junction_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.ln_utils.junction_angles()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p>width_ratio</p></td>
 <td><p>np.array</p></td>
-<td><p>N</p></td>
+<td><p>M</p></td>
 <td><p>ratio of wider link/narrower link for the two links used to compute int_angle; computed via <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.ln_utils.junction_angles" title="rivgraph.ln_utils.junction_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.ln_utils.junction_angles()</span></code></a></p></td>
 </tr>
 </tbody>
@@ -454,7 +455,7 @@ This page of the documentation will describe the <em>keys</em> present in these 
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="../contributing/index.html" class="btn btn-neutral float-right" title="Contributing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="../maskmaking/index.html" class="btn btn-neutral float-left" title="Maskmaking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../shoreline/index.html" class="btn btn-neutral float-left" title="Shoreline creation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

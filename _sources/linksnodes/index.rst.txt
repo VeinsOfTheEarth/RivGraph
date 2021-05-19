@@ -1,7 +1,7 @@
 .. _linksnodes:
 
 ===========================
-Links and Node Dictionaries
+Link and Node Dictionaries
 ===========================
 
 After defining a network in *RivGraph* with :obj:`rivgraph.classes.rivnetwork.compute_network()`, two dictionaries will be created:
@@ -23,7 +23,7 @@ The Links Dictionary
 Links Key Values
 ----------------
 
-**N**, represents the number of links.
+**N** represents the number of links.
 
 .. csv-table:: Generic Link Keys
    :file: links_generic.csv
@@ -55,7 +55,7 @@ The Nodes Dictionary
 Nodes Key Values
 ----------------
 
-**N**, represents the number of nodes.
+**M** represents the number of nodes.
 
 .. csv-table:: Generic Node Keys
    :file: nodes_generic.csv

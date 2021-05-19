@@ -96,7 +96,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Installation Instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../maskmaking/index.html">Maskmaking</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../linksnodes/index.html">Links and Node Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shoreline/index.html">Shoreline creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linksnodes/index.html">Link and Node Dictionaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apiref/index.html">API Reference</a></li>
 </ul>
@@ -207,13 +208,6 @@
 
 <div class="viewcode-block" id="get_island_properties"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_utils.get_island_properties">[docs]</a><span class="k">def</span> <span class="nf">get_island_properties</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="n">pixlen</span><span class="p">,</span> <span class="n">pixarea</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">gt</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get island properties.&quot;&quot;&quot;</span>
-    <span class="c1"># Imask = d.Imask.copy()</span>
-    <span class="c1"># pixlen = d.pixlen</span>
-    <span class="c1"># pixarea = d.pixarea</span>
-    <span class="c1"># crs = d.crs</span>
-    <span class="c1"># gt = d.gt</span>
-    <span class="c1"># props = [&#39;area&#39;, &#39;maxwidth&#39;, &#39;major_axis_length&#39;,</span>
-    <span class="c1">#                              &#39;minor_axis_length&#39;, &#39;surrounding_links&#39;]</span>
     
     <span class="c1"># maxwidth is an additional property</span>
     <span class="k">if</span> <span class="s1">&#39;maxwidth&#39;</span> <span class="ow">in</span> <span class="n">props</span><span class="p">:</span>
@@ -537,6 +531,7 @@
 
     <span class="c1"># Thresholding</span>
     <span class="n">remove</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    
     <span class="c1"># Global thresholding -- islands smaller than 1/10 the apex_wid^2</span>
     <span class="n">area_thresh</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">10</span> <span class="o">*</span> <span class="n">apex_width</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
     <span class="n">remove</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">islands</span><span class="o">.</span><span class="n">Area</span><span class="o">.</span><span class="n">values</span> <span class="o">&lt;</span> <span class="n">area_thresh</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
