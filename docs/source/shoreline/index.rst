@@ -29,7 +29,7 @@ Instead of placing nodes individually, you will provide a shoreline shapefile (o
 ------------------------
 How do I make a shoreline?
 ------------------------
-There are numerous tools available to generate your shoreline, such as the `Opening Angle Method <https://doi.org/10.1029/2008GL033963>`_ or you may automate a procedure. Here, we describe shoreline creation with QGIS, although other GIS software may also be used.
+There are numerous tools available to generate your shoreline, such as the `Opening Angle Method <https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2008GL033963>`_ or you may automate a procedure. Here, we describe shoreline creation with QGIS, although other GIS software may also be used.
 
 1. Generate the skeleton of your mask. 
 
