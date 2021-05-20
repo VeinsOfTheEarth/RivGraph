@@ -13,6 +13,7 @@ import itertools
 import pandas as pd
 from scipy.stats import mode
 from rivgraph import ln_utils as lnu
+from rivgraph import io_utils as io
 
 
 def add_directionality_trackers(links, nodes, ntype):
@@ -1322,6 +1323,9 @@ def dir_set_manually(links, nodes, manual_set_csv):
     # Read the csv file for fixing link directions.
     if os.path.isfile(manual_set_csv) is False:
         print('No file found for manually setting link directions.')
+        io.create_manual_dir_csv(manual_set_csv)
+        print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
+
         return links, nodes
     else:
         print('Using {} to manually set flow directions.'.format(manual_set_csv))
