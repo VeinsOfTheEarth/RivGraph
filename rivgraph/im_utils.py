@@ -1597,40 +1597,13 @@ def grow_blob(I, n=1, strel='square'):
     for i in np.arange(0, n):
         
         Id2 = morphology.dilation(Id, selem)
-        # oldarea = np.ravel_multi_index(np.nonzero(Id), Id.shape)
         oldarea = np.nonzero(Id)
 
         overlapid = np.nonzero(Id2[oldarea])[0] # Which values did you "grow into" 
         oldarea2 = np.unravel_index(np.ravel_multi_index(oldarea, Id.shape)[overlapid], Id.shape)
-        # --> we can't overwrite those
+        # --> We can't overwrite non-zero values (i.e. areas where a blob already exists)
         Id2[oldarea2] = Id[oldarea2]
         Id = Id2.copy()
         return Id2
 
     return Id2
-    
-    
-def rm_objects(I, lab):
-    """
-    Remove from the labelled image objects which have labels contained in lab
-    
-    Parameters
-    ----------
-    I   : np.array
-          Integer-valued labelled image to clean.
-    lab : n x 1 np.array,
-          label ids to remove.
-        
-    Returns
-    -------
-    Id. : np.array
-          Labelled image with lab id removed
-    
-    
-    """
-        
-    Id = I.copy()
-    for x in np.nditer(lab):
-        print(x)
-        Id[np.where(Id == x)] = 0
-    return Id
