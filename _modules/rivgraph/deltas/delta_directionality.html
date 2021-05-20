@@ -248,11 +248,12 @@
     <span class="c1"># Attempt to fix any cycles in the network (reports unfixable within function)</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">allcyclesfixed</span> <span class="o">=</span> <span class="n">fix_delta_cycles</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">imshape</span><span class="p">)</span>
 
-    <span class="c1"># Create a csv to store manual edits to directionality if does not exist</span>
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cont_violators</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">allcyclesfixed</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">io</span><span class="o">.</span><span class="n">create_manual_dir_csv</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;A .csv file for manual fixes to link directions at </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">))</span>
+    <span class="c1"># The following is done automatically now, regardless of if cycles or sinks exist</span>
+    <span class="c1"># # Create a csv to store manual edits to directionality if does not exist</span>
+    <span class="c1"># if os.path.isfile(manual_set_csv) is False:</span>
+    <span class="c1">#     if len(cont_violators) &gt; 0 or allcyclesfixed == 0:</span>
+    <span class="c1">#         io.create_manual_dir_csv(manual_set_csv)</span>
+    <span class="c1">#         print(&#39;A .csv file for manual fixes to link directions at {}.&#39;.format(manual_set_csv))</span>
 
     <span class="k">if</span> <span class="n">allcyclesfixed</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No cycles were found in network.&#39;</span><span class="p">)</span>

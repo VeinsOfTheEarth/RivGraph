@@ -344,13 +344,13 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Continuity violated at nodes </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cont_violators</span><span class="p">))</span>
         <span class="n">manual_fix</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1"># Create a csv to store manual edits to directionality if does not exist</span>
-    <span class="k">if</span> <span class="n">manual_fix</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">io</span><span class="o">.</span><span class="n">create_manual_dir_csv</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;A .csv file for manual fixes to link directions at </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Use the csv file at </span><span class="si">{}</span><span class="s1"> to manually fix link directions.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">))</span>
+    <span class="c1"># # Create a csv to store manual edits to directionality if does not exist</span>
+    <span class="c1"># if manual_fix == 1:</span>
+    <span class="c1">#     if os.path.isfile(manual_set_csv) is False:</span>
+    <span class="c1">#         io.create_manual_dir_csv(manual_set_csv)</span>
+    <span class="c1">#         print(&#39;A .csv file for manual fixes to link directions at {}.&#39;.format(manual_set_csv))</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         print(&#39;Use the csv file at {} to manually fix link directions.&#39;.format(manual_set_csv))</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 

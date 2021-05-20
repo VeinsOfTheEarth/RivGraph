@@ -181,6 +181,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">mode</span>
 <span class="kn">from</span> <span class="nn">rivgraph</span> <span class="kn">import</span> <span class="n">ln_utils</span> <span class="k">as</span> <span class="n">lnu</span>
+<span class="kn">from</span> <span class="nn">rivgraph</span> <span class="kn">import</span> <span class="n">io_utils</span> <span class="k">as</span> <span class="n">io</span>
 
 
 <div class="viewcode-block" id="add_directionality_trackers"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.add_directionality_trackers">[docs]</a><span class="k">def</span> <span class="nf">add_directionality_trackers</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">ntype</span><span class="p">):</span>
@@ -1490,6 +1491,9 @@
     <span class="c1"># Read the csv file for fixing link directions.</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No file found for manually setting link directions.&#39;</span><span class="p">)</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">create_manual_dir_csv</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;A .csv file for manual fixes to link directions at </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">))</span>
+
         <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Using </span><span class="si">{}</span><span class="s1"> to manually set flow directions.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">manual_set_csv</span><span class="p">))</span>
