@@ -823,7 +823,7 @@ def remove_disconnected_bridge_links(links, nodes):
     return links, nodes
 
 
-def remove_all_spurs(links, nodes, dontremove=[], ctmax=0):
+def remove_all_spurs(links, nodes, dontremove=[]):
     """
     Remove spurs.
 
@@ -840,8 +840,6 @@ def remove_all_spurs(links, nodes, dontremove=[], ctmax=0):
     dontremove : list, optional
         Node IDs not to remove (e.g. inlet and/or outlet nodes).
         The default is [].
-    ctmax : integer
-        Max of iterator to prevent overpruning in some networks
 
     Returns
     -------
@@ -870,16 +868,11 @@ def remove_all_spurs(links, nodes, dontremove=[], ctmax=0):
                 links, nodes = delete_link(links, nodes, looplink)
                 ct = ct + 1
 
-        
+
         # Remove all the nodes with only two links attached
         links, nodes = remove_two_link_nodes(links, nodes, dontremove)
-        
-         # For single channel (no loops & single outlet) networks,
-        # prevent overpruning beyond a single network with 2 nodes.
-        if (links['n_networks'] == 1) & (len(nodes['conn']) == 2):
-            ct = 0
-        
-        if ct <= ctmax:
+
+        if ct == 0:
             stopflag = 1
 
     return links, nodes
