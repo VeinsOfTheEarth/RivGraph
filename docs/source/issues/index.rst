@@ -18,7 +18,7 @@ Shoreline features should not contain any attributes named left_fid, LEFT_ID, et
 Non-point intersection
 ----------------------
 
-An assumption of `clip_by_shoreline` is that the channel skeleton and the shoreline intersect at a point, not at a line segment. If a shoreline was extracted using an automatic method such as the `Opening Angle Method <https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2008GL033963>`_, a line intersection can arise. It's recommended to smooth the shoreline, e.g. using `spline interpolation <https://gis.stackexchange.com/questions/24827/smoothing-polygons-in-contour-map>`_ or manually adjust the shoreline in that case to ensure point intersection. 
+An assumption of `clip_by_shoreline` is that the channel skeleton and the shoreline intersect at a point, not at a line segment. If a shoreline was extracted using an automatic method such as the `Opening Angle Method <https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963>`_, a line intersection can arise. It's recommended to smooth the shoreline, e.g. using `spline interpolation <https://gis.stackexchange.com/questions/24827/smoothing-polygons-in-contour-map>`_ or manually adjust the shoreline in that case to ensure point intersection. 
 
 Mask issues
 ===========
