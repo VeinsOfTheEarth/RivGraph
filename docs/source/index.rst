@@ -18,5 +18,6 @@ Documentation
    maskmaking/index
    shoreline/index
    linksnodes/index
+   issues/index
    contributing/index
    apiref/index
