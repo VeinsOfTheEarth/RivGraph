@@ -29,6 +29,8 @@ import rivgraph.deltas.delta_metrics as dm
 import rivgraph.rivers.river_directionality as rd
 import rivgraph.rivers.river_utils as ru
 import rivgraph.rivers.centerline_utils as cu
+import rivgraph.im_utils as imu
+
 
 class rivnetwork:
     """
@@ -558,7 +560,8 @@ class delta(rivnetwork):
 
     """
 
-    def __init__(self, name, path_to_mask, results_folder=None, verbose=False):
+    def __init__(self, name, path_to_mask, results_folder=None,
+                 verbose=False):
         """
 
         Parameters
@@ -573,7 +576,7 @@ class delta(rivnetwork):
             RivGraph will output processing progress if 'True'. Default is 'False'.
 
         """
-        rivnetwork.__init__(self, name, path_to_mask, results_folder, verbose=verbose)
+        super().__init__(name, path_to_mask, results_folder, verbose=verbose)
 
 
     def skeletonize(self):
@@ -645,7 +648,8 @@ class delta(rivnetwork):
             raise AttributeError('Network has not yet been computed.')
 
         if 'inlets' not in self.nodes.keys():
-            raise AttributeError('Cannot assign flow direcitons until prune_network has been run.')
+            raise AttributeError('Cannot assign flow directoons until '
+                                 'prune_network has been run.')
 
         if 'len' not in self.links.keys():
             self.compute_link_width_and_length()
@@ -1336,15 +1340,14 @@ class deltalakes(delta):
             'False'.
 
         """
+        # inherit base delta init method
+        super().__init__(name, path_to_mask, results_folder, verbose=verbose)
+
         # check expected values for the input mask
         _mask = self.gdobj.ReadAsArray()
         if 2 not in _mask:
             raise ValueError('No 2s in the input mask. '
                              'Are you sure this mask contains lakes?')
-
-        # inherit base delta init method
-        super().__init__(self, name, path_to_mask, results_folder,
-                         verbose=verbose)
 
         # define the lake mask and assign it to the class
         _lake_msk = self.Imask.copy()
@@ -1354,12 +1357,167 @@ class deltalakes(delta):
 
     def compute_lakes(self):
         """Custom function to define the lake nodes."""
-        pass
+        # ensure network has been computed
+        if hasattr(self, 'links') is False:
+            raise AttributeError('Network has not yet been computed.')
 
-    def prune_network(self):
-        """Customized method for pruning taking lakes into account."""
-        pass
+        # init node attributes for lakes and their centroids
+        self.nodes['lakes'] = []
+        self.nodes['lake_centroids'] = []
 
-    def assign_flow_directions(self):
-        """Customized flow directions assuming terminal lakes are sinks."""
-        pass
+        # get properties associated w/ lakes
+        props, labeled = imu.regionprops(self.Lmask,
+                                         props=['perimeter', 'centroid'])
+        if self.verbose is True:
+            print(str(np.max(labeled)) + ' lakes identified.')
+
+        # loop through lakes and define lake nodes
+        for i in range(1, np.max(labeled)+1):
+            # temporary mask for the lake being analyzed
+            _mask = labeled.copy()
+            _mask[_mask != i] = 0
+            _mask[_mask == i] = 1
+            # get ids of nodes within this lake
+            _node_ids = []
+            for j in range(len(self.nodes['id'])):
+                # get node coord
+                xx, yy = np.unravel_index(self.nodes['idx'][j],
+                                          self.Iskel.shape)
+                # add node id if node within the lake
+                if _mask[xx, yy] == 1:
+                    _node_ids.append(self.nodes['id'][j])
+            # 3 possible conditions
+            if len(_node_ids) > 1:
+                # multiple nodes within the lake
+                # which node is closest to the center
+                dist = np.infty
+                kept_id = np.nan
+                for k in _node_ids:
+                    ind = self.nodes['id'].index(k)  # node index
+                    xx, yy = np.unravel_index(self.nodes['idx'][ind],
+                                              self.Iskel.shape)
+                    c_dist = np.sqrt((xx-props['centroid'][i-1][0])**2 +
+                                     (yy-props['centroid'][i-1][1])**2)
+                    # record closest distance to centroid and node ID
+                    if c_dist < dist:
+                        dist = c_dist
+                        kept_id = k
+                # use the id being kept to set the node as a lake
+                self.nodes['lakes'].append(kept_id)
+
+            elif len(_node_ids) == 1:
+                # just 1 node in the lake (this is simplest condition)
+                # set this node to be the lake node so it isn't pruned
+                self.nodes['lakes'].append(_node_ids[0])
+
+            else:
+                # no nodes in the lake, must try to define one
+                # find link that runs through the lake in question
+                _link_ind = 0
+                while _link_ind >= 0:
+                    # coords of link
+                    xx, yy = np.unravel_index(self.links['idx'][_link_ind],
+                                              self.Iskel.shape)
+                    if np.sum(_mask[xx, yy]) == 0:
+                        # link not in lake
+                        _link_ind += 1
+                    else:
+                        link_ind = _link_ind
+                        _link_ind = -1  # end loop
+                # find index of closest point along link to lake centroid
+                dists = np.sqrt((props['centroid'][i-1][0]-xx)**2 +
+                                (props['centroid'][i-1][1]-yy)**2)
+                px_ind = np.where(dists == np.min(dists))[0][0]
+                # use this index to create 2 new links (auto adds node)
+                newlink1_idcs = self.links['idx'][link_ind][:px_ind+1]
+                newlink2_idcs = self.links['idx'][link_ind][px_ind:]
+                old_ids = set(self.nodes['id'])  # get node id list
+                self.links, self.nodes = lnu.add_link(self.links, self.nodes,
+                                                      newlink1_idcs)
+                self.links, self.nodes = lnu.add_link(self.links, self.nodes,
+                                                      newlink2_idcs)
+                # delete the old link
+                self.links, self.nodes = lnu.delete_link(self.links,
+                                                         self.nodes, link_ind)
+                # identify the new node and set that as the lake node
+                new_nodes = list(set(self.nodes['id']).difference(old_ids))
+                # set lake info from new nodes
+                self.nodes['lakes'].append(new_nodes[0])
+
+            # record the node centroid for the lake just assigned
+            self.nodes['lake_centroids'].append(props['centroid'][i-1])
+
+        # check that number of lake nodes == number of lakes
+        if np.max(labeled) != len(self.nodes['lakes']):
+            raise ValueError('Prototype lake identification has failed. '
+                             'The number of lakes from the mask does not '
+                             'equal the number of lake nodes identified!')
+
+    def prune_network(self, path_shoreline=None, path_inletnodes=None):
+        """
+        Customized method for pruning taking lakes into account.
+
+        This method overrides that used by the standard "delta" class.
+        Here the "lake" nodes are preserved when network pruning happens.
+
+        Parameters
+        ----------
+        path_shoreline : str, optional
+            Path to shoreline shapefile/geosjon. The default is None but will
+            check for the file at `paths['shoreline']`.
+        path_inletnodes : str, optional
+            Path to inlet nodes shapefile/geojson. The default is None but will
+            check for the file at `paths['inlet_nodes']`.
+
+
+        Returns
+        -------
+        :
+            None, but saves pruned links and nodes dictionaries to class
+            object.
+
+        """
+        # ensure network has been computed
+        if hasattr(self, 'links') is False:
+            raise AttributeError('Network has not yet been computed.')
+
+        # ensure lake nodes have been identified
+        if 'lakes' not in self.nodes.keys():
+            raise AttributeError('Run compute_lakes before pruning the '
+                                 'network.')
+
+        # copy shoreline/inlet file checking
+        # should refactor this check into a function to avoid duplicate code
+        try:
+            if path_shoreline is None:
+                path_shoreline = self.paths['shoreline']
+        except AttributeError:
+            raise AttributeError('Could not find shoreline shapefile '
+                                 'which should be at '
+                                 '{}.'.format(self.paths['shoreline']))
+
+        try:
+            if path_inletnodes is None:
+                path_inletnodes = self.paths['inlet_nodes']
+        except AttributeError:
+            raise AttributeError('Could not inlet_nodes shapefile which '
+                                 'should be at '
+                                 '{}.'.format(self.paths['inlet_nodes']))
+
+        # customized pruning
+        self.nodes = du.find_inlet_nodes(self.nodes, path_inletnodes,
+                                         self.gdobj)
+        self.links, self.nodes = du.clip_by_shoreline(self.links, self.nodes,
+                                                      path_shoreline,
+                                                      self.gdobj)
+        self.links, self.nodes = lnu.remove_all_spurs(
+            self.links, self.nodes, dontremove=list(self.nodes['inlets']) +
+            list(self.nodes['outlets']) + list(self.nodes['lakes']))
+        # self.links, self.nodes = lnu.remove_disconnected_bridge_links(
+        #     self.links, self.nodes)  # need to modify bridge check for lakes
+        self.links, self.nodes = lnu.remove_single_pixel_links(
+            self.links, self.nodes)
+        self.links, self.nodes = lnu.find_parallel_links(
+            self.links, self.nodes)
+
+        
