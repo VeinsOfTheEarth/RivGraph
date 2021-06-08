@@ -545,7 +545,7 @@ class rivnetwork:
 class delta(rivnetwork):
     """
     A class to manage and organize data and methods for analyzing a delta channel network.
-    This class inherets all the attributes and methods of the rivnetwork class,
+    This class inherits all the attributes and methods of the rivnetwork class,
     but also includes delta-specific attributes and methods.
 
 
@@ -1305,3 +1305,61 @@ class centerline():
 
         for i in range(0,len(LZC)-1,2):
             ax1.text(s[LZC[i]],0.5,str(i),fontsize=12)
+
+
+class deltalakes(delta):
+    """
+    Subclass of the delta class for scenarios with both lakes and channels.
+
+    This class inherits all of the attributes and methods from the delta
+    class, but some methods are over-ridden as necessary to incorporate the
+    lakes into the graph representation of the distributary network.
+    """
+
+    def __init__(self, name, path_to_mask, results_folder=None, verbose=False):
+        """
+        Initialize the deltalakes class.
+
+        Parameters
+        ----------
+        name : str
+            The name of the delta network; also defines the folder name
+            for storing results.
+        path_to_mask : str
+            Points to the combined channel network + lakes mask file path
+            which has 0s in land pixels, 1s for channel pixels, and 2s for lake
+            pixels.
+        results_folder : str, optional
+            Specifies a directory where results should be stored
+        verbose : str, optional
+            RivGraph will output processing progress if 'True'. Default is
+            'False'.
+
+        """
+        # check expected values for the input mask
+        _mask = self.gdobj.ReadAsArray()
+        if 2 not in _mask:
+            raise ValueError('No 2s in the input mask. '
+                             'Are you sure this mask contains lakes?')
+
+        # inherit base delta init method
+        super().__init__(self, name, path_to_mask, results_folder,
+                         verbose=verbose)
+
+        # define the lake mask and assign it to the class
+        _lake_msk = self.Imask.copy()
+        _lake_msk[_lake_msk < 2] = 0
+        _lake_msk[_lake_msk == 2] = 1
+        self.Lmask = _lake_msk
+
+    def compute_lakes(self):
+        """Custom function to define the lake nodes."""
+        pass
+
+    def prune_network(self):
+        """Customized method for pruning taking lakes into account."""
+        pass
+
+    def assign_flow_directions(self):
+        """Customized flow directions assuming terminal lakes are sinks."""
+        pass
