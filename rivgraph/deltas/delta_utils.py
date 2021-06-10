@@ -56,7 +56,7 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
     # Remove spurs from network (this includes valid inlets and outlets)
     links, nodes = lnu.remove_all_spurs(links, nodes,
                                         dontremove=list(nodes['inlets']) +
-                                                    list(nodes['outlets']))
+                                        list(nodes['outlets']))
 
     # Remove sets of links that are disconnected from inlets/outlets except for
     # a single bridge link (effectively re-pruning the network)
@@ -83,8 +83,8 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
 
     Parameters
     ----------
-    links : dict
-        stores the network's links and their properties
+    nodes : dict
+        stores the network's nodes and their properties
     inlets_shp : str
         path to the shapefile of inlet locations (point shapefile)
     gdobj : osgeo.gdal.Dataset
