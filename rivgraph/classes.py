@@ -1437,8 +1437,9 @@ class deltalakes(delta):
                 self.links, self.nodes = lnu.add_link(self.links, self.nodes,
                                                       newlink2_idcs)
                 # delete the old link
-                self.links, self.nodes = lnu.delete_link(self.links,
-                                                         self.nodes, link_ind)
+                self.links, self.nodes = lnu.delete_link(
+                    self.links, self.nodes, self.links['id'][link_ind])
+
                 # identify the new node and set that as the lake node
                 new_nodes = list(set(self.nodes['id']).difference(old_ids))
                 # set lake info from new nodes
@@ -1520,4 +1521,99 @@ class deltalakes(delta):
         self.links, self.nodes = lnu.find_parallel_links(
             self.links, self.nodes)
 
-        
+    def compute_link_width_and_length(self):
+        """
+        Computation of link widths and lengths.
+
+        Applies standard computation of link widths and lengths used in the
+        delta class. Then performs a new "lakes" method to "stamp out" the
+        footprint of the lakes so that link properties are reflective of
+        channels and do not include any widths or lengths associated with
+        properties of lake objects.
+        """
+        # use inherited method
+        super().compute_link_width_and_length()
+
+        # stamp out the lake footprints w/ custom lake method
+        self.links = lnu.stamp_out_lakes(self.links, self.Lmask,
+                                         pixlen=self.pixlen)
+
+        if self.verbose is True:
+            print('Link props computed taking lake footprints into account.')
+
+    def to_geovectors(self, export='network', ftype='json'):
+        """
+        Heavily duplicated method from `rivnetwork` to export geovectors.
+
+        Need to smartly refactor the general rivnetwork method so the
+        kind of changes made here can be easily incorporated without
+        duplicating a whole bunch of code.
+
+        This function includes lake information - which nodes are lakes
+        and their centroids - into the geovector of nodes that is output.
+        Parameters
+        ----------
+        export : str
+            Determines which features to export. Choose from:
+
+            - all (exports all available vector data)
+
+            - network (links and nodes)
+
+            - links
+
+            - nodes
+
+            - centerline (river classes only)
+
+            - mesh (centerline mesh, river classes only)
+
+            - centerline_smooth (river classes only)
+
+        ftype : str
+            Sets the output file format. Choose from:
+
+            - json (GeoJSON)
+
+            - shp  (ESRI Shapefile)
+
+        """
+        # Get extension for requested output type
+        if ftype == 'json':
+            ext = 'json'
+        elif ftype == 'shp':
+            ext = 'shp'
+        else:
+            raise TypeError('Only json and shp output types are supported.')
+
+        # Prepare list of desired exports
+        if export == 'all':
+            to_export = ['links', 'nodes']
+        elif export == 'network':
+            to_export = ['links', 'nodes']
+        else:
+            to_export = [export]
+
+        # Ensure that each requested vector dataset has been computed
+        # then export it
+        for te in to_export:
+            if te == 'links':
+                if hasattr(self, 'links') is True:
+                    self.paths['links'] = os.path.join(self.paths['basepath'],
+                                                       self.name + '_links.'
+                                                       + ext)
+                    io.links_to_geofile(self.links, self.imshape, self.gt,
+                                        self.crs, self.paths['links'])
+                else:
+                    print('Links have not been computed and thus cannot be '
+                          'exported.')
+            if te == 'nodes':
+                if hasattr(self, 'nodes') is True:
+                    self.paths['nodes'] = os.path.join(self.paths['basepath'],
+                                                       self.name + '_nodes.' +
+                                                       ext)
+                    io.lakenodes_to_geofile(self.nodes, self.imshape, self.gt,
+                                            self.crs, self.paths['nodes'])
+                else:
+                    print('Nodes have not been computed and thus cannot be '
+                          'exported.')

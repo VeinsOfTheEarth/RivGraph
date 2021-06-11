@@ -194,6 +194,81 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
     # Write geodataframe to file
     gdf.to_file(path_export, driver=get_driver(path_export))
 
+def lakenodes_to_geofile(nodes, dims, gt, crs, path_export):
+    """
+    Saves the nodes of the network to a georeferencedshapefile or geojson.
+    Computed node properties are appended as attributes when available.
+    The filetype is specified by the export path.
+    Specialized version to save lake information to the output geovectors...
+    But heavily copied from original, so need to figure out a cleaner way to
+    do this.
+
+    Parameters
+    ----------
+    nodes : dict
+        Network nodes and associated properties.
+    dims : tuple
+        (nrows, ncols) of the original mask from which nodes were derived.
+    gt : tuple
+        GDAL geotransform of the original mask from which nodes were derived.
+    crs : pyrpoj.CRS
+        CRS object specifying the coordinate reference system of the original
+        mask from which nodes were derived.
+    path_export : str
+        Path, including extension, where to save the nodes export.
+
+    Returns
+    -------
+    None.
+
+    """
+    nodexy = np.unravel_index(nodes['idx'], dims)
+    x, y = gu.xy_to_coords(nodexy[1], nodexy[0], gt)
+    all_nodes = [Point(x, y) for x, y in zip(x, y)]
+
+    # Create GeoDataFrame for storing geometries and attributes
+    gdf = gpd.GeoDataFrame(geometry=all_nodes)
+    gdf.crs = crs
+
+    # Store attributes as strings (numpy types give fiona trouble)
+    dontstore = ['idx']
+    storekeys = [k for k in nodes.keys() if
+                 len(nodes[k]) == len(nodes['id']) and k not in dontstore]
+    store_as_num = ['id', 'idx', 'logflux', 'flux', 'outletflux']
+    for k in storekeys:
+        if k in store_as_num:
+            gdf[k] = [c for c in nodes[k]]
+        else:
+            gdf[k] = [str(c).replace('[', '').replace(']', '') for
+                      c in nodes[k]]
+
+    # store lake info
+    _lakelist = np.zeros_like(np.array(nodes['id']), dtype=bool)
+    _lakecentroids = list(np.zeros_like(np.array(nodes['id']),
+                                        dtype=float)*np.nan)
+    # identify node indices w/ lakes
+    ind_list = [i for i in range(len(nodes['id'])) if
+                nodes['id'][i] in nodes['lakes']]
+
+    # set lake nodes as True in boolean array
+    _lakelist[ind_list] = True
+    # turn into list
+    _lakelist = list(_lakelist)
+
+    # loop and set centroids
+    _ind = 0
+    for i in ind_list:
+        # list of pts... as strings
+        _lakecentroids[i] = str(nodes['lake_centroids'][_ind][0]) + ', ' + \
+                            str(nodes['lake_centroids'][_ind][1])
+        _ind += 1
+
+    # add lake info to geodataframe
+    gdf['lakes'] = _lakelist
+    gdf['lake_centroids'] = _lakecentroids
+
+    # Write geodataframe to file
+    gdf.to_file(path_export, driver=get_driver(path_export))
 
 def links_to_geofile(links, dims, gt, crs, path_export):
     """
