@@ -1540,3 +1540,80 @@ class deltalakes(delta):
 
         if self.verbose is True:
             print('Link props computed taking lake footprints into account.')
+
+    def to_geovectors(self, export='network', ftype='json'):
+        """
+        Heavily duplicated method from `rivnetwork` to export geovectors.
+
+        Need to smartly refactor the general rivnetwork method so the
+        kind of changes made here can be easily incorporated without
+        duplicating a whole bunch of code.
+
+        This function includes lake information - which nodes are lakes
+        and their centroids - into the geovector of nodes that is output.
+        Parameters
+        ----------
+        export : str
+            Determines which features to export. Choose from:
+
+            - all (exports all available vector data)
+
+            - network (links and nodes)
+
+            - links
+
+            - nodes
+
+            - centerline (river classes only)
+
+            - mesh (centerline mesh, river classes only)
+
+            - centerline_smooth (river classes only)
+
+        ftype : str
+            Sets the output file format. Choose from:
+
+            - json (GeoJSON)
+
+            - shp  (ESRI Shapefile)
+
+        """
+        # Get extension for requested output type
+        if ftype == 'json':
+            ext = 'json'
+        elif ftype == 'shp':
+            ext = 'shp'
+        else:
+            raise TypeError('Only json and shp output types are supported.')
+
+        # Prepare list of desired exports
+        if export == 'all':
+            to_export = ['links', 'nodes']
+        elif export == 'network':
+            to_export = ['links', 'nodes']
+        else:
+            to_export = [export]
+
+        # Ensure that each requested vector dataset has been computed
+        # then export it
+        for te in to_export:
+            if te == 'links':
+                if hasattr(self, 'links') is True:
+                    self.paths['links'] = os.path.join(self.paths['basepath'],
+                                                       self.name + '_links.'
+                                                       + ext)
+                    io.links_to_geofile(self.links, self.imshape, self.gt,
+                                        self.crs, self.paths['links'])
+                else:
+                    print('Links have not been computed and thus cannot be '
+                          'exported.')
+            if te == 'nodes':
+                if hasattr(self, 'nodes') is True:
+                    self.paths['nodes'] = os.path.join(self.paths['basepath'],
+                                                       self.name + '_nodes.' +
+                                                       ext)
+                    io.lakenodes_to_geofile(self.nodes, self.imshape, self.gt,
+                                            self.crs, self.paths['nodes'])
+                else:
+                    print('Nodes have not been computed and thus cannot be '
+                          'exported.')
