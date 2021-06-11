@@ -1437,8 +1437,9 @@ class deltalakes(delta):
                 self.links, self.nodes = lnu.add_link(self.links, self.nodes,
                                                       newlink2_idcs)
                 # delete the old link
-                self.links, self.nodes = lnu.delete_link(self.links,
-                                                         self.nodes, link_ind)
+                self.links, self.nodes = lnu.delete_link(
+                    self.links, self.nodes, self.links['id'][link_ind])
+
                 # identify the new node and set that as the lake node
                 new_nodes = list(set(self.nodes['id']).difference(old_ids))
                 # set lake info from new nodes
@@ -1520,4 +1521,22 @@ class deltalakes(delta):
         self.links, self.nodes = lnu.find_parallel_links(
             self.links, self.nodes)
 
-        
+    def compute_link_width_and_length(self):
+        """
+        Computation of link widths and lengths.
+
+        Applies standard computation of link widths and lengths used in the
+        delta class. Then performs a new "lakes" method to "stamp out" the
+        footprint of the lakes so that link properties are reflective of
+        channels and do not include any widths or lengths associated with
+        properties of lake objects.
+        """
+        # use inherited method
+        super().compute_link_width_and_length()
+
+        # stamp out the lake footprints w/ custom lake method
+        self.links = lnu.stamp_out_lakes(self.links, self.Lmask,
+                                         pixlen=self.pixlen)
+
+        if self.verbose is True:
+            print('Link props computed taking lake footprints into account.')
