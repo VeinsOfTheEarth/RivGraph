@@ -915,7 +915,8 @@ def check_continuity(links, nodes):
     """
     Finds all sinks or sources within the network, excluding inlets and outlets.
     Returns any nodes where continuity is violated. Only checks nodes for whom
-    all attached links are certain.
+    all attached links are certain. Excludes terminal lake nodes from being
+    reported as they are treated as sinks.
 
     Parameters
     ----------
@@ -935,6 +936,12 @@ def check_continuity(links, nodes):
 
         if nid in nodes['outlets'] or nid in nodes['inlets']:
             continue
+        
+        # Exclude terminal lake nodes as well
+        if 'lakes' in nodes.keys():
+            if nid in nodes['lakes']:
+                if len(nodes['conn'][nodes['id'].index(nid)]) == 1:
+                    continue
 
         certains = [links['certain'][links['id'].index(lid)] for lid in nconn]
         if np.sum(certains) != len(nconn):
@@ -1347,6 +1354,7 @@ def dir_set_manually(links, nodes, manual_set_csv):
 def set_inletoutlet(links, nodes):
     """
     Sets directions of links that are connected to inlets and outlets.
+    Terminal lake nodes are also treated here; they are considered sinks.
 
     Parameters
     ----------
@@ -1365,7 +1373,6 @@ def set_inletoutlet(links, nodes):
         according to this algorithm.
 
     """
-    # alg = 0
     alg = algmap('inletoutlet')
 
     # Set directionality of inlet links
@@ -1396,6 +1403,18 @@ def set_inletoutlet(links, nodes):
             links, nodes = set_link(links, nodes, linkidx, usnode[0], alg=alg,
                                     checkcontinuity=True)
 
+    # Set directionality of lake outlet links
+    if 'lakes' in nodes.keys():
+        for lo in nodes['lakes']:
+            # Can only treat terminal lakes here
+            conn = nodes['conn'][nodes['id'].index(lo)]  
+            if len(conn) == 1:           
+                # Set link directionality
+                linkidx = links['id'].index(conn[0])    
+                usnode = links['conn'][linkidx][:]
+                usnode.remove(lo)
+                links, nodes = set_link(links, nodes, linkidx, usnode[0], alg=alg,
+                                        checkcontinuity=True)
     return links, nodes
 
 
@@ -1737,7 +1756,7 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
         dolink = dolinks.pop(0)
         lidx = links['id'].index(dolink)
 
-        # In case the link was set by continuity
+        # In case the link was already set by continuity
         if links['certain'][lidx] == 1:
             continue
 
@@ -1832,6 +1851,9 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
         # Ensure threshold is met
         if min_ang < angthresh:
             usnode = us_node_guess[ang_guess.index(min_ang)]
+            # if lidx == links['id'].index(90):
+            #     import pdb
+            #     pdb.set_trace()
             links, nodes = set_link(links, nodes, lidx, usnode,
                                     alg = alg, checkcontinuity=True)
 

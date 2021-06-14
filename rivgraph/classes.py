@@ -155,8 +155,8 @@ class rivnetwork:
         if exit_sides is not None:
             self.exit_sides = exit_sides.lower()
 
-        # Load mask into memory
-        self.Imask = self.gdobj.ReadAsArray()
+        # Load mask into memory - converts to binary mask
+        self.Imask = np.array(self.gdobj.ReadAsArray(), dtype=bool)
 
 
     def compute_network(self):
@@ -213,8 +213,14 @@ class rivnetwork:
             print('Computing link widths and lengths...', end='')
 
         # Widths and lengths are appended to links dict
+        if hasattr(self, 'Lmask') is True:
+            Ilakes = self.Lmask
+        else:
+            Ilakes = None
+        
         self.links = lnu.link_widths_and_lengths(self.links, self.Idist,
-                                                 pixlen=self.pixlen)
+                                                 pixlen=self.pixlen,
+                                                 Ilakes = Ilakes)
 
         if self.verbose is True:
             print('done.')
@@ -590,6 +596,8 @@ class delta(rivnetwork):
         # Load the skeleton if it already exists
         if 'Iskel' in self.paths.keys() and os.path.isfile(self.paths['Iskel']) is True:
             self.Iskel = gdal.Open(self.paths['Iskel']).ReadAsArray()
+            if self.verbose is True:
+                print('Using pre-computed skeleton found at {}.'.format(self.paths['Iskel']))
 
         else:
             if self.verbose is True:
@@ -1320,7 +1328,7 @@ class deltalakes(delta):
     lakes into the graph representation of the distributary network.
     """
 
-    def __init__(self, name, path_to_mask, results_folder=None, verbose=False):
+    def __init__(self, name, path_to_mask, lakemask, results_folder=None, verbose=False):
         """
         Initialize the deltalakes class.
 
@@ -1343,17 +1351,17 @@ class deltalakes(delta):
         # inherit base delta init method
         super().__init__(name, path_to_mask, results_folder, verbose=verbose)
 
-        # check expected values for the input mask
-        _mask = self.gdobj.ReadAsArray()
-        if 2 not in _mask:
-            raise ValueError('No 2s in the input mask. '
-                             'Are you sure this mask contains lakes?')
-
-        # define the lake mask and assign it to the class
-        _lake_msk = self.Imask.copy()
-        _lake_msk[_lake_msk < 2] = 0
-        _lake_msk[_lake_msk == 2] = 1
-        self.Lmask = _lake_msk
+        # Define the lake mask and assign it to the class
+        # Allows for a path to be input (string) or an array to be passed
+        if type(lakemask) is str:
+            self.Ilakes = gdal.Open(lakemask).ReadAsArray()
+        else:
+            self.Ilakes = lakemask
+        self.Ilakes = np.array(self.Ilakes, dtype=bool)
+            
+        # Check that the water and lake masks are the same shapes
+        if self.Imask.shape != self.Ilakes.shape:
+            raise Exception('Water mask and lake mask are not the same shape; cannot proceed.')
 
     def compute_lakes(self):
         """Custom function to define the lake nodes."""
@@ -1508,112 +1516,21 @@ class deltalakes(delta):
         # customized pruning
         self.nodes = du.find_inlet_nodes(self.nodes, path_inletnodes,
                                          self.gdobj)
+        
         self.links, self.nodes = du.clip_by_shoreline(self.links, self.nodes,
                                                       path_shoreline,
                                                       self.gdobj)
+        
         self.links, self.nodes = lnu.remove_all_spurs(
             self.links, self.nodes, dontremove=list(self.nodes['inlets']) +
             list(self.nodes['outlets']) + list(self.nodes['lakes']))
-        # self.links, self.nodes = lnu.remove_disconnected_bridge_links(
-        #     self.links, self.nodes)  # need to modify bridge check for lakes
+
+        self.links, self.nodes = lnu.remove_disconnected_bridge_links(
+            self.links, self.nodes)  # need to modify bridge check for lakes
+        
         self.links, self.nodes = lnu.remove_single_pixel_links(
             self.links, self.nodes)
+        
         self.links, self.nodes = lnu.find_parallel_links(
             self.links, self.nodes)
 
-    def compute_link_width_and_length(self):
-        """
-        Computation of link widths and lengths.
-
-        Applies standard computation of link widths and lengths used in the
-        delta class. Then performs a new "lakes" method to "stamp out" the
-        footprint of the lakes so that link properties are reflective of
-        channels and do not include any widths or lengths associated with
-        properties of lake objects.
-        """
-        # use inherited method
-        super().compute_link_width_and_length()
-
-        # stamp out the lake footprints w/ custom lake method
-        self.links = lnu.stamp_out_lakes(self.links, self.Lmask,
-                                         pixlen=self.pixlen)
-
-        if self.verbose is True:
-            print('Link props computed taking lake footprints into account.')
-
-    def to_geovectors(self, export='network', ftype='json'):
-        """
-        Heavily duplicated method from `rivnetwork` to export geovectors.
-
-        Need to smartly refactor the general rivnetwork method so the
-        kind of changes made here can be easily incorporated without
-        duplicating a whole bunch of code.
-
-        This function includes lake information - which nodes are lakes
-        and their centroids - into the geovector of nodes that is output.
-        Parameters
-        ----------
-        export : str
-            Determines which features to export. Choose from:
-
-            - all (exports all available vector data)
-
-            - network (links and nodes)
-
-            - links
-
-            - nodes
-
-            - centerline (river classes only)
-
-            - mesh (centerline mesh, river classes only)
-
-            - centerline_smooth (river classes only)
-
-        ftype : str
-            Sets the output file format. Choose from:
-
-            - json (GeoJSON)
-
-            - shp  (ESRI Shapefile)
-
-        """
-        # Get extension for requested output type
-        if ftype == 'json':
-            ext = 'json'
-        elif ftype == 'shp':
-            ext = 'shp'
-        else:
-            raise TypeError('Only json and shp output types are supported.')
-
-        # Prepare list of desired exports
-        if export == 'all':
-            to_export = ['links', 'nodes']
-        elif export == 'network':
-            to_export = ['links', 'nodes']
-        else:
-            to_export = [export]
-
-        # Ensure that each requested vector dataset has been computed
-        # then export it
-        for te in to_export:
-            if te == 'links':
-                if hasattr(self, 'links') is True:
-                    self.paths['links'] = os.path.join(self.paths['basepath'],
-                                                       self.name + '_links.'
-                                                       + ext)
-                    io.links_to_geofile(self.links, self.imshape, self.gt,
-                                        self.crs, self.paths['links'])
-                else:
-                    print('Links have not been computed and thus cannot be '
-                          'exported.')
-            if te == 'nodes':
-                if hasattr(self, 'nodes') is True:
-                    self.paths['nodes'] = os.path.join(self.paths['basepath'],
-                                                       self.name + '_nodes.' +
-                                                       ext)
-                    io.lakenodes_to_geofile(self.nodes, self.imshape, self.gt,
-                                            self.crs, self.paths['nodes'])
-                else:
-                    print('Nodes have not been computed and thus cannot be '
-                          'exported.')

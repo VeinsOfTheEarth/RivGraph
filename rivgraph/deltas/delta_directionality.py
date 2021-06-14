@@ -356,7 +356,7 @@ def fix_delta_cycles(links, nodes, imshape):
             allfixed = 0
             print('Could not fix the following cycles (links): {}'.format([c_links[i] for i in cantfix_links]))
 
-        if len(c_links) > 0:
+        if len(fixed_links) > 0:
             allfixed = 0
             print('The following cycles (links) were fixed, but should be manually checked: {}'.format([c_links[i] for i in fixed_links]))
 
@@ -417,7 +417,6 @@ def fix_delta_cycle(links, nodes, cyc_links, imshape):
 
     # List of algorithm ids that should not be reset if previously used to
     # determine direction
-    # dont_reset_algs = [-1, 0, 4, 5, 13]
     dont_reset_algs = [dy.algmap(key) for key in ['manual_set', 'inletoutlet',
                                                   'main_chans', 'bridges',
                                                   'longest_steepest']]
@@ -435,21 +434,30 @@ def fix_delta_cycle(links, nodes, cyc_links, imshape):
 
     links, nodes = re_set_linkdirs(links, nodes, imshape)
 
-    # Check that all links were reset
+    # Ensure that all links were reset
     if sum([links['certain'][links['id'].index(l)] for l in toreset]) != len(toreset):
         fixed = 0
 
     # Check that cycle was resolved
     cyclenode = links['conn'][links['id'].index(toreset[0])][0]
     cyc_n, cyc_l = dy.get_cycles(links, nodes, checknode=cyclenode)
+    
+    # Check continuity
+    violaters = dy.check_continuity(links, nodes)
 
-    # If the cycle was not fixed, try again, but set the cycle links AND the
+    # If we successfully fixed the cycle, we can exit
+    if cyc_n is None and len(violaters) == 0:
+        return links, nodes, 1
+    else:
+    # The cycle was not fixed, try again, but set the cycle links AND the
     # links connected to the cycle to unknown
-    if cyc_n is not None and cyclenode in cyc_n[0]:
         # First return to original orientation
         links = dy.cycle_return_to_original_orientation(links, orig)
 
-        # Get all cycle links and those connected to cycle
+        cyclenode = links['conn'][links['id'].index(toreset[0])][0]
+        cyc_n, cyc_l = dy.get_cycles(links, nodes, checknode=cyclenode)
+
+        # Get all cycle links plus those connected to the cycle links
         toreset = set()
         for cn in cyc_n[0]:
             conn = nodes['conn'][nodes['id'].index(cn)]
@@ -469,9 +477,11 @@ def fix_delta_cycle(links, nodes, cyc_links, imshape):
 
         # See if the fix resolved the cycle - if not, reset to original
         cyc_n, cyc_l = dy.get_cycles(links, nodes, checknode=cyclenode)
-        if cyc_n is not None and cyclenode in cyc_n[0]:
+        if cyc_n is not None and cyclenode in cyc_n[0] or len(dy.check_continuity(links, nodes)) > 0:
             links = dy.cycle_return_to_original_orientation(links, orig_links)
             fixed = 0
+        else:
+            fixed = 1
 
     return links, nodes, fixed
 

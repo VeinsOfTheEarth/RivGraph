@@ -327,7 +327,7 @@ def flip_link(links, linkid):
     return links
 
 
-def link_widths_and_lengths(links, Idt, pixlen=1):
+def link_widths_and_lengths(links, Idt, pixlen=1, Ilakes=None):
     """
     Compute all link widths and lengths.
 
@@ -374,30 +374,48 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
     links : dict
         Network links with width and length properties appended.
 
-    """
-    #TODO: add median width OR just change wid_adj to be median?
+    """   
+    # Ilakes = DL.Lmask
+    # links = DL.links
+    # pixlen = DL.pixlen
+    # Idt = DL.Idist
+    
+    width_mult = 1.1  # fraction of endpoint half-width to trim links before computing adjusted link width
+
+    # Mask out lake pixels if a lake mask is provided. Otherwise, use the 
+    # unmodified link indices list.
+    if Ilakes is not None:
+        lidcs = []
+        for li, lid in zip(links['idx'], links['id']):
+            xy = np.unravel_index(li, Idt.shape)
+            remove = np.array(Ilakes[xy], dtype=bool)
+            xy = (xy[0][~remove], xy[1][~remove])
+            lidcs.append(np.ravel_multi_index(xy, Idt.shape))
+            # if len(lidcs[-1]) == 0:
+            #     break
+    else:
+        lidcs = links['idx']
+        
 
     # Initialize attribute storage
     links['wid_pix'] = []  # width at each pixel
     links['len'] = []
     links['wid'] = []
-    links['wid_adj'] = []  # average of all link pixels considered to be part of actual channel
-    links['len_adj'] = []
-
-    dims = Idt.shape
-
-    width_mult = 1.1  # fraction of endpoint half-width to trim links before computing link width
+    links['wid_adj'] = []  # average of all link pixel widths considered to be part of actual channel
+    links['wid_adj_med'] = []  # median of all link pixel widths considered to be part of actual channel
+    links['len_adj'] = []  
 
     # Get widths at each pixel along each link
-    for li in links['idx']:
-        xy = np.unravel_index(li, dims)
+    for li in lidcs:
+        xy = np.unravel_index(li, Idt.shape)
         widths = Idt[xy] * 2 * pixlen  # x2 because dt gives half-widths
         links['wid_pix'].append(widths)
 
     # Compute trimmed/untrimmed link widths and lengths
-    for li, widths in zip(links['idx'], links['wid_pix']):
+    # Note that lake pixels are also trimmed here.
+    for li, widths in zip(lidcs, links['wid_pix']):
 
-        xy = np.unravel_index(li, dims)
+        xy = np.unravel_index(li, Idt.shape)
 
         # Compute distances along link
         dists = np.cumsum(np.sqrt(np.diff(xy[0])**2 + np.diff(xy[1])**2))
@@ -414,9 +432,11 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
         # Ensure there are enough pixels to trim the ends by the pixel half-width
         if startidx >= endidx:
             links['wid_adj'].append(np.mean(widths))
+            links['wid_adj_med'].append(np.median(widths))
             links['len_adj'].append(dists[-1])
         else:
             links['wid_adj'].append(np.mean(widths[startidx:endidx]))
+            links['wid_adj_med'].append(np.median(widths[startidx:endidx]))
             links['len_adj'].append(dists[endidx] - dists[startidx])
 
         # Unadjusted lengths and widths
@@ -806,6 +826,10 @@ def remove_disconnected_bridge_links(links, nodes):
     After all non-integral bridge links are removed, the connected component
     network that contains the inlet and outlets is returned; all other
     subnetworks are removed.
+    
+    6/11/2021 update: to account for lakes, if the set of nodes to be removed
+    contains a lake node, none of the set is removed. This has yet to be 
+    thoroughly tested, but will likely "underprune" if anything.
 
     Parameters
     ----------
@@ -822,6 +846,9 @@ def remove_disconnected_bridge_links(links, nodes):
         Pruned network nodes.
 
     """
+    # links = DL.links
+    # nodes = DL.nodes
+    
     G = nx.Graph()
     G.add_nodes_from(nodes['id'])
     for lc in links['conn']:
@@ -829,11 +856,13 @@ def remove_disconnected_bridge_links(links, nodes):
 
     bridges = list(nx.bridges(G))
 
-    # Links containining inlets or outlets cannot be bridge links
-    inletsoutlets = []
-    inletsoutlets.extend(nodes['inlets'])
-    inletsoutlets.extend(nodes['outlets'])
-    bridges = [b for b in bridges if b[0] not in inletsoutlets and b[1] not in inletsoutlets]
+    # Links attached to inlets, outlets, or lakes cannot be bridge links
+    exclude = []
+    exclude.extend(nodes['inlets'])
+    exclude.extend(nodes['outlets'])
+    if 'lakes' in nodes.keys():
+        exclude.extend(nodes['lakes'])
+    bridges = [b for b in bridges if b[0] not in exclude and b[1] not in exclude]
 
     all_remove_links = set()
     for b in bridges:
@@ -866,6 +895,8 @@ def remove_disconnected_bridge_links(links, nodes):
                 b1_out = True
                 break
 
+        # Can one of the subgraphs not reach inlets or outlets? (If so, prune it as
+        # long as it doesn't contain a lake node.)
         if b0_out is False and b0_in is False or b1_in is False and b1_out is False:
 
             # Get subgraph nodes lists
@@ -882,6 +913,12 @@ def remove_disconnected_bridge_links(links, nodes):
                 remove_nodes = set(cc[1]) - bkeep
             else:
                 remove_nodes = set(cc[0]) - bkeep
+                
+            # If any of the nodes to be removed are lakes, we don't prune the 
+            # bridge set
+            if 'lakes' in nodes.keys():
+                if any([rn in nodes['lakes'] for rn in remove_nodes]):
+                    continue # skip this b'th iteration
 
             # Convert to link ids for batch removal
             remove_linkids = set([lid for lid, lconn in zip(links['id'], links['conn']) if lconn[0] in remove_nodes and lconn[1] in remove_nodes])
@@ -899,7 +936,7 @@ def remove_disconnected_bridge_links(links, nodes):
         dontremove = nodes['arts']
     else:
         dontremove = []
-    dontremove.extend(inletsoutlets)
+    dontremove.extend(exclude)
 
     links, nodes = remove_two_link_nodes(links, nodes, dontremove)
 

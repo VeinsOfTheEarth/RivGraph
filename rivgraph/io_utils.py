@@ -173,15 +173,19 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
     None.
 
     """
+    # nodes = DL.nodes
+    # dims = DL.Imask.shape
+    # gt = DL.gt
+    # crs = DL.crs
+    
     nodexy = np.unravel_index(nodes['idx'], dims)
     x, y = gu.xy_to_coords(nodexy[1], nodexy[0], gt)
     all_nodes = [Point(x, y) for x, y in zip(x, y)]
 
     # Create GeoDataFrame for storing geometries and attributes
-    gdf = gpd.GeoDataFrame(geometry=all_nodes)
-    gdf.crs = crs
+    gdf = gpd.GeoDataFrame(geometry=all_nodes, crs=crs)
 
-    # Store attributes as strings (numpy types give fiona trouble)
+    # Store list-like attributes as strings, scala-like attributes as numeric
     dontstore = ['idx']
     storekeys = [k for k in nodes.keys() if len(nodes[k]) == len(nodes['id']) and k not in dontstore]
     store_as_num = ['id', 'idx', 'logflux', 'flux', 'outletflux']
@@ -190,6 +194,25 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
             gdf[k] = [c for c in nodes[k]]
         else:
             gdf[k] = [str(c).replace('[', '').replace(']', '') for c in nodes[k]]
+            
+    # Handle lake attributes
+    if 'lakes' in nodes.keys():
+        is_lake = []
+        lake_x, lake_y = [], []
+        for nid in nodes['id']:
+            if nid in nodes['lakes']:
+                is_lake.append(True)
+                idx = nodes['lakes'].index(nid)
+                lake_x.append(nodes['lake_centroids'][idx][0])
+                lake_y.append(nodes['lake_centroids'][idx][1])
+            else:
+                is_lake.append(False)
+                lake_x.append(None)
+                lake_y.append(None)
+                
+        gdf['is_lake'] = is_lake
+        gdf['lake_x'] = lake_x
+        gdf['lake_y'] = lake_y
 
     # Write geodataframe to file
     gdf.to_file(path_export, driver=get_driver(path_export))
@@ -270,9 +293,10 @@ def lakenodes_to_geofile(nodes, dims, gt, crs, path_export):
     # Write geodataframe to file
     gdf.to_file(path_export, driver=get_driver(path_export))
 
+
 def links_to_geofile(links, dims, gt, crs, path_export):
     """
-    Saves the links of the network to a georeferencedshapefile or geojson.
+    Saves the links of the network to a georeferenced shapefile or geojson.
     Computed link properties are saved as attributes when available. Note that
     the 'wid_pix' property, which stores the width at each pixel along the
     link, may be truncated depending on its length and the filetype.

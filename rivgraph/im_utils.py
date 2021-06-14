@@ -766,6 +766,8 @@ def dilate(I, n=1, strel='square'):
 
     if strel == 'square':
         selem = morphology.square(3)
+    if strel == 'disk2':
+        selem = morphology.disk(2)
     elif strel == 'plus':
         selem = morphology.diamond(1)
     elif strel == 'disk':
