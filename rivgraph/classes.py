@@ -213,14 +213,14 @@ class rivnetwork:
             print('Computing link widths and lengths...', end='')
 
         # Widths and lengths are appended to links dict
-        if hasattr(self, 'Lmask') is True:
-            Ilakes = self.Lmask
+        if hasattr(self, 'Ilakes') is True:
+            Ilakes = self.Ilakes
         else:
             Ilakes = None
-        
+
         self.links = lnu.link_widths_and_lengths(self.links, self.Idist,
                                                  pixlen=self.pixlen,
-                                                 Ilakes = Ilakes)
+                                                 Ilakes=Ilakes)
 
         if self.verbose is True:
             print('done.')
@@ -1223,7 +1223,6 @@ class centerline():
         plt.legend(legend)
         plt.axis('equal')
 
-
     def zs_plot(self, window=None):
         """
         Copied verbatim from https://github.com/zsylvester/curvaturepy/blob/master/Purus_2_migration_rates.ipynb
@@ -1328,7 +1327,8 @@ class deltalakes(delta):
     lakes into the graph representation of the distributary network.
     """
 
-    def __init__(self, name, path_to_mask, lakemask, results_folder=None, verbose=False):
+    def __init__(self, name, path_to_mask, lakemask, results_folder=None,
+                 verbose=False):
         """
         Initialize the deltalakes class.
 
@@ -1358,13 +1358,19 @@ class deltalakes(delta):
         else:
             self.Ilakes = lakemask
         self.Ilakes = np.array(self.Ilakes, dtype=bool)
-            
+
         # Check that the water and lake masks are the same shapes
         if self.Imask.shape != self.Ilakes.shape:
-            raise Exception('Water mask and lake mask are not the same shape; cannot proceed.')
+            raise Exception('Water mask and lake mask are not the same shape; '
+                            'cannot proceed.')
+
+    def skeletonize(self):
+        """Mask out lakes before calling delta.skeletonize."""
+        self.Imask[self.Ilakes] = False  # mask out lakes
+        super().skeletonize()  # apply delta skeletonization
 
     def compute_lakes(self):
-        """Custom function to define the lake nodes."""
+        """Define lake nodes with custom function."""
         # ensure network has been computed
         if hasattr(self, 'links') is False:
             raise AttributeError('Network has not yet been computed.')
@@ -1373,8 +1379,11 @@ class deltalakes(delta):
         self.nodes['lakes'] = []
         self.nodes['lake_centroids'] = []
 
+        # define new lakes dictionary
+        self.lakes = dict()
+
         # get properties associated w/ lakes
-        props, labeled = imu.regionprops(self.Lmask,
+        props, labeled = imu.regionprops(self.Ilakes,
                                          props=['perimeter', 'centroid'])
         if self.verbose is True:
             print(str(np.max(labeled)) + ' lakes identified.')
@@ -1516,21 +1525,20 @@ class deltalakes(delta):
         # customized pruning
         self.nodes = du.find_inlet_nodes(self.nodes, path_inletnodes,
                                          self.gdobj)
-        
+
         self.links, self.nodes = du.clip_by_shoreline(self.links, self.nodes,
                                                       path_shoreline,
                                                       self.gdobj)
-        
+
         self.links, self.nodes = lnu.remove_all_spurs(
             self.links, self.nodes, dontremove=list(self.nodes['inlets']) +
             list(self.nodes['outlets']) + list(self.nodes['lakes']))
 
         self.links, self.nodes = lnu.remove_disconnected_bridge_links(
             self.links, self.nodes)  # need to modify bridge check for lakes
-        
+
         self.links, self.nodes = lnu.remove_single_pixel_links(
             self.links, self.nodes)
-        
+
         self.links, self.nodes = lnu.find_parallel_links(
             self.links, self.nodes)
-

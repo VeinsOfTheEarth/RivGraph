@@ -374,15 +374,15 @@ def link_widths_and_lengths(links, Idt, pixlen=1, Ilakes=None):
     links : dict
         Network links with width and length properties appended.
 
-    """   
+    """
     # Ilakes = DL.Lmask
     # links = DL.links
     # pixlen = DL.pixlen
     # Idt = DL.Idist
-    
+
     width_mult = 1.1  # fraction of endpoint half-width to trim links before computing adjusted link width
 
-    # Mask out lake pixels if a lake mask is provided. Otherwise, use the 
+    # Mask out lake pixels if a lake mask is provided. Otherwise, use the
     # unmodified link indices list.
     if Ilakes is not None:
         lidcs = []
@@ -395,7 +395,7 @@ def link_widths_and_lengths(links, Idt, pixlen=1, Ilakes=None):
             #     break
     else:
         lidcs = links['idx']
-        
+
 
     # Initialize attribute storage
     links['wid_pix'] = []  # width at each pixel
@@ -403,7 +403,7 @@ def link_widths_and_lengths(links, Idt, pixlen=1, Ilakes=None):
     links['wid'] = []
     links['wid_adj'] = []  # average of all link pixel widths considered to be part of actual channel
     links['wid_adj_med'] = []  # median of all link pixel widths considered to be part of actual channel
-    links['len_adj'] = []  
+    links['len_adj'] = []
 
     # Get widths at each pixel along each link
     for li in lidcs:
@@ -826,9 +826,9 @@ def remove_disconnected_bridge_links(links, nodes):
     After all non-integral bridge links are removed, the connected component
     network that contains the inlet and outlets is returned; all other
     subnetworks are removed.
-    
+
     6/11/2021 update: to account for lakes, if the set of nodes to be removed
-    contains a lake node, none of the set is removed. This has yet to be 
+    contains a lake node, none of the set is removed. This has yet to be
     thoroughly tested, but will likely "underprune" if anything.
 
     Parameters
@@ -848,7 +848,7 @@ def remove_disconnected_bridge_links(links, nodes):
     """
     # links = DL.links
     # nodes = DL.nodes
-    
+
     G = nx.Graph()
     G.add_nodes_from(nodes['id'])
     for lc in links['conn']:
@@ -913,8 +913,8 @@ def remove_disconnected_bridge_links(links, nodes):
                 remove_nodes = set(cc[1]) - bkeep
             else:
                 remove_nodes = set(cc[0]) - bkeep
-                
-            # If any of the nodes to be removed are lakes, we don't prune the 
+
+            # If any of the nodes to be removed are lakes, we don't prune the
             # bridge set
             if 'lakes' in nodes.keys():
                 if any([rn in nodes['lakes'] for rn in remove_nodes]):
