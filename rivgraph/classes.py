@@ -634,7 +634,7 @@ class delta(rivnetwork):
         """
         # path checking and assignment function
         path_inletnodes, path_shoreline = io.read_inlet_shoreline(
-            self, path_inletnodes, path_shoreline)
+            self.paths, path_inletnodes, path_shoreline)
 
         self.links, self.nodes = du.prune_delta(
             self.links, self.nodes, path_shoreline, path_inletnodes, self.gdobj)
