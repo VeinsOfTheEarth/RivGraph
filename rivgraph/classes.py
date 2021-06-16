@@ -1346,7 +1346,30 @@ class deltalakes(delta):
 
     def compute_lakes(self, props=['perimeter', 'centroid'],
                       min_dil=1, max_dil=2):
-        """Define lake nodes with custom function."""
+        """Define lake nodes with custom function.
+
+        For more information see lake_utils.py and the function
+        make_lakenodes
+
+        Parameters
+        ----------
+        props : list, optional
+            List of lake parameters to store in the lakes dictionary. These can
+            be any property available in the
+            :obj:`~rivgraph.im_utils.regionprops` function. Perimeter and
+            centroid are always calculated.
+        min_dil : int, optional
+            Minimum number of dilations to perform for detecting nodes adjacent
+            to lakes. Default is 1, although visual inspection should be used
+            to make sure that all lakes are connected.
+        max_dil : int, optional
+            Maximum number of dilations you are willing to perform to try and
+            connect lake centers to nodes along the perimeter. Default value is
+            2 because that is one value above the default minimum of 1. If this
+            default value is below min_dil, it is set to be greater than
+            min_dil by 1.
+
+        """
         # ensure network has been computed
         if hasattr(self, 'links') is False:
             raise AttributeError('Network has not yet been computed.')
