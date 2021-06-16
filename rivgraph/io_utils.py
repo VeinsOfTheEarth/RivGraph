@@ -57,16 +57,16 @@ def prepare_paths(path_results, name, path_mask):
     paths = dict()
 
     paths['basepath'] = basepath
-    paths['maskpath'] = path_mask                                                     # geotiff binary mask; must be input by user
-    paths['Iskel'] = os.path.join(basepath, name + "_skel.tif")                      # geotiff of skeletonized mask
-    paths['Idist'] = os.path.join(basepath, name + "_dist.tif")                      # geotiff of distance transform of mask
-    paths['network_pickle'] = os.path.join(basepath, name + "_network.pkl")          # links and nodes dictionaries, pickled
-    paths['fixlinks_csv'] = os.path.join(basepath, name + "_fixlinks.csv")           # csv file to manually fix link directionality, must be created by user
-    paths['linkdirs'] = os.path.join(basepath, name + "_link_directions.tif")        # tif file that shows link directionality
-    paths['metrics'] = os.path.join(basepath, name + "_metrics.pkl")                 # metrics dictionary
+    paths['maskpath'] = path_mask # geotiff binary mask; must be input by user
+    paths['Iskel'] = os.path.join(basepath, name + "_skel.tif") # geotiff of skeletonized mask
+    paths['Idist'] = os.path.join(basepath, name + "_dist.tif") # geotiff of distance transform of mask
+    paths['network_pickle'] = os.path.join(basepath, name + "_network.pkl") # links and nodes dictionaries, pickled
+    paths['fixlinks_csv'] = os.path.join(basepath, name + "_fixlinks.csv") # csv file to manually fix link directionality, must be created by user
+    paths['linkdirs'] = os.path.join(basepath, name + "_link_directions.tif") # tif file that shows link directionality
+    paths['metrics'] = os.path.join(basepath, name + "_metrics.pkl") # metrics dictionary
 
     # The files at the following paths are not created by RivGraph, but by the user.
-    paths['shoreline'] = os.path.join(basepath, name + "_shoreline.shp")     # shoreline shapefile, must be created by user
+    paths['shoreline'] = os.path.join(basepath, name + "_shoreline.shp") # shoreline shapefile, must be created by user
     paths['inlet_nodes'] = os.path.join(basepath, name + "_inlet_nodes.shp") # inlet nodes shapefile, must be created by user
 
     return paths
@@ -177,7 +177,7 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
     # dims = DL.Imask.shape
     # gt = DL.gt
     # crs = DL.crs
-    
+
     nodexy = np.unravel_index(nodes['idx'], dims)
     x, y = gu.xy_to_coords(nodexy[1], nodexy[0], gt)
     all_nodes = [Point(x, y) for x, y in zip(x, y)]
@@ -194,7 +194,7 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
             gdf[k] = [c for c in nodes[k]]
         else:
             gdf[k] = [str(c).replace('[', '').replace(']', '') for c in nodes[k]]
-            
+
     # Handle lake attributes
     if 'lakes' in nodes.keys():
         is_lake = []
@@ -209,7 +209,7 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
                 is_lake.append(False)
                 lake_x.append(None)
                 lake_y.append(None)
-                
+
         gdf['is_lake'] = is_lake
         gdf['lake_x'] = lake_x
         gdf['lake_y'] = lake_y
@@ -671,3 +671,56 @@ def coords_to_geovector(coords, epsg, path_export):
 
     # Save and close everything
     datasource = layer = feat = geom = None
+
+
+def read_inlet_shoreline(rg_paths, path_inletnodes=None, path_shoreline=None):
+    """
+    Try to read in the inlet and shoreline shapefile paths.
+
+    Checks that the inlet and shoreline shapefiles are present at the paths
+    which have been specified. Also checks that their file extensions are
+    '.shp' (this could be made more flexible to include GeoJSONs?)
+
+    Parameters
+    ----------
+    rg_paths : dict
+        Dictionary of the RivGraph paths
+
+    path_inletnodes : str
+        Path to the inlet shapefile
+
+    path_shoreline : str
+        Path to the shoreline shapefile
+
+    Returns
+    -------
+    path_inletnodes : str
+        Path to the inlet shapefile that has been checked
+
+    path_shoreline : str
+        Path to the shoreline shapefile that has been checked
+
+    """
+    try:
+        if path_shoreline is None:
+            path_shoreline = rg_paths['shoreline']
+    except AttributeError:
+        raise AttributeError('Could not find shoreline shapefile which should '
+                             'be at {}.'.format(rg_paths['shoreline']))
+
+    if os.path.splitext(path_shoreline)[1] != '.shp':
+        raise AttributeError('Shoreline path provided does not have the file '
+                             'extension ".shp"')
+
+    try:
+        if path_inletnodes is None:
+            path_inletnodes = rg_paths['inlet_nodes']
+    except AttributeError:
+        raise AttributeError('Could not inlet_nodes shapefile which should be '
+                             'at {}.'.format(rg_paths['inlet_nodes']))
+
+    if os.path.splitext(path_inletnodes)[1] != '.shp':
+        raise AttributeError('Inlet nodes path provided does not have the '
+                             'file extension ".shp"')
+
+    return path_inletnodes, path_shoreline

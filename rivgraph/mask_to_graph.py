@@ -94,7 +94,6 @@ def skel_to_graph(Iskel):
 
         return chk_sp
 
-
     def find_starting_pixels(Iskel):
         """
         Finds an endpoint pixel to begin walking to resolve network.
