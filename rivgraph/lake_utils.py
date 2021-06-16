@@ -29,7 +29,7 @@ def prune_deltalakes(links, nodes, path_shoreline, path_inletnodes,
                                         list(nodes['lakes']) +
                                         list(nodes['lake_edges']))
 
-    # need to modify bridge check for lakes
+    # bridge link removal still buggy
     # links, nodes = lnu.remove_disconnected_bridge_links(links, nodes)
 
     links, nodes = lnu.remove_single_pixel_links(links, nodes)
@@ -39,10 +39,19 @@ def prune_deltalakes(links, nodes, path_shoreline, path_inletnodes,
     return links, nodes
 
 
-def make_lakenodes(links, nodes, Ilakes, proplist=None, max_dil=2,
+def make_lakenodes(links, nodes, Ilakes, proplist=None, min_dil=1, max_dil=2,
                    verbose=True):
     """
     Routine to define the lake nodes.
+
+    Function currently relies on two parameters controlling the range of
+    morphological dilations that occur. This is less than ideal, but without
+    this type of manual control, it is unclear how we will be able to
+    automatically handle all cases (lakes with 1, 2, 3+ connections). So some
+    manual inspection is needed after running this function (and later after
+    pruning) to make sure that all of the lakes are connected. Or if you have
+    an idea about the distance from the lake to the perimeter nodes you should
+    use that to set the minimum dilation (min_dil) parameter.
 
     Parameters
     ----------
@@ -56,6 +65,16 @@ def make_lakenodes(links, nodes, Ilakes, proplist=None, max_dil=2,
         List of lake parameters to store in the lakes dictionary. These can
         be any property available in the :obj:`~rivgraph.im_utils.regionprops`
         function. Perimeter and centroid are always calculated.
+    min_dil : int, optional
+        Minimum number of dilations to perform for detecting nodes adjacent to
+        lakes. Default is 1, although visual inspection should be used to make
+        sure that all lakes are connected.
+    max_dil : int, optional
+        Maximum number of dilations you are willing to perform to try and
+        connect lake centers to nodes along the perimeter. Default value is
+        2 because that is one value above the default minimum of 1. If this
+        default value is below min_dil, it is set to be greater than min_dil
+        by 1.
     verbose : bool, optional
         Controls verbosity of the method, True means print-statements are
         output to the console, False is suppresses output. Default is True.
@@ -79,6 +98,10 @@ def make_lakenodes(links, nodes, Ilakes, proplist=None, max_dil=2,
         proplist.append('perimeter')
     if 'centroid' not in proplist:
         proplist.append('centroid')
+
+    # handle dilations
+    if max_dil <= min_dil:
+        max_dil = min_dil + 1
 
     # init node attributes for lakes and their centroids
     nodes['lakes'] = []
@@ -129,7 +152,7 @@ def make_lakenodes(links, nodes, Ilakes, proplist=None, max_dil=2,
         Ilakec = np.pad(Ilakec, npad, mode='constant')
 
         # Find nodes connected to the lake
-        conn_nodes = find_conn_nodes(Ilakec, 1, ymin, xmin, npad, nodes,
+        conn_nodes = find_conn_nodes(Ilakec, min_dil, ymin, xmin, npad, nodes,
                                      Ilakes)
 
         # Assume at least one node connected to each lake

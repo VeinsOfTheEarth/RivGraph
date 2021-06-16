@@ -1344,7 +1344,8 @@ class deltalakes(delta):
         self.Imask[self.Ilakes] = False  # mask out lakes
         super().skeletonize()  # apply delta skeletonization
 
-    def compute_lakes(self, props=['perimeter', 'centroid'], max_dil=2):
+    def compute_lakes(self, props=['perimeter', 'centroid'],
+                      min_dil=1, max_dil=2):
         """Define lake nodes with custom function."""
         # ensure network has been computed
         if hasattr(self, 'links') is False:
@@ -1352,7 +1353,7 @@ class deltalakes(delta):
 
         # run custom lake definition function
         self.lakes, self.links, self.nodes = lku.make_lakenodes(
-            self.links, self.nodes, self.Ilakes, props, max_dil,
+            self.links, self.nodes, self.Ilakes, props, min_dil, max_dil,
             self.verbose)
 
     def prune_network(self, path_shoreline=None, path_inletnodes=None):
