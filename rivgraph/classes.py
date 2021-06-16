@@ -43,7 +43,6 @@ class rivnetwork:
 
     """
 
-
     def __init__(self, name, path_to_mask, results_folder=None,
                  exit_sides=None, verbose=False):
         """
@@ -158,7 +157,6 @@ class rivnetwork:
         # Load mask into memory - converts to binary mask
         self.Imask = np.array(self.gdobj.ReadAsArray(), dtype=bool)
 
-
     def compute_network(self):
         """
         Computes the links and nodes of the channel network mask.
@@ -175,8 +173,7 @@ class rivnetwork:
         self.links, self.nodes = m2g.skel_to_graph(self.Iskel)
 
         if self.verbose is True:
-                print('done.')
-
+            print('done.')
 
     def compute_distance_transform(self):
         """
@@ -195,7 +192,6 @@ class rivnetwork:
 
             if self.verbose is True:
                 print('done.')
-
 
     def compute_link_width_and_length(self):
         """
@@ -225,7 +221,6 @@ class rivnetwork:
         if self.verbose is True:
             print('done.')
 
-
     def compute_junction_angles(self, weight=None):
         """
         Computes the angle at nodes where only three links are connected.
@@ -247,7 +242,6 @@ class rivnetwork:
             self.nodes = lnu.junction_angles(self.links, self.nodes,
                                              self.imshape, self.pixlen,
                                              weight=weight)
-
 
     def get_islands(self, props=['area', 'maxwidth', 'major_axis_length',
                                  'minor_axis_length', 'surrounding_links'],
@@ -308,7 +302,6 @@ class rivnetwork:
 
         return islands, Iislands
 
-
     def plot(self, *kwargs, axis=None):
         """
         Generates matplotlib plots of the network.
@@ -348,7 +341,6 @@ class rivnetwork:
             f = lnu.plot_network(self.links, self.nodes, self.Imask, self.name, axis=axis)
             return f
 
-
     def save_network(self, path=None):
         """
         Writes the link and nodes dictionaries to a .pkl file.
@@ -369,7 +361,6 @@ class rivnetwork:
                 print('Links and nodes saved to pickle file: {}.'.format(self.paths['network_pickle']))
             except AttributeError:
                 print('Network has not been computed yet. Use the compute_network() method first.')
-
 
     def load_network(self, path=None):
         """
@@ -393,7 +384,6 @@ class rivnetwork:
                 print('No file was found at provided path: {}.'.format(path))
         else:
             self.links, self.nodes = io.unpickle_links_and_nodes(path)
-
 
     def adjacency_matrix(self, weight=None, normalized=False):
         """
@@ -423,7 +413,6 @@ class rivnetwork:
             A = nx.to_numpy_array(G)
 
         return A
-
 
     def to_geovectors(self, export='network', ftype='json'):
         """
@@ -507,7 +496,6 @@ class rivnetwork:
                 else:
                     print('Smoothed centerline has not been computed and thus cannot be exported.')
 
-
     def to_geotiff(self, export):
         """
         Writes geotiffs to disk.
@@ -584,7 +572,6 @@ class delta(rivnetwork):
         """
         super().__init__(name, path_to_mask, results_folder, verbose=verbose)
 
-
     def skeletonize(self):
         """
         Skeletonizes the delta binary mask.
@@ -607,7 +594,6 @@ class delta(rivnetwork):
 
             if self.verbose is True:
                 print('done.')
-
 
     def prune_network(self, path_shoreline=None, path_inletnodes=None):
         """
@@ -639,7 +625,6 @@ class delta(rivnetwork):
         self.links, self.nodes = du.prune_delta(
             self.links, self.nodes, path_shoreline, path_inletnodes, self.gdobj)
 
-
     def assign_flow_directions(self):
         """
         Computes flow directions for each link in the delta channel network.
@@ -659,7 +644,6 @@ class delta(rivnetwork):
             self.compute_distance_transform()
 
         self.links, self.nodes = dd.set_link_directions(self.links, self.nodes, self.imshape, manual_set_csv=self.paths['fixlinks_csv'])
-
 
     def compute_topologic_metrics(self):
         """
@@ -727,7 +711,6 @@ class river(rivnetwork):
 
         rivnetwork.__init__(self, name, path_to_mask, results_folder, exit_sides, verbose=verbose)
 
-
     def skeletonize(self):
         """
         Skeletonizes the river binary mask.
@@ -749,7 +732,6 @@ class river(rivnetwork):
             if self.verbose is True:
                 print('done.')
 
-
     def prune_network(self):
         """
         Prunes the computed river network.
@@ -762,7 +744,6 @@ class river(rivnetwork):
             self.skeletonize()
 
         self.links, self.nodes = ru.prune_river(self.links, self.nodes, self.exit_sides, self.Iskel, self.gdobj)
-
 
     def compute_centerline(self):
         """
@@ -779,8 +760,8 @@ class river(rivnetwork):
         if self.verbose is True:
             print('done.')
 
-
-    def compute_mesh(self, grid_spacing=None, smoothing=0.1, buf_halfwidth=None):
+    def compute_mesh(self, grid_spacing=None, smoothing=0.1,
+                     buf_halfwidth=None):
         """
         Generates an along-centerline mesh that indicates a valley-direction
         of sorts. The mesh is useful for computing spatial statistics as a function
@@ -846,7 +827,6 @@ class river(rivnetwork):
 
         if self.verbose is True:
             print('done.')
-
 
     def assign_flow_directions(self):
         """
@@ -919,7 +899,6 @@ class centerline():
             vers = 'original'
 
         return x, y, vers
-
 
     def smooth(self, window=None, n=1, k=3, x=None, y=None):
         """
@@ -1037,7 +1016,6 @@ class centerline():
         # Use curvature to find inflection points
         self.infs_C = cu.inflection_points(self.C)
 
-
     def intersection_points(self, x2, y2, x1=None, y1=None):
 
         if x1 is None:
@@ -1084,7 +1062,6 @@ class centerline():
 
         else:
             print('Could not map intersections to inflection point pairs because infs_os not computed. Run infs() first.')
-
 
     def mig_rate_transect_matching(self, x2, y2, dt_years, path_matchers,
                                    x1=None, y1=None, mig_spacing=None,
@@ -1190,7 +1167,6 @@ class centerline():
             for e in self.erode_ids:
                 self.mr_zs_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
                 self.mr_zs_sm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
-
 
     def plot(self, x=None, y=None):
 
@@ -1368,7 +1344,7 @@ class deltalakes(delta):
         self.Imask[self.Ilakes] = False  # mask out lakes
         super().skeletonize()  # apply delta skeletonization
 
-    def compute_lakes(self):
+    def compute_lakes(self, props=['perimeter', 'centroid'], max_dil=2):
         """Define lake nodes with custom function."""
         # ensure network has been computed
         if hasattr(self, 'links') is False:
@@ -1376,7 +1352,8 @@ class deltalakes(delta):
 
         # run custom lake definition function
         self.lakes, self.links, self.nodes = lku.make_lakenodes(
-            self.links, self.nodes, self.Ilakes, self.verbose)
+            self.links, self.nodes, self.Ilakes, props, max_dil,
+            self.verbose)
 
     def prune_network(self, path_shoreline=None, path_inletnodes=None):
         """

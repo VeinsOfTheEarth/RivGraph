@@ -368,6 +368,9 @@ def link_widths_and_lengths(links, Idt, pixlen=1, Ilakes=None):
         pixel resolution is the same in the horizontal and vertical directions.
         The default is 1, which corresponds to computing widths and lengths
         in units of pixels.
+    Ilakes : np.ndarray, optional
+        Binary array of lake pixels / locations. If provided is used to
+        mask out the lake pixels from the links.
 
     Returns
     -------
@@ -375,11 +378,6 @@ def link_widths_and_lengths(links, Idt, pixlen=1, Ilakes=None):
         Network links with width and length properties appended.
 
     """
-    # Ilakes = DL.Lmask
-    # links = DL.links
-    # pixlen = DL.pixlen
-    # Idt = DL.Idist
-
     width_mult = 1.1  # fraction of endpoint half-width to trim links before computing adjusted link width
 
     # Mask out lake pixels if a lake mask is provided. Otherwise, use the
@@ -442,89 +440,6 @@ def link_widths_and_lengths(links, Idt, pixlen=1, Ilakes=None):
         # Unadjusted lengths and widths
         links['wid'].append(np.mean(widths))
         links['len'].append(dists[-1])
-
-    return links
-
-
-def stamp_out_lakes(links, Lmask, pixlen=1):
-    """
-    Remove lake footprints from link calculations.
-
-    Adjusts link widths and lengths by the footprint of any lakes in the mask.
-    Function uniquely applicable to the `deltalakes` class.
-
-    The following attributes of the link dictionary may be adjusted:
-
-    - 'wid_adj' : the "adjusted" average width of link pixels excluding both
-    "false" pixels and the "lake" pixels
-
-    - 'len_adj' : the "adjusted" length of a link after excluding "false"
-    pixels and "lake" pixels
-
-    Pre-stamped widths/lengths are retained as 'old_wid_adj' and 'old_len_adj'
-
-    Parameters
-    ----------
-    links : dict
-        Network links and associated properties.
-    Lmask : np.ndarray
-        Binary mask of the lake locations, 1s for lake pixels, 0s elsewhere.
-    pixlen : float or int, optional
-        Length (or resolution) of the pixel. If provided, assumes that the
-        pixel resolution is the same in the horizontal and vertical directions.
-        The default is 1, which corresponds to computing widths and lengths
-        in units of pixels.
-
-    Returns
-    -------
-    links : dict
-        Network links with width and length properties appended.
-
-    """
-    dims = Lmask.shape  # get mask dimensions
-
-    # set lists for function
-    _wid_adj = []
-    _len_adj = []
-
-    # loop through the links and adjust widths/lengths for lakes as needed
-    for li, widths, wida, lena in zip(links['idx'], links['wid_pix'],
-                                      links['wid_adj'], links['len_adj']):
-        # get xy coords
-        xy = np.unravel_index(li, dims)
-        # define places to track new widths/lengths outside of lakes
-        _widths = []
-        _pix = 0
-        _dists = 0
-        # check if link contains lake indices and adjust wid/len of link
-        if np.sum(Lmask[xy]) > 0:
-            for i in range(len(xy[0])):
-                # if pixel is outside of a lake then count width/length
-                if Lmask[xy[0][i], xy[1][i]] == 0:
-                    _widths.append(widths[i])
-                    _pix += 1
-                    _dists += np.sqrt((xy[0][i]-xy[0][i-1])**2 +
-                                      (xy[1][i]-xy[1][i-1])**2) * pixlen
-        # append either existing or updated quantities to adj lists
-        if _pix > 0:
-            # link was in lake so use new adjusted values
-            _wid_adj.append(np.mean(_widths))
-            _len_adj.append(_dists)
-        else:
-            # link was fine just re-append old values
-            _wid_adj.append(wida)
-            _len_adj.append(lena)
-
-    # update link attributes
-    # store old ones
-    links['old_wid_adj'] = links['wid_adj']
-    links['old_len_adj'] = links['len_adj']
-    # update adjusted values for lakes - links should only get thinner&shorter
-    for i in range(0, len(_wid_adj)):
-        if _wid_adj[i] < links['wid_adj'][i] and \
-          _len_adj[i] < links['len_adj'][i]:
-            links['wid_adj'][i] = _wid_adj[i]
-            links['len_adj'][i] = _len_adj[i]
 
     return links
 
@@ -975,6 +890,8 @@ def remove_all_spurs(links, nodes, dontremove=[]):
         # Remove spurs
         for nid, con in zip(nodes['id'], nodes['conn']):
             if len(con) == 1 and nid not in dontremove:
+                if nid == 210 or nid == 10 or nid == 11:
+                    import pdb; pdb.set_trace()
                 ct = ct + 1
                 links, nodes = delete_link(links, nodes, con[0])
 
@@ -987,7 +904,6 @@ def remove_all_spurs(links, nodes, dontremove=[]):
                 # Delete link
                 links, nodes = delete_link(links, nodes, looplink)
                 ct = ct + 1
-
 
         # Remove all the nodes with only two links attached
         links, nodes = remove_two_link_nodes(links, nodes, dontremove)

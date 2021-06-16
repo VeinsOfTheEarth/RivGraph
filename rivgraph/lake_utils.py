@@ -26,7 +26,8 @@ def prune_deltalakes(links, nodes, path_shoreline, path_inletnodes,
     links, nodes = lnu.remove_all_spurs(links, nodes,
                                         dontremove=list(nodes['inlets']) +
                                         list(nodes['outlets']) +
-                                        list(nodes['lakes']))
+                                        list(nodes['lakes']) +
+                                        list(nodes['lake_edges']))
 
     # need to modify bridge check for lakes
     # links, nodes = lnu.remove_disconnected_bridge_links(links, nodes)
@@ -38,7 +39,8 @@ def prune_deltalakes(links, nodes, path_shoreline, path_inletnodes,
     return links, nodes
 
 
-def make_lakenodes(links, nodes, Ilakes, verbose=True):
+def make_lakenodes(links, nodes, Ilakes, proplist=None, max_dil=2,
+                   verbose=True):
     """
     Routine to define the lake nodes.
 
@@ -50,6 +52,10 @@ def make_lakenodes(links, nodes, Ilakes, verbose=True):
         RivGraph dictionary of nodes and their attributes
     Ilakes : np.ndarray
         2-D binary array of lakes
+    proplist : list, optional
+        List of lake parameters to store in the lakes dictionary. These can
+        be any property available in the :obj:`~rivgraph.im_utils.regionprops`
+        function. Perimeter and centroid are always calculated.
     verbose : bool, optional
         Controls verbosity of the method, True means print-statements are
         output to the console, False is suppresses output. Default is True.
@@ -64,17 +70,32 @@ def make_lakenodes(links, nodes, Ilakes, verbose=True):
         RivGraph dictionary of nodes with lake information now provided
 
     """
+    # handle proplist
+    if proplist is None:
+        proplist = ['perimeter', 'centroid']
+    if (type(proplist) is list) is False:
+        raise ValueError('proplist was not actually a list, it must be.')
+    if 'perimeter' not in proplist:
+        proplist.append('perimeter')
+    if 'centroid' not in proplist:
+        proplist.append('centroid')
+
     # init node attributes for lakes and their centroids
     nodes['lakes'] = []
     nodes['lake_centroids'] = []
+    nodes['lake_edges'] = []  # nodes along lake perimeters
 
-    # define new lakes dictionary
-    lakes = dict()
+    # define new lakes dictionary w/ id and conn keys
+    lakes = {'id': [], 'conn': []}
 
     # get properties associated w/ lakes
-    props, labeled = imu.regionprops(Ilakes, props=['perimeter', 'centroid'])
+    props, labeled = imu.regionprops(Ilakes, props=proplist)
     if verbose is True:
         print(str(np.max(labeled)) + ' lakes identified.')
+
+    # add and set keys-value pairs for all properties in proplist
+    for i in proplist:
+        lakes[i] = props[i]
 
     # identify the number of lakes
     nlakes = len(props['perimeter'])
@@ -82,6 +103,8 @@ def make_lakenodes(links, nodes, Ilakes, verbose=True):
     # Loop through each lake, connect it to the network
     # also store some properties
     for i in range(nlakes):
+        # set lake id
+        lakes['id'].append(i)
         # Get representative point within lake
         # similar to centroid, but ensures point is within the polygon
         perim = props['perimeter'][i]
@@ -100,52 +123,46 @@ def make_lakenodes(links, nodes, Ilakes, verbose=True):
             np.min(perim[:, 1]), np.max(perim[:, 0]) + 1, \
             np.min(perim[:, 0])
         Ilakec = np.array(labeled[ymin:ymax, xmin:xmax], dtype=bool)
+
         # Pad the image so there is room to dilate
         npad = 3
         Ilakec = np.pad(Ilakec, npad, mode='constant')
-        # Dilate the lake and get the newly-added pixels
-        Ilakec_d = imu.dilate(Ilakec, n=1, strel='square')
-        Ilakec_d[Ilakec] = False
-        # Get the indices of the dilated pixels
-        dpix_rc = np.where(Ilakec_d)
-        # Adjust the rows and columns to account image cropping
-        dpix_rc = (dpix_rc[0] + ymin - npad, dpix_rc[1] + xmin - npad)
-        # Convert to index
-        dpix_idx = np.ravel_multi_index(dpix_rc, Ilakes.shape)
 
-        # Find the nodes connected to the lake
-        conn_nodes = []
-        for nidx, nid in zip(nodes['idx'], nodes['id']):
-            if nidx in dpix_idx:
-                conn_nodes.append(nid)
+        # Find nodes connected to the lake
+        conn_nodes = find_conn_nodes(Ilakec, 1, ymin, xmin, npad, nodes,
+                                     Ilakes)
 
         # Assume at least one node connected to each lake
-        if len(conn_nodes) == 0:
-            print('No connecting nodes were found for lake {}; over-dilating...'.format(i))
-            # I have found one case in our test image where the skeleton doesn't actually reach the
-            # edge of the blob, but is instead an extra pixel away. Not sure the best approach
-            # to handle these, but we can dilate the lake blob a little more to capture them.
-            # Don't like this approach because it **could** capture other non-link endpoints
-            # that aren't actually connected...but I also don't see another option immediately.
+        dil_iter = 1
+        while len(conn_nodes) == 0 and dil_iter <= max_dil:
+            if verbose is True:
+                print('No connecting nodes were found for lake {L}; '
+                      'over-dilating with dilation = {D}'.format(L=i,
+                                                                 D=dil_iter))
+            # I have found one case in our test image where the skeleton
+            # doesn't actually reach the edge of the blob, but is instead an
+            # extra pixel away. Not sure the best approach to handle these, but
+            # we can dilate the lake blob a little more to capture them. Don't
+            # like this approach because it **could** capture other non-link
+            # endpoints that aren't actually connected...but I also don't see
+            # another option immediately.
 
-            # Bad coding practice but I'm copy/pasting the above code here but with
-            # a fatter dilation
-            # Just dilate one more time
-            Ilakec_d = imu.dilate(Ilakec, n=2, strel='square')
-            Ilakec_d[Ilakec] = False
-            dpix_rc = np.where(Ilakec_d)
-            dpix_rc = (dpix_rc[0] + ymin - npad, dpix_rc[1] + xmin - npad)
-            dpix_idx = np.ravel_multi_index(dpix_rc, Ilakes.shape)
+            # Find the nodes connected to the lake, dilate 1 extra time
+            conn_nodes = find_conn_nodes(Ilakec, dil_iter, ymin, xmin, npad,
+                                         nodes, Ilakes)
 
-            # Find the nodes connected to the lake
-            conn_nodes = []
-            for nidx, nid in zip(nodes['idx'], nodes['id']):
-                if nidx in dpix_idx:
-                    conn_nodes.append(nid)
+            dil_iter += 1  # increment amount of dilation
 
-            # If we still can't find one, give up for now?
-            if len(conn_nodes) == 0:
-                print('No connecting nodes were found for lake {} and over-dilating did not fix. Debug it'.format(i))
+        # If we still can't find one, give up for now?
+        if len(conn_nodes) == 0 and dil_iter == max_dil and verbose is True:
+            print('No connecting nodes were found for lake {L} '
+                  'and over-dilating did not fix. Debug it'.format(L=i))
+        elif len(conn_nodes) != 0 and dil_iter > 1 and verbose is True:
+            print('Found a connecting node with a dilation of '
+                  '{D}.'.format(D=dil_iter-1))
+
+        # record these connecting nodes as lake edge nodes
+        nodes['lake_edges'] = nodes['lake_edges'] + conn_nodes
 
         # Now we connect all the adjacent link nodes to the representative point within the lake;
         # Ensure we stay within lake pixels by using shortest path
@@ -174,8 +191,20 @@ def make_lakenodes(links, nodes, Ilakes, verbose=True):
             p_idcs = np.ravel_multi_index((path[:, 0], path[:, 1]),
                                           Ilakes.shape)
 
+            # set of node ids before creating a new one
+            old_ids = set(nodes['id'])
+
             # Add the link to the links dictionary
             links, nodes = lnu.add_link(links, nodes, p_idcs)
+
+            # use old id list to identify the new node that has been created
+            new_node_id = list(set(nodes['id']).difference(old_ids))
+
+            # add this to the lake info
+            if len(new_node_id) == 1:
+                nodes['lakes'].append(new_node_id[0])
+                nodes['lake_centroids'].append(props['centroid'][i])
+                lakes['conn'].append(new_node_id[0])
 
     # check that number of lake nodes == number of lakes
     if np.max(labeled) != len(nodes['lakes']):
@@ -184,3 +213,57 @@ def make_lakenodes(links, nodes, Ilakes, verbose=True):
                       'equal the number of lake nodes identified!')
 
     return lakes, links, nodes
+
+
+def find_conn_nodes(Ilakec, num_dil, ymin, xmin, npad, nodes, Ilakes):
+    """
+    Find nodes that connect to a lake.
+
+    This is really an internal function that a user should not need to call.
+    Basically the lake footprint is morphologically dilated to find any
+    connecting nodes present in the graph. The number of dilations is expected
+    to be very low for this process, if this exceeds 2, we suggest manual
+    inspection to take a closer look at the issue.
+
+    Parameters
+    ----------
+    Ilakec : np.ndarray
+        Padded boolean array of the lake.
+    num_dil : int
+        Number of times to perform the dilation. When this function is called
+        internally, 1 is used, and 2 is only used as a fall-back. Anything
+        beyond 2 we consider anomalous and worth human inspection of the issue.
+    ymin : int
+        Minimum y-coordinate for this lake
+    xmin : int
+        Minimum x-coordinate for this lake
+    npad : int
+        Padding used to make Ilakec
+    nodes : dict
+        RivGraph nodes dictionary
+    Ilakes : np.ndarray
+        2-D array of the lakes, used here for its shape really
+
+    Returns
+    -------
+    conn_nodes : list
+        List of nodes connected to the lake
+
+    """
+    # Dilate the lake and get the newly-added pixels
+    Ilakec_d = imu.dilate(Ilakec, n=num_dil, strel='square')
+    Ilakec_d[Ilakec] = False
+    # Get the indices of the dilated pixels
+    dpix_rc = np.where(Ilakec_d)
+    # Adjust the rows and columns to account image cropping
+    dpix_rc = (dpix_rc[0] + ymin - npad, dpix_rc[1] + xmin - npad)
+    # Convert to index
+    dpix_idx = np.ravel_multi_index(dpix_rc, Ilakes.shape)
+
+    # Find the nodes connected to the lake
+    conn_nodes = []
+    for nidx, nid in zip(nodes['idx'], nodes['id']):
+        if nidx in dpix_idx:
+            conn_nodes.append(nid)
+
+    return conn_nodes
