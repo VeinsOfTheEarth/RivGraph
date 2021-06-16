@@ -108,6 +108,9 @@ def make_lakenodes(links, nodes, Ilakes, proplist=None, min_dil=1, max_dil=2,
     nodes['lake_centroids'] = []
     nodes['lake_edges'] = []  # nodes along lake perimeters
 
+    # init new link attribute to record ids of the interior lake links
+    links['lakes'] = []
+
     # define new lakes dictionary w/ id and conn keys
     lakes = {'id': [], 'conn': []}
 
@@ -214,14 +217,19 @@ def make_lakenodes(links, nodes, Ilakes, proplist=None, min_dil=1, max_dil=2,
             p_idcs = np.ravel_multi_index((path[:, 0], path[:, 1]),
                                           Ilakes.shape)
 
-            # set of node ids before creating a new one
-            old_ids = set(nodes['id'])
+            # set of ids before creating a new one
+            old_node_ids = set(nodes['id'])
+            old_link_ids = set(links['id'])
 
             # Add the link to the links dictionary
             links, nodes = lnu.add_link(links, nodes, p_idcs)
 
-            # use old id list to identify the new node that has been created
-            new_node_id = list(set(nodes['id']).difference(old_ids))
+            # use old id list to identify the new stuff that has been created
+            new_node_id = list(set(nodes['id']).difference(old_node_ids))
+            new_link_id = list(set(links['id']).difference(old_link_ids))
+
+            # record this link so we know it is an inner lake link
+            links['lakes'].append(new_link_id[0])
 
             # add this to the lake info
             if len(new_node_id) == 1:

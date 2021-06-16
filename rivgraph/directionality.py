@@ -936,7 +936,7 @@ def check_continuity(links, nodes):
 
         if nid in nodes['outlets'] or nid in nodes['inlets']:
             continue
-        
+
         # Exclude terminal lake nodes as well
         if 'lakes' in nodes.keys():
             if nid in nodes['lakes']:
@@ -1407,14 +1407,14 @@ def set_inletoutlet(links, nodes):
     if 'lakes' in nodes.keys():
         for lo in nodes['lakes']:
             # Can only treat terminal lakes here
-            conn = nodes['conn'][nodes['id'].index(lo)]  
-            if len(conn) == 1:           
+            conn = nodes['conn'][nodes['id'].index(lo)]
+            if len(conn) == 1:
                 # Set link directionality
-                linkidx = links['id'].index(conn[0])    
+                linkidx = links['id'].index(conn[0])
                 usnode = links['conn'][linkidx][:]
                 usnode.remove(lo)
-                links, nodes = set_link(links, nodes, linkidx, usnode[0], alg=alg,
-                                        checkcontinuity=True)
+                links, nodes = set_link(links, nodes, linkidx, usnode[0],
+                                        alg=alg, checkcontinuity=True)
     return links, nodes
 
 
@@ -1959,7 +1959,7 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
     Method 1 sets a broken link if its counterpart is known.
     Method 2 sets a side of the loop if the other side is known.
     Method 3 sets both sides if the input to one of the end nodes is known.
-    
+
     Parameters
     ----------
     links : dict
@@ -1969,7 +1969,7 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
     checknodes : int or str, optional
         Node ids to check for presence of settable artificial links. If 'all',
         all nodes in the network are checked.
-    
+
     Returns
     -------
     links : dict
