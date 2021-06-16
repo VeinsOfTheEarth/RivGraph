@@ -890,8 +890,6 @@ def remove_all_spurs(links, nodes, dontremove=[]):
         # Remove spurs
         for nid, con in zip(nodes['id'], nodes['conn']):
             if len(con) == 1 and nid not in dontremove:
-                if nid == 210 or nid == 10 or nid == 11:
-                    import pdb; pdb.set_trace()
                 ct = ct + 1
                 links, nodes = delete_link(links, nodes, con[0])
 
