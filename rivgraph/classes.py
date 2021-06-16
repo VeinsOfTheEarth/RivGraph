@@ -29,7 +29,7 @@ import rivgraph.deltas.delta_metrics as dm
 import rivgraph.rivers.river_directionality as rd
 import rivgraph.rivers.river_utils as ru
 import rivgraph.rivers.centerline_utils as cu
-import rivgraph.im_utils as imu
+import rivgraph.lake_utils as lku
 
 
 class rivnetwork:
@@ -632,19 +632,12 @@ class delta(rivnetwork):
             None, but saves pruned links and nodes dictionaries to class object.
 
         """
-        try:
-            if path_shoreline is None:
-                path_shoreline = self.paths['shoreline']
-        except AttributeError:
-            raise AttributeError('Could not find shoreline shapefile which should be at {}.'.format(self.paths['shoreline']))
+        # path checking and assignment function
+        path_inletnodes, path_shoreline = io.read_inlet_shoreline(
+            self, path_inletnodes, path_shoreline)
 
-        try:
-            if path_inletnodes is None:
-                path_inletnodes = self.paths['inlet_nodes']
-        except AttributeError:
-            raise AttributeError('Could not inlet_nodes shapefile which should be at {}.'.format(self.paths['inlet_nodes']))
-
-        self.links, self.nodes = du.prune_delta(self.links, self.nodes, path_shoreline, path_inletnodes, self.gdobj)
+        self.links, self.nodes = du.prune_delta(
+            self.links, self.nodes, path_shoreline, path_inletnodes, self.gdobj)
 
 
     def assign_flow_directions(self):
@@ -1053,7 +1046,7 @@ class centerline():
         ls1 = LineString(zip(x1, y1))
         ls2 = LineString(zip(x2, y2))
         ls_intersections = ls1.intersection(ls2)
-        self.ints_all = np.unique(np.sort([np.argmin(np.sqrt((x1-pt.coords.xy[0][0])**2 + (y1-pt.coords.xy[1][0])**2)) for pt in ls_intersections])) # locations of zero migration
+        self.ints_all = np.unique(np.sort([np.argmin(np.sqrt((x1-pt.coords.xy[0][0])**2 + (y1-pt.coords.xy[1][0])**2)) for pt in ls_intersections]))  # locations of zero migration
 
         # Map the intersection points so that there is one point for every
         # pair of inflection points in inf_os
@@ -1067,7 +1060,7 @@ class centerline():
             # Compute the average bend length from the inflection points
             ints = []
             s = self.s()
-#            abl = (s[self.infs_os[-1]] - s[self.infs_os[0]])/(len(self.infs_os)-1)
+            # abl = (s[self.infs_os[-1]] - s[self.infs_os[0]])/(len(self.infs_os)-1)
 
             for i in range(len(self.infs_os)):
 
@@ -1093,7 +1086,9 @@ class centerline():
             print('Could not map intersections to inflection point pairs because infs_os not computed. Run infs() first.')
 
 
-    def mig_rate_transect_matching(self, x2, y2, dt_years, path_matchers, x1=None, y1=None, mig_spacing=None, window=None, path_mig_vectors=None):
+    def mig_rate_transect_matching(self, x2, y2, dt_years, path_matchers,
+                                   x1=None, y1=None, mig_spacing=None,
+                                   window=None, path_mig_vectors=None):
         """
         Compute migration rate using "transect matching". Requires a user to
         provide a geovector file (e.g. shapefile, geopackage, etc.) of that
@@ -1119,7 +1114,9 @@ class centerline():
         if mig_spacing is None:
             mig_spacing = self.W/8
 
-        self.mr_tm, pts_cl1, pts_cl2 = cu.cl_migration_transect_matching(path_matchers, x1, y1, x2, y2, dt_years, mig_spacing)
+        self.mr_tm, pts_cl1, pts_cl2 = \
+            cu.cl_migration_transect_matching(path_matchers, x1, y1, x2, y2,
+                                              dt_years, mig_spacing)
 
         # Export migration vectors if path provided
         if path_mig_vectors is not None:
@@ -1131,8 +1128,8 @@ class centerline():
                 for p1, p2 in zip(pts_cl1, pts_cl2):
                     mvs.append(LineString((p1, p2)))
                 gdf_mvs = gpd.GeoDataFrame(geometry=mvs, crs=self.crs)
-                gdf_mvs.to_file(path_mig_vectors, driver=io.get_driver(path_mig_vectors))
-
+                gdf_mvs.to_file(path_mig_vectors,
+                                driver=io.get_driver(path_mig_vectors))
 
         # Smooth the migration rates
         self.mr_tm_sm = signal.savgol_filter(self.mr_tm, window_length=window,
@@ -1150,7 +1147,6 @@ class centerline():
             for e in self.erode_ids:
                 self.mr_tm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
                 self.mr_tm_sm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
-
 
     def mig_rate_zs(self, x2, y2, dt_years, x1=None, y1=None, window=None):
         """
@@ -1341,6 +1337,9 @@ class deltalakes(delta):
             Points to the combined channel network + lakes mask file path
             which has 0s in land pixels, 1s for channel pixels, and 2s for lake
             pixels.
+        lakemask : str, or np.ndarray
+            Provide either a path to a .tif of a binary lake mask, or provide
+            the binary lake mask (lake pixels = 1, other = 0) directly
         results_folder : str, optional
             Specifies a directory where results should be stored
         verbose : str, optional
@@ -1375,101 +1374,9 @@ class deltalakes(delta):
         if hasattr(self, 'links') is False:
             raise AttributeError('Network has not yet been computed.')
 
-        # init node attributes for lakes and their centroids
-        self.nodes['lakes'] = []
-        self.nodes['lake_centroids'] = []
-
-        # define new lakes dictionary
-        self.lakes = dict()
-
-        # get properties associated w/ lakes
-        props, labeled = imu.regionprops(self.Ilakes,
-                                         props=['perimeter', 'centroid'])
-        if self.verbose is True:
-            print(str(np.max(labeled)) + ' lakes identified.')
-
-        # loop through lakes and define lake nodes
-        for i in range(1, np.max(labeled)+1):
-            # temporary mask for the lake being analyzed
-            _mask = labeled.copy()
-            _mask[_mask != i] = 0
-            _mask[_mask == i] = 1
-            # get ids of nodes within this lake
-            _node_ids = []
-            for j in range(len(self.nodes['id'])):
-                # get node coord
-                xx, yy = np.unravel_index(self.nodes['idx'][j],
-                                          self.Iskel.shape)
-                # add node id if node within the lake
-                if _mask[xx, yy] == 1:
-                    _node_ids.append(self.nodes['id'][j])
-            # 3 possible conditions
-            if len(_node_ids) > 1:
-                # multiple nodes within the lake
-                # which node is closest to the center
-                dist = np.infty
-                kept_id = np.nan
-                for k in _node_ids:
-                    ind = self.nodes['id'].index(k)  # node index
-                    xx, yy = np.unravel_index(self.nodes['idx'][ind],
-                                              self.Iskel.shape)
-                    c_dist = np.sqrt((xx-props['centroid'][i-1][0])**2 +
-                                     (yy-props['centroid'][i-1][1])**2)
-                    # record closest distance to centroid and node ID
-                    if c_dist < dist:
-                        dist = c_dist
-                        kept_id = k
-                # use the id being kept to set the node as a lake
-                self.nodes['lakes'].append(kept_id)
-
-            elif len(_node_ids) == 1:
-                # just 1 node in the lake (this is simplest condition)
-                # set this node to be the lake node so it isn't pruned
-                self.nodes['lakes'].append(_node_ids[0])
-
-            else:
-                # no nodes in the lake, must try to define one
-                # find link that runs through the lake in question
-                _link_ind = 0
-                while _link_ind >= 0:
-                    # coords of link
-                    xx, yy = np.unravel_index(self.links['idx'][_link_ind],
-                                              self.Iskel.shape)
-                    if np.sum(_mask[xx, yy]) == 0:
-                        # link not in lake
-                        _link_ind += 1
-                    else:
-                        link_ind = _link_ind
-                        _link_ind = -1  # end loop
-                # find index of closest point along link to lake centroid
-                dists = np.sqrt((props['centroid'][i-1][0]-xx)**2 +
-                                (props['centroid'][i-1][1]-yy)**2)
-                px_ind = np.where(dists == np.min(dists))[0][0]
-                # use this index to create 2 new links (auto adds node)
-                newlink1_idcs = self.links['idx'][link_ind][:px_ind+1]
-                newlink2_idcs = self.links['idx'][link_ind][px_ind:]
-                old_ids = set(self.nodes['id'])  # get node id list
-                self.links, self.nodes = lnu.add_link(self.links, self.nodes,
-                                                      newlink1_idcs)
-                self.links, self.nodes = lnu.add_link(self.links, self.nodes,
-                                                      newlink2_idcs)
-                # delete the old link
-                self.links, self.nodes = lnu.delete_link(
-                    self.links, self.nodes, self.links['id'][link_ind])
-
-                # identify the new node and set that as the lake node
-                new_nodes = list(set(self.nodes['id']).difference(old_ids))
-                # set lake info from new nodes
-                self.nodes['lakes'].append(new_nodes[0])
-
-            # record the node centroid for the lake just assigned
-            self.nodes['lake_centroids'].append(props['centroid'][i-1])
-
-        # check that number of lake nodes == number of lakes
-        if np.max(labeled) != len(self.nodes['lakes']):
-            raise ValueError('Prototype lake identification has failed. '
-                             'The number of lakes from the mask does not '
-                             'equal the number of lake nodes identified!')
+        # run custom lake definition function
+        self.lakes, self.links, self.nodes = lku.make_lakenodes(
+            self.links, self.nodes, self.Ilakes, self.verbose)
 
     def prune_network(self, path_shoreline=None, path_inletnodes=None):
         """
@@ -1504,41 +1411,11 @@ class deltalakes(delta):
             raise AttributeError('Run compute_lakes before pruning the '
                                  'network.')
 
-        # copy shoreline/inlet file checking
-        # should refactor this check into a function to avoid duplicate code
-        try:
-            if path_shoreline is None:
-                path_shoreline = self.paths['shoreline']
-        except AttributeError:
-            raise AttributeError('Could not find shoreline shapefile '
-                                 'which should be at '
-                                 '{}.'.format(self.paths['shoreline']))
+        # check / assign inlet and shore information
+        path_inletnodes, path_shoreline = io.read_inlet_shoreline(
+            self.paths, path_inletnodes, path_shoreline)
 
-        try:
-            if path_inletnodes is None:
-                path_inletnodes = self.paths['inlet_nodes']
-        except AttributeError:
-            raise AttributeError('Could not inlet_nodes shapefile which '
-                                 'should be at '
-                                 '{}.'.format(self.paths['inlet_nodes']))
-
-        # customized pruning
-        self.nodes = du.find_inlet_nodes(self.nodes, path_inletnodes,
-                                         self.gdobj)
-
-        self.links, self.nodes = du.clip_by_shoreline(self.links, self.nodes,
-                                                      path_shoreline,
-                                                      self.gdobj)
-
-        self.links, self.nodes = lnu.remove_all_spurs(
-            self.links, self.nodes, dontremove=list(self.nodes['inlets']) +
-            list(self.nodes['outlets']) + list(self.nodes['lakes']))
-
-        self.links, self.nodes = lnu.remove_disconnected_bridge_links(
-            self.links, self.nodes)  # need to modify bridge check for lakes
-
-        self.links, self.nodes = lnu.remove_single_pixel_links(
-            self.links, self.nodes)
-
-        self.links, self.nodes = lnu.find_parallel_links(
-            self.links, self.nodes)
+        # customized pruning method for lakes
+        self.links, self.nodes = lku.prune_deltalakes(
+            self.links, self.nodes, path_shoreline, path_inletnodes,
+            self.gdobj)
