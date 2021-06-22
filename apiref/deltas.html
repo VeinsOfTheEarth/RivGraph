@@ -359,9 +359,29 @@ is None.</p></li>
 <p>Created on Mon May 21 09:00:01 2018</p>
 <p>&#64;author: Jon</p>
 <dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.add_super_apex">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">add_super_apex</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#add_super_apex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.add_super_apex" title="Permalink to this definition">¶</a></dt>
+<dd><p>If multiple inlets are present, this creates a “super apex” that is
+directly upstream of all the inlet nodes. The synthetic links created
+have zero length and widths equal to the sum of the widths of the links
+connected to their respective inlet node.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="rivgraph.deltas.delta_metrics.compute_delta_metrics">
 <code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">compute_delta_metrics</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#compute_delta_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.compute_delta_metrics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute delta metrics.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.compute_steady_state_link_fluxes">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">compute_steady_state_link_fluxes</code><span class="sig-paren">(</span><em>G</em>, <em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#compute_steady_state_link_fluxes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.compute_steady_state_link_fluxes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the steady state fluxes through links given a directed, weighted,
+NetworkX graph. The network should have only a single inlet (use either
+ensure_single_inlet() or add_super_apex() to do this). Additionally,
+this method will fail if the network has parallel edges. You should first
+run ln_utils artificial_nodes() function to break parallel edges, then
+re-compute link widths and lengths.</p>
 </dd></dl>
 
 <dl class="function">
@@ -440,7 +460,9 @@ flux.</p>
 <dl class="function">
 <dt id="rivgraph.deltas.delta_metrics.ensure_single_inlet">
 <code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">ensure_single_inlet</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#ensure_single_inlet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.ensure_single_inlet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Ensure only a single apex node exists.</p>
+<dd><p>Ensure only a single apex node exists. This dumbly just prunes all inlet
+nodes+links except the widest one. Recommended to use the super_apex()
+approach instead if you want to preserve all inlets.</p>
 <p>All the delta metrics here require a single apex node, and that that node
 be connected to at least two downstream links. This function ensures these
 conditions are met; where there are multiple inlets, the widest is chosen.
@@ -462,7 +484,8 @@ The graph should contain a single apex
 <dl class="function">
 <dt id="rivgraph.deltas.delta_metrics.graphiphy">
 <code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">graphiphy</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#graphiphy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.graphiphy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a networkx graph.</p>
+<dd><p>Converts the RivGraph links and nodes dictionaries into a NetworkX graph
+object.</p>
 </dd></dl>
 
 <dl class="function">
