@@ -22,12 +22,17 @@ was found for all metrics, for both deltas, using both the original Matlab
 scripts and the Python functions provided here.
 JS has made some efficiency improvments to the code; otherwise most variable
 names and code structure was matched to the original Matlab scripts.
+
+Use at your own risk.
 """
 
 
 def compute_delta_metrics(links, nodes):
     """Compute delta metrics."""
     # Delta metrics require a single apex node
+    # This is not the ideal way to force a single inlet; adding the super-apex
+    # is generally a much better approach. It has yet to be tested thoroughly,
+    # though.
     links_m, nodes_m = ensure_single_inlet(links, nodes)
 
     # Ensure we have a directed, acyclic graph; also include widths as weights
@@ -45,9 +50,7 @@ def compute_delta_metrics(links, nodes):
     metrics['nonlin_entropy_rate'] = ner
     metrics['nER_prob_exceedence'] = pexc
     metrics['nER_randomized'] = ner_randomized
-    TMI, TCE = top_entropy_based_topo(deltavars)
-    metrics['top_mutual_info'] = TMI
-    metrics['top_conditional_entropy'] = TCE
+    metrics['top_mutual_info'], metrics['top_conditional_entropy'] = top_entropy_based_topo(deltavars)
     metrics['top_link_sharing_idx'] = top_link_sharing_index(deltavars)
     metrics['n_alt_paths'] = top_number_alternative_paths(deltavars)
     metrics['resistance_distance'] = top_resistance_distance(deltavars)
@@ -55,16 +58,16 @@ def compute_delta_metrics(links, nodes):
     metrics['flux_sharing_idx'] = dyn_flux_sharing_index(deltavars)
     metrics['leakage_idx'] = dyn_leakage_index(deltavars)
     metrics['dyn_pairwise_dependence'] = dyn_pairwise_dep(deltavars)
-    DMI, DCE = dyn_entropy_based_dyn(deltavars)
-    metrics['dyn_mutual_info'] = DMI
-    metrics['dyn_conditional_entropy'] = DCE
+    metrics['dyn_mutual_info'], metrics['dyn_conditional_entropy'] = dyn_entropy_based_dyn(deltavars)
 
     return metrics
 
 
 def ensure_single_inlet(links, nodes):
     """
-    Ensure only a single apex node exists.
+    Ensure only a single apex node exists. This dumbly just prunes all inlet
+    nodes+links except the widest one. Recommended to use the super_apex() 
+    approach instead if you want to preserve all inlets.
 
     All the delta metrics here require a single apex node, and that that node
     be connected to at least two downstream links. This function ensures these
@@ -128,8 +131,56 @@ def ensure_single_inlet(links, nodes):
     return links_edit, nodes_edit
 
 
+def add_super_apex(links, nodes, imshape):
+    """
+    If multiple inlets are present, this creates a "super apex" that is
+    directly upstream of all the inlet nodes. The synthetic links created
+    have zero length and widths equal to the sum of the widths of the links
+    connected to their respective inlet node.
+    """
+    
+    # Get inlet nodes
+    ins = nodes['inlets']
+    
+    if len(ins) <= 1:
+        return links, nodes
+    
+    # Find the location of the super-apex by averaging the inlets' locations
+    ins_idx = [nodes['idx'][nodes['id'].index(i)] for i in ins]
+    rs, cs = np.unravel_index(ins_idx, imshape)
+    apex_r, apex_c = np.mean(rs, dtype=int), np.mean(cs, dtype=int)
+    apex_idx = np.ravel_multi_index((apex_r, apex_c), imshape)
+    
+    # Get the widths of the super-apex links -- these are just the summed
+    # widths of all the links connected to each inlet node
+    sa_widths = []
+    for i in ins:
+        lconn = nodes['conn'][nodes['id'].index(i)]
+        sa_widths.append(sum([links['wid_adj'][links['id'].index(lid)] for lid in lconn]))
+    
+    # Add links from the super-apex to the inlet nodes
+    # Widths are computed above; lengths are set to zero for these synthetic links
+    for i, wid in zip(ins, sa_widths):
+        in_idx = nodes['idx'][nodes['id'].index(i)]
+        idcs = [apex_idx, in_idx]
+        links, nodes = lnu.add_link(links, nodes, idcs)      
+        links['wid_adj'].append(wid)
+        links['wid'].append(wid) # we also append to the width attribute to keep the fields the same length
+        links['len'].append(0)
+        links['len_adj'].append(0)
+        
+    # Add the super apex node field to the nodes dictionary
+    # nodes = ln_utils.add_node(nodes, apex_idx, sa_lids)
+    nodes['super_apex'] = nodes['id'][-1]
+
+    return links, nodes
+
+
 def graphiphy(links, nodes, weight=None):
-    """Create a networkx graph."""
+    """
+    Converts the RivGraph links and nodes dictionaries into a NetworkX graph
+    object.
+    """
     if weight is not None and weight not in links.keys():
         raise RuntimeError('Provided weight key not in nodes dictionary.')
 
@@ -139,9 +190,7 @@ def graphiphy(links, nodes, weight=None):
         weights = np.array(links[weight])
         
     # Check weights
-    print(np.sum(weights<=0))
     if np.sum(weights<=0) > 0:
-        print('shit')
         raise Warning('One or more of your weights is =< 0. This could cause problems later.')
 
     G = nx.DiGraph()
@@ -213,7 +262,6 @@ def intermediate_vars(G):
     return deltavars
 
 
-
 def find_inlet_outlet_nodes(A):
     """
     Find inlet and outlet nodes.
@@ -229,6 +277,43 @@ def find_inlet_outlet_nodes(A):
     outlets = np.where(np.sum(A, axis=0) == 0)[0]
 
     return apex, outlets
+
+
+def compute_steady_state_link_fluxes(G, links, nodes):
+    """
+    Computes the steady state fluxes through links given a directed, weighted,
+    NetworkX graph. The network should have only a single inlet (use either
+    ensure_single_inlet() or add_super_apex() to do this). Additionally,
+    this method will fail if the network has parallel edges. You should first
+    run ln_utils artificial_nodes() function to break parallel edges, then
+    re-compute link widths and lengths.
+    """
+    
+    # Normalize the adjacency matrix
+    An = normalize_adj_matrix(G)
+    # Transposed adjacency required for computing F
+    An_t = np.transpose(An)
+    # Compute steady-state flux distribution 
+    fluxes, _ = delta_subN_F(An_t)
+
+    # Fluxes are at-a-node and need to be translated to links
+    fluxes = np.expand_dims(fluxes,1)
+    # Expand node-fluxes back to full adjacency matrix
+    fw = fluxes * An
+    # All nonzero elements in fw represent links where there is flux
+    rows, cols = np.where(fw>0)
+    Gnodes = list(G.nodes)
+    linkfluxes = np.zeros((len(links['id']),1)) # Preallocate storage
+    for (r,c) in zip(rows,cols):
+        u = Gnodes[r]
+        v = Gnodes[c]        
+        link_id = G.edges[u,v]['eyedee']
+        linkfluxes[links['id'].index(link_id)] = fw[r,c]
+    
+    # Store the fluxes in the links dict
+    links['flux_ss'] = np.array(linkfluxes).flatten().tolist()
+    
+    return links
 
 
 def delta_subN_F(A, epsilon=10**-10):
@@ -554,8 +639,6 @@ def graphshortestpath(A, start, finish):
     considered. Number of links in the shortest path is returned.
 
     """
-    import networkx as nx
-
     G = nx.from_numpy_matrix(A)
     sp = nx.shortest_path_length(G, start, finish)
 
