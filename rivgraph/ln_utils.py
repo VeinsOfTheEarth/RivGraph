@@ -418,10 +418,16 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
         else:
             links['wid_adj'].append(np.mean(widths[startidx:endidx]))
             links['len_adj'].append(dists[endidx] - dists[startidx])
-
+            
         # Unadjusted lengths and widths
         links['wid'].append(np.mean(widths))
         links['len'].append(dists[-1])
+        
+        # Ensure the minimum width and length equal to the pixel resolution
+        links['wid'][-1] = max(pixlen, links['wid'][-1])
+        links['len'][-1] = max(pixlen, links['len'][-1])
+        links['wid_adj'][-1] = max(pixlen, links['wid_adj'][-1])
+        links['len_adj'][-1] = max(pixlen, links['len_adj'][-1])
 
     return links
 

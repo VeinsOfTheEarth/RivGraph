@@ -307,7 +307,7 @@ def compute_steady_state_link_fluxes(G, links, nodes):
     for (r,c) in zip(rows,cols):
         u = Gnodes[r]
         v = Gnodes[c]        
-        link_id = G.edges[u,v]['eyedee']
+        link_id = G.edges[u,v]['linkid']
         linkfluxes[links['id'].index(link_id)] = fw[r,c]
     
     # Store the fluxes in the links dict
