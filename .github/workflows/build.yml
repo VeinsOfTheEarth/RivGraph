@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.8]
+        python-version: [3.7, 3.8, 3.9]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
@@ -38,7 +38,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        python-version: [3.8]
+        python-version: [3.7, 3.8, 3.9]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
@@ -65,7 +65,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest]
-        python-version: [3.8]
+        python-version: [3.7, 3.8, 3.9]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
