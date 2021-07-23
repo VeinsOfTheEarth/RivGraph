@@ -642,7 +642,7 @@ def isbp_parsimonious(Ic, Icr, Inar, Infr):
     # possible initial branchpoint
     bpsave = []
     for bpi in bp_poss_i:
-        bptemp = isbp_walk_for_bps(np.array(Ic, dtype=np.bool), [bpi])
+        bptemp = isbp_walk_for_bps(np.array(Ic, dtype=bool), [bpi])
         bpsave.append(bptemp)
 
     # Number of branchpoints for each possible initial branchpoint
@@ -686,7 +686,7 @@ def isbp_parsimonious(Ic, Icr, Inar, Infr):
 
     # Only consider combinations that have branchpoints where they must be placed
     if len(bp_must) > 0:
-        bps = isbp_walk_for_bps(np.array(Ic, dtype=np.bool), bp_must)
+        bps = isbp_walk_for_bps(np.array(Ic, dtype=bool), bp_must)
         return bps
 
     # If there are no branchpoints that must exist based on patterns,
