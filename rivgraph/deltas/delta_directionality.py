@@ -548,7 +548,7 @@ def dir_synthetic_DEM(links, nodes, imshape):
     alg = dy.algmap('syn_dem')
 
     # Create empty image to store surface
-    I = np.ones(imshape, dtype=np.float)
+    I = np.ones(imshape, dtype=float)
 
     # Get row,col coordinates of outlet nodes, arrange them in a
     # clockwise order
@@ -589,7 +589,7 @@ def dir_synthetic_DEM(links, nodes, imshape):
         hci = hull_coords(insxy)
 
     # Burn the hull into the Iout surface
-    I = np.zeros(imshape, dtype=np.float) + 1
+    I = np.zeros(imshape, dtype=float) + 1
     if hci.shape[0] == 1:
         I[hci[0][0], hci[0][1]] = 0
     else:

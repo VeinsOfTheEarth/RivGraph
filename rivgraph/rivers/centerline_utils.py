@@ -19,7 +19,7 @@ def resample_line(xs, ys, npts=None, nknots=None, k=3):
 
     Resamples a line defined by x,y coordinates such that coordinates are
     evenly-spaced.
-    
+
     If the optional npts parameter is not specified, the
     line will be resampled with the same number of points as the input
     coordinates.
@@ -28,14 +28,14 @@ def resample_line(xs, ys, npts=None, nknots=None, k=3):
     """
     # FitPack in si.splprep can't handle duplicate points in the line, so remove them
     no_dupes = np.array(np.where(np.abs(np.diff(xs)) +
-                        np.abs(np.diff(ys)) > 0)[0], dtype=np.int)
+                        np.abs(np.diff(ys)) > 0)[0], dtype=int)
     xs_nd = np.r_[xs[no_dupes], xs[-1]]
     ys_nd = np.r_[ys[no_dupes], ys[-1]]
 
     # Get indices of knots
     if nknots is None:
         nknots = len(xs_nd)
-    knot_indices = np.linspace(0, len(xs_nd), nknots, dtype=np.int)
+    knot_indices = np.linspace(0, len(xs_nd), nknots, dtype=int)
     knot_indices[knot_indices > len(xs_nd) - 1] = len(xs_nd) - 1
     knot_indices = np.unique(knot_indices)
 
@@ -138,7 +138,7 @@ def inflection_pts_oversmooth(xs, ys, n_infs):
         greater than the polyorder of the smoother and be odd.
         """
 
-        smoothwins = np.linspace(start, stop, nbreaks, dtype=np.int)
+        smoothwins = np.linspace(start, stop, nbreaks, dtype=int)
 
         # Window must be greater than polyorder
         smoothwins[smoothwins < polyorder] = polyorder + 1
@@ -331,26 +331,26 @@ def cl_migration_transect_matching(path_matchers, x1, y1, x2, y2, dt, mig_spacin
     """
     Computes migration between two centerlines with a user-provided geovector
     file that specifies matching transects. A "matching transect" is simply
-    a line segment that intersects the same along-stream point on both 
+    a line segment that intersects the same along-stream point on both
     centerlines. It provides a manual way to determine where points on a
-    centerline map to that centerline at a later time. Implemented due to the 
+    centerline map to that centerline at a later time. Implemented due to the
     failure of the ZS method for downstream-translation.
-    
+
     This function works by parameterizing the channel position as a function
-    of centerline distance between every pair of matching transects, then 
+    of centerline distance between every pair of matching transects, then
     evaluating this parameterization at equally-spaced intervals. This procedure
-    is done for both centerlines, and the migration vectors are thus the 
-    distance between each pair of evaluated points. 
+    is done for both centerlines, and the migration vectors are thus the
+    distance between each pair of evaluated points.
     """
-    
+
     def get_along_cl_distance(cl, pt, origin):
         """
         Returns the upstream segment of a centerline that is split by splitter
         geometry.
-        """    
+        """
         # Shapely's split function works only at vertices of linestring
-        splt = split_precise(cl, pt)    
-        
+        splt = split_precise(cl, pt)
+
         if len(splt) == 1:
             int_pt = cl.intersection(pt)
             if int_pt.coords.xy[0][0] == origin[0] and int_pt.coords.xy[1][0] == origin[1]:
@@ -362,33 +362,33 @@ def cl_migration_transect_matching(path_matchers, x1, y1, x2, y2, dt, mig_spacin
                 if s.coords.xy[0][0] == origin[0] and s.coords.xy[1][0] == origin[1]:
                     dist = s.length
                 break
-        
+
         return dist
-        
-    
+
+
     def split_precise(linestring, splitter):
         """
         Shapely's split() function will only split LineStrings at vertices.
         This returns the split LineStrings exactly at the point of intersection.
         Assumes a single intersection.
         """
-        
+
         # If there is no intersection, return the linestring
         if linestring.intersects(splitter) is False:
             return linestring
-        
+
         ssplit = split(linestring, splitter)
         split_pt = linestring.intersection(splitter)
-        
+
         splits = []
         for s in ssplit:
             if Point(s.coords[0]).distance(split_pt) < Point(s.coords[-1]).distance(split_pt):
-                splits.append(LineString(list(split_pt.coords) + list(s.coords))) 
+                splits.append(LineString(list(split_pt.coords) + list(s.coords)))
             else:
-                splits.append(LineString(list(s.coords) + list(split_pt.coords))) 
-                
+                splits.append(LineString(list(s.coords) + list(split_pt.coords)))
+
         return splits
-    
+
 #    import pdb
 #    pdb.set_trace()
 
@@ -399,12 +399,12 @@ def cl_migration_transect_matching(path_matchers, x1, y1, x2, y2, dt, mig_spacin
     # Read in manual matched indices
     matchers = gpd.read_file(path_matchers)
     origin = (clls1.coords.xy[0][0], clls1.coords.xy[1][0])
-    
+
     # Add matchers at the beginning and end of the centerlines
     m_begin = LineString(((clls1.coords.xy[0][0], clls1.coords.xy[1][0]), (clls2.coords.xy[0][0], clls2.coords.xy[1][0])))
     m_end = LineString(((clls1.coords.xy[0][-1], clls1.coords.xy[1][-1]), (clls2.coords.xy[0][-1], clls2.coords.xy[1][-1])))
     matchers = gpd.GeoDataFrame(geometry=matchers.geometry.values.tolist() + [m_begin] + [m_end], crs=matchers.crs)
-    
+
     # Order matchers from US->DS
     m_s = [get_along_cl_distance(clls1, g, origin) for g in matchers.geometry.values]
     matchers['s'] = m_s
@@ -416,7 +416,7 @@ def cl_migration_transect_matching(path_matchers, x1, y1, x2, y2, dt, mig_spacin
     # Loop through each pair of transects; note that this assumes they are already
     # in order
     for m_u, m_d, dist_u, dist_d, idx in zip(matchers.geometry.values[0:-1], matchers.geometry.values[1:], matchers.s.values[0:-1], matchers.s.values[1:], matchers.index.values):
-        
+
         # Get centerline segments between matching transects
         # First centerline
         us_split = split_precise(clls1, m_u)
@@ -429,7 +429,7 @@ def cl_migration_transect_matching(path_matchers, x1, y1, x2, y2, dt, mig_spacin
                 else:
                     seg1 = ds_split[1]
                 break
-                    
+
         # Second centerline
         us_split = split_precise(clls2, m_u)
         for uss in us_split:
@@ -441,34 +441,32 @@ def cl_migration_transect_matching(path_matchers, x1, y1, x2, y2, dt, mig_spacin
                 else:
                     seg2 = ds_split[1]
                 break
-             
+
         # Interpolate matching points along segments
         n = round(seg1.length/mig_spacing)
         sparam = np.arange(0, n) / n
         pts1 = [seg1.interpolate(sp, normalized=True) for sp in sparam]
         pts2 = [seg2.interpolate(sp, normalized=True) for sp in sparam]
-        
+
         pts_mig1.extend(pts1)
         pts_mig2.extend(pts2)
-        
+
         # Update distances
         all_dists = np.append(all_dists, [dist_u + sparam*(dist_d-dist_u)])
-    
+
     # Add the end points to the list
     pts_mig1.append(Point(clls1.coords.xy[0][-1], clls1.coords.xy[1][-1]))
     pts_mig2.append(Point(clls2.coords.xy[0][-1], clls2.coords.xy[1][-1]))
     all_dists = np.append(all_dists, clls1.length)
-            
+
     # Compute migration rates
     mig_rates = [p1.distance(p2)/dt for p1, p2 in zip(pts_mig1, pts_mig2)]
-    
+
     # Parameterize migration rate as a function of along-centerline distance
     mr_fxn = interp1d(all_dists, mig_rates)
-    
+
     # Evaluate migration rates at the coordinates of the original centerline
     s, _ = s_ds(x1, y1)
     mr_matched = mr_fxn(s)
 
     return mr_matched, pts_mig1, pts_mig2
-
-

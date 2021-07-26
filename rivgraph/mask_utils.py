@@ -40,7 +40,7 @@ def pixagon(c_cent, r_cent, pixlen):
 
 def get_island_properties(Imask, pixlen, pixarea, crs, gt, props, connectivity=2):
     """Get island properties."""
-    
+
     # maxwidth is an additional property
     if 'maxwidth' in props:
         props.remove('maxwidth')
@@ -54,7 +54,7 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props, connectivity=2
 
     # Pad by one pixel to help identify and remove the outer portion of
     # the channel netowrk
-    Imaskpad = np.array(np.pad(Imask, 1, mode='constant'), dtype=np.bool)
+    Imaskpad = np.array(np.pad(Imask, 1, mode='constant'), dtype=bool)
     Imp_invert = np.invert(Imaskpad)
 
     rp_islands, Ilabeled = iu.regionprops(Imp_invert, props=props, connectivity=connectivity)
@@ -143,7 +143,7 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
     Imask : np.array
         Binary mask of the channel network.
     islands : geopandas.GeoDataframe
-        Contains island boundaries and associated properties. Created by 
+        Contains island boundaries and associated properties. Created by
         get_island_properties().
     Iislands : np.array
         Image wherein each island has a unique integer ID.
@@ -174,7 +174,7 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
     # # Iislands = np.load(r'C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_Iislands.npy')
 
     # Rasterize the links and nodes
-    Iln = np.zeros(Imask.shape, dtype=np.int)
+    Iln = np.zeros(Imask.shape, dtype=int)
 
     # Burn links into raster
     for lidcs in links['idx']:
@@ -188,11 +188,11 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
     # Pad Ilids and Imask to avoid edge effects later
     npad = 8
     Iln = np.pad(Iln, npad, mode='constant')
-    Imask = np.array(np.pad(Imask, npad, mode='constant'), dtype=np.bool)
+    Imask = np.array(np.pad(Imask, npad, mode='constant'), dtype=bool)
     Iislands = np.pad(Iislands, npad, mode='constant')
 
     # Make a binary version of the network skeleton
-    Iskel = np.array(Iln, dtype=np.bool)
+    Iskel = np.array(Iln, dtype=bool)
     # Invert the skeleton
     Iskel = np.invert(Iskel)
 
@@ -241,7 +241,7 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
 
         # Pad and dilate the blob
         Irblob = np.pad(Irblob, npad, mode='constant')
-        Irblob = np.array(im.dilate(Irblob, n=2, strel='disk'), dtype=np.bool)
+        Irblob = np.array(im.dilate(Irblob, n=2, strel='disk'), dtype=bool)
 
         # Adjust padded image in case pads extend beyond original image boundary
         if cropped[0] - npad < 0:
@@ -363,7 +363,7 @@ def thresholding_set1(islands, apex_width):
 
     # Thresholding
     remove = set()
-    
+
     # Global thresholding -- islands smaller than 1/10 the apex_wid^2
     area_thresh = (1/10 * apex_width)**2
     remove.update(np.where(islands.Area.values < area_thresh)[0].tolist())

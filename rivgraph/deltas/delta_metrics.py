@@ -66,7 +66,7 @@ def compute_delta_metrics(links, nodes):
 def ensure_single_inlet(links, nodes):
     """
     Ensure only a single apex node exists. This dumbly just prunes all inlet
-    nodes+links except the widest one. Recommended to use the super_apex() 
+    nodes+links except the widest one. Recommended to use the super_apex()
     approach instead if you want to preserve all inlets.
 
     All the delta metrics here require a single apex node, and that that node
@@ -138,37 +138,37 @@ def add_super_apex(links, nodes, imshape):
     have zero length and widths equal to the sum of the widths of the links
     connected to their respective inlet node.
     """
-    
+
     # Get inlet nodes
     ins = nodes['inlets']
-    
+
     if len(ins) <= 1:
         return links, nodes
-    
+
     # Find the location of the super-apex by averaging the inlets' locations
     ins_idx = [nodes['idx'][nodes['id'].index(i)] for i in ins]
     rs, cs = np.unravel_index(ins_idx, imshape)
     apex_r, apex_c = np.mean(rs, dtype=int), np.mean(cs, dtype=int)
     apex_idx = np.ravel_multi_index((apex_r, apex_c), imshape)
-    
+
     # Get the widths of the super-apex links -- these are just the summed
     # widths of all the links connected to each inlet node
     sa_widths = []
     for i in ins:
         lconn = nodes['conn'][nodes['id'].index(i)]
         sa_widths.append(sum([links['wid_adj'][links['id'].index(lid)] for lid in lconn]))
-    
+
     # Add links from the super-apex to the inlet nodes
     # Widths are computed above; lengths are set to zero for these synthetic links
     for i, wid in zip(ins, sa_widths):
         in_idx = nodes['idx'][nodes['id'].index(i)]
         idcs = [apex_idx, in_idx]
-        links, nodes = lnu.add_link(links, nodes, idcs)      
+        links, nodes = lnu.add_link(links, nodes, idcs)
         links['wid_adj'].append(wid)
         links['wid'].append(wid) # we also append to the width attribute to keep the fields the same length
         links['len'].append(0)
         links['len_adj'].append(0)
-        
+
     # Add the super apex node field to the nodes dictionary
     # nodes = ln_utils.add_node(nodes, apex_idx, sa_lids)
     nodes['super_apex'] = nodes['id'][-1]
@@ -188,7 +188,7 @@ def graphiphy(links, nodes, weight=None):
         weights = np.ones((len(links['conn']), 1))
     else:
         weights = np.array(links[weight])
-        
+
     # Check weights
     if np.sum(weights<=0) > 0:
         raise Warning('One or more of your weights is =< 0. This could cause problems later.')
@@ -235,7 +235,7 @@ def intermediate_vars(G):
     # entries a_{uv} that correspond to the fraction of the flux
     # present at node v that flows through the channel (vu). Flux partitioning
     # is done via channel widths.
-    
+
     # Compute normalized weighted adjacency matrix
     A = normalize_adj_matrix(G)
 
@@ -252,7 +252,7 @@ def intermediate_vars(G):
     deltavars['F_w_trans'], deltavars['SubN_w_trans'] = delta_subN_F(deltavars['A_w_trans'])
 
     """ Unweighted Adj"""
-    deltavars['A_uw'] = np.array(deltavars['A_w'].copy(), dtype=np.bool)
+    deltavars['A_uw'] = np.array(deltavars['A_w'].copy(), dtype=bool)
     deltavars['F_uw'], deltavars['SubN_uw'] = delta_subN_F(deltavars['A_uw'])
 
     """ Unweighted transitional"""
@@ -288,12 +288,12 @@ def compute_steady_state_link_fluxes(G, links, nodes):
     run ln_utils artificial_nodes() function to break parallel edges, then
     re-compute link widths and lengths.
     """
-    
+
     # Normalize the adjacency matrix
     An = normalize_adj_matrix(G)
     # Transposed adjacency required for computing F
     An_t = np.transpose(An)
-    # Compute steady-state flux distribution 
+    # Compute steady-state flux distribution
     fluxes, _ = delta_subN_F(An_t)
 
     # Fluxes are at-a-node and need to be translated to links
@@ -306,13 +306,13 @@ def compute_steady_state_link_fluxes(G, links, nodes):
     linkfluxes = np.zeros((len(links['id']),1)) # Preallocate storage
     for (r,c) in zip(rows,cols):
         u = Gnodes[r]
-        v = Gnodes[c]        
+        v = Gnodes[c]
         link_id = G.edges[u,v]['linkid']
         linkfluxes[links['id'].index(link_id)] = fw[r,c]
-    
+
     # Store the fluxes in the links dict
     links['flux_ss'] = np.array(linkfluxes).flatten().tolist()
-    
+
     return links
 
 
@@ -639,7 +639,7 @@ def graphshortestpath(A, start, finish):
     considered. Number of links in the shortest path is returned.
 
     """
-    G = nx.from_numpy_matrix(A)
+    G = nx.from_numpy_array(A)
     sp = nx.shortest_path_length(G, start, finish)
 
     return sp
