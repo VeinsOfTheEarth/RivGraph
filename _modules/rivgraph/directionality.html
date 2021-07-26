@@ -1606,7 +1606,7 @@
         <span class="n">conn</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nindex</span><span class="p">]</span>
 
         <span class="c1"># Initialize bookkeeping for all the links connected to this node</span>
-        <span class="n">linkdir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">conn</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>  <span class="c1"># 0 if uncertain, 1 if into, 2 if out of</span>
+        <span class="n">linkdir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">conn</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># 0 if uncertain, 1 if into, 2 if out of</span>
 
         <span class="k">if</span> <span class="n">linkdir</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">continue</span>
@@ -2106,7 +2106,7 @@
 <span class="sd">    Method 1 sets a broken link if its counterpart is known.</span>
 <span class="sd">    Method 2 sets a side of the loop if the other side is known.</span>
 <span class="sd">    Method 3 sets both sides if the input to one of the end nodes is known.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    links : dict</span>
@@ -2116,7 +2116,7 @@
 <span class="sd">    checknodes : int or str, optional</span>
 <span class="sd">        Node ids to check for presence of settable artificial links. If &#39;all&#39;,</span>
 <span class="sd">        all nodes in the network are checked.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    links : dict</span>

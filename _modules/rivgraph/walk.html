@@ -811,7 +811,7 @@
     <span class="c1"># possible initial branchpoint</span>
     <span class="n">bpsave</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">bpi</span> <span class="ow">in</span> <span class="n">bp_poss_i</span><span class="p">:</span>
-        <span class="n">bptemp</span> <span class="o">=</span> <span class="n">isbp_walk_for_bps</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Ic</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span> <span class="p">[</span><span class="n">bpi</span><span class="p">])</span>
+        <span class="n">bptemp</span> <span class="o">=</span> <span class="n">isbp_walk_for_bps</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Ic</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">),</span> <span class="p">[</span><span class="n">bpi</span><span class="p">])</span>
         <span class="n">bpsave</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bptemp</span><span class="p">)</span>
 
     <span class="c1"># Number of branchpoints for each possible initial branchpoint</span>
@@ -855,7 +855,7 @@
 
     <span class="c1"># Only consider combinations that have branchpoints where they must be placed</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bp_must</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">bps</span> <span class="o">=</span> <span class="n">isbp_walk_for_bps</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Ic</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span> <span class="n">bp_must</span><span class="p">)</span>
+        <span class="n">bps</span> <span class="o">=</span> <span class="n">isbp_walk_for_bps</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Ic</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">),</span> <span class="n">bp_must</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">bps</span>
 
     <span class="c1"># If there are no branchpoints that must exist based on patterns,</span>

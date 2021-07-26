@@ -209,7 +209,7 @@
 
 <div class="viewcode-block" id="get_island_properties"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_utils.get_island_properties">[docs]</a><span class="k">def</span> <span class="nf">get_island_properties</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="n">pixlen</span><span class="p">,</span> <span class="n">pixarea</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">gt</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get island properties.&quot;&quot;&quot;</span>
-    
+
     <span class="c1"># maxwidth is an additional property</span>
     <span class="k">if</span> <span class="s1">&#39;maxwidth&#39;</span> <span class="ow">in</span> <span class="n">props</span><span class="p">:</span>
         <span class="n">props</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;maxwidth&#39;</span><span class="p">)</span>
@@ -223,7 +223,7 @@
 
     <span class="c1"># Pad by one pixel to help identify and remove the outer portion of</span>
     <span class="c1"># the channel netowrk</span>
-    <span class="n">Imaskpad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="n">Imaskpad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
     <span class="n">Imp_invert</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">Imaskpad</span><span class="p">)</span>
 
     <span class="n">rp_islands</span><span class="p">,</span> <span class="n">Ilabeled</span> <span class="o">=</span> <span class="n">iu</span><span class="o">.</span><span class="n">regionprops</span><span class="p">(</span><span class="n">Imp_invert</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="n">connectivity</span><span class="p">)</span>
@@ -312,7 +312,7 @@
 <span class="sd">    Imask : np.array</span>
 <span class="sd">        Binary mask of the channel network.</span>
 <span class="sd">    islands : geopandas.GeoDataframe</span>
-<span class="sd">        Contains island boundaries and associated properties. Created by </span>
+<span class="sd">        Contains island boundaries and associated properties. Created by</span>
 <span class="sd">        get_island_properties().</span>
 <span class="sd">    Iislands : np.array</span>
 <span class="sd">        Image wherein each island has a unique integer ID.</span>
@@ -343,7 +343,7 @@
     <span class="c1"># # Iislands = np.load(r&#39;C:\Users\Jon\Desktop\Research\eBI\Results\Indus\Indus_Iislands.npy&#39;)</span>
 
     <span class="c1"># Rasterize the links and nodes</span>
-    <span class="n">Iln</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Imask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">Iln</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Imask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="c1"># Burn links into raster</span>
     <span class="k">for</span> <span class="n">lidcs</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]:</span>
@@ -357,11 +357,11 @@
     <span class="c1"># Pad Ilids and Imask to avoid edge effects later</span>
     <span class="n">npad</span> <span class="o">=</span> <span class="mi">8</span>
     <span class="n">Iln</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">Iln</span><span class="p">,</span> <span class="n">npad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span>
-    <span class="n">Imask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="n">npad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="n">Imask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="n">npad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
     <span class="n">Iislands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">Iislands</span><span class="p">,</span> <span class="n">npad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span>
 
     <span class="c1"># Make a binary version of the network skeleton</span>
-    <span class="n">Iskel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Iln</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="n">Iskel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Iln</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
     <span class="c1"># Invert the skeleton</span>
     <span class="n">Iskel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">Iskel</span><span class="p">)</span>
 
@@ -410,7 +410,7 @@
 
         <span class="c1"># Pad and dilate the blob</span>
         <span class="n">Irblob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">Irblob</span><span class="p">,</span> <span class="n">npad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span>
-        <span class="n">Irblob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">dilate</span><span class="p">(</span><span class="n">Irblob</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">strel</span><span class="o">=</span><span class="s1">&#39;disk&#39;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+        <span class="n">Irblob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">dilate</span><span class="p">(</span><span class="n">Irblob</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">strel</span><span class="o">=</span><span class="s1">&#39;disk&#39;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
 
         <span class="c1"># Adjust padded image in case pads extend beyond original image boundary</span>
         <span class="k">if</span> <span class="n">cropped</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">npad</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -532,7 +532,7 @@
 
     <span class="c1"># Thresholding</span>
     <span class="n">remove</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    
+
     <span class="c1"># Global thresholding -- islands smaller than 1/10 the apex_wid^2</span>
     <span class="n">area_thresh</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">10</span> <span class="o">*</span> <span class="n">apex_width</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
     <span class="n">remove</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">islands</span><span class="o">.</span><span class="n">Area</span><span class="o">.</span><span class="n">values</span> <span class="o">&lt;</span> <span class="n">area_thresh</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
