@@ -6,10 +6,6 @@ import io
 import numpy as np
 import matplotlib.pyplot as plt
 import shapely
-
-from inspect import getsourcefile
-basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
-sys.path.insert(0, basepath)
 from rivgraph.rivers import river_utils as ru
 from rivgraph.rivers import centerline_utils as cu
 from rivgraph.classes import centerline

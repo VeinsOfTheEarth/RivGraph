@@ -7,13 +7,6 @@ try:
     from osgeo import gdal
 except ImportError:
     import gdal
-# import numpy as np
-# import matplotlib.pyplot as plt
-
-from inspect import getsourcefile
-basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
-sys.path.insert(0, basepath)
-
 from rivgraph import ln_utils
 from rivgraph.ordered_set import OrderedSet
 
@@ -33,7 +26,9 @@ def test_conn_links(test_net):
 
 def test_append_link_len(test_net):
     """Test append_link_lengths() function."""
-    gobj = gdal.Open(os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif')))
+    gobj = gdal.Open(
+        os.path.normpath(
+            'tests/integration/data/Colville/Colville_islands_filled.tif'))
     test_net.skeletonize()
     test_net.compute_network()
     # assert keys in links before getting lengths
@@ -46,7 +41,9 @@ def test_append_link_len(test_net):
 
 def test_add_art_nodes(test_net):
     """Testing add_artificial_nodes() function."""
-    gobj = gdal.Open(os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif')))
+    gobj = gdal.Open(
+        os.path.normpath(
+            'tests/integration/data/Colville/Colville_islands_filled.tif'))
     test_net.skeletonize()
     test_net.compute_network()
     # assert no artificial links or nodes before function
@@ -100,7 +97,8 @@ def test_artificial_nodes(synthetic_cycles):
     synthetic_cycles.compute_link_width_and_length()
     links = synthetic_cycles.links
     nodes = synthetic_cycles.nodes
-    gobj = gdal.Open(os.path.join(basepath, os.path.normpath('tests/data/SyntheticCycle/skeleton.tif')))
+    gobj = gdal.Open(
+        os.path.normpath('tests/integration/data/SyntheticCycle/skeleton.tif'))
     links, nodes = ln_utils.add_artificial_nodes(links, nodes, gobj)
     # make assertions
     assert ('arts' in links.keys()) is True

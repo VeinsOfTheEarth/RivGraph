@@ -10,8 +10,8 @@ from rivgraph.rivers import river_utils as ru
 from rivgraph.rivers import centerline_utils as cu
 
 
-def test_river_ne(tmp_path):
-    """Test river with exit sides 'ne'."""
+def test_river_dirs(tmp_path):
+    """Test river with exit sides 'ne' and 'sw'."""
     img_path = os.path.normpath(
         'tests/integration/data/Brahma/brahma_mask_clip.tif')
     out_path = os.path.join(tmp_path, 'cropped.tif')
@@ -28,11 +28,8 @@ def test_river_ne(tmp_path):
     assert len(test_ne.nodes['outlets']) == 1
     assert test_ne.exit_sides == 'ne'
 
-
-def test_river_sw(tmp_path):
-    """Test river with exit sides 'sw'."""
-    test_sw = river('Brahmclip',
-                    os.path.join(tmp_path, 'cropped.tif'),
+    # test sw
+    test_sw = river('Brahmclip', out_path,
                     os.path.join(tmp_path, 'brahma'),
                     exit_sides='sw')
     test_sw.compute_network()

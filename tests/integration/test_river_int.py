@@ -4,10 +4,6 @@ import sys
 import os
 import io
 import numpy as np
-
-from inspect import getsourcefile
-basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
-sys.path.insert(0, basepath)
 from rivgraph.classes import river
 from rivgraph import geo_utils
 from rivgraph.rivers import river_utils as ru

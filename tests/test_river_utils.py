@@ -6,10 +6,6 @@ import io
 import numpy as np
 import matplotlib.pyplot as plt
 import shapely
-
-from inspect import getsourcefile
-basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
-sys.path.insert(0, basepath)
 from rivgraph.rivers import river_utils as ru
 from rivgraph.rivers import centerline_utils as cu
 from rivgraph.classes import centerline
@@ -61,8 +57,10 @@ def test_inflection_pts():
 
 def test_eBI_avg():
     """Test compute_eBI() with method='avg'."""
-    path_meshlines = os.path.join(basepath, os.path.normpath('tests/data/Brahma/Brahmclip_meshlines.json'))
-    path_links = os.path.join(basepath, os.path.normpath('tests/data/Brahma/Brahmclip_links.json'))
+    path_meshlines = os.path.normpath(
+        'tests/integration/data/Brahma/Brahmclip_meshlines.json')
+    path_links = os.path.normpath(
+        'tests/integration/data/Brahma/Brahmclip_links.json')
     eBI, BI = ru.compute_eBI(path_meshlines, path_links, method='avg')
 
     # make assertions
@@ -73,14 +71,15 @@ def test_eBI_avg():
     assert eBI[100] == pytest.approx(6.389362214783173)
     assert eBI[120] == pytest.approx(8.543247059514744)
     assert eBI[140] == pytest.approx(4.683156935890404)
-    assert np.all(BI == np.array([ 0,  2,  4,  4,  3,  3,  5,  5,  4,  6,  4,  3,  4,  3,  3,  3,  5,
+    assert np.all(BI == np.array([
+        0,  2,  4,  4,  3,  3,  5,  5,  4,  6,  4,  3,  4,  3,  3,  3,  5,
         4,  6,  7,  7,  7,  7,  7,  7,  6,  7,  5,  7,  7,  8,  7,  9,  7,
         7,  8,  7, 11, 10, 10, 11,  8,  8,  7, 10, 11, 12, 10, 10,  8,  8,
         9, 11, 13,  8,  8,  8, 11, 13,  9,  9,  7,  6,  6,  6, 10,  9, 10,
         9,  8,  8,  9,  5,  5,  5,  3,  2,  3,  3,  5,  6,  5,  6,  8,  8,
         5,  4,  4,  3,  2,  3,  3,  3,  3,  5,  6,  7,  4,  4,  7,  9,  8,
         7,  6,  8,  6,  7,  7,  8, 10,  8,  9,  9,  7,  8,  6, 10,  9,  6,
-       11,  9, 14, 12, 12, 13, 12, 10, 10, 10,  8,  7,  9,  6,  4,  4,  6,
+        11,  9, 14, 12, 12, 13, 12, 10, 10, 10,  8,  7,  9,  6,  4,  4,  6,
         6,  4,  3,  5,  6,  8,  7, 10,  9,  8,  8,  7,  7,  7,  5,  5,  5,
         4,  3,  3,  3,  4,  6,  4,  5,  6,  4,  5,  5,  2,  2,  2,  2]))
 
@@ -264,16 +263,16 @@ def test_csmooth_nowindow():
     assert capturedOutput.getvalue()[:-1] == 'Must provide a smoothing window.'
 
 
-def test_sine_plot():
+def test_sine_plot(tmp_path):
     """Use sine wave to test plotting of CenterLine."""
     xs = np.linspace(0, 100, 101)
     ys = np.sin(xs) + 5
     CL = centerline(xs, ys)
     CL.plot()
-    plt.savefig(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/sinewave.png')))
+    plt.savefig(os.path.join(tmp_path, 'sinewave.png'))
     plt.close()
     # assert file exists now
-    assert os.path.isfile(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/sinewave.png'))) == True
+    assert os.path.isfile(os.path.join(tmp_path, 'sinewave.png')) == True
 
 
 def test_long_sine():
@@ -296,7 +295,7 @@ def test_long_sine_CLinfs():
     assert CL.infs_os[-1] == 10000
 
 
-def test_plot_withattrs():
+def test_plot_withattrs(tmp_path):
     """Testing CenterLine plotting with various attributes."""
     xs = np.linspace(0, 100, 101)
     ys = np.sin(xs) + 5
@@ -305,10 +304,10 @@ def test_plot_withattrs():
     CL.ints_all = [1]
     CL.ints = [2]
     CL.plot()
-    plt.savefig(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/sinewaveattrs.png')))
+    plt.savefig(os.path.join(tmp_path,'sinewaveattrs.png'))
     plt.close()
     # assert file exists now
-    assert os.path.isfile(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/sinewaveattrs.png'))) == True
+    assert os.path.isfile(os.path.join(tmp_path, 'sinewaveattrs.png')) == True
 
 
 def test_zs_noinflection():
@@ -360,13 +359,3 @@ def test_zs_nomigrates():
     sys.stdout = sys.__stdout__
     # assert output
     assert capturedOutput.getvalue()[:-1] == 'Must compute migration rates first.'
-
-
-# Delete data created by tests in this file ...
-
-def test_delete_files():
-    """Delete created files at the end."""
-    for i in os.listdir(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/'))):
-        os.remove(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/'+i)))
-    # check directory is empty
-    assert os.listdir(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/'))) == []

@@ -3,21 +3,19 @@ import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-
-from inspect import getsourcefile
-basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
-sys.path.insert(0, basepath)
-
 from rivgraph import io_utils as iu
 
 # Testing of functions that do I/O within the rivgraph.classes.delta class
 
 
-def test_save(known_net):
+def test_save(known_net, tmp_path):
     """Test saving functionality."""
+    # assert file does not exist
+    assert os.path.isfile(known_net.paths['network_pickle']) == False
+    # save it
     known_net.save_network()
     # assert that the file now exists
-    assert os.path.isfile(os.path.join(basepath, os.path.normpath('tests/results/known/known_network.pkl'))) == True
+    assert os.path.isfile(known_net.paths['network_pickle']) == True
 
 
 def test_load(known_net):
@@ -72,27 +70,27 @@ def test_to_geotiff(known_net):
     assert os.path.isfile(known_net.paths['Iskel']) == True
 
 
-def test_plotnetwork(known_net):
+def test_plotnetwork(known_net, tmp_path):
     """Make plots with various kwargs specified."""
     # default
     f1 = known_net.plot()
-    plt.savefig('tests/results/known/testall.png')
+    plt.savefig(os.path.join(tmp_path, 'testall.png'))
     plt.close()
     # network
     f2 = known_net.plot('network')
-    plt.savefig('tests/results/known/testnetwork.png')
+    plt.savefig(os.path.join(tmp_path, 'testnetwork.png'))
     plt.close()
     # directions
     f3 = known_net.plot('directions')
-    plt.savefig('tests/results/known/testdirections.png')
+    plt.savefig(os.path.join(tmp_path, 'testdirections.png'))
     plt.close()
     # assert that figures were made
-    assert os.path.isfile('tests/results/known/testall.png') == True
-    assert os.path.isfile('tests/results/known/testnetwork.png') == True
-    assert os.path.isfile('tests/results/known/testdirections.png') == True
+    assert os.path.isfile(os.path.join(tmp_path, 'testall.png')) == True
+    assert os.path.isfile(os.path.join(tmp_path, 'testnetwork.png')) == True
+    assert os.path.isfile(os.path.join(tmp_path, 'testdirections.png')) == True
 
 
-def test_coords_to_from_geovector(known_net):
+def test_coords_to_from_geovector(known_net, tmp_path):
     """Test coords_from_geovector and coords_to_geovector."""
     # coords from geovector
     known_net.to_geovectors()
@@ -106,7 +104,7 @@ def test_coords_to_from_geovector(known_net):
 
     # coords to geovector
     epsg = 32606
-    outpath = os.path.normpath('tests/results/known/geo_test.shp')
+    outpath = os.path.join(tmp_path, 'geo_test.shp')
     iu.coords_to_geovector(coords, epsg, outpath)
     # assert file is created
     assert os.path.isfile(outpath) == True
