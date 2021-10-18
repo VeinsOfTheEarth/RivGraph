@@ -3,7 +3,6 @@ import pytest
 import sys
 import os
 import io
-sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph.classes import delta
 from rivgraph.classes import river
 

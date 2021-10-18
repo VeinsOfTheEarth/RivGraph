@@ -3,7 +3,6 @@ import pytest
 import sys
 import os
 import numpy as np
-sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph import mask_utils
 
 

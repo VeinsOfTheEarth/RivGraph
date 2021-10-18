@@ -4,7 +4,6 @@ import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
 from rivgraph import walk
 
 
