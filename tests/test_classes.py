@@ -41,12 +41,19 @@ class Test_rivnetwork:
         # mock methods to test
         _rivnetwork.Iskel = mock.MagicMock()
         _rivnetwork.skeletonize = mock.MagicMock()
-        m2g.skel_to_graph = mock.MagicMock(return_value=(1, 2))
-        # call the method
+        # patch skel to graph method
+        def _patched_skel_to_graph(Iskel):
+            return {'id': [0]}, {'id': [1]}
+        patcher = mock.patch(
+            'rivgraph.mask_to_graph.skel_to_graph',
+            new=_patched_skel_to_graph)
+        patcher.start()
         _rivnetwork.compute_network()
         # count function calls
         assert _rivnetwork.skeletonize.call_count == 0  # mocked a skeleton
-        assert m2g.skel_to_graph.call_count == 1
+        assert _rivnetwork.links['id'] == [0]
+        assert _rivnetwork.nodes['id'] == [1]
+        patcher.stop()
 
     def test_compute_distance_transform(self, tmp_path):
         """Test general distance transform function."""
@@ -70,11 +77,18 @@ class Test_rivnetwork:
         _rivnetwork.links = mock.MagicMock()
         _rivnetwork.Idist = mock.MagicMock()
         _rivnetwork.pixlen = mock.MagicMock()
-        lnu.link_widths_and_lengths = mock.MagicMock()
+        # patch link width and length function
+        def _patched_link_widths_and_lengths(links, Idist, pixlen):
+            return {'id': [0]}
+        patcher = mock.patch(
+            'rivgraph.ln_utils.link_widths_and_lengths',
+            new=_patched_link_widths_and_lengths)
+        patcher.start()
         # call the method to test
         _rivnetwork.compute_link_width_and_length()
-        # count function calls
-        assert lnu.link_widths_and_lengths.call_count == 1
+        # assertions
+        assert _rivnetwork.links == {'id': [0]}
+        patcher.stop()
 
     def test_compute_junction_angles(self, tmp_path):
         """Test junction angle function."""
@@ -87,11 +101,18 @@ class Test_rivnetwork:
         _rivnetwork.nodes = mock.MagicMock()
         _rivnetwork.imshape = mock.MagicMock()
         _rivnetwork.pixlen = mock.MagicMock()
-        lnu.junction_angles = mock.MagicMock()
+        # patch junction angles function
+        def _patched_junction_angles(links, nodes, imshape, pixlen, weight):
+            return {'id': [1]}
+        patcher = mock.patch(
+            'rivgraph.ln_utils.junction_angles',
+            new=_patched_junction_angles)
+        patcher.start()
         # call method
         _rivnetwork.compute_junction_angles()
         # assert internal calls
-        assert lnu.junction_angles.call_count == 1
+        assert _rivnetwork.nodes == {'id': [1]}
+        patcher.stop()
 
     def test_adj_matrix(self, tmp_path):
         """Test adjacency matrix function."""
@@ -101,11 +122,22 @@ class Test_rivnetwork:
             self.name, self.path_to_mask, results_folder)
         _rivnetwork.links = []
         _rivnetwork.nodes = []
-        # mocking functions
-        dm.graphiphy = mock.MagicMock()
-        dm.normalize_adj_matrix = mock.MagicMock()
+        # patch functions
+        def _patched_graphiphy(links, nodes, weight):
+            return 1
+        patcher1 = mock.patch(
+            'rivgraph.deltas.delta_metrics.graphiphy',
+            new=_patched_graphiphy)
+        patcher1.start()
+        def _patched_normalize_adj_matrix(A):
+            return A + 1
+        patcher2 = mock.patch(
+            'rivgraph.deltas.delta_metrics.normalize_adj_matrix',
+            new=_patched_normalize_adj_matrix)
+        patcher2.start()
         # call
-        _rivnetwork.adjacency_matrix(normalized=True)
+        A = _rivnetwork.adjacency_matrix(normalized=True)
         # assertions
-        assert dm.graphiphy.call_count == 1
-        assert dm.normalize_adj_matrix.call_count == 1
+        assert A == 2
+        patcher1.stop()
+        patcher2.stop()

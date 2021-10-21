@@ -11,8 +11,8 @@ from rivgraph.deltas import delta_metrics
 
 def test_graphiphy():
     """Raise RuntimeError due to missing weight."""
-    links = dict()
-    nodes = dict()
+    links = {'id': [1]}
+    nodes = {'id': [2]}
     with pytest.raises(RuntimeError):
         delta_metrics.graphiphy(links, nodes, weight='bad')
 
