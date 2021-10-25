@@ -2,6 +2,8 @@
 # import pytest
 import sys
 import io
+import numpy as np
+from scipy.ndimage import distance_transform_edt as dte
 try:
     from osgeo import gdal
 except ImportError:
@@ -55,3 +57,22 @@ def test_delete_node():
     # do assertion
     assert capturedOutput.getvalue()[:-1] == 'You are deleting node 10 which still has connections to links.'
     assert new_nodes['conn'] == []
+
+
+def test_link_widths_lengths():
+    """Test the link widths and lengths calculation."""
+    links = dict()
+    Idt = np.zeros((10, 10))
+    Idt[1:-1, 5] = 1.0
+    inds = np.where(Idt == 1)
+    links['idx'] = [list(np.ravel_multi_index(inds, Idt.shape))]
+    Idt[4, 4:8] = 1.0
+    links = ln_utils.link_widths_and_lengths(links, dte(Idt))
+    # assert things about computed link properties
+    assert links['sinuosity'][0] == 1.0
+    assert len(links['idx'][0]) == 8
+    assert links['wid_med'][0] == 2.0
+    assert links['len_adj'][0] == 5.0
+    assert links['len'][0] == 7.0
+    assert links['wid_adj'][0] > 2.0
+    assert links['wid_adj'][0] > links['wid'][0]  # b/c single end px clipped
