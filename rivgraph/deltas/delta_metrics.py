@@ -159,13 +159,17 @@ def add_super_apex(links, nodes, imshape):
         sa_widths.append(sum([links['wid_adj'][links['id'].index(lid)] for lid in lconn]))
 
     # Add links from the super-apex to the inlet nodes
-    # Widths are computed above; lengths are set to zero for these synthetic links
+    # Widths are computed above
+    # lengths are set to zero for these synthetic links
     for i, wid in zip(ins, sa_widths):
         in_idx = nodes['idx'][nodes['id'].index(i)]
         idcs = [apex_idx, in_idx]
         links, nodes = lnu.add_link(links, nodes, idcs)
         links['wid_adj'].append(wid)
-        links['wid'].append(wid) # we also append to the width attribute to keep the fields the same length
+        # we also append to the other attributes to keep fields the same length
+        links['wid'].append(wid)
+        links['wid_med'].append(wid)
+        links['sinuosity'].append(wid)
         links['len'].append(0)
         links['len_adj'].append(0)
 
@@ -176,13 +180,60 @@ def add_super_apex(links, nodes, imshape):
     return links, nodes
 
 
-def graphiphy(links, nodes, weight=None):
+def delete_super_apex(links, nodes):
     """
+    If you have a super apex, this function deletes it and connecting links.
+    """
+
+    # Get super apex node
+    if 'super_apex' not in nodes:
+        raise ValueError('no super apex detected.')
+
+    # identify super apex
+    super_apex = nodes['super_apex'][0]
+
+    # identify connecting links
+    super_links = nodes['conn'][nodes['id'].index(super_apex)]
+
+    # delete links first
+    for i in super_links:
+        links, nodes = lnu.delete_link(links, nodes, i)
+
+    # then delete super apex
+    nodes = lnu.delete_node(nodes, super_apex, warn=True)
+
+    return links, nodes
+
+
+def graphiphy(links, nodes, weight=None, inletweights=None):
+    """Converts RivGraph links and nodes into a NetworkX graph object.
+
     Converts the RivGraph links and nodes dictionaries into a NetworkX graph
     object.
+
+    Parameters
+    ----------
+    links : dict
+        RivGraph links and their attributes
+    nodes : dict
+        RivGraph nodes and their attributes
+    weight : str, optional
+        Link attribute to use to weight the NetworkX graph. If not provided or
+        None, the graph will be unweighted (links of 1 and 0)
+    inletweights : list, optional
+        Optional manual weights for the inlets when using the super-apex
+        functionality. Overrides the weight set by the inlet link attribute
+        in favor of values from the provided list. List must be in the same
+        order and have the same length as nodes['inlets'].
+        
+    Returns
+    -------
+    G : networkx.DiGraph
+        Returns a NetworkX DiGraph object weighted by the link attribute
+        specified in the optional parameter `weight`
     """
     if weight is not None and weight not in links.keys():
-        raise RuntimeError('Provided weight key not in nodes dictionary.')
+        raise RuntimeError('Provided weight key not in links dictionary.')
 
     if weight is None:
         weights = np.ones((len(links['conn']), 1))
@@ -190,14 +241,25 @@ def graphiphy(links, nodes, weight=None):
         weights = np.array(links[weight])
 
     # Check weights
-    if np.sum(weights<=0) > 0:
+    if np.sum(weights <= 0) > 0:
         raise Warning('One or more of your weights is =< 0. This could cause problems later.')
+
+    if inletweights is not None:
+        if 'super_apex' not in nodes.keys():
+            raise RuntimeError('Can only specify weights if super-apex has been added.')
+        if len(inletweights) != len(nodes['inlets']):
+            raise RuntimeError('graphiphy requires {} weights but {} were provided.'.format(len(nodes['inlets']), len(inletweights)))
+        # Set weights of inlet links
+        for inw, inl in zip(inletweights, nodes['inlets']):
+            lconn = nodes['conn'][nodes['id'].index(inl)][:]
+            lconn = [lc for lc in lconn if lc in nodes['conn'][nodes['id'].index(nodes['super_apex'])]]
+            lidx = links['id'].index(lconn[0])
+            weights[lidx] = inw
 
     G = nx.DiGraph()
     G.add_nodes_from(nodes['id'])
     for lc, wt, lid in zip(links['conn'], weights, links['id']):
         G.add_edge(lc[0], lc[1], weight=wt, linkid=lid)
-
     return G
 
 
@@ -279,16 +341,38 @@ def find_inlet_outlet_nodes(A):
     return apex, outlets
 
 
-def compute_steady_state_link_fluxes(G, links, nodes):
-    """
+def compute_steady_state_link_fluxes(G, links, nodes, weight_name='flux_ss'):
+    """Compute steady state fluxes through the network graph.
+
     Computes the steady state fluxes through links given a directed, weighted,
     NetworkX graph. The network should have only a single inlet (use either
     ensure_single_inlet() or add_super_apex() to do this). Additionally,
     this method will fail if the network has parallel edges. You should first
     run ln_utils artificial_nodes() function to break parallel edges, then
-    re-compute link widths and lengths.
-    """
+    re-compute link widths and lengths. Method after Tejedor et al 2015 [1]_.
 
+    .. [1] Tejedor, Alejandro, et al. "Delta channel networks: 1. A
+       graph‐theoretic approach for studying connectivity and steady state
+       transport on deltaic surfaces."
+       Water Resources Research 51.6 (2015): 3998-4018.
+
+    Parameters
+    ----------
+    G : networkx.DiGraph
+        NetworkX DiGraph object from graphiphy()
+    links : dict
+        RivGraph links dictionary
+    nodes : dict
+        RivGraph nodes dictionary
+    weight_name : str, optional
+        Name to give the new attribute in the links dictionary, is optional,
+        if not provided will be 'flux_ss' (flux steady-state
+
+    Returns
+    -------
+    links : dict
+        RivGraph links dictionary with new attribute
+    """
     # Normalize the adjacency matrix
     An = normalize_adj_matrix(G)
     # Transposed adjacency required for computing F
@@ -297,21 +381,21 @@ def compute_steady_state_link_fluxes(G, links, nodes):
     fluxes, _ = delta_subN_F(An_t)
 
     # Fluxes are at-a-node and need to be translated to links
-    fluxes = np.expand_dims(fluxes,1)
+    fluxes = np.expand_dims(fluxes, 1)
     # Expand node-fluxes back to full adjacency matrix
     fw = fluxes * An
     # All nonzero elements in fw represent links where there is flux
-    rows, cols = np.where(fw>0)
+    rows, cols = np.where(fw > 0)
     Gnodes = list(G.nodes)
-    linkfluxes = np.zeros((len(links['id']),1)) # Preallocate storage
-    for (r,c) in zip(rows,cols):
+    linkfluxes = np.zeros((len(links['id']), 1))  # Preallocate storage
+    for (r, c) in zip(rows, cols):
         u = Gnodes[r]
         v = Gnodes[c]
-        link_id = G.edges[u,v]['linkid']
-        linkfluxes[links['id'].index(link_id)] = fw[r,c]
+        link_id = G.edges[u, v]['linkid']
+        linkfluxes[links['id'].index(link_id)] = fw[r, c]
 
     # Store the fluxes in the links dict
-    links['flux_ss'] = np.array(linkfluxes).flatten().tolist()
+    links[weight_name] = np.array(linkfluxes).flatten().tolist()
 
     return links
 
@@ -889,3 +973,146 @@ def dyn_entropy_based_dyn(deltavars, epsilon=10**-10):
         DCE[i, 1] = DCE_sum
 
     return DMI, DCE
+
+
+def dist_from_apex(nodes, imshape):
+    """Calculate normalized distance from apex.
+
+    Does this for nodes. Calculates a normalized distances from apex, ignores
+    pixel resolution.
+
+    Parameters
+    ----------
+    nodes : dict
+        RivGraph dictionary of nodes
+    imshape : tuple
+        Tuple of the shape of the domain (e.g., Imask.shape)
+
+    Returns
+    -------
+    norm_dist : list
+        List of normalized straight line distances between each node and the
+        inlet in the same order as the nodes come in the input nodes
+        dictionary.
+    """
+    # id row/coord of the apex (or representative location)
+    apex_id = nodes['inlets']
+    if len(apex_id) < 1:
+        raise ValueError('No inlets')
+    elif len(apex_id) > 1:
+        # average inlet locations to a single point
+        ins_idx = [nodes['idx'][nodes['id'].index(i)] for i in apex_id]
+        rs, cs = np.unravel_index(ins_idx, imshape)
+        apex_xy = np.mean(rs, dtype=int), np.mean(cs, dtype=int)
+    else:
+        apex_idx = nodes['idx'][nodes['id'].index(apex_id)]
+        apex_xy = np.unravel_index(apex_idx, imshape)
+
+    # calculate distances to all nodes from apex location
+    def calc_dist(apex_xy, node_xy):
+        """Euclidean distance function."""
+        return np.sqrt((apex_xy[0]-node_xy[0])**2 +
+                       (apex_xy[1]-node_xy[1])**2)
+
+    # get coordinates of all nodes in xy space
+    node_xy = [np.unravel_index(i, imshape) for i in nodes['idx']]
+    node_dists = [calc_dist(apex_xy, i) for i in node_xy]
+    # normalize and return this normalized distance
+    norm_dist = list(np.array(node_dists) / np.max(node_dists))
+
+    return norm_dist
+
+
+def calc_QR(links, nodes, wt='wid_adj', new_at='graphQR'):
+    """Clunky solution (target for optimization) to get QR at bifurcations.
+
+    QR is defined as the larger branch Q / smaller branch Q per
+    Edmonds & Slingerland 2008 [2]_. This measure of flux partitioning at a
+    bifurcation does not scale beyond bifurcations to trifurcations etc.
+    The graph-based flux partitioning scheme also assumes flow is routed
+    in a steady-state manner based on the width (or some other attribute)
+    of the links in the network. Therefore the actual flux value doesn't
+    matter, we can calculate QR as larger width / smaller width from the two
+    branches as that will be the same as if we'd calculated the steady-state
+    fluxes and taken their ratio.
+    The function is written flexibly to allow one to assuming flux weighting
+    by an attribute other than the link width if desired.
+
+    .. warning::
+
+      QR values calculated at nodes located at confluences, polyfurcations,
+      or any other non-bifurcating location will be incorrect!
+
+    .. [2] Edmonds, D. A., and R. L. Slingerland. "Stability of delta
+       distributary networks and their bifurcations."
+       Water Resources Research 44.9 (2008).
+
+    Parameters
+    ----------
+    links : dict
+        RivGraph links dictionary
+    nodes : dict
+        RivGraph nodes dictionary
+    wt : str, optional
+        String pointing to the link attribute to use when calculating ratios,
+        optional, default is 'wid_adj' which is the adjusted link widths
+    new_at : str, optional
+        Name of the new attribute to add to the nodes dictionary, optional,
+        default is 'graphQR' to indicate the graph calculated QR value
+    Returns
+    -------
+    nodes : dict
+        RivGraph dictionary with new_at attribute added
+    """
+    # check links for wt attribute
+    if wt not in links.keys():
+        raise ValueError('wt attribute not in the links dictionary')
+
+    # set up list of zeros
+    nodes[new_at] = np.zeros_like(nodes['id'], dtype=float)
+
+    for i in range(len(nodes['id'])):
+        # for bifurcations
+        if len(nodes['conn'][i]) == 3:
+            # get the 3 connected link ids
+            link_ids = nodes['conn'][i]
+            # get upstream node for each link, its "start" point
+            link_starts = [links['conn'][links['id'].index(link_ids[0])][0],
+                           links['conn'][links['id'].index(link_ids[1])][0],
+                           links['conn'][links['id'].index(link_ids[2])][0]]
+            # figure out which two links are the ones leaving this node
+            # and get the width of each
+            # (which controls the local flux partitioning anyway)
+            if link_starts[0] == link_starts[1]:
+                # check if 1st and 2nd match
+                wid_1 = links[wt][links['id'].index(link_ids[0])]
+                wid_2 = links[wt][links['id'].index(link_ids[1])]
+            elif link_starts[0] == link_starts[2]:
+                # check if 1st and 3rd match
+                wid_1 = links[wt][links['id'].index(link_ids[0])]
+                wid_2 = links[wt][links['id'].index(link_ids[2])]
+            else:
+                # then 2nd and 3rd must match
+                wid_1 = links[wt][links['id'].index(link_ids[1])]
+                wid_2 = links[wt][links['id'].index(link_ids[2])]
+
+        # for inlets w/ only 2 connecting links
+        elif nodes['id'][i] in nodes['inlets'] and len(nodes['conn'][i]) == 2:
+            link_ids = nodes['conn'][i]
+            wid_1 = links[wt][links['id'].index(link_ids[0])]
+            wid_2 = links[wt][links['id'].index(link_ids[1])]
+
+        # catch-all for other scenarios: QR will be -1
+        else:
+            wid_1 = -1
+            wid_2 = 1
+
+        # calculate and assign QR to the node of interest
+        wid_big = np.max([wid_1, wid_2])
+        wid_small = np.min([wid_1, wid_2])
+        nodes[new_at][i] = wid_big / wid_small
+
+    # coerce into list
+    nodes[new_at] = list(nodes[new_at])
+
+    return nodes
