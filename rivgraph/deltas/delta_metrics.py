@@ -225,7 +225,7 @@ def graphiphy(links, nodes, weight=None, inletweights=None):
         functionality. Overrides the weight set by the inlet link attribute
         in favor of values from the provided list. List must be in the same
         order and have the same length as nodes['inlets'].
-        
+
     Returns
     -------
     G : networkx.DiGraph
@@ -366,7 +366,7 @@ def compute_steady_state_link_fluxes(G, links, nodes, weight_name='flux_ss'):
         RivGraph nodes dictionary
     weight_name : str, optional
         Name to give the new attribute in the links dictionary, is optional,
-        if not provided will be 'flux_ss' (flux steady-state
+        if not provided will be 'flux_ss' (flux steady-state)
 
     Returns
     -------
