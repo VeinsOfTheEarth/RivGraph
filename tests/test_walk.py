@@ -1,9 +1,5 @@
 """Unit tests for walk.py."""
-import pytest
-import sys
-import os
 import numpy as np
-import matplotlib.pyplot as plt
 from rivgraph import walk
 
 

@@ -1,25 +1,7 @@
 """pytest fixture to initialize some rivgraph classes for the tests."""
 import pytest
-import sys
 import os
 import numpy as np
-import matplotlib.pyplot as plt
-import skimage.io
-
-# from inspect import getsourcefile
-# basepath = os.path.dirname(
-#     os.path.dirname(
-#         os.path.abspath(getsourcefile(lambda: 0))))
-# sys.path.insert(0, basepath)
-
-# print(basepath)
-# basepath = os.path.join(os.path.sep, *(basepath.split(os.path.sep)[:-1]))
-# print(basepath)
-# basepath = r'C:\Users\Jon\Documents\GitHub\RivGraph'
-# print(os.path.realpath(os.path.dirname(__file__)+".."))
-# sys.path.append(os.path.realpath(os.path.dirname(__file__)+"/.."))
-# sys.path.insert(0, os.path.join(basepath))
-
 from rivgraph.classes import delta
 from rivgraph.classes import river
 
@@ -102,12 +84,6 @@ def synthetic_cycles():
     synthetic[7, 5:7] = 1
     synthetic[8, 3:6] = 1
     synthetic[9:, 4] = 1
-
-    # visualize synthetic case as a png to look at and a tif to use
-    # plt.imshow(synthetic)
-    # plt.savefig(os.path.join(basepath, 'tests/data/SyntheticCycle/skeleton.png'))
-    # plt.close()
-    # skimage.io.imsave(os.path.join(basepath, 'tests/data/SyntheticCycle/skeleton.tif'), synthetic)
 
     # create and return rivgraph.delta object
     return delta(

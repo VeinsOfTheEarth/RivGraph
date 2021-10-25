@@ -1,14 +1,11 @@
 """Unit tests for ln_utils.py."""
 # import pytest
-import sys
 import os
-import io
 try:
     from osgeo import gdal
 except ImportError:
     import gdal
 from rivgraph import ln_utils
-from rivgraph.ordered_set import OrderedSet
 
 
 def test_conn_links(test_net):

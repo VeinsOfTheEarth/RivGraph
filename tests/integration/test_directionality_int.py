@@ -1,10 +1,8 @@
 """Unit tests for directionality.py."""
 import pytest
 import sys
-import os
 import io
 import numpy as np
-import networkx as nx
 from rivgraph import directionality as di
 from rivgraph import ln_utils as lnu
 from rivgraph.deltas import delta_directionality as dd

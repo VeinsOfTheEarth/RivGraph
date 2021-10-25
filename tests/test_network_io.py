@@ -1,13 +1,6 @@
 """Unit tests to check Input/Output functionality."""
-import sys
 import os
 import numpy as np
-import matplotlib.pyplot as plt
-
-from inspect import getsourcefile
-basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
-sys.path.insert(0, basepath)
-
 from rivgraph import io_utils as iu
 
 # Explicit testing of functions from io_utils.py
@@ -17,27 +10,27 @@ class TestColortable:
     def test_binary(self):
         """Test binary colormap."""
         color_table = iu.colortable('binary')
-        assert np.all(color_table.GetColorEntry(0)==(0, 0, 0, 0))
-        assert np.all(color_table.GetColorEntry(1)==(255, 255, 255, 100))
+        assert np.all(color_table.GetColorEntry(0) == (0, 0, 0, 0))
+        assert np.all(color_table.GetColorEntry(1) == (255, 255, 255, 100))
 
     def test_mask(self):
         """Test mask."""
         color_table = iu.colortable('mask')
-        assert np.all(color_table.GetColorEntry(0)==(0, 0, 0, 0))
-        assert np.all(color_table.GetColorEntry(1)==(0, 128, 0, 100))
+        assert np.all(color_table.GetColorEntry(0) == (0, 0, 0, 0))
+        assert np.all(color_table.GetColorEntry(1) == (0, 128, 0, 100))
 
     def test_tile(self):
         """Test tile."""
         color_table = iu.colortable('tile')
-        assert np.all(color_table.GetColorEntry(0)==(0, 0, 0, 0))
-        assert np.all(color_table.GetColorEntry(1)==(0, 0, 255, 100))
+        assert np.all(color_table.GetColorEntry(0) == (0, 0, 0, 0))
+        assert np.all(color_table.GetColorEntry(1) == (0, 0, 255, 100))
 
     def test_GSW(self):
         """Test GSW."""
         color_table = iu.colortable('GSW')
-        assert np.all(color_table.GetColorEntry(0)==(0, 0, 0, 0))
-        assert np.all(color_table.GetColorEntry(1)==(0, 0, 0, 0))
-        assert np.all(color_table.GetColorEntry(2)==(176, 224, 230, 100))
+        assert np.all(color_table.GetColorEntry(0) == (0, 0, 0, 0))
+        assert np.all(color_table.GetColorEntry(1) == (0, 0, 0, 0))
+        assert np.all(color_table.GetColorEntry(2) == (176, 224, 230, 100))
 
 # Function iu.coords_from_shapefile() no longer exists
 # def test_coords_from_shp():
@@ -53,7 +46,7 @@ def test_create_manual_dir_csv(tmp_path):
     """Test creation of manual direction csv."""
     csvpath = os.path.join(tmp_path, 'csvtest.csv')
     iu.create_manual_dir_csv(csvpath)
-    assert os.path.isfile(csvpath) == True
+    assert os.path.isfile(csvpath) is True
 
 
 def test_prep_paths(tmp_path):

@@ -1,11 +1,7 @@
 """Testing RivGraph Exceptions/Errors."""
 import pytest
-import sys
-import os
 import numpy as np
-from rivgraph.classes import delta
 from rivgraph.classes import river
-from rivgraph import ln_utils
 from rivgraph.deltas import delta_metrics
 
 

@@ -7,6 +7,7 @@ from rivgraph import im_utils
 
 class TestSkelBranchpts:
     """Tests for skel_branchpoints method."""
+
     def test_colville_branchpoints(self, known_net):
         """Test branchpoints on colville skeleton."""
         known_net.skeletonize()
@@ -30,6 +31,7 @@ class TestSkelBranchpts:
 
 class TestSkelCurvature:
     """Tests for skel_pixel_curvature method."""
+    
     def test_colville_curvature(self, known_net):
         """Test curvature on colville skeleton."""
         known_net.skeletonize()

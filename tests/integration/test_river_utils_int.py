@@ -1,14 +1,5 @@
 """Tests for `rivgraph.river.river_utils` functions."""
-import pytest
-import sys
-import os
-import io
-import numpy as np
-import matplotlib.pyplot as plt
-import shapely
 from rivgraph.rivers import river_utils as ru
-from rivgraph.rivers import centerline_utils as cu
-from rivgraph.classes import centerline
 
 
 class TestFindInletsOutlets:

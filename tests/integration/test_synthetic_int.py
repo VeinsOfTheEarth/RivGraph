@@ -10,7 +10,7 @@ import numpy as np
 
 
 def test_check_props(synthetic_cycles):
-    """check that synthetic system was properly established."""
+    """Check that synthetic system was properly established."""
     assert type(synthetic_cycles) is not None
     assert synthetic_cycles.gt == (0.0, 1.0, 0.0, 10.0, 0.0, -1.0)
     assert synthetic_cycles.imshape == (15, 10)

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Unit tests for im_utils.py."""
 import pytest
-import sys
-import os
 import numpy as np
 import matplotlib.pyplot as plt
 from rivgraph import im_utils

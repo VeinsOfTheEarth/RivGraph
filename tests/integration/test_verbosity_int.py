@@ -1,10 +1,6 @@
 """Tests associated with verbosity outputs."""
-import pytest
 import sys
-import os
 import io
-from rivgraph.classes import delta
-from rivgraph.classes import river
 
 
 def test_to_geovectors(test_net):

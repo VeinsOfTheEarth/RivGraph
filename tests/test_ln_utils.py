@@ -1,18 +1,11 @@
 """Unit tests for ln_utils.py."""
 # import pytest
 import sys
-import os
 import io
 try:
     from osgeo import gdal
 except ImportError:
     import gdal
-# import numpy as np
-# import matplotlib.pyplot as plt
-
-from inspect import getsourcefile
-basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
-sys.path.insert(0, basepath)
 
 from rivgraph import ln_utils
 from rivgraph.ordered_set import OrderedSet

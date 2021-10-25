@@ -1,16 +1,8 @@
 """Unit tests for `rivgraph.classes` classes and methods."""
-import pytest
 import unittest.mock as mock
-import sys
 import os
-import io
 import numpy as np
 from rivgraph.classes import rivnetwork
-from rivgraph.classes import delta
-from rivgraph.classes import river
-import rivgraph.mask_to_graph as m2g
-import rivgraph.ln_utils as lnu
-import rivgraph.deltas.delta_metrics as dm
 
 class Test_rivnetwork:
     """Set up some variable names."""

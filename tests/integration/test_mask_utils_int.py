@@ -1,7 +1,4 @@
 """Tests for the mask_utils.py functions."""
-import pytest
-import sys
-import os
 import numpy as np
 from rivgraph import mask_utils
 
