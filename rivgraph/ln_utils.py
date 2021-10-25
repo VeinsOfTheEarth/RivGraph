@@ -7,6 +7,7 @@ Created on Mon Sep 10 09:59:52 2018
 
 @author: Jon
 """
+from loguru import logger
 import shapely
 import numpy as np
 from scipy.stats import mode
@@ -47,7 +48,7 @@ def add_node(nodes, idx, linkconn):
         linkconn = [linkconn]
 
     if idx in nodes['idx']:
-        print('Node already in set; returning unchanged.')
+        logger.info('Node already in set; returning unchanged.')
         return nodes
 
     # Find new node ID
@@ -232,7 +233,7 @@ def delete_node(nodes, nodeid, warn=True):
     # Check that the node has no connectivity
     nodeidx = nodes['id'].index(nodeid)
     if len(nodes['conn'][nodeidx]) != 0 and warn == True:
-        print('You are deleting node {} which still has connections to links.'.format(nodeid))
+        logger.info('You are deleting node {} which still has connections to links.'.format(nodeid))
 
     # Remove the node and its properties
     for nk in nodekeys:
@@ -1251,7 +1252,7 @@ def add_artificial_nodes(links, nodes, gd_obj):
         for tr in to_rem:
             if tr in links.keys():
                 del links[tr]
-        print('{} artificial nodes added. Link lengths and widths should be recomputed via the link_widths_and_lengths() function in ln_utils.'.format(len(arts)))
+        logger.info('{} artificial nodes added. Link lengths and widths should be recomputed via the link_widths_and_lengths() function in ln_utils.'.format(len(arts)))
 
     return links, nodes
 

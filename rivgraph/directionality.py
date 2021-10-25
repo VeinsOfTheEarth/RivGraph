@@ -6,6 +6,7 @@ Directionality Utilities (directionality.py)
 Created on Wed Nov  7 11:38:16 2018
 @author: Jon
 """
+from loguru import logger
 import os
 import numpy as np
 import networkx as nx
@@ -1194,7 +1195,7 @@ def fix_cycles(links, nodes):
             # we just skip these and report them so they can be manually
             # corrected.
             if len(all_combos) > 1024:
-                print('The cycle links {} is too large to attempt to fix automatically.'.format(cycle_l))
+                logger.info('The cycle links {} is too large to attempt to fix automatically.'.format(cycle_l))
                 continue
 
             # Iterate through each combination and determine violations: there are four conditions that must be met:
@@ -1270,7 +1271,7 @@ def fix_cycles(links, nodes):
             poss_configs = [i for i, (nv, nc, hp, ms) in enumerate(zip(cont_violators, len_cycle, has_path, manually_set)) if nv == 0 and nc == 0 and hp == 1 and ms == 0]
 
             if len(poss_configs) == 0:
-                print('Unfixable cycle found at links: {}.'.format(cycle_l))
+                logger.info('Unfixable cycle found at links: {}.'.format(cycle_l))
                 continue
 
             # Choose the configuration that flips the fewest links
@@ -1322,13 +1323,13 @@ def dir_set_manually(links, nodes, manual_set_csv):
 
     # Read the csv file for fixing link directions.
     if os.path.isfile(manual_set_csv) is False:
-        print('No file found for manually setting link directions.')
+        logger.info('No file found for manually setting link directions.')
         io.create_manual_dir_csv(manual_set_csv)
-        print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
+        logger.info('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
 
         return links, nodes
     else:
-        print('Using {} to manually set flow directions.'.format(manual_set_csv))
+        logger.info('Using {} to manually set flow directions.'.format(manual_set_csv))
 
     df = pd.read_csv(manual_set_csv)
 
