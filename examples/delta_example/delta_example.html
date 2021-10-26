@@ -1,78 +1,36 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Let’s demo RivGraph on the Colville Delta! &mdash; RivGraph 0.4 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>Let’s demo RivGraph on the Colville Delta! &mdash; RivGraph 0.4 documentation</title><link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+  <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script type="text/javascript" src="../../_static/jquery.js"></script>
         <script type="text/javascript" src="../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Let’s demo RivGraph on the Brahmaputra River!" href="../braided_river_example/braided_river_example.html" />
     <link rel="prev" title="Examples" href="../index.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
-            <a href="../../index.html">
-          
-
-          
-            
-            <img src="../../_static/rg_logo_full.png" class="logo" alt="Logo"/>
-          
+            <a href="../../index.html"><img src="../../_static/rg_logo_full.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
                 0.4
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -80,18 +38,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart/index.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../background/index.html">Background</a></li>
@@ -121,74 +68,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../../apiref/index.html">API Reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">RivGraph</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../index.html">Examples</a> &raquo;</li>
-        
       <li>Let’s demo RivGraph on the Colville Delta!</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../../_sources/examples/delta_example/delta_example.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="lets-demo-rivgraph-on-the-colville-delta">
+             
+  <section id="lets-demo-rivgraph-on-the-colville-delta">
 <h1>Let’s demo RivGraph on the Colville Delta!<a class="headerlink" href="#lets-demo-rivgraph-on-the-colville-delta" title="Permalink to this headline">¶</a></h1>
 <p>This demo shows some of the core functionality and convenient plotting
 and exporting features provided by RivGraph for analyzing delta channel
@@ -209,7 +114,7 @@ the channel network</strong>, preferably georeferenced (i.e., a GeoTiff). For
 deltas, you will also need to create two shapefiles/GeoJSONs: one of the
 <strong>shoreline</strong>, and one of the <strong>inlet nodes</strong>. See section 4 for
 guidance on how to create these required geovector files.</p>
-<div class="section" id="instantiate-delta-class">
+<section id="instantiate-delta-class">
 <h2>1. Instantiate delta class<a class="headerlink" href="#instantiate-delta-class" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rivgraph.classes</span> <span class="kn">import</span> <span class="n">delta</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -234,8 +139,8 @@ guidance on how to create these required geovector files.</p>
 </pre></div>
 </div>
 <img alt="../../_images/output_2_11.png" src="../../_images/output_2_11.png" />
-</div>
-<div class="section" id="skeletonize-the-binary-mask">
+</section>
+<section id="skeletonize-the-binary-mask">
 <h2>2. Skeletonize the binary mask<a class="headerlink" href="#skeletonize-the-binary-mask" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simply use the skeletonize() method.</span>
 <span class="n">colville</span><span class="o">.</span><span class="n">skeletonize</span><span class="p">()</span>
@@ -260,17 +165,21 @@ option is to save it as a geotiff and pull it up in a GIS (like QGIS).</p>
 <pre class="literal-block">Geotiff written to dataColville_DeltaResultsColville_skel.tif.</pre>
 <p>The georeferenced Colville skeleton has been written to disk, so we can
 pull it up in QGIS along with the georeferenced mask:</p>
-<div class="figure align-center" id="id1">
+<figure class="align-center" id="id1">
 <img alt="colville_qgis_mask_skel_large.PNG" src="../../_images/colville_qgis_mask_skel_large.png" />
-<p class="caption"><span class="caption-text">colville_qgis_mask_skel_large.PNG</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-text">colville_qgis_mask_skel_large.PNG</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>Or a bit zoomed-in:</p>
-<div class="figure align-center" id="id2">
+<figure class="align-center" id="id2">
 <img alt="colville_qgis_mask_skel_zoom.PNG" src="../../_images/colville_qgis_mask_skel_zoom.png" />
-<p class="caption"><span class="caption-text">colville_qgis_mask_skel_zoom.PNG</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
-</div>
-</div>
-<div class="section" id="compute-the-network-links-and-nodes">
+<figcaption>
+<p><span class="caption-text">colville_qgis_mask_skel_zoom.PNG</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="compute-the-network-links-and-nodes">
 <h2>3. Compute the network (links and nodes)<a class="headerlink" href="#compute-the-network-links-and-nodes" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simply use the compute_network() method.</span>
 <span class="n">colville</span><span class="o">.</span><span class="n">compute_network</span><span class="p">()</span>
@@ -323,8 +232,8 @@ dataColville_DeltaResultsColville_nodes.json</pre>
 <p>And dragging these into QGIS: <img alt="colville_network_unpruned.PNG" src="../../_images/colville_network_unpruned.png" /> You can
 query different links and nodes using the Identify tool. Note that their
 properties (‘conn’ and ‘id’) are appended.</p>
-</div>
-<div class="section" id="pruning-the-network">
+</section>
+<section id="pruning-the-network">
 <h2>4. Pruning the network<a class="headerlink" href="#pruning-the-network" title="Permalink to this headline">¶</a></h2>
 <p>You notice in the above image that there are many superfluous links
 along the shoreline. This is a result of skeletonizing such a massive,
@@ -335,10 +244,12 @@ links, but not the others! RivGraph will automatically prune the
 network, but it requires (for deltas) two additional pieces of
 information: the location of the inlet nodes, and a delineation of the
 shoreline. We can create both of these in QGIS:</p>
-<div class="figure align-center" id="id3">
+<figure class="align-center" id="id3">
 <img alt="colville_shoreline_inlet_outlet.png" src="../../_images/colville_shoreline_inlet_outlet.png" />
-<p class="caption"><span class="caption-text">colville_shoreline_inlet_outlet.png</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-text">colville_shoreline_inlet_outlet.png</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>Shoreline: Create a polyline vector layer. The shoreline should be drawn
 to intersect all the outlet links. It should separate all the unwanted
 ocean links from the actual links of the delta channel network. If you
@@ -368,10 +279,12 @@ prune the network!</p>
 </pre></div>
 </div>
 <p>Let’s see how the pruned version compares to the unpruned:</p>
-<div class="figure align-center" id="id4">
+<figure class="align-center" id="id4">
 <img alt="colville_shoreline_inlet_outlet_pruned.png" src="../../_images/colville_shoreline_inlet_outlet_pruned.png" />
-<p class="caption"><span class="caption-text">colville_shoreline_inlet_outlet_pruned.png</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-text">colville_shoreline_inlet_outlet_pruned.png</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>Wow, we really clipped off a lot of links! We also added some new nodes
 at the shoreline–notice how each link that intersects the shoreline was
 truncated, and outlet nodes were placed there (RivGraph remembers which
@@ -382,8 +295,8 @@ inlet nodes in your shapefile.</p>
 <p>Compare with the figure above this one; the set of nodes was also
 reduced. As links were removed from the network, some nodes were no
 longer needed as they only connected two links.</p>
-</div>
-<div class="section" id="compute-morphologic-metrics-lengths-widths">
+</section>
+<section id="compute-morphologic-metrics-lengths-widths">
 <h2>5. Compute morphologic metrics (lengths, widths)<a class="headerlink" href="#compute-morphologic-metrics-lengths-widths" title="Permalink to this headline">¶</a></h2>
 <p>Now that the network is resolved and pruned, we can compute some link
 metrics.</p>
@@ -431,8 +344,8 @@ difference is addressed in a separate Jupyter notebook called XXX.</p>
 </pre></div>
 </div>
 <img alt="../../_images/output_26_1.png" src="../../_images/output_26_1.png" />
-</div>
-<div class="section" id="assign-flow-directions-for-each-link">
+</section>
+<section id="assign-flow-directions-for-each-link">
 <h2>6. Assign flow directions for each link.<a class="headerlink" href="#assign-flow-directions-for-each-link" title="Permalink to this headline">¶</a></h2>
 <p>Now we wish to determine the long-term, steady-state flow direction in
 each link. The algorithms used here are described in <a class="reference external" href="https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html">this
@@ -471,10 +384,12 @@ for inspection in a GIS:</p>
 </div>
 <pre class="literal-block">Geotiff written to dataColville_DeltaResultsColville_link_directions.tif.</pre>
 <p>Pulling this into QGIS and applying a similar color ramp, we see</p>
-<div class="figure align-center" id="id5">
+<figure class="align-center" id="id5">
 <img alt="colville_link_directions.PNG" src="examples/delta_example/images/colville_link_directions.PNG" />
-<p class="caption"><span class="caption-text">colville_link_directions.PNG</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-text">colville_link_directions.PNG</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>The pixel values along each link have been rescaled from 0 (upstream) to
 1 (downstream).</p>
 <p>Now that flow directions have been computed, we can also compute
@@ -491,8 +406,8 @@ junction angles at each node.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dict_keys</span><span class="p">([</span><span class="s1">&#39;idx&#39;</span><span class="p">,</span> <span class="s1">&#39;conn&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;inlets&#39;</span><span class="p">,</span> <span class="s1">&#39;outlets&#39;</span><span class="p">,</span> <span class="s1">&#39;int_ang&#39;</span><span class="p">,</span> <span class="s1">&#39;jtype&#39;</span><span class="p">,</span> <span class="s1">&#39;width_ratio&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="compute-topologic-metrics">
+</section>
+<section id="compute-topologic-metrics">
 <h2>7. Compute topologic metrics<a class="headerlink" href="#compute-topologic-metrics" title="Permalink to this headline">¶</a></h2>
 <p>RivGraph will compute a number of topologic metrics for your delta
 channel network. These metrics are explained and demonstrated in Tejedor
@@ -598,55 +513,38 @@ with the following method:</p>
  <span class="p">[</span><span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="o">...</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span><span class="p">]]</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../braided_river_example/braided_river_example.html" class="btn btn-neutral float-right" title="Let’s demo RivGraph on the Brahmaputra River!" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../index.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../braided_river_example/braided_river_example.html" class="btn btn-neutral float-right" title="Let’s demo RivGraph on the Brahmaputra River!" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020, J. Schwenk &amp; J. Hariharan.
-
-    </p>
+    <p>&#169; Copyright 2020, J. Schwenk &amp; J. Hariharan.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

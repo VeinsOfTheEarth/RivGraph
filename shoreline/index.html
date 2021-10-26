@@ -1,78 +1,36 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Shoreline creation &mdash; RivGraph 0.4 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>Shoreline creation &mdash; RivGraph 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script type="text/javascript" src="../_static/jquery.js"></script>
         <script type="text/javascript" src="../_static/underscore.js"></script>
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Link and Node Dictionaries" href="../linksnodes/index.html" />
     <link rel="prev" title="Maskmaking" href="../maskmaking/index.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
-            <a href="../index.html">
-          
-
-          
-            
-            <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
-          
+            <a href="../index.html"><img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
                 0.4
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -80,18 +38,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../quickstart/index.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../background/index.html">Background</a></li>
@@ -109,72 +56,31 @@
 <li class="toctree-l1"><a class="reference internal" href="../apiref/index.html">API Reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">RivGraph</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
       <li>Shoreline creation</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/shoreline/index.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="shoreline-creation">
+             
+  <section id="shoreline-creation">
 <span id="shoreline"></span><h1>Shoreline creation<a class="headerlink" href="#shoreline-creation" title="Permalink to this headline">¶</a></h1>
 <p>Every delta analyzed by <em>RivGraph</em> requires that the user create a shoreline as well. This shoreline is used to determine the location of the outlet nodes of the network. Here, guidance is provided for how to create this shoreline for your delta mask.</p>
 <blockquote>
@@ -183,14 +89,14 @@
 <li><p><a class="reference internal" href="#howshoreline"><span class="std std-ref">How do I make a shoreline?</span></a></p></li>
 </ul>
 </div></blockquote>
-<div class="section" id="purpose-of-the-shoreline">
+<section id="purpose-of-the-shoreline">
 <span id="whyshoreline"></span><h2>Purpose of the shoreline<a class="headerlink" href="#purpose-of-the-shoreline" title="Permalink to this headline">¶</a></h2>
 <p>Consider the following mask and its skeleton:</p>
 <img alt="../_images/colville_mask_skel.PNG" src="../_images/colville_mask_skel.PNG" />
 <p>How can we identify the “ends” of the network–i.e. the outlet locations? There are two options; first, we could manually specify each outlet point individually. This is a viable option, but it is also tedious and does not lend itself well to automation. Instead, <em>RivGraph</em> takes a different approach that still requires manual input, but is robust, less tedious, and has the potential for automation.</p>
 <p>Instead of placing nodes individually, you will provide a shoreline shapefile (or any geopandas-readable PolyLine). <em>RivGraph</em> will intersect your shoreline with the skeleton (actually the vectorized links and nodes that make up the skeleton), place nodes at the connected intersection points, and trim away all the skeleton that lies outside the river network.</p>
-</div>
-<div class="section" id="how-do-i-make-a-shoreline">
+</section>
+<section id="how-do-i-make-a-shoreline">
 <span id="howshoreline"></span><h2>How do I make a shoreline?<a class="headerlink" href="#how-do-i-make-a-shoreline" title="Permalink to this headline">¶</a></h2>
 <p>There are numerous tools available to generate your shoreline, such as the <a class="reference external" href="http://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963">Opening Angle Method</a> or you may automate a procedure. Here, we describe shoreline creation with QGIS, although other GIS software may also be used.</p>
 <ol class="arabic simple">
@@ -232,55 +138,38 @@
 <img alt="../_images/shoreline_howto2.PNG" class="align-center" src="../_images/shoreline_howto2.PNG" />
 <p class="centered">
 <strong>The pruned network is in blue; the outlet nodes are yellow.</strong></p><p>Notice that all the spurious skeleton portions have been trimmed, as have all the links in the ocean. We also see outlet nodes have been placed exactly where the shoreline intersected the skeleton.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../linksnodes/index.html" class="btn btn-neutral float-right" title="Link and Node Dictionaries" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../maskmaking/index.html" class="btn btn-neutral float-left" title="Maskmaking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../linksnodes/index.html" class="btn btn-neutral float-right" title="Link and Node Dictionaries" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020, J. Schwenk &amp; J. Hariharan.
-
-    </p>
+    <p>&#169; Copyright 2020, J. Schwenk &amp; J. Hariharan.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
