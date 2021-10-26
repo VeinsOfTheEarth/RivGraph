@@ -80,28 +80,28 @@ def test_assign_flow_directions(test_river, known_river):
     assert match_counter / len(ind_list) > 0.9
 
 
-def test_assign_flow_directions_verbose(test_river):
-    """Test assigning flow directions verbosity."""
-    # set up capture string
-    capturedOutput = io.StringIO()
-    sys.stdout = capturedOutput
-
-    print(test_river)
-
-    test_river.verbose = True
-    test_river.assign_flow_directions()
-
-    # grab output
-    sys.stdout = sys.__stdout__
-    # assert output
-
-    properVerbosity = False
-    if 'Setting link directionality...' in capturedOutput.getvalue()[:-1]:
-        if 'to manually set flow directions.' in capturedOutput.getvalue()[:-1]:
-            if 'Attempting to fix' in capturedOutput.getvalue()[:-1]:
-                properVerbosity = True
-
-    assert properVerbosity == True
+# def test_assign_flow_directions_verbose(test_river):
+#     """Test assigning flow directions verbosity."""
+#     # set up capture string
+#     capturedOutput = io.StringIO()
+#     sys.stdout = capturedOutput
+#
+#     print(test_river)
+#
+#     test_river.verbose = True
+#     test_river.assign_flow_directions()
+#
+#     # grab output
+#     sys.stdout = sys.__stdout__
+#     # assert output
+#
+#     properVerbosity = False
+#     if 'Setting link directionality...' in capturedOutput.getvalue()[:-1]:
+#         if 'to manually set flow directions.' in capturedOutput.getvalue()[:-1]:
+#             if 'Attempting to fix' in capturedOutput.getvalue()[:-1]:
+#                 properVerbosity = True
+#
+#     assert properVerbosity == True
     # assert capturedOutput.getvalue()[:-1] == 'Setting link directionality...Using tests/results/brahma/Brahmclip_fixlinks.csv to manually set flow directions.\nAttempting to fix 3 cycles.\nCould not fix cycle links: [[1472, 1471, 1452, 1455, 1476], [1604, 1634, 1635, 1605]].\nUse the csv file at tests/results/brahma/Brahmclip_fixlinks.csv to manually fix link directions.\ndone.'
 
 

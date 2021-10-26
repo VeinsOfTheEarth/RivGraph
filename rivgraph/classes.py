@@ -129,25 +129,7 @@ class rivnetwork:
 
         # init logger - prints out to stdout if verbose is True
         # ALWAYS writes output to log file (doesn't print if verbose is False)
-        if self.verbose is True:
-            logger.configure(
-                handlers=[
-                    dict(sink=self.paths['log'],
-                         format="[{time:YYYY-MM-DD at HH:mm:ss}] | {message}"),
-                    dict(sink=sys.stdout,
-                         format="{message}")
-                ],
-                activation=[("", True)],
-            )
-        else:
-            logger.configure(
-                handlers=[
-                    dict(sink=self.paths['log'],
-                         format="[{time:YYYY-MM-DD at HH:mm:ss}] | {message}"),
-                ],
-                activation=[("", True)],
-            )
-        logger.info("-"*10 + " New Run " + "-"*10)
+        self.init_logger()
 
         # Handle georeferencing
         # GA_Update required for setting dummy projection/geotransform
@@ -179,6 +161,29 @@ class rivnetwork:
 
         # Load mask into memory
         self.Imask = self.gdobj.ReadAsArray()
+
+
+    def init_logger(self):
+        """Function to initialize the logger."""
+        if self.verbose is True:
+            logger.configure(
+                handlers=[
+                    dict(sink=self.paths['log'],
+                         format="[{time:YYYY-MM-DD at HH:mm:ss}] | {message}"),
+                    dict(sink=sys.stdout,
+                         format="{message}")
+                ],
+                activation=[("", True)],
+            )
+        else:
+            logger.configure(
+                handlers=[
+                    dict(sink=self.paths['log'],
+                         format="[{time:YYYY-MM-DD at HH:mm:ss}] | {message}"),
+                ],
+                activation=[("", True)],
+            )
+        logger.info("-"*10 + " New Run " + "-"*10)
 
 
     def compute_network(self):
