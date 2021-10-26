@@ -429,9 +429,17 @@
 
 <span class="sd">    - &#39;wid&#39; : the average width of all pixels of the link</span>
 
-<span class="sd">    - &#39;wid_adj&#39; : the &quot;adjusted&quot; average width of all link pixels excluding &quot;false&quot; pixels</span>
+<span class="sd">    - &#39;wid_adj&#39; : the &quot;adjusted&quot; average width of all link pixels excluding</span>
+<span class="sd">                  &quot;false&quot; pixels</span>
 
-<span class="sd">    - &#39;len_adj&#39; : the &quot;adjusted&quot; length of the link after excluding &quot;false&quot; pixels</span>
+<span class="sd">    - &#39;wid_med&#39; : median of &#39;adjusted&#39; width values</span>
+
+<span class="sd">    - &#39;len_adj&#39; : the &quot;adjusted&quot; length of the link after excluding</span>
+<span class="sd">                  &quot;false&quot; pixels</span>
+
+<span class="sd">    - &#39;sinuosity&#39; : simple sinuosity using euclidean distances in the array-</span>
+<span class="sd">                    space. does not take projection or geoid into account.</span>
+<span class="sd">                    is length of channel / euclidean distance</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -451,14 +459,14 @@
 <span class="sd">        Network links with width and length properties appended.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1">#TODO: add median width OR just change wid_adj to be median?</span>
-
     <span class="c1"># Initialize attribute storage</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_pix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># width at each pixel</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_adj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># average of all link pixels considered to be part of actual channel</span>
+    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_med&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># median of all link px in channel</span>
     <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len_adj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;sinuosity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># channel sinuosity for adjusted length</span>
 
     <span class="n">dims</span> <span class="o">=</span> <span class="n">Idt</span><span class="o">.</span><span class="n">shape</span>
 
@@ -480,25 +488,39 @@
         <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">dists</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">pixlen</span>
 
         <span class="c1"># Compute distances along link in opposite direction</span>
-        <span class="n">revdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="n">revdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                                               <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
         <span class="n">revdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">revdists</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">pixlen</span>
 
         <span class="c1"># Find the first and last pixel along the link that is at least a half-width&#39;s distance away</span>
         <span class="n">startidx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dists</span> <span class="o">-</span> <span class="n">widths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">width_mult</span><span class="p">))</span>
-        <span class="n">endidx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">revdists</span> <span class="o">-</span> <span class="n">widths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">width_mult</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">endidx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">revdists</span> <span class="o">-</span> <span class="n">widths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span>
+                                               <span class="mi">2</span><span class="o">*</span><span class="n">width_mult</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
 
         <span class="c1"># Ensure there are enough pixels to trim the ends by the pixel half-width</span>
         <span class="k">if</span> <span class="n">startidx</span> <span class="o">&gt;=</span> <span class="n">endidx</span><span class="p">:</span>
             <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_adj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">widths</span><span class="p">))</span>
+            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_med&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">widths</span><span class="p">))</span>
             <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len_adj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dists</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># straight-line distance between first and last pixel of link</span>
+            <span class="n">st_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                              <span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">pixlen</span>
+            <span class="c1"># sinuosity =  channel len / straight line length</span>
+            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;sinuosity&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dists</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">st_dist</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_adj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">startidx</span><span class="p">:</span><span class="n">endidx</span><span class="p">]))</span>
+            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_med&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">startidx</span><span class="p">:</span><span class="n">endidx</span><span class="p">]))</span>
             <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len_adj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dists</span><span class="p">[</span><span class="n">endidx</span><span class="p">]</span> <span class="o">-</span> <span class="n">dists</span><span class="p">[</span><span class="n">startidx</span><span class="p">])</span>
-            
+            <span class="c1"># straight-line distance between first and last pixel of link</span>
+            <span class="n">st_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">startidx</span><span class="p">]</span><span class="o">-</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">endidx</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                              <span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">startidx</span><span class="p">]</span><span class="o">-</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">endidx</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">pixlen</span>
+            <span class="c1"># sinuosity =  channel len / straight line length</span>
+            <span class="n">links</span><span class="p">[</span><span class="s1">&#39;sinuosity&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dists</span><span class="p">[</span><span class="n">endidx</span><span class="p">]</span><span class="o">-</span><span class="n">dists</span><span class="p">[</span><span class="n">startidx</span><span class="p">])</span><span class="o">/</span><span class="n">st_dist</span><span class="p">)</span>
+
         <span class="c1"># Unadjusted lengths and widths</span>
         <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">widths</span><span class="p">))</span>
         <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dists</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        
+
         <span class="c1"># Ensure the minimum width and length equal to the pixel resolution</span>
         <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">pixlen</span><span class="p">,</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">pixlen</span><span class="p">,</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -994,10 +1016,10 @@
             <span class="n">conn</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nidx</span><span class="p">][:]</span>
             <span class="c1"># We want to combine links where a node has only two connections</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">nid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dontremove</span><span class="p">:</span>
-                
+
                 <span class="c1"># First check if the node is connected to itself. This can</span>
                 <span class="c1"># happen for small subnetworks where all the spurs have been</span>
-                <span class="c1"># removed, leaving an isolated loop. (Occurs in masks that </span>
+                <span class="c1"># removed, leaving an isolated loop. (Occurs in masks that</span>
                 <span class="c1"># have not been filtered to the largest connected component.)</span>
                 <span class="c1"># See https://github.com/jonschwenk/RivGraph/issues/32</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">conn</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1611,8 +1633,8 @@
     <span class="n">links_gpd</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
     <span class="n">links_gpd</span><span class="p">[</span><span class="s1">&#39;us node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]]</span>
     <span class="n">links_gpd</span><span class="p">[</span><span class="s1">&#39;ds node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]]</span>
-    
-    <span class="c1"># Assign CRS - done last to avoid DeprecationWarning - need geometry </span>
+
+    <span class="c1"># Assign CRS - done last to avoid DeprecationWarning - need geometry</span>
     <span class="c1"># to exist before assigning CRS.</span>
     <span class="n">links_gpd</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">gdobj</span><span class="o">.</span><span class="n">GetProjection</span><span class="p">())</span>
 

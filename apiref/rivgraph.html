@@ -155,7 +155,7 @@ but also includes delta-specific attributes and methods.</p>
 
 <dl class="method">
 <dt id="rivgraph.classes.delta.prune_network">
-<code class="descname">prune_network</code><span class="sig-paren">(</span><em>path_shoreline=None</em>, <em>path_inletnodes=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#delta.prune_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.delta.prune_network" title="Permalink to this definition">¶</a></dt>
+<code class="descname">prune_network</code><span class="sig-paren">(</span><em>path_shoreline=None</em>, <em>path_inletnodes=None</em>, <em>prune_less=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/classes.html#delta.prune_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.classes.delta.prune_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prunes the delta by removing spurs and links beyond the provided shoreline.
 Paths may be provided to shoreline and inlet nodes shapefiles, otherwise
 their location is specified by paths dictionary.</p>
@@ -166,6 +166,11 @@ their location is specified by paths dictionary.</p>
 check for the file at <cite>paths[‘shoreline’]</cite>.</p></li>
 <li><p><strong>path_inletnodes</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to inlet nodes shapefile/geojson. The default is None but will
 check for the file at <cite>paths[‘inlet_nodes’]</cite>.</p></li>
+<li><p><strong>prune_less</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to optionally prune the network less. The first spur
+removal can create problems, especially for very small/simple
+networks. Default behavior is encouraged, but in the event a bug
+is encountered, toggling this parameter to True may fix the issue.
+Default is False (more pruning).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -3291,8 +3296,23 @@ also computed that account for this effect.</p>
 <li><p>‘len’ : the length of the full link</p></li>
 <li><p>‘wid_pix’ : the width of each pixel in the link</p></li>
 <li><p>‘wid’ : the average width of all pixels of the link</p></li>
-<li><p>‘wid_adj’ : the “adjusted” average width of all link pixels excluding “false” pixels</p></li>
-<li><p>‘len_adj’ : the “adjusted” length of the link after excluding “false” pixels</p></li>
+<li><dl class="simple">
+<dt>‘wid_adj’<span class="classifier">the “adjusted” average width of all link pixels excluding</span></dt><dd><p>“false” pixels</p>
+</dd>
+</dl>
+</li>
+<li><p>‘wid_med’ : median of ‘adjusted’ width values</p></li>
+<li><dl class="simple">
+<dt>‘len_adj’<span class="classifier">the “adjusted” length of the link after excluding</span></dt><dd><p>“false” pixels</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘sinuosity’<span class="classifier">simple sinuosity using euclidean distances in the array-</span></dt><dd><p>space. does not take projection or geoid into account.
+is length of channel / euclidean distance</p>
+</dd>
+</dl>
+</li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

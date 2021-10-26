@@ -90,7 +90,8 @@
 <span class="kn">import</span> <span class="nn">rivgraph.ln_utils</span> <span class="k">as</span> <span class="nn">lnu</span>
 
 
-<div class="viewcode-block" id="prune_delta"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_utils.prune_delta">[docs]</a><span class="k">def</span> <span class="nf">prune_delta</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">shoreline_shp</span><span class="p">,</span> <span class="n">inlets_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">):</span>
+<div class="viewcode-block" id="prune_delta"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_utils.prune_delta">[docs]</a><span class="k">def</span> <span class="nf">prune_delta</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">shoreline_shp</span><span class="p">,</span> <span class="n">inlets_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">,</span>
+                <span class="n">prune_less</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prune a delta network.</span>
 
@@ -110,6 +111,9 @@
 <span class="sd">    gdobj : osgeo.gdal.Dataset</span>
 <span class="sd">        gdal object corresponding to the georeferenced input binary channel</span>
 <span class="sd">        mask</span>
+<span class="sd">    prune_less : bool</span>
+<span class="sd">        Boolean to prune the network less... the first spur removal can</span>
+<span class="sd">        create problems, especially for very small/simple networks.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -122,9 +126,10 @@
     <span class="c1"># Get inlet nodes</span>
     <span class="n">nodes</span> <span class="o">=</span> <span class="n">find_inlet_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">inlets_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">)</span>
 
-    <span class="c1"># Remove spurs from network (this includes valid inlets and outlets)</span>
-    <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span>
-                                        <span class="n">dontremove</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">prune_less</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="c1"># Remove spurs from network (this includes valid inlets and outlets)</span>
+        <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span>
+                                            <span class="n">dontremove</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]))</span>
 
     <span class="c1"># Clip the network with a shoreline polyline, adding outlet nodes</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">clip_by_shoreline</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">shoreline_shp</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">)</span>
@@ -132,7 +137,7 @@
     <span class="c1"># Remove spurs from network (this includes valid inlets and outlets)</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">remove_all_spurs</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span>
                                         <span class="n">dontremove</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">])</span> <span class="o">+</span>
-                                                    <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]))</span>
+                                        <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]))</span>
 
     <span class="c1"># Remove sets of links that are disconnected from inlets/outlets except for</span>
     <span class="c1"># a single bridge link (effectively re-pruning the network)</span>

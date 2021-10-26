@@ -531,7 +531,7 @@ mask</p></li>
 
 <dl class="function">
 <dt id="rivgraph.deltas.delta_utils.prune_delta">
-<code class="descclassname">rivgraph.deltas.delta_utils.</code><code class="descname">prune_delta</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>shoreline_shp</em>, <em>inlets_shp</em>, <em>gdobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_utils.html#prune_delta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_utils.prune_delta" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rivgraph.deltas.delta_utils.</code><code class="descname">prune_delta</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>shoreline_shp</em>, <em>inlets_shp</em>, <em>gdobj</em>, <em>prune_less</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_utils.html#prune_delta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_utils.prune_delta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prune a delta network.</p>
 <p>Clips a delta channel network given an inlet and shoreline shapefile and
 removes spurious links.</p>
@@ -544,6 +544,8 @@ removes spurious links.</p>
 <li><p><strong>inlets_shp</strong> (<em>str</em>) – path to the shapefile of inlet locations (point shapefile)</p></li>
 <li><p><strong>gdobj</strong> (<em>osgeo.gdal.Dataset</em>) – gdal object corresponding to the georeferenced input binary channel
 mask</p></li>
+<li><p><strong>prune_less</strong> (<em>bool</em>) – Boolean to prune the network less… the first spur removal can
+create problems, especially for very small/simple networks.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

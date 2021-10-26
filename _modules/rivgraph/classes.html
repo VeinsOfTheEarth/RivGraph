@@ -674,7 +674,8 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="delta.prune_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta.prune_network">[docs]</a>    <span class="k">def</span> <span class="nf">prune_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_shoreline</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path_inletnodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="delta.prune_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta.prune_network">[docs]</a>    <span class="k">def</span> <span class="nf">prune_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_shoreline</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path_inletnodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">prune_less</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prunes the delta by removing spurs and links beyond the provided shoreline.</span>
 <span class="sd">        Paths may be provided to shoreline and inlet nodes shapefiles, otherwise</span>
@@ -689,7 +690,12 @@
 <span class="sd">        path_inletnodes : str, optional</span>
 <span class="sd">            Path to inlet nodes shapefile/geojson. The default is None but will</span>
 <span class="sd">            check for the file at `paths[&#39;inlet_nodes&#39;]`.</span>
-
+<span class="sd">        prune_less : bool, optional</span>
+<span class="sd">            Boolean to optionally prune the network less. The first spur</span>
+<span class="sd">            removal can create problems, especially for very small/simple</span>
+<span class="sd">            networks. Default behavior is encouraged, but in the event a bug</span>
+<span class="sd">            is encountered, toggling this parameter to True may fix the issue.</span>
+<span class="sd">            Default is False (more pruning).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -709,7 +715,7 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Could not inlet_nodes shapefile which should be at </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;inlet_nodes&#39;</span><span class="p">]))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">du</span><span class="o">.</span><span class="n">prune_delta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">path_shoreline</span><span class="p">,</span> <span class="n">path_inletnodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdobj</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">du</span><span class="o">.</span><span class="n">prune_delta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">path_shoreline</span><span class="p">,</span> <span class="n">path_inletnodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdobj</span><span class="p">,</span> <span class="n">prune_less</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="delta.assign_flow_directions"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta.assign_flow_directions">[docs]</a>    <span class="k">def</span> <span class="nf">assign_flow_directions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
