@@ -13,7 +13,7 @@ dependencies:
   - networkx
   - matplotlib
   - pyproj
-  - shapely
+  - shapely==1.7.1
   - fiona
   - rivgraph
   - fastdtw
