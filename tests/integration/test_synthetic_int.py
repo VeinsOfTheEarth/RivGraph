@@ -5,16 +5,12 @@ import os
 import io
 import numpy as np
 # import networkx as nx
-
-from inspect import getsourcefile
-basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
-sys.path.insert(0, basepath)
 # from rivgraph import directionality as di
 # from rivgraph import mask_utils as mu
 
 
 def test_check_props(synthetic_cycles):
-    """check that synthetic system was properly established."""
+    """Check that synthetic system was properly established."""
     assert type(synthetic_cycles) is not None
     assert synthetic_cycles.gt == (0.0, 1.0, 0.0, 10.0, 0.0, -1.0)
     assert synthetic_cycles.imshape == (15, 10)
@@ -67,17 +63,10 @@ def test_get_islands_verbose(synthetic_cycles):
 @pytest.mark.xfail
 def test_assigning_inletshore(synthetic_cycles):
     """Test setting inlet/shoreline."""
-    synthetic_cycles.prune_network(path_shoreline=os.path.join(basepath, os.path.normpath('tests/data/SyntheticCycle/shoreline.shp')),
-                                   path_inletnodes=os.path.join(basepath, os.path.normpath('tests/data/SyntheticCycle/inlet_node.shp')))
+    synthetic_cycles.prune_network(
+        path_shoreline=os.path.normpath(
+            'tests/integration/data/SyntheticCycle/shoreline.shp'),
+       path_inletnodes=os.path.normpath(
+        'tests/integration/data/SyntheticCycle/inlet_node.shp'))
     # breaks in one of the geopandas functions
     # suggests that synthetic case handling is not working correctly
-
-
-# Delete data created by tests in this file ...
-
-def test_delete_files():
-    """Delete created files at the end."""
-    for i in os.listdir(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/'))):
-        os.remove(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/'+i)))
-    # check directory is empty
-    assert os.listdir(os.path.join(basepath, os.path.normpath('tests/results/synthetic_cycles/'))) == []

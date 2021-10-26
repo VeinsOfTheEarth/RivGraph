@@ -1,10 +1,7 @@
 """Tests for broader `rivgraph.classes.delta` functions."""
 import pytest
 import numpy as np
-from inspect import getsourcefile
-import sys, os
-basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
-sys.path.insert(0, basepath)
+import os
 
 
 def test_skeletonize(test_net):
@@ -54,8 +51,11 @@ def test_compute_network(test_net, known_net):
 def test_prune_network(test_net, known_net):
     """Test network pruning."""
     # prune the network
-    test_net.prune_network(path_shoreline=os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_shoreline.shp')),
-                            path_inletnodes=os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_inlet_nodes.shp')))
+    test_net.prune_network(
+        path_shoreline=os.path.normpath(
+            'tests/integration/data/Colville/Colville_shoreline.shp'),
+        path_inletnodes=os.path.normpath(
+            'tests/integration/data/Colville/Colville_inlet_nodes.shp'))
 
     # now the number of nodes and links should be exactly the same
     # Currently x-failing because changes in directionality computation altered the number of nodes/links identified

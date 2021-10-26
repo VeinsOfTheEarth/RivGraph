@@ -173,7 +173,7 @@ class rivnetwork:
         self.links, self.nodes = m2g.skel_to_graph(self.Iskel)
 
         if self.verbose is True:
-                print('done.')
+            print('done.')
 
 
     def compute_distance_transform(self):
