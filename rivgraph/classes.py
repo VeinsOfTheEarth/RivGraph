@@ -598,7 +598,8 @@ class delta(rivnetwork):
                 print('done.')
 
 
-    def prune_network(self, path_shoreline=None, path_inletnodes=None):
+    def prune_network(self, path_shoreline=None, path_inletnodes=None,
+                      prune_less=False):
         """
         Prunes the delta by removing spurs and links beyond the provided shoreline.
         Paths may be provided to shoreline and inlet nodes shapefiles, otherwise
@@ -613,7 +614,12 @@ class delta(rivnetwork):
         path_inletnodes : str, optional
             Path to inlet nodes shapefile/geojson. The default is None but will
             check for the file at `paths['inlet_nodes']`.
-
+        prune_less : bool, optional
+            Boolean to optionally prune the network less. The first spur
+            removal can create problems, especially for very small/simple
+            networks. Default behavior is encouraged, but in the event a bug
+            is encountered, toggling this parameter to True may fix the issue.
+            Default is False (more pruning).
 
         Returns
         -------
@@ -633,7 +639,7 @@ class delta(rivnetwork):
         except AttributeError:
             raise AttributeError('Could not inlet_nodes shapefile which should be at {}.'.format(self.paths['inlet_nodes']))
 
-        self.links, self.nodes = du.prune_delta(self.links, self.nodes, path_shoreline, path_inletnodes, self.gdobj)
+        self.links, self.nodes = du.prune_delta(self.links, self.nodes, path_shoreline, path_inletnodes, self.gdobj, prune_less)
 
 
     def assign_flow_directions(self):
