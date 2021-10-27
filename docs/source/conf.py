@@ -35,9 +35,11 @@ sys.modules['scipy.spatial'] = Mock()
 sys.modules['scipy.spatial.distance'] = Mock()
 sys.modules['scipy.ndimage'] = Mock()
 sys.modules['scipy.ndimage.morphology'] = Mock()
+sys.modules['scipy.ndimage.graph'] = Mock()
 sys.modules['skimage'] = Mock()
 sys.modules['cv2'] = Mock()
 sys.modules['fastdtw'] = Mock()
+sys.modules['loguru'] = Mock()
 
 # path to repo-head
 sys.path.insert(0, os.path.abspath('../..'))
@@ -193,4 +195,3 @@ linkcheck_ignore = [r'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2
 		    r'http://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963',
 		    r'https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963'
 			]
-

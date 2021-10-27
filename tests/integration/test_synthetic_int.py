@@ -53,11 +53,12 @@ def test_get_islands_verbose(synthetic_cycles):
     capturedOutput = io.StringIO()
     sys.stdout = capturedOutput
     synthetic_cycles.verbose = True
+    synthetic_cycles.init_logger()  # re-init logger
     islands = synthetic_cycles.get_islands()
     # grab output
     sys.stdout = sys.__stdout__
     # assert output
-    assert capturedOutput.getvalue()[:-1] == 'Getting island properties...done.'
+    assert capturedOutput.getvalue()[-23:-1] == 'got island properties.'
 
 
 @pytest.mark.xfail

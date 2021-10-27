@@ -4,7 +4,7 @@ Mask to Graph Utilities (mask_to_graph.py)
 
 Functions for converting a binary channel mask to a graphical representation.
 """
-
+from loguru import logger
 import cv2
 import numpy as np
 from skimage import morphology, measure
@@ -231,7 +231,7 @@ def skel_to_graph(Iskel):
                         links = lnu.link_updater(links, linkid, noturnidx)
                     # Else, shit. You've found a critical flaw in the algorithm.
                     else:
-                        print('idx: {}, poss_steps: {}'.format(links['idx'][linkidx][-1], poss_steps))
+                        logger.info('idx: {}, poss_steps: {}'.format(links['idx'][linkidx][-1], poss_steps))
                         raise RuntimeError('Ambiguous which step to take next :( Please raise issue at https://github.com/jonschwenk/RivGraph/issues.')
 
                 elif sum(isbp) == 1:
@@ -258,7 +258,7 @@ def skel_to_graph(Iskel):
 
                         # If we don't have exactly one, shit.
                         if len(isbp_and_fourconn_idx) != 1:
-                            print('idx: {}, poss_steps: {}'.format(links['idx'][linkidx][-1], poss_steps))
+                            logger.info('idx: {}, poss_steps: {}'.format(links['idx'][linkidx][-1], poss_steps))
                             raise RuntimeError('There is not a unique branchpoint to step to.')
                         else:
                             links = lnu.link_updater(links, linkid, poss_steps[isbp_and_fourconn_idx[0]])

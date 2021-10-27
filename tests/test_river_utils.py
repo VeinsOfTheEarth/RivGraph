@@ -219,20 +219,20 @@ def test_sine_curvature():
     assert CL.yrs.shape == (50,)
 
 
-def test_smooth_nowindow():
-    """smooth() without providing a window."""
-    xs = np.linspace(0, 100, 101)
-    ys = np.sin(xs) + 5
-    CL = centerline(xs, ys)
-    # set up capture string
-    capturedOutput = io.StringIO()
-    sys.stdout = capturedOutput
-    # smooth the centerline
-    CL.smooth()
-    # grab output
-    sys.stdout = sys.__stdout__
-    # assert output
-    assert capturedOutput.getvalue()[:-1] == 'Must provide a smoothing window.'
+# def test_smooth_nowindow():
+#     """smooth() without providing a window."""
+#     xs = np.linspace(0, 100, 101)
+#     ys = np.sin(xs) + 5
+#     CL = centerline(xs, ys)
+#     # set up capture string
+#     capturedOutput = io.StringIO()
+#     sys.stdout = capturedOutput
+#     # smooth the centerline
+#     CL.smooth()
+#     # grab output
+#     sys.stdout = sys.__stdout__
+#     # assert output
+#     assert capturedOutput.getvalue()[:-1] == 'Must provide a smoothing window.'
 
 
 def test_sine_csmooth():
@@ -247,20 +247,20 @@ def test_sine_csmooth():
     assert Cs.shape == (101,)
 
 
-def test_csmooth_nowindow():
-    """csmooth() without providing a window."""
-    xs = np.linspace(0, 100, 101)
-    ys = np.sin(xs) + 5
-    CL = centerline(xs, ys)
-    # set up capture string
-    capturedOutput = io.StringIO()
-    sys.stdout = capturedOutput
-    # smooth the centerline
-    Cs = CL.Csmooth()
-    # grab output
-    sys.stdout = sys.__stdout__
-    # assert output
-    assert capturedOutput.getvalue()[:-1] == 'Must provide a smoothing window.'
+# def test_csmooth_nowindow():
+#     """csmooth() without providing a window."""
+#     xs = np.linspace(0, 100, 101)
+#     ys = np.sin(xs) + 5
+#     CL = centerline(xs, ys)
+#     # set up capture string
+#     capturedOutput = io.StringIO()
+#     sys.stdout = capturedOutput
+#     # smooth the centerline
+#     Cs = CL.Csmooth()
+#     # grab output
+#     sys.stdout = sys.__stdout__
+#     # assert output
+#     assert capturedOutput.getvalue()[:-1] == 'Must provide a smoothing window.'
 
 
 def test_sine_plot(tmp_path):
@@ -310,52 +310,52 @@ def test_plot_withattrs(tmp_path):
     assert os.path.isfile(os.path.join(tmp_path, 'sinewaveattrs.png')) == True
 
 
-def test_zs_noinflection():
-    """zs_plot without inflection points."""
-    xs = np.linspace(0, 100, 101)
-    ys = np.sin(xs) + 5
-    CL = centerline(xs, ys)
-    # set up capture string
-    capturedOutput = io.StringIO()
-    sys.stdout = capturedOutput
-    # call plot
-    CL.zs_plot()
-    # grab output
-    sys.stdout = sys.__stdout__
-    # assert output
-    assert capturedOutput.getvalue()[:-1] == 'Must compute inflection points first.'
-
-
-def test_zs_noints():
-    """zs_plot without intersection points."""
-    xs = np.linspace(0, 100, 101)
-    ys = np.sin(xs) + 5
-    CL = centerline(xs, ys)
-    CL.infs_os = [1]
-    # set up capture string
-    capturedOutput = io.StringIO()
-    sys.stdout = capturedOutput
-    # call plot
-    CL.zs_plot()
-    # grab output
-    sys.stdout = sys.__stdout__
-    # assert output
-    assert capturedOutput.getvalue()[:-1] == 'Must compute intersections first.'
-
-
-def test_zs_nomigrates():
-    """zs_plot without migration rates."""
-    xs = np.linspace(0, 100, 101)
-    ys = np.sin(xs) + 5
-    CL = centerline(xs, ys)
-    CL.infs_os = [1]
-    CL.ints = [2]
-    # set up capture string
-    capturedOutput = io.StringIO()
-    sys.stdout = capturedOutput
-    # call plot
-    CL.zs_plot()
-    # grab output
-    sys.stdout = sys.__stdout__
-    # assert output
-    assert capturedOutput.getvalue()[:-1] == 'Must compute migration rates first.'
+# def test_zs_noinflection():
+#     """zs_plot without inflection points."""
+#     xs = np.linspace(0, 100, 101)
+#     ys = np.sin(xs) + 5
+#     CL = centerline(xs, ys)
+#     # set up capture string
+#     capturedOutput = io.StringIO()
+#     sys.stdout = capturedOutput
+#     # call plot
+#     CL.zs_plot()
+#     # grab output
+#     sys.stdout = sys.__stdout__
+#     # assert output
+#     assert capturedOutput.getvalue()[:-1] == 'Must compute inflection points first.'
+#
+#
+# def test_zs_noints():
+#     """zs_plot without intersection points."""
+#     xs = np.linspace(0, 100, 101)
+#     ys = np.sin(xs) + 5
+#     CL = centerline(xs, ys)
+#     CL.infs_os = [1]
+#     # set up capture string
+#     capturedOutput = io.StringIO()
+#     sys.stdout = capturedOutput
+#     # call plot
+#     CL.zs_plot()
+#     # grab output
+#     sys.stdout = sys.__stdout__
+#     # assert output
+#     assert capturedOutput.getvalue()[:-1] == 'Must compute intersections first.'
+#
+#
+# def test_zs_nomigrates():
+#     """zs_plot without migration rates."""
+#     xs = np.linspace(0, 100, 101)
+#     ys = np.sin(xs) + 5
+#     CL = centerline(xs, ys)
+#     CL.infs_os = [1]
+#     CL.ints = [2]
+#     # set up capture string
+#     capturedOutput = io.StringIO()
+#     sys.stdout = capturedOutput
+#     # call plot
+#     CL.zs_plot()
+#     # grab output
+#     sys.stdout = sys.__stdout__
+#     # assert output
+#     assert capturedOutput.getvalue()[:-1] == 'Must compute migration rates first.'

@@ -1,8 +1,11 @@
 """Unit tests for `rivgraph.classes` classes and methods."""
 import unittest.mock as mock
 import os
+import sys
+import io
 import numpy as np
 from rivgraph.classes import rivnetwork
+
 
 class Test_rivnetwork:
     """Set up some variable names."""
@@ -133,3 +136,32 @@ class Test_rivnetwork:
         assert A == 2
         patcher1.stop()
         patcher2.stop()
+
+    def test_logger_off(self, tmp_path):
+        """Test logger functionality."""
+        # set up capture string
+        capturedOutput = io.StringIO()
+        sys.stdout = capturedOutput
+        # define network object - initializes the logger
+        results_folder = os.path.join(tmp_path, 'results')
+        _rivnetwork = rivnetwork(
+            self.name, self.path_to_mask, results_folder)
+        # check for log file
+        assert os.path.isfile(_rivnetwork.paths['log']) is True
+        # std out should be empty because verbosity is off by default
+        sys.stdout = sys.__stdout__
+        assert capturedOutput.getvalue() == ''
+
+    def test_logger_on(self, tmp_path):
+        """Test logger functionality."""
+        # set up capture string
+        capturedOutput = io.StringIO()
+        sys.stdout = capturedOutput
+        # define network object - initializes the logger
+        results_folder = os.path.join(tmp_path, 'results')
+        _rivnetwork = rivnetwork(
+            self.name, self.path_to_mask, results_folder, verbose=True)
+        # check for log file
+        assert os.path.isfile(_rivnetwork.paths['log']) is True
+        # std out should not be empty because verbosity is on
+        assert capturedOutput.getvalue() == '---------- New Run ----------\n'

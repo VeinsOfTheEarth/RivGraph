@@ -8,6 +8,7 @@ Created on Sun Nov 18 19:26:01 2018
 @author: Jon
 """
 
+from loguru import logger
 import os
 import numpy as np
 import networkx as nx
@@ -75,7 +76,7 @@ def set_link_directions(links, nodes, imshape, manual_set_csv=None):
     # Check that continuity problems are resolved
     cont_violators = dy.check_continuity(links, nodes)
     if len(cont_violators) > 0:
-        print('Nodes {} violate continuity. Check connected links and fix manually.'.format(cont_violators))
+        logger.info('Nodes {} violate continuity. Check connected links and fix manually.'.format(cont_violators))
 
     # Attempt to fix any cycles in the network (reports unfixable within function)
     links, nodes, allcyclesfixed = fix_delta_cycles(links, nodes, imshape)
@@ -88,7 +89,7 @@ def set_link_directions(links, nodes, imshape, manual_set_csv=None):
     #         print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
 
     if allcyclesfixed == 2:
-        print('No cycles were found in network.')
+        logger.info('No cycles were found in network.')
 
     return links, nodes
 
@@ -354,11 +355,11 @@ def fix_delta_cycles(links, nodes, imshape):
         # Report
         if len(cantfix_links) > 0:
             allfixed = 0
-            print('Could not fix the following cycles (links): {}'.format([c_links[i] for i in cantfix_links]))
+            logger.info('Could not fix the following cycles (links): {}'.format([c_links[i] for i in cantfix_links]))
 
         if len(c_links) > 0:
             allfixed = 0
-            print('The following cycles (links) were fixed, but should be manually checked: {}'.format([c_links[i] for i in fixed_links]))
+            logger.info('The following cycles (links) were fixed, but should be manually checked: {}'.format([c_links[i] for i in fixed_links]))
 
     else:
         allfixed = 2  # Indicates there were no cycles to fix

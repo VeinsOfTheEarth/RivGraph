@@ -1,7 +1,5 @@
 """Unit tests for ln_utils.py."""
 # import pytest
-import sys
-import io
 import numpy as np
 from scipy.ndimage import distance_transform_edt as dte
 try:
@@ -38,9 +36,6 @@ def test_add_node():
 
 def test_delete_node():
     """Check print warning about node still having connections."""
-    # set up capture string
-    capturedOutput = io.StringIO()
-    sys.stdout = capturedOutput
     # initialize node
     nodes = dict()
     nodes['idx'] = OrderedSet([])
@@ -51,11 +46,8 @@ def test_delete_node():
     nodes['id'].append(10)
     nodes['conn'].append([5])
     # run delete_node function
-    new_nodes = ln_utils.delete_node(nodes, 10, warn=True)
-    # grab output
-    sys.stdout = sys.__stdout__
+    new_nodes = ln_utils.delete_node(nodes, 10, warn=False)
     # do assertion
-    assert capturedOutput.getvalue()[:-1] == 'You are deleting node 10 which still has connections to links.'
     assert new_nodes['conn'] == []
 
 
