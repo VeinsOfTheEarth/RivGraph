@@ -235,13 +235,17 @@
         <span class="n">sa_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_adj&#39;</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">lid</span><span class="p">)]</span> <span class="k">for</span> <span class="n">lid</span> <span class="ow">in</span> <span class="n">lconn</span><span class="p">]))</span>
 
     <span class="c1"># Add links from the super-apex to the inlet nodes</span>
-    <span class="c1"># Widths are computed above; lengths are set to zero for these synthetic links</span>
+    <span class="c1"># Widths are computed above</span>
+    <span class="c1"># lengths are set to zero for these synthetic links</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">wid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">sa_widths</span><span class="p">):</span>
         <span class="n">in_idx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
         <span class="n">idcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">apex_idx</span><span class="p">,</span> <span class="n">in_idx</span><span class="p">]</span>
         <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">add_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">idcs</span><span class="p">)</span>
         <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_adj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span>
-        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span> <span class="c1"># we also append to the width attribute to keep the fields the same length</span>
+        <span class="c1"># we also append to the other attributes to keep fields the same length</span>
+        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span>
+        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;wid_med&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span>
+        <span class="n">links</span><span class="p">[</span><span class="s1">&#39;sinuosity&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span>
         <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">links</span><span class="p">[</span><span class="s1">&#39;len_adj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
@@ -252,13 +256,60 @@
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
 
-<div class="viewcode-block" id="graphiphy"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.graphiphy">[docs]</a><span class="k">def</span> <span class="nf">graphiphy</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="delete_super_apex"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.delete_super_apex">[docs]</a><span class="k">def</span> <span class="nf">delete_super_apex</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If you have a super apex, this function deletes it and connecting links.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get super apex node</span>
+    <span class="k">if</span> <span class="s1">&#39;super_apex&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;no super apex detected.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># identify super apex</span>
+    <span class="n">super_apex</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;super_apex&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># identify connecting links</span>
+    <span class="n">super_links</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">super_apex</span><span class="p">)]</span>
+
+    <span class="c1"># delete links first</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">super_links</span><span class="p">:</span>
+        <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">delete_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+    <span class="c1"># then delete super apex</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">delete_node</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">super_apex</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
+
+
+<div class="viewcode-block" id="graphiphy"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.graphiphy">[docs]</a><span class="k">def</span> <span class="nf">graphiphy</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inletweights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts RivGraph links and nodes into a NetworkX graph object.</span>
+
 <span class="sd">    Converts the RivGraph links and nodes dictionaries into a NetworkX graph</span>
 <span class="sd">    object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        RivGraph links and their attributes</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        RivGraph nodes and their attributes</span>
+<span class="sd">    weight : str, optional</span>
+<span class="sd">        Link attribute to use to weight the NetworkX graph. If not provided or</span>
+<span class="sd">        None, the graph will be unweighted (links of 1 and 0)</span>
+<span class="sd">    inletweights : list, optional</span>
+<span class="sd">        Optional manual weights for the inlets when using the super-apex</span>
+<span class="sd">        functionality. Overrides the weight set by the inlet link attribute</span>
+<span class="sd">        in favor of values from the provided list. List must be in the same</span>
+<span class="sd">        order and have the same length as nodes[&#39;inlets&#39;].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    G : networkx.DiGraph</span>
+<span class="sd">        Returns a NetworkX DiGraph object weighted by the link attribute</span>
+<span class="sd">        specified in the optional parameter `weight`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">weight</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Provided weight key not in nodes dictionary.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Provided weight key not in links dictionary.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">))</span>
@@ -266,14 +317,25 @@
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="n">weight</span><span class="p">])</span>
 
     <span class="c1"># Check weights</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span><span class="s1">&#39;One or more of your weights is =&lt; 0. This could cause problems later.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">inletweights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;super_apex&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Can only specify weights if super-apex has been added.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inletweights</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;graphiphy requires </span><span class="si">{}</span><span class="s1"> weights but </span><span class="si">{}</span><span class="s1"> were provided.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">inletweights</span><span class="p">)))</span>
+        <span class="c1"># Set weights of inlet links</span>
+        <span class="k">for</span> <span class="n">inw</span><span class="p">,</span> <span class="n">inl</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inletweights</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]):</span>
+            <span class="n">lconn</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">inl</span><span class="p">)][:]</span>
+            <span class="n">lconn</span> <span class="o">=</span> <span class="p">[</span><span class="n">lc</span> <span class="k">for</span> <span class="n">lc</span> <span class="ow">in</span> <span class="n">lconn</span> <span class="k">if</span> <span class="n">lc</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;super_apex&#39;</span><span class="p">])]]</span>
+            <span class="n">lidx</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">lconn</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">weights</span><span class="p">[</span><span class="n">lidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">inw</span>
 
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
     <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">lc</span><span class="p">,</span> <span class="n">wt</span><span class="p">,</span> <span class="n">lid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">],</span> <span class="n">weights</span><span class="p">,</span> <span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]):</span>
         <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">lc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="n">wt</span><span class="p">,</span> <span class="n">linkid</span><span class="o">=</span><span class="n">lid</span><span class="p">)</span>
-
     <span class="k">return</span> <span class="n">G</span></div>
 
 
@@ -355,16 +417,38 @@
     <span class="k">return</span> <span class="n">apex</span><span class="p">,</span> <span class="n">outlets</span></div>
 
 
-<div class="viewcode-block" id="compute_steady_state_link_fluxes"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.compute_steady_state_link_fluxes">[docs]</a><span class="k">def</span> <span class="nf">compute_steady_state_link_fluxes</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="compute_steady_state_link_fluxes"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.compute_steady_state_link_fluxes">[docs]</a><span class="k">def</span> <span class="nf">compute_steady_state_link_fluxes</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">weight_name</span><span class="o">=</span><span class="s1">&#39;flux_ss&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute steady state fluxes through the network graph.</span>
+
 <span class="sd">    Computes the steady state fluxes through links given a directed, weighted,</span>
 <span class="sd">    NetworkX graph. The network should have only a single inlet (use either</span>
 <span class="sd">    ensure_single_inlet() or add_super_apex() to do this). Additionally,</span>
 <span class="sd">    this method will fail if the network has parallel edges. You should first</span>
 <span class="sd">    run ln_utils artificial_nodes() function to break parallel edges, then</span>
-<span class="sd">    re-compute link widths and lengths.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    re-compute link widths and lengths. Method after Tejedor et al 2015 [1]_.</span>
 
+<span class="sd">    .. [1] Tejedor, Alejandro, et al. &quot;Delta channel networks: 1. A</span>
+<span class="sd">       graph‐theoretic approach for studying connectivity and steady state</span>
+<span class="sd">       transport on deltaic surfaces.&quot;</span>
+<span class="sd">       Water Resources Research 51.6 (2015): 3998-4018.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    G : networkx.DiGraph</span>
+<span class="sd">        NetworkX DiGraph object from graphiphy()</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        RivGraph links dictionary</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        RivGraph nodes dictionary</span>
+<span class="sd">    weight_name : str, optional</span>
+<span class="sd">        Name to give the new attribute in the links dictionary, is optional,</span>
+<span class="sd">        if not provided will be &#39;flux_ss&#39; (flux steady-state)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        RivGraph links dictionary with new attribute</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Normalize the adjacency matrix</span>
     <span class="n">An</span> <span class="o">=</span> <span class="n">normalize_adj_matrix</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
     <span class="c1"># Transposed adjacency required for computing F</span>
@@ -373,21 +457,21 @@
     <span class="n">fluxes</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">delta_subN_F</span><span class="p">(</span><span class="n">An_t</span><span class="p">)</span>
 
     <span class="c1"># Fluxes are at-a-node and need to be translated to links</span>
-    <span class="n">fluxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">fluxes</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fluxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">fluxes</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="c1"># Expand node-fluxes back to full adjacency matrix</span>
     <span class="n">fw</span> <span class="o">=</span> <span class="n">fluxes</span> <span class="o">*</span> <span class="n">An</span>
     <span class="c1"># All nonzero elements in fw represent links where there is flux</span>
-    <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">fw</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">fw</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">Gnodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
-    <span class="n">linkfluxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span><span class="mi">1</span><span class="p">))</span> <span class="c1"># Preallocate storage</span>
-    <span class="k">for</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span><span class="n">cols</span><span class="p">):</span>
+    <span class="n">linkfluxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># Preallocate storage</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
         <span class="n">u</span> <span class="o">=</span> <span class="n">Gnodes</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
         <span class="n">v</span> <span class="o">=</span> <span class="n">Gnodes</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
-        <span class="n">link_id</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">][</span><span class="s1">&#39;linkid&#39;</span><span class="p">]</span>
-        <span class="n">linkfluxes</span><span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_id</span><span class="p">)]</span> <span class="o">=</span> <span class="n">fw</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+        <span class="n">link_id</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">][</span><span class="s1">&#39;linkid&#39;</span><span class="p">]</span>
+        <span class="n">linkfluxes</span><span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_id</span><span class="p">)]</span> <span class="o">=</span> <span class="n">fw</span><span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span>
 
     <span class="c1"># Store the fluxes in the links dict</span>
-    <span class="n">links</span><span class="p">[</span><span class="s1">&#39;flux_ss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">linkfluxes</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">links</span><span class="p">[</span><span class="n">weight_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">linkfluxes</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">links</span></div>
 
@@ -965,6 +1049,155 @@
         <span class="n">DCE</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">DCE_sum</span>
 
     <span class="k">return</span> <span class="n">DMI</span><span class="p">,</span> <span class="n">DCE</span></div>
+
+
+<div class="viewcode-block" id="dist_from_apex"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.dist_from_apex">[docs]</a><span class="k">def</span> <span class="nf">dist_from_apex</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">imshape</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate normalized distance from apex.</span>
+
+<span class="sd">    Does this for nodes. Calculates a normalized distances from apex, ignores</span>
+<span class="sd">    pixel resolution.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        RivGraph dictionary of nodes</span>
+<span class="sd">    imshape : tuple</span>
+<span class="sd">        Tuple of the shape of the domain (e.g., Imask.shape)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    norm_dist : list</span>
+<span class="sd">        List of normalized straight line distances between each node and the</span>
+<span class="sd">        inlet in the same order as the nodes come in the input nodes</span>
+<span class="sd">        dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># id row/coord of the apex (or representative location)</span>
+    <span class="n">apex_id</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">apex_id</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No inlets&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">apex_id</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># average inlet locations to a single point</span>
+        <span class="n">ins_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">apex_id</span><span class="p">]</span>
+        <span class="n">rs</span><span class="p">,</span> <span class="n">cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">ins_idx</span><span class="p">,</span> <span class="n">imshape</span><span class="p">)</span>
+        <span class="n">apex_xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">apex_idx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">apex_id</span><span class="p">)]</span>
+        <span class="n">apex_xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">apex_idx</span><span class="p">,</span> <span class="n">imshape</span><span class="p">)</span>
+
+    <span class="c1"># calculate distances to all nodes from apex location</span>
+    <span class="k">def</span> <span class="nf">calc_dist</span><span class="p">(</span><span class="n">apex_xy</span><span class="p">,</span> <span class="n">node_xy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Euclidean distance function.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">apex_xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">node_xy</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                       <span class="p">(</span><span class="n">apex_xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">node_xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># get coordinates of all nodes in xy space</span>
+    <span class="n">node_xy</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">imshape</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]]</span>
+    <span class="n">node_dists</span> <span class="o">=</span> <span class="p">[</span><span class="n">calc_dist</span><span class="p">(</span><span class="n">apex_xy</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">node_xy</span><span class="p">]</span>
+    <span class="c1"># normalize and return this normalized distance</span>
+    <span class="n">norm_dist</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_dists</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">node_dists</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">norm_dist</span></div>
+
+
+<div class="viewcode-block" id="calc_QR"><a class="viewcode-back" href="../../../apiref/deltas.html#rivgraph.deltas.delta_metrics.calc_QR">[docs]</a><span class="k">def</span> <span class="nf">calc_QR</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">wt</span><span class="o">=</span><span class="s1">&#39;wid_adj&#39;</span><span class="p">,</span> <span class="n">new_at</span><span class="o">=</span><span class="s1">&#39;graphQR&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Clunky solution (target for optimization) to get QR at bifurcations.</span>
+
+<span class="sd">    QR is defined as the larger branch Q / smaller branch Q per</span>
+<span class="sd">    Edmonds &amp; Slingerland 2008 [2]_. This measure of flux partitioning at a</span>
+<span class="sd">    bifurcation does not scale beyond bifurcations to trifurcations etc.</span>
+<span class="sd">    The graph-based flux partitioning scheme also assumes flow is routed</span>
+<span class="sd">    in a steady-state manner based on the width (or some other attribute)</span>
+<span class="sd">    of the links in the network. Therefore the actual flux value doesn&#39;t</span>
+<span class="sd">    matter, we can calculate QR as larger width / smaller width from the two</span>
+<span class="sd">    branches as that will be the same as if we&#39;d calculated the steady-state</span>
+<span class="sd">    fluxes and taken their ratio.</span>
+<span class="sd">    The function is written flexibly to allow one to assuming flux weighting</span>
+<span class="sd">    by an attribute other than the link width if desired.</span>
+
+<span class="sd">    .. warning::</span>
+
+<span class="sd">      QR values calculated at nodes located at confluences, polyfurcations,</span>
+<span class="sd">      or any other non-bifurcating location will be incorrect!</span>
+
+<span class="sd">    .. [2] Edmonds, D. A., and R. L. Slingerland. &quot;Stability of delta</span>
+<span class="sd">       distributary networks and their bifurcations.&quot;</span>
+<span class="sd">       Water Resources Research 44.9 (2008).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    links : dict</span>
+<span class="sd">        RivGraph links dictionary</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        RivGraph nodes dictionary</span>
+<span class="sd">    wt : str, optional</span>
+<span class="sd">        String pointing to the link attribute to use when calculating ratios,</span>
+<span class="sd">        optional, default is &#39;wid_adj&#39; which is the adjusted link widths</span>
+<span class="sd">    new_at : str, optional</span>
+<span class="sd">        Name of the new attribute to add to the nodes dictionary, optional,</span>
+<span class="sd">        default is &#39;graphQR&#39; to indicate the graph calculated QR value</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nodes : dict</span>
+<span class="sd">        RivGraph dictionary with new_at attribute added</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check links for wt attribute</span>
+    <span class="k">if</span> <span class="n">wt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;wt attribute not in the links dictionary&#39;</span><span class="p">)</span>
+
+    <span class="c1"># set up list of zeros</span>
+    <span class="n">nodes</span><span class="p">[</span><span class="n">new_at</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])):</span>
+        <span class="c1"># for bifurcations</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># get the 3 connected link ids</span>
+            <span class="n">link_ids</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="c1"># get upstream node for each link, its &quot;start&quot; point</span>
+            <span class="n">link_starts</span> <span class="o">=</span> <span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])][</span><span class="mi">0</span><span class="p">],</span>
+                           <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">])][</span><span class="mi">0</span><span class="p">],</span>
+                           <span class="n">links</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_ids</span><span class="p">[</span><span class="mi">2</span><span class="p">])][</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="c1"># figure out which two links are the ones leaving this node</span>
+            <span class="c1"># and get the width of each</span>
+            <span class="c1"># (which controls the local flux partitioning anyway)</span>
+            <span class="k">if</span> <span class="n">link_starts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">link_starts</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="c1"># check if 1st and 2nd match</span>
+                <span class="n">wid_1</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="n">wt</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+                <span class="n">wid_2</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="n">wt</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+            <span class="k">elif</span> <span class="n">link_starts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">link_starts</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="c1"># check if 1st and 3rd match</span>
+                <span class="n">wid_1</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="n">wt</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+                <span class="n">wid_2</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="n">wt</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_ids</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># then 2nd and 3rd must match</span>
+                <span class="n">wid_1</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="n">wt</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                <span class="n">wid_2</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="n">wt</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_ids</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+
+        <span class="c1"># for inlets w/ only 2 connecting links</span>
+        <span class="k">elif</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">link_ids</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">wid_1</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="n">wt</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+            <span class="n">wid_2</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="n">wt</span><span class="p">][</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">link_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+
+        <span class="c1"># catch-all for other scenarios: QR will be -1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wid_1</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">wid_2</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># calculate and assign QR to the node of interest</span>
+        <span class="n">wid_big</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">wid_1</span><span class="p">,</span> <span class="n">wid_2</span><span class="p">])</span>
+        <span class="n">wid_small</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">wid_1</span><span class="p">,</span> <span class="n">wid_2</span><span class="p">])</span>
+        <span class="n">nodes</span><span class="p">[</span><span class="n">new_at</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">wid_big</span> <span class="o">/</span> <span class="n">wid_small</span>
+
+    <span class="c1"># coerce into list</span>
+    <span class="n">nodes</span><span class="p">[</span><span class="n">new_at</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">new_at</span><span class="p">])</span>
+
+    <span class="c1"># if junction angles are known, make non-bifurcation node QR values NaNs</span>
+    <span class="k">if</span> <span class="s1">&#39;jtype&#39;</span> <span class="ow">in</span> <span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;jtype&#39;</span><span class="p">])):</span>
+            <span class="k">if</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;jtype&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span>
+                <span class="n">nodes</span><span class="p">[</span><span class="n">new_at</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="k">return</span> <span class="n">nodes</span></div>
 </pre></div>
 
            </div>

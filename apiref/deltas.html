@@ -273,6 +273,53 @@ connected to their respective inlet node.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.calc_QR">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">calc_QR</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>wt='wid_adj'</em>, <em>new_at='graphQR'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#calc_QR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.calc_QR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clunky solution (target for optimization) to get QR at bifurcations.</p>
+<p>QR is defined as the larger branch Q / smaller branch Q per
+Edmonds &amp; Slingerland 2008 <a class="footnote-reference brackets" href="#id3" id="id2">2</a>. This measure of flux partitioning at a
+bifurcation does not scale beyond bifurcations to trifurcations etc.
+The graph-based flux partitioning scheme also assumes flow is routed
+in a steady-state manner based on the width (or some other attribute)
+of the links in the network. Therefore the actual flux value doesn’t
+matter, we can calculate QR as larger width / smaller width from the two
+branches as that will be the same as if we’d calculated the steady-state
+fluxes and taken their ratio.
+The function is written flexibly to allow one to assuming flux weighting
+by an attribute other than the link width if desired.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>QR values calculated at nodes located at confluences, polyfurcations,
+or any other non-bifurcating location will be incorrect!</p>
+</div>
+<dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Edmonds, D. A., and R. L. Slingerland. “Stability of delta
+distributary networks and their bifurcations.”
+Water Resources Research 44.9 (2008).</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – RivGraph links dictionary</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – RivGraph nodes dictionary</p></li>
+<li><p><strong>wt</strong> (<em>str</em><em>, </em><em>optional</em>) – String pointing to the link attribute to use when calculating ratios,
+optional, default is ‘wid_adj’ which is the adjusted link widths</p></li>
+<li><p><strong>new_at</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the new attribute to add to the nodes dictionary, optional,
+default is ‘graphQR’ to indicate the graph calculated QR value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>nodes</strong> – RivGraph dictionary with new_at attribute added</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="rivgraph.deltas.delta_metrics.compute_delta_metrics">
 <code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">compute_delta_metrics</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#compute_delta_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.compute_delta_metrics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute delta metrics.</p>
@@ -280,13 +327,45 @@ connected to their respective inlet node.</p>
 
 <dl class="function">
 <dt id="rivgraph.deltas.delta_metrics.compute_steady_state_link_fluxes">
-<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">compute_steady_state_link_fluxes</code><span class="sig-paren">(</span><em>G</em>, <em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#compute_steady_state_link_fluxes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.compute_steady_state_link_fluxes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the steady state fluxes through links given a directed, weighted,
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">compute_steady_state_link_fluxes</code><span class="sig-paren">(</span><em>G</em>, <em>links</em>, <em>nodes</em>, <em>weight_name='flux_ss'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#compute_steady_state_link_fluxes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.compute_steady_state_link_fluxes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute steady state fluxes through the network graph.</p>
+<p>Computes the steady state fluxes through links given a directed, weighted,
 NetworkX graph. The network should have only a single inlet (use either
 ensure_single_inlet() or add_super_apex() to do this). Additionally,
 this method will fail if the network has parallel edges. You should first
 run ln_utils artificial_nodes() function to break parallel edges, then
-re-compute link widths and lengths.</p>
+re-compute link widths and lengths. Method after Tejedor et al 2015 <a class="footnote-reference brackets" href="#id5" id="id4">1</a>.</p>
+<dl class="footnote brackets">
+<dt class="label" id="id5"><span class="brackets"><a class="fn-backref" href="#id4">1</a></span></dt>
+<dd><p>Tejedor, Alejandro, et al. “Delta channel networks: 1. A
+graph‐theoretic approach for studying connectivity and steady state
+transport on deltaic surfaces.”
+Water Resources Research 51.6 (2015): 3998-4018.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>G</strong> (<em>networkx.DiGraph</em>) – NetworkX DiGraph object from graphiphy()</p></li>
+<li><p><strong>links</strong> (<em>dict</em>) – RivGraph links dictionary</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – RivGraph nodes dictionary</p></li>
+<li><p><strong>weight_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name to give the new attribute in the links dictionary, is optional,
+if not provided will be ‘flux_ss’ (flux steady-state)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>links</strong> – RivGraph links dictionary with new attribute</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.delete_super_apex">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">delete_super_apex</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#delete_super_apex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.delete_super_apex" title="Permalink to this definition">¶</a></dt>
+<dd><p>If you have a super apex, this function deletes it and connecting links.</p>
 </dd></dl>
 
 <dl class="function">
@@ -326,6 +405,30 @@ node does not belong to the n’th subnetwork; but if SubN(m,n) = 1, the m’th
 node belongs <em>only</em> to the n’th subnetwork. The values in SubN may be
 interpreted as the percentage of tracers that pass through node m that
 eventually make their way to the outlet of subnetwork n.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rivgraph.deltas.delta_metrics.dist_from_apex">
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">dist_from_apex</code><span class="sig-paren">(</span><em>nodes</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#dist_from_apex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.dist_from_apex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate normalized distance from apex.</p>
+<p>Does this for nodes. Calculates a normalized distances from apex, ignores
+pixel resolution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>dict</em>) – RivGraph dictionary of nodes</p></li>
+<li><p><strong>imshape</strong> (<em>tuple</em>) – Tuple of the shape of the domain (e.g., Imask.shape)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>norm_dist</strong> – List of normalized straight line distances between each node and the
+inlet in the same order as the nodes come in the input nodes
+dictionary.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -388,9 +491,31 @@ The graph should contain a single apex
 
 <dl class="function">
 <dt id="rivgraph.deltas.delta_metrics.graphiphy">
-<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">graphiphy</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#graphiphy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.graphiphy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts the RivGraph links and nodes dictionaries into a NetworkX graph
+<code class="descclassname">rivgraph.deltas.delta_metrics.</code><code class="descname">graphiphy</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>weight=None</em>, <em>inletweights=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/deltas/delta_metrics.html#graphiphy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.deltas.delta_metrics.graphiphy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts RivGraph links and nodes into a NetworkX graph object.</p>
+<p>Converts the RivGraph links and nodes dictionaries into a NetworkX graph
 object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>links</strong> (<em>dict</em>) – RivGraph links and their attributes</p></li>
+<li><p><strong>nodes</strong> (<em>dict</em>) – RivGraph nodes and their attributes</p></li>
+<li><p><strong>weight</strong> (<em>str</em><em>, </em><em>optional</em>) – Link attribute to use to weight the NetworkX graph. If not provided or
+None, the graph will be unweighted (links of 1 and 0)</p></li>
+<li><p><strong>inletweights</strong> (<em>list</em><em>, </em><em>optional</em>) – Optional manual weights for the inlets when using the super-apex
+functionality. Overrides the weight set by the inlet link attribute
+in favor of values from the provided list. List must be in the same
+order and have the same length as nodes[‘inlets’].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>G</strong> – Returns a NetworkX DiGraph object weighted by the link attribute
+specified in the optional parameter <cite>weight</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>networkx.DiGraph</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
