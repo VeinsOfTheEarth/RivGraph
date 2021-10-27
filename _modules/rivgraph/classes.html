@@ -82,6 +82,8 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">gdal</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
@@ -146,8 +148,8 @@
 <span class="sd">        ----------</span>
 <span class="sd">        name : str</span>
 <span class="sd">            the name of the channel network, usually the river or delta&#39;s name</span>
-<span class="sd">        verbose : str</span>
-<span class="sd">            [True] or False to specify if processing updates should be printed.</span>
+<span class="sd">        verbose : bool, optional (False by default)</span>
+<span class="sd">            True or False to specify if processing updates should be printed.</span>
 <span class="sd">        d : osgeo.gdal.Dataset</span>
 <span class="sd">            object created by gdal.Open() that provides access to geotiff</span>
 <span class="sd">            metadata</span>
@@ -198,8 +200,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">prepare_paths</span><span class="p">(</span>
                             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span>
                                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path_to_mask</span><span class="p">)),</span> <span class="n">name</span><span class="p">,</span>
-                                    <span class="n">path_to_mask</span><span class="p">)</span>
+                            <span class="n">path_to_mask</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">path_to_mask</span><span class="p">)</span>
+
+        <span class="c1"># init logger - prints out to stdout if verbose is True</span>
+        <span class="c1"># ALWAYS writes output to log file (doesn&#39;t print if verbose is False)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_logger</span><span class="p">()</span>
 
         <span class="c1"># Handle georeferencing</span>
         <span class="c1"># GA_Update required for setting dummy projection/geotransform</span>
@@ -208,7 +214,7 @@
 
         <span class="c1"># Create dummy georeferencing if none is supplied</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdobj</span><span class="o">.</span><span class="n">GetProjection</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Input mask is unprojected; assigning a dummy projection.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Input mask is unprojected; assigning a dummy projection.&#39;</span><span class="p">)</span>
             <span class="c1"># Creates a dummy projection in EPSG:4326 with UL coordinates (0,0)</span>
             <span class="c1"># and pixel resolution = 1.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">wkt</span> <span class="o">=</span> <span class="s1">&#39;GEOGCS[&quot;WGS 84&quot;,DATUM[&quot;WGS_1984&quot;,SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],PRIMEM[&quot;Greenwich&quot;,0,AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],UNIT[&quot;degree&quot;,0.01745329251994328,AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]]&#39;</span> <span class="c1"># 4326</span>
@@ -233,6 +239,29 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Imask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdobj</span><span class="o">.</span><span class="n">ReadAsArray</span><span class="p">()</span></div>
 
 
+<div class="viewcode-block" id="rivnetwork.init_logger"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.init_logger">[docs]</a>    <span class="k">def</span> <span class="nf">init_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function to initialize the logger.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+                <span class="n">handlers</span><span class="o">=</span><span class="p">[</span>
+                    <span class="nb">dict</span><span class="p">(</span><span class="n">sink</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;log&#39;</span><span class="p">],</span>
+                         <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;[{time:YYYY-MM-DD at HH:mm:ss}] | </span><span class="si">{message}</span><span class="s2">&quot;</span><span class="p">),</span>
+                    <span class="nb">dict</span><span class="p">(</span><span class="n">sink</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span>
+                         <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{message}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)],</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+                <span class="n">handlers</span><span class="o">=</span><span class="p">[</span>
+                    <span class="nb">dict</span><span class="p">(</span><span class="n">sink</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;log&#39;</span><span class="p">],</span>
+                         <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;[{time:YYYY-MM-DD at HH:mm:ss}] | </span><span class="si">{message}</span><span class="s2">&quot;</span><span class="p">),</span>
+                <span class="p">],</span>
+                <span class="n">activation</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)],</span>
+            <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">10</span> <span class="o">+</span> <span class="s2">&quot; New Run &quot;</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">10</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="rivnetwork.compute_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_network">[docs]</a>    <span class="k">def</span> <span class="nf">compute_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the links and nodes of the channel network mask.</span>
@@ -243,13 +272,11 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Iskel&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">skeletonize</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Resolving links and nodes...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Resolving links and nodes...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">m2g</span><span class="o">.</span><span class="n">skel_to_graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Iskel</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;links and nodes have been resolved.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="rivnetwork.compute_distance_transform"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_distance_transform">[docs]</a>    <span class="k">def</span> <span class="nf">compute_distance_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -262,13 +289,11 @@
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;Idist&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Idist</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;Idist&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">ReadAsArray</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing distance transform...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Computing distance transform...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">Idist</span> <span class="o">=</span> <span class="n">distance_transform_edt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span></div>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;distance transform done.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="rivnetwork.compute_link_width_and_length"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_link_width_and_length">[docs]</a>    <span class="k">def</span> <span class="nf">compute_link_width_and_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -283,15 +308,13 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Idist&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">compute_distance_transform</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing link widths and lengths...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Computing link widths and lengths...&#39;</span><span class="p">)</span>
 
         <span class="c1"># Widths and lengths are appended to links dict</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_widths_and_lengths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Idist</span><span class="p">,</span>
                                                  <span class="n">pixlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;link widths and lengths computed.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="rivnetwork.compute_junction_angles"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_junction_angles">[docs]</a>    <span class="k">def</span> <span class="nf">compute_junction_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -310,7 +333,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s1">&#39;certain&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Junction angles cannot be computed before link directions are set.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Junction angles cannot be computed before link directions are set.&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">junction_angles</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span>
                                              <span class="bp">self</span><span class="o">.</span><span class="n">imshape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">,</span>
@@ -349,27 +372,23 @@
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;links&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="n">do_surr</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cannot compute surrounding island links without first computing the network. Skipping.&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Cannot compute surrounding island links without first computing the network. Skipping.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Getting island properties...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Getting island properties...&#39;</span><span class="p">)</span>
 
         <span class="n">islands</span><span class="p">,</span> <span class="n">Iislands</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">get_island_properties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixarea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gt</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="n">connectivity</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;got island properties.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">do_surr</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="s1">&#39;wid_adj&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">compute_link_width_and_length</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing surrounding links for each island...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Computing surrounding links for each island...&#39;</span><span class="p">)</span>
 
             <span class="n">islands</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">surrounding_link_properties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">,</span> <span class="n">islands</span><span class="p">,</span> <span class="n">Iislands</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixarea</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;surrounding links computed.&#39;</span><span class="p">)</span>
 
         <span class="c1"># Add a column to be used for thresholding</span>
         <span class="n">islands</span><span class="p">[</span><span class="s1">&#39;remove&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">islands</span><span class="p">))]</span>
@@ -401,7 +420,7 @@
             <span class="n">plt_directions</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;links&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Network has not been computed yet; cannot plot.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No path is available to load the network.&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">plt_directions</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -434,9 +453,9 @@
             <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;network_pickle&#39;</span><span class="p">]</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">io</span><span class="o">.</span><span class="n">pickle_links_and_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Links and nodes saved to pickle file: </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;network_pickle&#39;</span><span class="p">]))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Links and nodes saved to pickle file: </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;network_pickle&#39;</span><span class="p">]))</span>
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Network has not been computed yet. Use the compute_network() method first.&#39;</span><span class="p">)</span></div>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Network has not been computed yet. Use the compute_network() method first.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="rivnetwork.load_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.load_network">[docs]</a>    <span class="k">def</span> <span class="nf">load_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -451,14 +470,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">path</span><span class="o">==</span><span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;paths&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No path is available to load the network.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No path is available to load the network.&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;network_pickle&#39;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No file was found at provided path: </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No file was found at provided path: </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">unpickle_links_and_nodes</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
@@ -547,13 +566,13 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;basepath&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_links.&#39;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
                     <span class="n">io</span><span class="o">.</span><span class="n">links_to_geofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">imshape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Links have not been computed and thus cannot be exported.&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Links have not been computed and thus cannot be exported.&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">te</span> <span class="o">==</span> <span class="s1">&#39;nodes&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;nodes&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;basepath&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_nodes.&#39;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
                     <span class="n">io</span><span class="o">.</span><span class="n">nodes_to_geofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">imshape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Nodes have not been computed and thus cannot be exported.&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Nodes have not been computed and thus cannot be exported.&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">te</span> <span class="o">==</span> <span class="s1">&#39;mesh&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;meshlines&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="ow">is</span> <span class="n">river</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;meshlines&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;basepath&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_meshlines.&#39;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
@@ -561,19 +580,19 @@
                     <span class="n">io</span><span class="o">.</span><span class="n">shapely_list_to_geovectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshlines</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;meshlines&#39;</span><span class="p">])</span>
                     <span class="n">io</span><span class="o">.</span><span class="n">shapely_list_to_geovectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshpolys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;meshpolys&#39;</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Mesh has not been computed and thus cannot be exported.&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Mesh has not been computed and thus cannot be exported.&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">te</span> <span class="o">==</span> <span class="s1">&#39;centerline&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;centerline&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="ow">is</span> <span class="n">river</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;centerline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;basepath&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_centerline.&#39;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
                     <span class="n">io</span><span class="o">.</span><span class="n">centerline_to_geovector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centerline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;centerline&#39;</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Centerlines has not been computed and thus cannot be exported.&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Centerlines has not been computed and thus cannot be exported.&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">te</span> <span class="o">==</span> <span class="s1">&#39;centerline_smooth&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;centerline_smooth&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="ow">is</span> <span class="n">river</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;centerline_smooth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;basepath&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_centerline_smooth.&#39;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
                     <span class="n">io</span><span class="o">.</span><span class="n">centerline_to_geovector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centerline_smooth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;centerline_smooth&#39;</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Smoothed centerline has not been computed and thus cannot be exported.&#39;</span><span class="p">)</span></div>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Smoothed centerline has not been computed and thus cannot be exported.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="rivnetwork.to_geotiff"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.to_geotiff">[docs]</a>    <span class="k">def</span> <span class="nf">to_geotiff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">export</span><span class="p">):</span>
@@ -591,7 +610,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">valid_exports</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;directions&#39;</span><span class="p">,</span> <span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="s1">&#39;skeleton&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">export</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_exports</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cannot write </span><span class="si">{}</span><span class="s1">. Choose from </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">export</span><span class="p">,</span> <span class="n">valid_exports</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Cannot write </span><span class="si">{}</span><span class="s1">. Choose from </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">export</span><span class="p">,</span> <span class="n">valid_exports</span><span class="p">))</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">export</span> <span class="o">==</span> <span class="s1">&#39;directions&#39;</span><span class="p">:</span>
@@ -615,7 +634,7 @@
 
             <span class="n">io</span><span class="o">.</span><span class="n">write_geotiff</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wkt</span><span class="p">,</span> <span class="n">outpath</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span> <span class="n">color_table</span><span class="o">=</span><span class="n">color_table</span><span class="p">,</span> <span class="n">nbands</span><span class="o">=</span><span class="n">nbands</span><span class="p">)</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Geotiff written to </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outpath</span><span class="p">))</span></div></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Geotiff written to </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outpath</span><span class="p">))</span></div></div>
 
 
 <div class="viewcode-block" id="delta"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta">[docs]</a><span class="k">class</span> <span class="nc">delta</span><span class="p">(</span><span class="n">rivnetwork</span><span class="p">):</span>
@@ -665,13 +684,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">Iskel</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;Iskel&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">ReadAsArray</span><span class="p">()</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Skeletonizing mask...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Skeletonizing mask...&#39;</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">Iskel</span> <span class="o">=</span> <span class="n">m2g</span><span class="o">.</span><span class="n">skeletonize_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span></div>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;done skeletonization.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="delta.prune_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta.prune_network">[docs]</a>    <span class="k">def</span> <span class="nf">prune_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_shoreline</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path_inletnodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -818,13 +835,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">Iskel</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;Iskel&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">ReadAsArray</span><span class="p">()</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Skeletonizing mask...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Skeletonizing mask...&#39;</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">Iskel</span> <span class="o">=</span> <span class="n">m2g</span><span class="o">.</span><span class="n">skeletonize_river_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_sides</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span></div>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skeletonization is done.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="river.prune_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.prune_network">[docs]</a>    <span class="k">def</span> <span class="nf">prune_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -846,15 +861,13 @@
 <span class="sd">        Computes the centerline of the holes-filled river binary image.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing centerline...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Computing centerline...&#39;</span><span class="p">)</span>
 
         <span class="n">centerline_pix</span><span class="p">,</span> <span class="n">valley_centerline_widths</span> <span class="o">=</span> <span class="n">ru</span><span class="o">.</span><span class="n">mask_to_centerline</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_sides</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_valley_width_pixels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">valley_centerline_widths</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">centerline</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">xy_to_coords</span><span class="p">(</span><span class="n">centerline_pix</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">centerline_pix</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">gt</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;centerline computation is done.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="river.compute_mesh"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.compute_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">compute_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">buf_halfwidth</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -905,24 +918,20 @@
             <span class="c1"># Compute the maximum valley width in pixels</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;max_valley_width_pixels&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing maximum valley width...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Computing maximum valley width...&#39;</span><span class="p">)</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">max_valley_width_pixels</span> <span class="o">=</span> <span class="n">ru</span><span class="o">.</span><span class="n">max_valley_width</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;valley width computation is done.&#39;</span><span class="p">)</span>
 
             <span class="c1"># Multiply by pixlen to keep units consistent</span>
             <span class="n">buf_halfwidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_valley_width_pixels</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span> <span class="o">*</span> <span class="mf">1.1</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generating mesh...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating mesh...&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">meshlines</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshpolys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centerline_smooth</span> <span class="o">=</span> <span class="n">ru</span><span class="o">.</span><span class="n">valleyline_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centerline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">avg_chan_width</span><span class="p">,</span> <span class="n">buf_halfwidth</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="n">smoothing</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mesh generation is done.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="river.assign_flow_directions"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.assign_flow_directions">[docs]</a>    <span class="k">def</span> <span class="nf">assign_flow_directions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -943,13 +952,11 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Idist&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">compute_distance_transform</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Setting link directionality...&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Setting link directionality...&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">set_directionality</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Imask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_sides</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshlines</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshpolys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Idist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;fixlinks_csv&#39;</span><span class="p">])</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done.&#39;</span><span class="p">)</span></div></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;link directionality has been set.&#39;</span><span class="p">)</span></div></div>
 
 
 <span class="k">class</span> <span class="nc">centerline</span><span class="p">():</span>
@@ -978,7 +985,7 @@
                 <span class="k">if</span> <span class="n">alen</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">alen</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">attribs</span><span class="p">[</span><span class="n">a</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Attribute </span><span class="si">{}</span><span class="s1"> does not have the proper length and is not being stored.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Attribute </span><span class="si">{}</span><span class="s1"> does not have the proper length and is not being stored.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__get_x_and_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -1013,7 +1020,7 @@
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;window_cl&#39;</span><span class="p">):</span>
                 <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_cl</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must provide a smoothing window.&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Must provide a smoothing window.&#39;</span><span class="p">)</span>
                 <span class="k">return</span>
 
         <span class="c1"># Ensure window is integer and odd</span>
@@ -1082,7 +1089,7 @@
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;window_C&#39;</span><span class="p">):</span>
                 <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_C</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must provide a smoothing window.&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Must provide a smoothing window.&#39;</span><span class="p">)</span>
                 <span class="k">return</span>
 
         <span class="n">Cs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">()</span>
@@ -1160,7 +1167,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ints</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not map intersections to inflection point pairs because infs_os not computed. Run infs() first.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Could not map intersections to inflection point pairs because infs_os not computed. Run infs() first.&#39;</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="nf">mig_rate_transect_matching</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">dt_years</span><span class="p">,</span> <span class="n">path_matchers</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mig_spacing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path_mig_vectors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1194,7 +1201,7 @@
         <span class="c1"># Export migration vectors if path provided</span>
         <span class="k">if</span> <span class="n">path_mig_vectors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cannot export migration vectors until crs is set.&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Cannot export migration vectors until crs is set.&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Migration vectors export</span>
                 <span class="n">mvs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1301,15 +1308,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;infs_os&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must compute inflection points first.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Must compute inflection points first.&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ints&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must compute intersections first.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Must compute intersections first.&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;mr_zs_nan&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must compute migration rates first.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Must compute migration rates first.&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 <span class="c1">#            elif hasattr(self, &#39;mr_zs_sm_nan&#39;):</span>
 <span class="c1">#                migr_rate = self.mr_zs_sm_nan</span>
@@ -1330,7 +1337,7 @@
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;window_C&#39;</span><span class="p">):</span>
                 <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_C</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Must provide a smoothing window.&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Must provide a smoothing window.&#39;</span><span class="p">)</span>
                 <span class="k">return</span>
 
         <span class="n">LZC</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infs_os</span>

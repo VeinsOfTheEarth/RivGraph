@@ -84,6 +84,7 @@
 <span class="sd">@author: Jon</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
@@ -151,7 +152,7 @@
     <span class="c1"># Check that continuity problems are resolved</span>
     <span class="n">cont_violators</span> <span class="o">=</span> <span class="n">dy</span><span class="o">.</span><span class="n">check_continuity</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cont_violators</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Nodes </span><span class="si">{}</span><span class="s1"> violate continuity. Check connected links and fix manually.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cont_violators</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Nodes </span><span class="si">{}</span><span class="s1"> violate continuity. Check connected links and fix manually.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cont_violators</span><span class="p">))</span>
 
     <span class="c1"># Attempt to fix any cycles in the network (reports unfixable within function)</span>
     <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">allcyclesfixed</span> <span class="o">=</span> <span class="n">fix_delta_cycles</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">imshape</span><span class="p">)</span>
@@ -164,7 +165,7 @@
     <span class="c1">#         print(&#39;A .csv file for manual fixes to link directions at {}.&#39;.format(manual_set_csv))</span>
 
     <span class="k">if</span> <span class="n">allcyclesfixed</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No cycles were found in network.&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No cycles were found in network.&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 
@@ -430,11 +431,11 @@
         <span class="c1"># Report</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cantfix_links</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">allfixed</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not fix the following cycles (links): </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">([</span><span class="n">c_links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cantfix_links</span><span class="p">]))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Could not fix the following cycles (links): </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">([</span><span class="n">c_links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cantfix_links</span><span class="p">]))</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c_links</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">allfixed</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The following cycles (links) were fixed, but should be manually checked: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">([</span><span class="n">c_links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fixed_links</span><span class="p">]))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;The following cycles (links) were fixed, but should be manually checked: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">([</span><span class="n">c_links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fixed_links</span><span class="p">]))</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">allfixed</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Indicates there were no cycles to fix</span>

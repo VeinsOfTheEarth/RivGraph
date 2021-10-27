@@ -83,6 +83,7 @@
 
 <span class="sd">@author: Jon</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">import</span> <span class="nn">shapely</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">mode</span>
@@ -123,7 +124,7 @@
         <span class="n">linkconn</span> <span class="o">=</span> <span class="p">[</span><span class="n">linkconn</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Node already in set; returning unchanged.&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Node already in set; returning unchanged.&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">nodes</span>
 
     <span class="c1"># Find new node ID</span>
@@ -308,7 +309,7 @@
     <span class="c1"># Check that the node has no connectivity</span>
     <span class="n">nodeidx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">nodeid</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;conn&#39;</span><span class="p">][</span><span class="n">nodeidx</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">warn</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;You are deleting node </span><span class="si">{}</span><span class="s1"> which still has connections to links.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nodeid</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;You are deleting node </span><span class="si">{}</span><span class="s1"> which still has connections to links.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nodeid</span><span class="p">))</span>
 
     <span class="c1"># Remove the node and its properties</span>
     <span class="k">for</span> <span class="n">nk</span> <span class="ow">in</span> <span class="n">nodekeys</span><span class="p">:</span>
@@ -1327,7 +1328,7 @@
         <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">to_rem</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">del</span> <span class="n">links</span><span class="p">[</span><span class="n">tr</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> artificial nodes added. Link lengths and widths should be recomputed via the link_widths_and_lengths() function in ln_utils.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arts</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> artificial nodes added. Link lengths and widths should be recomputed via the link_widths_and_lengths() function in ln_utils.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arts</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span></div>
 

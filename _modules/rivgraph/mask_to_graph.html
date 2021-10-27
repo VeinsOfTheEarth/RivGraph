@@ -80,7 +80,7 @@
 
 <span class="sd">Functions for converting a binary channel mask to a graphical representation.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">import</span> <span class="nn">cv2</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">skimage</span> <span class="kn">import</span> <span class="n">morphology</span><span class="p">,</span> <span class="n">measure</span>
@@ -307,7 +307,7 @@
                         <span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_updater</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">noturnidx</span><span class="p">)</span>
                     <span class="c1"># Else, shit. You&#39;ve found a critical flaw in the algorithm.</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;idx: </span><span class="si">{}</span><span class="s1">, poss_steps: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">poss_steps</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;idx: </span><span class="si">{}</span><span class="s1">, poss_steps: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">poss_steps</span><span class="p">))</span>
                         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Ambiguous which step to take next :( Please raise issue at https://github.com/jonschwenk/RivGraph/issues.&#39;</span><span class="p">)</span>
 
                 <span class="k">elif</span> <span class="nb">sum</span><span class="p">(</span><span class="n">isbp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -334,7 +334,7 @@
 
                         <span class="c1"># If we don&#39;t have exactly one, shit.</span>
                         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">isbp_and_fourconn_idx</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;idx: </span><span class="si">{}</span><span class="s1">, poss_steps: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">poss_steps</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;idx: </span><span class="si">{}</span><span class="s1">, poss_steps: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">][</span><span class="n">linkidx</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">poss_steps</span><span class="p">))</span>
                             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;There is not a unique branchpoint to step to.&#39;</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_updater</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">poss_steps</span><span class="p">[</span><span class="n">isbp_and_fourconn_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>

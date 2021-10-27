@@ -82,6 +82,7 @@
 <span class="sd">A collection of functions for pruning a delta channel network.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 <span class="kn">from</span> <span class="nn">pyproj.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -184,7 +185,7 @@
     <span class="n">mask_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">gdobj</span><span class="o">.</span><span class="n">GetProjection</span><span class="p">())</span>
     <span class="k">if</span> <span class="n">inlets_gpd</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">mask_crs</span><span class="p">:</span>
         <span class="n">inlets_gpd</span> <span class="o">=</span> <span class="n">inlets_gpd</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">mask_crs</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Provided inlet points file does not have the same CRS as provided mask. Reprojecting.&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Provided inlet points file does not have the same CRS as provided mask. Reprojecting.&#39;</span><span class="p">)</span>
 
     <span class="c1"># Convert all nodes to xy coordinates for distance search</span>
     <span class="n">nodes_xy</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">idx_to_coords</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">],</span> <span class="n">gdobj</span><span class="p">)</span>
@@ -239,7 +240,7 @@
     <span class="c1"># Enusre we have consistent CRS before intersecting</span>
     <span class="k">if</span> <span class="n">links_gdf</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">shore_gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
         <span class="n">shore_gdf</span> <span class="o">=</span> <span class="n">shore_gdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">links_gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Provided shoreline file does not have the same CRS as provided mask. Reprojecting.&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Provided shoreline file does not have the same CRS as provided mask. Reprojecting.&#39;</span><span class="p">)</span>
 
 
     <span class="c1"># Remove the links beyond the shoreline</span>
@@ -323,7 +324,7 @@
     <span class="c1"># Ensure all inlets are contained in this network</span>
     <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">]:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">main_net</span> <span class="o">-</span> <span class="n">nx</span><span class="o">.</span><span class="n">node_connected_component</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">nid</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Not all inlets found in main connected component.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Not all inlets found in main connected component.&#39;</span><span class="p">)</span>
 
     <span class="c1"># Remove all nodes not in the main network</span>
     <span class="n">remove_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">main_net</span><span class="p">]</span>
