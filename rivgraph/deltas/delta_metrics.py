@@ -1115,4 +1115,10 @@ def calc_QR(links, nodes, wt='wid_adj', new_at='graphQR'):
     # coerce into list
     nodes[new_at] = list(nodes[new_at])
 
+    # if junction angles are known, make non-bifurcation node QR values NaNs
+    if 'jtype' in nodes.keys():
+        for i in range(len(nodes['jtype'])):
+            if nodes['jtype'][i] != 'b':
+                nodes[new_at][i] = np.nan
+
     return nodes
