@@ -31,6 +31,7 @@ jobs:
           pip install pytest pytest-timeout pytest-cov coveralls coverage
           python setup.py install
           coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
+          conda list
 
   windows-build:
     runs-on: ${{ matrix.os }}
@@ -58,6 +59,7 @@ jobs:
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
           pytest --cov-config=.coveragerc --cov=rivgraph/
+          conda list
 
   macos-build:
     runs-on: ${{ matrix.os }}
@@ -85,3 +87,4 @@ jobs:
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
           pytest --cov-config=.coveragerc --cov=rivgraph/
+          conda list
