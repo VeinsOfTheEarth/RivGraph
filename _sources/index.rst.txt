@@ -19,5 +19,6 @@ Documentation
    shoreline/index
    linksnodes/index
    issues/index
+   featuredevelopment/index
    contributing/index
    apiref/index
