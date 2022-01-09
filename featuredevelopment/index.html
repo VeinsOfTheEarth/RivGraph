@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>&lt;no title&gt; &mdash; RivGraph 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Feature Development &mdash; RivGraph 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -39,7 +39,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../quickstart/index.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../background/index.html">Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install/index.html">Installation Instructions</a></li>
@@ -48,6 +48,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../shoreline/index.html">Shoreline creation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../linksnodes/index.html">Link and Node Dictionaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../issues/index.html">Known issues</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Feature Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#automatic-shoreline-extraction">Automatic Shoreline Extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lake-wetland-connectivity">Lake/wetland connectivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#machine-learned-flow-directions">Machine Learned Flow Directions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#flow-direction-uncertainty">Flow Direction Uncertainty</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../apiref/index.html">API Reference</a></li>
 </ul>
@@ -66,7 +73,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>&lt;no title&gt;</li>
+      <li>Feature Development</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/featuredevelopment/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -76,22 +83,96 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p># Feature Development {#featuredevelopment}</p>
-<p>There’s always more to be done! The features listed below are suggestions that require some significant amount of development. If you’re interested in tackling, or helping tackle, any of these, please email j………k&#64;gmail.com and we’ll add you to the RivGraph slack channel to start discussions.</p>
-<p>## Automatic Shoreline Extraction</p>
-<p>Currently, users must provide their own shoreline file for each delta they wish to analyze. While the strategy for creating shorelines is [documented](<a class="reference external" href="https://jonschwenk.github.io/RivGraph/shoreline/index.html">https://jonschwenk.github.io/RivGraph/shoreline/index.html</a>), a preferable option would have RivGraph automatically generate shorelines. There have been a number of published softwares that attempt to solve this problem (e.g. opening-angle method), but in practice these have been found to be too slow and/or need finegaling to interface with RivGraph.</p>
-<p>## Lake/wetland connectivity</p>
-<p>Many deltas, especially Arctic ones, are lake-dense, and the connectivity of these lakes has implications for biogeochemical cycling and transport times of water and sediment. We have spent a few weeks developing a <cite>rivgraph-lakes</cite> branch that attempts to resolve lake connectivity. However, it’s a difficult problem and we didn’t quite cross the finish line.</p>
-<p>![image-20220107142427137](../../images/lakemask_example.PNG)</p>
-<p>In this formulation, a lake mask would be provided in conjunction with the river mask, or lakes would be labeled distinctly in a river mask, as shown by the above mask. The difficulties here lie in the number of ways lakes can be connected; the figure shown is a rather simple case, but sometimes lakes themselves intersect both the channel network <em>and</em> the ocean/draining body. The many possibilities make simply resolving their position within the channel network a formidable task.</p>
-<p>The second major issue arises when trying to set flow directions. Are lakes sources, sinks, or both? The flow directionality algorithms need to know! And they need to be adapted accordingly. We have made significant progress on this feature, but it is not ready for Production.</p>
-<p>Another point to mention here is that while we are focusing on lakes here, the concept may be more generally applicable. For example, if a user also had a mask of wetlands–or any objects that are connected to the channel network, this framework could handle those cases.</p>
-<p>## Machine Learned Flow Directions</p>
-<p>The current scheme for [setting flow directions](<a class="reference external" href="https://esurf.copernicus.org/articles/8/87/2020/">https://esurf.copernicus.org/articles/8/87/2020/</a>) in the links of a channel network is quite complicated. It is “physically-based” in the sense that the rules defining flow directions have physical bases. There are two “hard” constraints–1) there can be no interior sources or sinks and 2) there can be no cycles (although this can be violated if RivGraph cannot find a cycle-less solutions).</p>
-<p>The paper (and attached dataset) linked above contains plenty of “training data” that could be used to take a machine learning approach to set flow directions. Many of the algorithms in place, for example determining if a link is part of a “main channel,” or synthetically-generated slopes, can be used to generate the features of an AI approach. It’s not clear to me how you would enforce the constraints listed above, but I’ll bet it could be done. Another difficulty might be that in the “physically-based” scheme, directions are set iteratively starting with the most certain. By setting a link, that information is useful in setting its neighbors’ directions, and so-on. Continuity can only be exploited when only one link (in a group of adjacent links) has an unknown direction. I would therefore guess that a ML model would have to follow a similar iterative path.</p>
-<p>However, who knows? An AI approach could be faster, especially for the larger deltas. Post-processing corrections would also be useful (for either approach, really).</p>
-<p>## Flow Direction Uncertainty</p>
-<p>Many links’ flow directions are not certain and may in fact be bidirectional. One approached proposed to handle this is: rather than export a single adjacency matrix with RivGraph’s “best guess,” we could export a family of adjacency matrices. Alej Tejedor has done some recent work on the concept of “effective resolution”–i.e. the resolution of the underlying mask at which graph-based flux partitioning is significantly impacted (as we coarsen the mask). This concept could be combined with the family of adjacency matrices to prevent the family from being huge. In other words, “effective resolution” could prune links that don’t contribute much to flux routing–and these links are typically the most uncertain.</p>
+  <section id="feature-development">
+<span id="featuredevelopment"></span><h1>Feature Development<a class="headerlink" href="#feature-development" title="Permalink to this headline">¶</a></h1>
+<p>There’s always more to be done! The features listed below are
+suggestions that require some significant amount of development. If
+you’re interested in tackling, or helping tackle, any of these, please
+email j………<a class="reference external" href="mailto:k&#37;&#52;&#48;gmail&#46;com">k<span>&#64;</span>gmail<span>&#46;</span>com</a> and we’ll add you to the RivGraph slack channel to
+start discussions.</p>
+<section id="automatic-shoreline-extraction">
+<h2>Automatic Shoreline Extraction<a class="headerlink" href="#automatic-shoreline-extraction" title="Permalink to this headline">¶</a></h2>
+<p>Currently, users must provide their own shoreline file for each delta
+they wish to analyze. While the strategy for creating shorelines is
+<a class="reference external" href="https://jonschwenk.github.io/RivGraph/shoreline/index.html">documented</a>,
+a preferable option would have RivGraph automatically generate
+shorelines. There have been a number of published softwares that attempt
+to solve this problem (e.g. opening-angle method), but in practice these
+have been found to be too slow and/or need finegaling to interface with
+RivGraph.</p>
+</section>
+<section id="lake-wetland-connectivity">
+<h2>Lake/wetland connectivity<a class="headerlink" href="#lake-wetland-connectivity" title="Permalink to this headline">¶</a></h2>
+<p>Many deltas, especially Arctic ones, are lake-dense, and the
+connectivity of these lakes has implications for biogeochemical cycling
+and transport times of water and sediment. We have spent a few weeks
+developing a <code class="docutils literal notranslate"><span class="pre">rivgraph-lakes</span></code> branch that attempts to resolve lake
+connectivity. However, it’s a difficult problem and we didn’t quite
+cross the finish line.</p>
+<figure class="align-center" id="id1">
+<img alt="image-20220107142427137" src="../_images/lakemask_example.PNG" />
+<figcaption>
+<p><span class="caption-text">An example mask with labeled channel network (gray) and lakes (white).</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>In this formulation, a lake mask would be provided in conjunction with
+the river mask, or lakes would be labeled distinctly in a river mask, as
+shown by the above mask. The difficulties here lie in the number of ways
+lakes can be connected; the figure shown is a rather simple case, but
+sometimes lakes themselves intersect both the channel network <em>and</em> the
+ocean/draining body. The many possibilities make simply resolving their
+position within the channel network a formidable task.</p>
+<p>The second major issue arises when trying to set flow directions. Are
+lakes sources, sinks, or both? The flow directionality algorithms need
+to know! And they need to be adapted accordingly. We have made
+significant progress on this feature, but it is not ready for
+Production.</p>
+<p>Another point to mention here is that while we are focusing on lakes
+here, the concept may be more generally applicable. For example, if a
+user also had a mask of wetlands–or any objects that are connected to
+the channel network, this framework could handle those cases.</p>
+</section>
+<section id="machine-learned-flow-directions">
+<h2>Machine Learned Flow Directions<a class="headerlink" href="#machine-learned-flow-directions" title="Permalink to this headline">¶</a></h2>
+<p>The current scheme for <a class="reference external" href="https://esurf.copernicus.org/articles/8/87/2020/">setting flow
+directions</a> in the
+links of a channel network is quite complicated. It is
+“physically-based” in the sense that the rules defining flow directions
+have physical bases. There are two “hard” constraints–1) there can be no
+interior sources or sinks and 2) there can be no cycles (although this
+can be violated if RivGraph cannot find a cycle-less solutions).</p>
+<p>The paper (and attached dataset) linked above contains plenty of
+“training data” that could be used to take a machine learning approach
+to set flow directions. Many of the algorithms in place, for example
+determining if a link is part of a “main channel,” or
+synthetically-generated slopes, can be used to generate the features of
+an AI approach. It’s not clear to me how you would enforce the
+constraints listed above, but I’ll bet it could be done. Another
+difficulty might be that in the “physically-based” scheme, directions
+are set iteratively starting with the most certain. By setting a link,
+that information is useful in setting its neighbors’ directions, and
+so-on. Continuity can only be exploited when only one link (in a group
+of adjacent links) has an unknown direction. I would therefore guess
+that a ML model would have to follow a similar iterative path.</p>
+<p>However, who knows? An AI approach could be faster, especially for the
+larger deltas. Post-processing corrections would also be useful (for
+either approach, really).</p>
+</section>
+<section id="flow-direction-uncertainty">
+<h2>Flow Direction Uncertainty<a class="headerlink" href="#flow-direction-uncertainty" title="Permalink to this headline">¶</a></h2>
+<p>Many links’ flow directions are not certain and may in fact be
+bidirectional. One approached proposed to handle this is: rather than
+export a single adjacency matrix with RivGraph’s “best guess,” we could
+export a family of adjacency matrices. Alej Tejedor has done some recent
+work on the concept of “effective resolution”–i.e. the resolution of the
+underlying mask at which graph-based flux partitioning is significantly
+impacted (as we coarsen the mask). This concept could be combined with
+the family of adjacency matrices to prevent the family from being huge.
+In other words, “effective resolution” could prune links that don’t
+contribute much to flux routing–and these links are typically the most
+uncertain.</p>
+</section>
+</section>
 
 
            </div>
