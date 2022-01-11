@@ -18,6 +18,7 @@ jobs:
         mamba-version: "*"
         channels: conda-forge, defaults
     - name: Install RivGraph, dependencies, and Sphinx
+      shell: bash -l {0}
       run: |
         mamba env create -q --file environment.yml
         conda activate rivgraph
