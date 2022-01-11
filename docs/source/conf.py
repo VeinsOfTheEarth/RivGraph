@@ -5,41 +5,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # Since we aren't installing package here, we mock imports of the dependencies.
 
-from unittest.mock import Mock
 import os
 import sys
-# mocking
-sys.modules['gdal'] = Mock()
-import gdal
-gdal.GDT_UInt16 = 'GDT_UInt16'
-sys.modules['numpy'] = Mock()
-sys.modules['scikit-image'] = Mock()
-sys.modules['opencv-python'] = Mock()
-sys.modules['pandas'] = Mock()
-sys.modules['networkx'] = Mock()
-sys.modules['geopandas'] = Mock()
-sys.modules['pyproj'] = Mock()
-sys.modules['pyproj.crs'] = Mock()
-sys.modules['ogr'] = Mock()
-sys.modules['osr'] = Mock()
-sys.modules['shapely.geometry'] = Mock()
-sys.modules['shapely'] = Mock()
-sys.modules['shapely.ops'] = Mock()
-sys.modules['fiona'] = Mock()
-sys.modules['matplotlib'] = Mock()
-sys.modules['matplotlib.collections'] = Mock()
-sys.modules['scipy'] = Mock()
-sys.modules['scipy.stats'] = Mock()
-sys.modules['scipy.interpolate'] = Mock()
-sys.modules['scipy.spatial'] = Mock()
-sys.modules['scipy.spatial.distance'] = Mock()
-sys.modules['scipy.ndimage'] = Mock()
-sys.modules['scipy.ndimage.morphology'] = Mock()
-sys.modules['scipy.ndimage.graph'] = Mock()
-sys.modules['skimage'] = Mock()
-sys.modules['cv2'] = Mock()
-sys.modules['fastdtw'] = Mock()
-sys.modules['loguru'] = Mock()
 
 # path to repo-head
 sys.path.insert(0, os.path.abspath('../..'))
@@ -58,7 +25,15 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
-              'sphinx.ext.napoleon']
+              'sphinx.ext.napoleon',
+              'sphinx_gallery.gen_gallery']
+
+# gallery configuration
+sphinx_gallery_conf = {
+	'examples_dirs': 'gallery_source',  # path to gallery scripts
+	'gallery_dirs': 'gallery',  # path to where to save gallery output
+	'remove_config_comments': True,
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
