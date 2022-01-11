@@ -33,8 +33,9 @@ jobs:
         pip install ipykernel
     - name: Build and test documentation
       run: |
-        (cd docs && make docs)
-        (cd docs && make html)
+        cd docs
+        make docs
+        make html
     - name: Debug
       run: |
         echo $REF
