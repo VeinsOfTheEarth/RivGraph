@@ -6,6 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>rivgraph &mdash; RivGraph 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -50,6 +54,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../issues/index.html">Known issues</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../featuredevelopment/index.html">Feature Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gallery/index.html">RG in the wild</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">rivgraph</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#rivgraph-classes-py">RivGraph (classes.py)</a></li>
@@ -2840,7 +2845,7 @@ within this function so that pickle can interpret OrderedSet object fields.</p>
 
 <dl class="function">
 <dt id="rivgraph.io_utils.write_geotiff">
-<code class="descclassname">rivgraph.io_utils.</code><code class="descname">write_geotiff</code><span class="sig-paren">(</span><em>raster, gt, wkt, path_export, dtype='GDT_UInt16', options=['COMPRESS=LZW'], nbands=1, nodata=None, color_table=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#write_geotiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.write_geotiff" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rivgraph.io_utils.</code><code class="descname">write_geotiff</code><span class="sig-paren">(</span><em>raster, gt, wkt, path_export, dtype=2, options=['COMPRESS=LZW'], nbands=1, nodata=None, color_table=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/io_utils.html#write_geotiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.io_utils.write_geotiff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes a georeferenced raster to disk.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
