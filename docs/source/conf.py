@@ -31,8 +31,9 @@ extensions = ['sphinx.ext.autodoc',
 # gallery configuration
 sphinx_gallery_conf = {
 	'examples_dirs': 'gallery_source',  # path to gallery scripts
-	'gallery_dirs': 'gallery',  # path to where to save gallery output
+	'gallery_dirs': 'gallery',  # pvath to where to save gallery output
 	'remove_config_comments': True,
+	'download_all_examples': False,
 }
 
 # Add any paths that contain templates here, relative to this directory.
