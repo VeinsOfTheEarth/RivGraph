@@ -21,4 +21,5 @@ Documentation
    issues/index
    featuredevelopment/index
    contributing/index
+   gallery/index
    apiref/index
