@@ -17,7 +17,7 @@ jobs:
         python-version: '3.9'
         mamba-version: "*"
         channels: conda-forge, defaults
-    - name: Install RivGraph, dependencies, and Sphinx
+    - name: Install RivGraph, dependencies, and Sphinx then build docs
       shell: bash -l {0}
       run: |
         mamba env create -q --file environment.yml
@@ -31,11 +31,8 @@ jobs:
         pip install sphinx-gallery
         pip install ipython
         pip install ipykernel
-    - name: Build and test documentation
-      run: |
-        cd docs
-        make docs
-        make html
+        (cd docs && make docs)
+        (cd docs && make html)
     - name: Debug
       run: |
         echo $REF
