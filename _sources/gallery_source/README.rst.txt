@@ -1,4 +1,7 @@
-RG in the wild
-==============
+RivGraph in the wild
+====================
 
-Gallery of publications which have used RivGraph.
+Some selected publications that have used RivGraph to answer some cool science questions.
+
+`Let us know <https://github.com/jonschwenk/RivGraph/issues>`_ if you'd like to add an application to the gallery!
+

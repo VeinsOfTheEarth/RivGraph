@@ -4,23 +4,26 @@
 
 .. _sphx_glr_gallery:
 
-RG in the wild
-==============
+RivGraph in the wild
+====================
 
-Gallery of publications which have used RivGraph.
+Some selected publications that have used RivGraph to answer some cool science questions.
+
+`Let us know <https://github.com/jonschwenk/RivGraph/issues>`_ if you'd like to add an application to the gallery!
+
 
 
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The gallery uses python files. But within the files you can embed rST, as the gallery converts ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019WR026867&gt;`_ made...">
 
 .. only:: html
 
- .. figure:: /gallery/images/thumb/sphx_glr_example_thumb.png
-     :alt: Example script of how to generate a gallery item
+ .. figure:: /gallery/images/thumb/sphx_glr_knights2020_thumb.png
+     :alt: Nitrate Removal Across Ecogeomorphic Zones in Wax Lake Delta, Louisiana (USA)
 
-     :ref:`sphx_glr_gallery_example.py`
+     :ref:`sphx_glr_gallery_knights2020.py`
 
 .. raw:: html
 
@@ -30,28 +33,11 @@ Gallery of publications which have used RivGraph.
 .. toctree::
    :hidden:
 
-   /gallery/example
+   /gallery/knights2020
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
 
-
-
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-gallery
-
-
-  .. container:: sphx-glr-download sphx-glr-download-python
-
-    :download:`Download all examples in Python source code: gallery_python.zip </gallery/gallery_python.zip>`
-
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-    :download:`Download all examples in Jupyter notebooks: gallery_jupyter.zip </gallery/gallery_jupyter.zip>`
 
 
 .. only:: html
