@@ -11,6 +11,6 @@ in channels on the Wax Lake Delta.
 .. image:: ../gallery_source/images/knights_et_al_2020.PNG
 """
 # sphinx_gallery_thumbnail_path = 'gallery_source/images/knights_et_al_2020.png'
-# (left) Removal rate calculated using submerged‐delta approach. (right) Removal rate calculated using 
-# nutrient spiraling approach as a percentage of amount of nitrate entering each link.
+# (left) Removal rate calculated using submerged‐delta approach. (right) Removal rate calculated 
+# using nutrient spiraling approach as a percentage of amount of nitrate entering each link.
 

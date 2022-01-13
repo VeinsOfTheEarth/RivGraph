@@ -169,5 +169,6 @@ linkcheck_ignore = [r'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2
 		    r'https://pubs.geoscienceworld.org/gsa/geology/article/47/3/263/568705/High-curvatures-drive-river-meandering',
 		    r'https://github.com/Unidata/MetPy#contributing',
 		    r'http://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963',
-		    r'https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963'
+		    r'https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963',
+		    r'https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019WR026867',
 			]
