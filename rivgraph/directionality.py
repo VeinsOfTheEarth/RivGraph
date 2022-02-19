@@ -13,6 +13,8 @@ import networkx as nx
 import itertools
 import pandas as pd
 from scipy.stats import mode
+from tqdm import tqdm
+
 from rivgraph import ln_utils as lnu
 from rivgraph import io_utils as io
 
@@ -318,7 +320,7 @@ def dir_main_channel(links, nodes):
     for lc, wt in zip(links['conn'], weights):
         G.add_edge(lc[0], lc[1], weight=wt)
 
-    for o in nodes['outlets']:
+    for o in tqdm(nodes['outlets'], "Dir main channel"):
 
         pathnodes = nx.dijkstra_path(G, nodes['inlets'][inlet_idx], o, weight='weight')
         pathlinks = nodepath_to_links(pathnodes, links, nodes)
@@ -651,7 +653,7 @@ def dir_bridges(links, nodes):
                 break
 
     # Guess the bridge link
-    for bl, bn in zip(bridgelinks, bridgenodes):
+    for bl, bn in tqdm(zip(bridgelinks, bridgenodes), "Dir bridges", total=len(bridgelinks)):
         # Remove edge from graph
         G.remove_edge(bn[0], bn[1])
         # See which bridgenode connects to upstream node(s) -
@@ -1523,7 +1525,10 @@ def set_parallel_links(links, nodes, knownlink):
             usnode = links['conn'][lidx][1]
 
         # Check if any parallel sets are connected to the known link
-        ppnodes = links['conn'][links['id'].index(parpairs[0])][:]
+        if parpairs[0] in links['id']:
+            ppnodes = links['conn'][links['id'].index(parpairs[0])][:]
+        else:
+            continue
         for parlink in parpairs:
             if links['certain'][links['id'].index(parlink)] == 0:
                 if dsnode in ppnodes:
