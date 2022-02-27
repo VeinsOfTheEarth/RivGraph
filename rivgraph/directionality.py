@@ -6,6 +6,7 @@ Directionality Utilities (directionality.py)
 Created on Wed Nov  7 11:38:16 2018
 @author: Jon
 """
+import warnings
 from loguru import logger
 import os
 import numpy as np
@@ -139,6 +140,7 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
     """
+    from networkx.exception import NetworkXNoPath
 
     # alg = 3 # identifier for diagnostics
     alg = algmap('parallels')
@@ -158,10 +160,13 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
 
     # Get all paths from inlet(s) to outlets
     all_pathnodes = []
-    for inl in nodes['inlets']:
-        for o in nodes['outlets']:
-            all_pathnodes.append(nx.dijkstra_path(G, nodes['inlets'][inlet_idx], o, weight='weight'))
-
+    randout = np.random.choice(nodes['outlets'], len(nodes['inlets']))
+    for inl, out in tqdm(zip(nodes['inlets'], randout), "Main channels", total=len(nodes['inlets'])):
+        #for o in nodes['outlets']:
+        try:
+            all_pathnodes.append(nx.dijkstra_path(G, inl, out, weight='weight'))
+        except NetworkXNoPath:
+            warnings.warn(f'No path found btw {inl} and {out}')
     # Reduce all pathnodes to smallest set, saving associated path for each node
     pathnode_set = set()
     for ap in all_pathnodes:
