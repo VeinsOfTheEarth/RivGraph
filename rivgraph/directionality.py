@@ -184,7 +184,7 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
 
     # Find the nearest path to all uncertain links
     uncertains = np.where(links['certain'] == 0)[0]
-    for u in uncertains:
+    for u in tqdm(uncertains, 'Dir by nearest main channel'):
 
         # Since we're not updating uncertains as links are being set, need to
         # recheck that the link hasn't been set by continuity/aritifical node
@@ -325,7 +325,7 @@ def dir_main_channel(links, nodes):
     for lc, wt in zip(links['conn'], weights):
         G.add_edge(lc[0], lc[1], weight=wt)
 
-    for o in tqdm(nodes['outlets'], "Dir main channel"):
+    for o in nodes['outlets']:
 
         pathnodes = nx.dijkstra_path(G, nodes['inlets'][inlet_idx], o, weight='weight')
         pathlinks = nodepath_to_links(pathnodes, links, nodes)
@@ -1377,7 +1377,7 @@ def set_inletoutlet(links, nodes):
     alg = algmap('inletoutlet')
 
     # Set directionality of inlet links
-    for i in nodes['inlets']:
+    for i in tqdm(nodes['inlets'], 'Inlet links'):
 
         # Get links attached to inlets
         conn = nodes['conn'][nodes['id'].index(i)]
@@ -1390,7 +1390,7 @@ def set_inletoutlet(links, nodes):
                                     checkcontinuity=True)
 
     # Set directionality of outlet links
-    for o in nodes['outlets']:
+    for o in tqdm(nodes['outlets'], 'Outlet links'):
 
         # Get links attached to outlets
         conn = nodes['conn'][nodes['id'].index(o)]

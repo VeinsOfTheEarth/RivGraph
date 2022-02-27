@@ -142,19 +142,20 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
     #                                            alg)
 
     # Set directions by most-certain angles
-    print("Set by shallow angles...")
     angthreshs = np.linspace(0, 0.4, 10)
-    for a in angthreshs:
+    for a in tqdm(angthresh, "Directions by shallow angles"):
         links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,
                                                        angthresh=a,
                                                        lenthresh=3)
 
     # Set using direction of nearest main channel
+    print("Set directions by nearest main channel...")
     links, nodes = dy.set_by_nearest_main_channel(links, nodes, imshape,
                                                   nodethresh=1)
 
+    # Set directions by less-certain angles
     angthreshs = np.linspace(0, 1.5, 20)
-    for a in angthreshs:
+    for a in tqdm(angthreshs, "Directions by steep angles"):
         links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,
                                                        angthresh=a)
 
@@ -244,9 +245,9 @@ def directional_info(links, nodes, Imask, pixlen, exit_sides, gt, meshlines,
     links = dir_link_widths(links)
     #print("Direction network bridges...")
     #links, nodes = dy.dir_bridges(links, nodes)
-    print("Direction main channel...")
+    #for inl in tqdm(nodes['inlets'], 'Main channel direction'):
+    #    links, nodes = dy.dir_main_channel(links, nodes, inlet=inl)
     links, nodes = dy.dir_main_channel(links, nodes)
-
     return links, nodes
 
 
@@ -312,7 +313,8 @@ def fix_river_cycles(links, nodes, imshape):
         print('Attempting to fix {} cycles.'.format(len(cfix_nodes)))
 
         # Try to fix all the cycles
-        for cnodes, clinks in zip(cfix_nodes, cfix_links):
+        for cnodes, clinks in tqdm(zip(cfix_nodes, cfix_links),
+                                   "Fixing cycles", total=len(cfix_nodes)):
             links, nodes, fixed = fix_river_cycle(links, nodes, clinks,
                                                   cnodes, imshape)
             if fixed == 0:
