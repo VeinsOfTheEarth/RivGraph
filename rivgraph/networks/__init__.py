@@ -42,14 +42,14 @@ class RiverNetwork(RGRiver):
         self.nodes = {
             'id': OrderedSet(nodes.index),
             'idx': OrderedSet(nodes.idx),
-            'conn': nodes.conn.apply(eval).tolist(),
+            'conn': nodes.conn.tolist(),
             'inlets': nodes.index[nodes.inlet].tolist(),
             'outlets': nodes.index[nodes.outlet].tolist(),
         }
 
         self.links = {
             'id': OrderedSet(links.index),
-            'idx': links.idx.apply(eval).tolist(),
+            'idx': links.idx.tolist(),
             'conn': links[["start_node", "end_node"]].values.tolist(),
             'wid_pix': links.wid_pix.apply(lambda s: np.array(eval(s))).values.tolist(),
         }
@@ -161,30 +161,72 @@ class RiverNetwork(RGRiver):
         return
 
 
+def prune_single_flow_network(nodes, links):
+    # prune single flow reaches and check the direction by accumulation
+    sfd_in = [None]
+    flips = []
+    order = 1
+    while True:
+        # inlet nodes and lines with single flow
+        sfd_inl = nodes[(nodes.n_lines == 1) & nodes.single_flow & ~nodes.outlet]
+        sfd_lns = links.loc[sfd_inl.conn.apply(lambda x: x[0])]
+        nxt_nodes = nodes.loc[
+            np.where(sfd_lns.end_node == sfd_inl.index, sfd_lns["start_node"], sfd_lns["end_node"])
+        ]
+        # make sure inlet - outlet links have the right direction (includes outlet - inlet lines)
+        flip = (sfd_lns.end_node == sfd_inl.index) & nxt_nodes.single_flow.values
+        flips.extend(sfd_lns.index[flip].tolist())
+        # receiving node also needs to be a single flow node
+        sfd_inl = sfd_inl[(nxt_nodes.single_flow).values]
+        sfd_lns = sfd_lns[(nxt_nodes.single_flow).values]
+        if len(sfd_inl) == 0:
+            break
+        # recalculate next nodes
+        nxt_nodes = nodes.loc[
+            np.where(sfd_lns.end_node == sfd_inl.index, sfd_lns["start_node"], sfd_lns["end_node"])
+        ]
+        # recalculate node connections
+        for n, l in zip(nxt_nodes.index, sfd_lns.index):
+            if l in nodes.loc[n, 'conn']:
+                nodes.loc[n, 'conn'].remove(l)
+        nodes.loc[nxt_nodes.index, 'n_lines'] = nodes.loc[nxt_nodes.index, 'conn'].apply(lambda c: len(c))
+        # drop from nodes and lines
+        nodes.drop(sfd_inl.index, inplace=True)
+        nodes.drop(nxt_nodes.index[nxt_nodes.outlet], inplace=True)
+        links.drop(sfd_lns.index, inplace=True)
+        print(f'Pruning {len(sfd_lns)} single flow lines of order {order}')
+        order += 1
+
+    return nodes, links, flips
+
+
 def multi_network_rivgraph(links, nodes, idx_shape, results_folder='.', res=30):
     """Run RivgraphNetwork on multiple networks.
     """
     nodes = pd.read_csv(nodes, index_col=0) if type(nodes) == str else nodes
+    nodes['conn'] = nodes.conn.apply(eval)
     links = pd.read_csv(links, index_col=0) if type(links) == str else links
+    links['idx'] = links.idx.apply(eval)
 
     # sanity check input
     #  segments with less than 2 pixels?
-    links_length = links.idx.apply(lambda s: len(eval(s)))
+    links_length = links.idx.apply(lambda s: len(s))
     assert links_length.min() >= 2
     #  no inlet also assigned as outlet
     assert len(set(nodes.index[nodes.inlet]) & set(nodes.index[nodes.outlet])) == 0
     #  all node idx are at start/end of line idx
-    lidx = links.idx.apply(eval)
-    assert (nodes.loc[links.start_node.values, "idx"].values == lidx.apply(lambda l: l[0])).all()
-    assert (nodes.loc[links.end_node.values, "idx"].values == lidx.apply(lambda l: l[-1])).all()
+    assert (nodes.loc[links.start_node.values, "idx"].values == links['idx'].apply(lambda l: l[0])).all()
+    assert (nodes.loc[links.end_node.values, "idx"].values == links['idx'].apply(lambda l: l[-1])).all()
     # no loops
     assert (links.start_node == links.end_node).sum() == 0
+
+    nodes, links, flips = prune_single_flow_network(nodes, links)
 
     nix, lix = nodes.groupby("component").groups, links.groupby("component").groups
     assert len(nix) == len(lix)
     print(f"Found {len(nix)} networks.")
-    links_info, nodes_info, flips = [], [], []
-    for n in [91]:  #nix:
+    links_info, nodes_info = [], []
+    for n in nix:
         rgn = RiverNetwork(links.loc[lix[n]], nodes.loc[nix[n]], idx_shape,
                            results_folder=results_folder, res=res,
                            name="component_%04i" % n)
