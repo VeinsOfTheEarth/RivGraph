@@ -143,7 +143,7 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
 
     # Set directions by most-certain angles
     angthreshs = np.linspace(0, 0.4, 10)
-    for a in tqdm(angthresh, "Directions by shallow angles"):
+    for a in tqdm(angthreshs, "Directions by shallow angles"):
         links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,
                                                        angthresh=a,
                                                        lenthresh=3)
@@ -177,21 +177,22 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
     # Summary of problems:
     manual_fix = 0
     if len(cantfix_cyclelinks) > 0:
-        print('Could not fix cycle links: {}.'.format(cantfix_cyclelinks))
+        nc = sum([len(lc) for lc in cantfix_cyclelinks])
+        print(f'Could not fix {nc} cycle links: {cantfix_cyclelinks}')
         manual_fix = 1
     else:
         print('All cycles were resolved.')
     if len(cont_violators) > 0:
-        print('Continuity violated at nodes {}.'.format(cont_violators))
+        print(f'Continuity violated at {len(cont_violators)} nodes: {cont_violators}')
         manual_fix = 1
 
-    # # Create a csv to store manual edits to directionality if does not exist
-    # if manual_fix == 1:
-    #     if os.path.isfile(manual_set_csv) is False:
-    #         io.create_manual_dir_csv(manual_set_csv)
-    #         print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
-    #     else:
-    #         print('Use the csv file at {} to manually fix link directions.'.format(manual_set_csv))
+    # Create a csv to store manual edits to directionality if does not exist
+    if manual_fix == 1:
+        if os.path.isfile(manual_set_csv) is False:
+            io.create_manual_dir_csv(manual_set_csv)
+            print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
+        else:
+            print('Use the csv file at {} to manually fix link directions.'.format(manual_set_csv))
 
     return links, nodes
 
@@ -243,8 +244,10 @@ def directional_info(links, nodes, Imask, pixlen, exit_sides, gt, meshlines,
     #                        pixlen)
     print("Direction link width...")
     links = dir_link_widths(links)
+
     #print("Direction network bridges...")
     #links, nodes = dy.dir_bridges(links, nodes)
+
     #for inl in tqdm(nodes['inlets'], 'Main channel direction'):
     #    links, nodes = dy.dir_main_channel(links, nodes, inlet=inl)
     links, nodes = dy.dir_main_channel(links, nodes)
@@ -320,6 +323,9 @@ def fix_river_cycles(links, nodes, imshape):
             if fixed == 0:
                 cantfix_nodes.append(cnodes)
                 cantfix_links.append(clinks)
+
+        if len(cantfix_links) > 0:
+            print(f"Failed to fix {len(cantfix_links)} cycles.")
 
     return links, nodes, cantfix_links, cantfix_nodes
 
