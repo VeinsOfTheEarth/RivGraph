@@ -10,7 +10,7 @@ import sys
 from loguru import logger
 try:
     from osgeo import gdal
-except ImportError:
+except ModuleNotFoundError:
     import gdal
 import numpy as np
 import networkx as nx
