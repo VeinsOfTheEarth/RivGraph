@@ -32,6 +32,7 @@ jobs:
         run: |
           conda env create -f environment.yml
           conda activate rivgraph
+          conda install shapely=1.7.1 -c conda-forge
           pip install pytest pytest-timeout pytest-cov coveralls coverage
           python setup.py install
           coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
@@ -63,7 +64,7 @@ jobs:
           conda activate rivgraph          
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
-          pytest --cov-config=.coveragerc --cov=rivgraph/
+          python -m pytest --cov-config=.coveragerc --cov=rivgraph/
           conda list
 
   macos-build:
@@ -92,5 +93,5 @@ jobs:
           conda activate rivgraph          
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
-          pytest --cov-config=.coveragerc --cov=rivgraph/
+          python -m pytest --cov-config=.coveragerc --cov=rivgraph/
           conda list
