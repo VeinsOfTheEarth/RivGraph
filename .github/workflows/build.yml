@@ -19,11 +19,9 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: ${{ matrix.python-version }}
-          mamba-version: "*"
           channels: conda-forge, defaults
       - uses: actions/checkout@v2
       - name: install RivGraph + dependencies, then unit test
-        shell: bash -l {0}
         run: |
           conda env create -f environment.yml
           conda activate rivgraph

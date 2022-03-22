@@ -3,11 +3,10 @@ channels:
   - conda-forge
 dependencies:
   - python=3
-  - gdal
   - geopandas
   - scikit-image
   - opencv
-  - networkx<2.7
+  - networkx<2.7 # necessary for correct numpy ops
   - matplotlib
   - fastdtw
   - loguru
