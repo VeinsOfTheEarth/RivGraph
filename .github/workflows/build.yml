@@ -27,7 +27,6 @@ jobs:
         run: |
           mamba env create -q --file environment.yml
           conda activate rivgraph
-          conda uninstall rivgraph
           pip install pytest pytest-timeout pytest-cov coveralls coverage
           python setup.py install
           coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
