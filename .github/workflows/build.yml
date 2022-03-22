@@ -11,6 +11,9 @@ on:
 jobs:
   ubunutu-build:
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
     strategy:
       fail-fast: false
       matrix:
@@ -36,6 +39,9 @@ jobs:
 
   windows-build:
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
     strategy:
       fail-fast: false
       matrix:
@@ -52,7 +58,6 @@ jobs:
           channels: conda-forge, defaults
       - uses: actions/checkout@v2
       - name: install RivGraph + dependencies, then unit test
-        shell: bash -l {0}
         run: |
           conda env create -f environment.yml
           conda activate rivgraph          
@@ -63,6 +68,9 @@ jobs:
 
   macos-build:
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: sh -l {0}
     strategy:
       fail-fast: false
       matrix:
@@ -79,7 +87,6 @@ jobs:
           channels: conda-forge, defaults
       - uses: actions/checkout@v2
       - name: install RivGraph + dependencies, then unit test
-        shell: sh -l {0}
         run: |
           conda env create -f environment.yml
           conda activate rivgraph          
