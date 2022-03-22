@@ -25,7 +25,7 @@ jobs:
       - name: install RivGraph + dependencies, then unit test
         shell: bash -l {0}
         run: |
-          mamba env create -q --file environment.yml
+          conda env create -f environment.yml
           conda activate rivgraph
           pip install pytest pytest-timeout pytest-cov coveralls coverage
           python setup.py install
@@ -52,9 +52,8 @@ jobs:
       - name: install RivGraph + dependencies, then unit test
         shell: bash -l {0}
         run: |
-          conda env create -q --file environment.yml
-          conda activate rivgraph
-          conda uninstall rivgraph
+          conda env create -f environment.yml
+          conda activate rivgraph          
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
           pytest --cov-config=.coveragerc --cov=rivgraph/
@@ -80,9 +79,8 @@ jobs:
       - name: install RivGraph + dependencies, then unit test
         shell: sh -l {0}
         run: |
-          mamba env create -q --file environment.yml
-          conda activate rivgraph
-          conda uninstall rivgraph
+          conda env create -f environment.yml
+          conda activate rivgraph          
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
           pytest --cov-config=.coveragerc --cov=rivgraph/
