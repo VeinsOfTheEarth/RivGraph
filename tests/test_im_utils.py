@@ -433,7 +433,7 @@ def test_regionprops_big():
                   )
     assert np.all(info['mean'] == np.array([1., 1., 1.]))
     assert np.all(info['perim_len'] == np.array([4., 18., 16.]))
-    assert pytest.approx(info['eccentricity'] == np.array([0.,
+    assert info['eccentricity'] == pytest.approx(np.array([0.,
                                                            0.93435318,
                                                            0.]))
 

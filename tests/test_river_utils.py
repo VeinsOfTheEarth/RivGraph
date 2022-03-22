@@ -188,7 +188,7 @@ class TestCenterline:
         CL = centerline(x, y)
         Cs = CL.C()
         # make assertions
-        assert pytest.approx(Cs == np.array([-0., 0., 0., 0., 0.,
+        assert Cs == pytest.approx(np.array([-0., 0., 0., 0., 0.,
                                              1.57079633, 1.57079633,
                                              0., 0., 0., 0.]))
 
