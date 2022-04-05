@@ -26,7 +26,7 @@ jobs:
         conda activate rivgraph
         python setup.py install
         python -m pip install --upgrade pip
-        pip install sphinx==2.0.1
+        pip install sphinx
         sudo apt update -y && sudo apt install -y latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended dvipng
         pip install sphinx-rtd-theme
         pip install sphinx-gallery
