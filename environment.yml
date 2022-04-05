@@ -7,7 +7,7 @@ dependencies:
   - scikit-image
   - opencv
   - networkx<2.7 # necessary for correct numpy ops
-  - shapely<1.8.0
+  - shapely
   - matplotlib
   - fastdtw
   - loguru
