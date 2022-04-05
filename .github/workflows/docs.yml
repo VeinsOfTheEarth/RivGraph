@@ -4,10 +4,6 @@ name: docs
 
 on: 
   push:
-    paths:
-      - "rivgraph/**"
-      - "docs/**"
-      - "examples/**"
   pull_request:
 
 jobs:
