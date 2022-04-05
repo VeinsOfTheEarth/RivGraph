@@ -5,7 +5,8 @@ name: build
 on: 
   push:
   pull_request:
-  workflow_dispatch:
+  schedule:
+    - cron: '0 0 1 * *'  # run workflow at 12AM on first day of every month
 
 
 jobs:
