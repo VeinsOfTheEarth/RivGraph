@@ -28,7 +28,6 @@ jobs:
       run: |
         mamba env create -q --file environment.yml
         conda activate rivgraph
-        conda uninstall rivgraph
         python setup.py install
         python -m pip install --upgrade pip
         pip install sphinx==2.0.1
