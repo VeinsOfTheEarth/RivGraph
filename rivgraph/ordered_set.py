@@ -37,7 +37,7 @@ def is_iterable(obj):
     )
 
 
-class OrderedSet(collections.MutableSet, collections.Sequence):
+class OrderedSet(collections.abc.MutableSet, collections.abc.Sequence):
     """
     An OrderedSet is a custom MutableSet that remembers its order, so that
     every entry has an index that can be looked up.
@@ -287,7 +287,7 @@ class OrderedSet(collections.MutableSet, collections.Sequence):
         """
         # In Python 2 deque is not a Sequence, so treat it as one for
         # consistent behavior with Python 3.
-        if isinstance(other, (collections.Sequence, collections.deque)):
+        if isinstance(other, (collections.abc.Sequence, collections.deque)):
             # Check that this OrderedSet contains the same elements, in the
             # same order, as the other object.
             return list(self) == list(other)

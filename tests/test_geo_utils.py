@@ -1,6 +1,5 @@
 """Tests for geo_utils.py."""
 import pytest
-import sys
 import os
 import numpy as np
 # import matplotlib.pyplot as plt
@@ -12,11 +11,6 @@ try:
 except ImportError:
     import gdal
 from pyproj import CRS
-
-from inspect import getsourcefile
-basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
-sys.path.insert(0, basepath)
-
 
 # function geo_utils.get_EPSG() no longer exists
 # def test_getEPSG_fromshp():
@@ -48,8 +42,10 @@ def test_geotiff_vals_from_coords():
     """Test geotiff_vals_from_coords()."""
     # read in origin point
     coords = np.array([[336885.0000000000000000, 7826415.0000000000000000]])
-    gobj = gdal.Open(os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif')))
-    vals = geo_utils.geotiff_vals_from_coords(coords,gobj)
+    gobj = gdal.Open(
+        os.path.normpath(
+            'tests/integration/data/Colville/Colville_islands_filled.tif'))
+    vals = geo_utils.geotiff_vals_from_coords(coords, gobj)
     # assert that value at origin is 0, this is what it is in the mask
     assert vals[0] == 0
 
@@ -59,7 +55,8 @@ def test_coords_to_xy():
     # use corners or extents of the geotiff to test
     xs = [336885.0000000000000000, 383085.0000000000000000]
     ys = [7780215.0000000000000000, 7826415.0000000000000000]
-    gobj = gdal.Open(os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif')))
+    gobj = gdal.Open(os.path.normpath(
+        'tests/integration/data/Colville/Colville_islands_filled.tif'))
     gt = gobj.GetGeoTransform()
     vals = geo_utils.coords_to_xy(xs, ys, gt)
     # make assertions
@@ -105,41 +102,19 @@ def test_transform_coords():
 #     assert np.all(xy[0]==pytest.approx(xs))
 #     assert np.all(xy[1]==pytest.approx(ys))
 
-def test_crop_geotiff():
+def test_crop_geotiff(tmp_path):
     """Test crop_geotif()."""
-    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
-    outpath = os.path.join(basepath, os.path.normpath('tests/results/known/cropped.tif'))
+    g_path = os.path.normpath(
+        'tests/integration/data/Colville/Colville_islands_filled.tif')
+    outpath = os.path.join(tmp_path, 'cropped.tif')
     # run cropping function
     o_path = geo_utils.crop_geotif(g_path, outpath=outpath)
     # assert file name and existance
     assert o_path == outpath
     assert os.path.isfile(o_path) == True
 
-
-def test_crop_geotiff_out():
-    """Test crop_geotif() with no outpath."""
-    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
-    # run cropping function
-    o_path = geo_utils.crop_geotif(g_path)
-    # assert file name and existance
-    assert o_path == g_path.split('.')[-2] + '_cropped.tif'
-    assert os.path.isfile(o_path) == True
-
-
-def test_croppad_geotiff():
-    """Test crop_geotif() with padding."""
-    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
-    outpath = os.path.join(basepath, os.path.normpath('tests/results/known/croppedpad.tif'))
-    # run cropping function
-    o_path = geo_utils.crop_geotif(g_path, npad=6, outpath=outpath)
-    # assert file name and existance
-    assert o_path == outpath
-    assert os.path.isfile(o_path) == True
-
-
-def test_crop_geotiff_output():
-    """Test output of crop_geotif()."""
-    crop_file = gdal.Open(os.path.join(basepath, os.path.normpath('tests/results/known/cropped.tif')))
+    # check output of cropped file
+    crop_file = gdal.Open(o_path)
     o_file = crop_file.ReadAsArray()
     # check that first/last rows and columns not all 0s
     assert np.sum(o_file[0, :]) > 0
@@ -148,9 +123,30 @@ def test_crop_geotiff_output():
     assert np.sum(o_file[:, -1]) > 0
 
 
-def test_croppad_geotiff_output():
-    """Test padded crop_geotif() output."""
-    crop_file = gdal.Open(os.path.join(basepath, os.path.normpath('tests/results/known/croppedpad.tif')))
+# def test_crop_geotiff_out():
+#     """Test crop_geotif() with no outpath."""
+#     g_path = os.path.normpath(
+#         'tests/integration/data/Colville/Colville_islands_filled.tif')
+#     # run cropping function
+#     o_path = geo_utils.crop_geotif(g_path)
+#     # assert file name and existance
+#     assert o_path == g_path.split('.')[-2] + '_cropped.tif'
+#     assert os.path.isfile(o_path) == True
+
+
+def test_croppad_geotiff(tmp_path):
+    """Test crop_geotif() with padding."""
+    g_path = os.path.normpath(
+        'tests/integration/data/Colville/Colville_islands_filled.tif')
+    outpath = os.path.join(tmp_path, 'cropped.tif')
+    # run cropping function
+    o_path = geo_utils.crop_geotif(g_path, npad=6, outpath=outpath)
+    # assert file name and existance
+    assert o_path == outpath
+    assert os.path.isfile(o_path) == True
+
+    # check padded crop_geotif() output
+    crop_file = gdal.Open(o_path)
     o_file = crop_file.ReadAsArray()
     # check that first/last rows and columns are all 0s
     assert np.sum(o_file[0, :]) == 0
@@ -164,43 +160,44 @@ def test_croppad_geotiff_output():
     assert np.sum(o_file[:, -7]) > 0
 
 
-def test_downsample_bad_factor():
+def test_downsample_bad_factor(tmp_path):
     """Test downsampling geotiff with invalid ds_factor."""
-    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
-    outpath = os.path.join(basepath, os.path.normpath('tests/results/known/downsampled.tif'))
+    g_path = os.path.normpath(
+        'tests/integration/data/Colville/Colville_islands_filled.tif')
+    outpath = os.path.join(tmp_path, 'downsampled.tif')
     # run downsampling function and throw error
     with pytest.raises(ValueError):
         geo_utils.downsample_binary_geotiff(g_path, 2.0, outpath)
 
 
-def test_downsample_default_thresh():
+def test_downsample_default_thresh(tmp_path):
     """Test downsampling geotiff with default thresh."""
-    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
-    outpath = os.path.join(basepath, os.path.normpath('tests/results/known/downsampled.tif'))
+    g_path = os.path.normpath(
+        'tests/integration/data/Colville/Colville_islands_filled.tif')
+    outpath = os.path.join(tmp_path, 'downsampled.tif')
     # run downsampling function
     ofile = geo_utils.downsample_binary_geotiff(g_path, 0.5, outpath)
     # assert output
     assert ofile == outpath
 
 
-def test_downsample_input_thresh():
+def test_downsample_input_thresh(tmp_path):
     """Test downsampling geotiff with defined thresh."""
-    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
-    outpath = os.path.join(basepath, os.path.normpath('tests/results/known/downsampled.tif'))
+    g_path = os.path.normpath(
+        'tests/integration/data/Colville/Colville_islands_filled.tif')
+    outpath = os.path.join(tmp_path, 'downsampled.tif')
     # run downsampling function
     outfile = geo_utils.downsample_binary_geotiff(g_path, 0.5,
                                                   outpath, thresh=0.1)
     # assert output
     assert outfile == outpath
 
-
-def test_downsampled_result():
-    """Test downsampled output."""
+    # check downsampled output
     # original
-    og_file = gdal.Open(os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif')))
+    og_file = gdal.Open(g_path)
     og_img = og_file.ReadAsArray()
     # downsampled
-    ds_file = gdal.Open(os.path.join(basepath, os.path.normpath('tests/results/known/downsampled.tif')))
+    ds_file = gdal.Open(outpath)
     o_file = ds_file.ReadAsArray()
     # check that downsampled size is smaller
     assert np.shape(og_img)[0] > np.shape(o_file)[0]
@@ -210,20 +207,12 @@ def test_downsampled_result():
     assert (ds_file.GetGeoTransform()[5]) == (og_file.GetGeoTransform()[5]*2)
 
 
-def test_downsample_w_pad():
+def test_downsample_w_pad(tmp_path):
     """Test downsampling geotiff with some padding due to division."""
-    g_path = os.path.join(basepath, os.path.normpath('tests/data/Colville/Colville_islands_filled.tif'))
-    outpath = os.path.join(basepath, os.path.normpath('tests/results/known/downsampled.tif'))
+    g_path = os.path.normpath(
+        'tests/integration/data/Colville/Colville_islands_filled.tif')
+    outpath = os.path.join(tmp_path, 'downsampled.tif')
     # run downsampling function
     ofile = geo_utils.downsample_binary_geotiff(g_path, 0.76, outpath)
     # assert output
     assert ofile == outpath
-
-
-def test_delete_files():
-    """Delete files created by tests."""
-    # delete created files at the end
-    for i in os.listdir(os.path.join(basepath, os.path.normpath('tests/results/known/'))):
-        os.remove(os.path.join(basepath, os.path.normpath('tests/results/known/'+i)))
-    # check directory is empty
-    assert os.listdir(os.path.join(basepath, os.path.normpath('tests/results/known/'))) == []

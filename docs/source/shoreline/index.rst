@@ -20,18 +20,18 @@ Consider the following mask and its skeleton:
 
 .. image:: ../../images/colville_mask_skel.PNG
 
-How can we identify the "ends" of the network--i.e. the outlet locations? There are two options; first, we could manually specify each outlet point individually. This is a viable option, but it is also tedious and does not lend itself well to automation. Instead, *RivGraph* takes a different approach that still requires manual input, but is robust, less tedious, and has the potential for automation. 
+How can we identify the "ends" of the network--i.e. the outlet locations? There are two options; first, we could manually specify each outlet point individually. This is a viable option, but it is also tedious and does not lend itself well to automation. Instead, *RivGraph* takes a different approach that still requires manual input, but is robust, less tedious, and has the potential for automation.
 
 Instead of placing nodes individually, you will provide a shoreline shapefile (or any geopandas-readable PolyLine). *RivGraph* will intersect your shoreline with the skeleton (actually the vectorized links and nodes that make up the skeleton), place nodes at the connected intersection points, and trim away all the skeleton that lies outside the river network.
 
 .. _howshoreline:
 
-------------------------
+--------------------------
 How do I make a shoreline?
-------------------------
+--------------------------
 There are numerous tools available to generate your shoreline, such as the `Opening Angle Method <http://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963>`_ or you may automate a procedure. Here, we describe shoreline creation with QGIS, although other GIS software may also be used.
 
-1. Generate the skeleton of your mask. 
+1. Generate the skeleton of your mask.
 
 .. code-block:: python3
 
@@ -57,9 +57,9 @@ There are numerous tools available to generate your shoreline, such as the `Open
 Now we're at the point of actually drawing the shoreline. Our goal is to intersect all the skeleton links by the shoreline at locations where we'd like outlet nodes to be placed. Identify the first outlet of the mask, and begin drawing shoreline segments across your channels. Here are some tips:
 
     * The only thing that matters is where your shoreline intersects the outlet links. Don't worry if your shoreline doesn't actually follow the shore.
-    * I find it helpful to connect the ends of islands to define where to create shoreline nodes; this typically ensures you're cutting across the correct part of the channel. See the figure below. 
+    * I find it helpful to connect the ends of islands to define where to create shoreline nodes; this typically ensures you're cutting across the correct part of the channel. See the figure below.
     * Make sure your final shoreline cuts the skeleton into two disconnected components.
-    * Again, don't worry about intersecting portions of the skeleton other than the outlet links. 
+    * Again, don't worry about intersecting portions of the skeleton other than the outlet links.
     * It gets easier with a little practice, and you may have to iterate a time or two to achieve your desired result.
 
 .. image:: ../../images/shoreline_howto1.PNG
@@ -73,5 +73,3 @@ After we run ``mydelta.prune_network()`` (and specifying the proper paths for th
   The pruned network is in blue; the outlet nodes are yellow.
 
 Notice that all the spurious skeleton portions have been trimmed, as have all the links in the ocean. We also see outlet nodes have been placed exactly where the shoreline intersected the skeleton.
-
-

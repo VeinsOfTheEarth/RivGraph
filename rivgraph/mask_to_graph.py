@@ -4,7 +4,7 @@ Mask to Graph Utilities (mask_to_graph.py)
 
 Functions for converting a binary channel mask to a graphical representation.
 """
-
+from loguru import logger
 import cv2
 import numpy as np
 from skimage import morphology, measure
@@ -231,7 +231,7 @@ def skel_to_graph(Iskel):
                         links = lnu.link_updater(links, linkid, noturnidx)
                     # Else, shit. You've found a critical flaw in the algorithm.
                     else:
-                        print('idx: {}, poss_steps: {}'.format(links['idx'][linkidx][-1], poss_steps))
+                        logger.info('idx: {}, poss_steps: {}'.format(links['idx'][linkidx][-1], poss_steps))
                         raise RuntimeError('Ambiguous which step to take next :( Please raise issue at https://github.com/jonschwenk/RivGraph/issues.')
 
                 elif sum(isbp) == 1:
@@ -258,7 +258,7 @@ def skel_to_graph(Iskel):
 
                         # If we don't have exactly one, shit.
                         if len(isbp_and_fourconn_idx) != 1:
-                            print('idx: {}, poss_steps: {}'.format(links['idx'][linkidx][-1], poss_steps))
+                            logger.info('idx: {}, poss_steps: {}'.format(links['idx'][linkidx][-1], poss_steps))
                             raise RuntimeError('There is not a unique branchpoint to step to.')
                         else:
                             links = lnu.link_updater(links, linkid, poss_steps[isbp_and_fourconn_idx[0]])
@@ -412,8 +412,8 @@ def simplify_skel(Iskel):
             continue
 
         # Create 3x3 array with center pixel removed
-        Inv = np.array([[nv[0], nv[1], nv[2]], [nv[3], 0, nv[4]], [nv[5], nv[6], nv[7]]], dtype=np.bool)
-
+        Inv = np.array([[nv[0], nv[1], nv[2]], [nv[3], 0,
+                         nv[4]], [nv[5], nv[6], nv[7]]], dtype=bool)
 
         # Check the connectivity after removing the pixel, set to zero if unchanged
         Ilabeled = measure.label(Inv, background=0, connectivity=2)
@@ -468,7 +468,7 @@ def pad_river_im(I, es, pm=2):
         pads[0] = (en-st) * pm
 
         # Make pad
-        addpad = np.zeros((pads[0], Ip.shape[1]), dtype=np.bool)
+        addpad = np.zeros((pads[0], Ip.shape[1]), dtype=bool)
         addpad[:,rowidcs] = True
 
         # Add pad to image
@@ -482,7 +482,7 @@ def pad_river_im(I, es, pm=2):
         pads[1] = (en-st) * pm
 
         # Make pad
-        addpad = np.zeros((pads[1], Ip.shape[1]), dtype=np.bool)
+        addpad = np.zeros((pads[1], Ip.shape[1]), dtype=bool)
         addpad[:,rowidcs] = True
 
         # Add pad to image
@@ -496,7 +496,7 @@ def pad_river_im(I, es, pm=2):
         pads[2] = (en-st) * pm
 
         # Make pad
-        addpad = np.zeros((Ip.shape[0], pads[2]), dtype=np.bool)
+        addpad = np.zeros((Ip.shape[0], pads[2]), dtype=bool)
         addpad[colidcs,:] = True
         Ip = np.concatenate((Ip, addpad), axis=1)
 
@@ -508,7 +508,7 @@ def pad_river_im(I, es, pm=2):
         pads[3] = (en-st) * pm
 
         # Make pad
-        addpad = np.zeros((Ip.shape[0], pads[3]), dtype=np.bool)
+        addpad = np.zeros((Ip.shape[0], pads[3]), dtype=bool)
         addpad[colidcs,:] = True
         Ip = np.concatenate((addpad, Ip), axis=1)
 

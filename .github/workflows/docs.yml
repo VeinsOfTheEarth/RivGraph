@@ -12,20 +12,25 @@ jobs:
       uses: actions/checkout@v2
       with:
         persist-credentials: false
-    - name: Set up Python 3.x
-      uses: actions/setup-python@v2
+    - uses: conda-incubator/setup-miniconda@v2
       with:
-        python-version: '3.x'
-    - name: Install dependencies
+        python-version: '3.9'
+        mamba-version: "*"
+        channels: conda-forge, defaults
+    - name: Install RivGraph, dependencies, and Sphinx then build docs
+      shell: bash -l {0}
       run: |
+        mamba env create -q --file environment.yml
+        conda activate rivgraph
+        conda uninstall rivgraph
+        python setup.py install
         python -m pip install --upgrade pip
         pip install sphinx==2.0.1
         sudo apt update -y && sudo apt install -y latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended dvipng
         pip install sphinx-rtd-theme
+        pip install sphinx-gallery
         pip install ipython
         pip install ipykernel
-    - name: Build and test documentation
-      run: |
         (cd docs && make docs)
         (cd docs && make html)
     - name: Debug

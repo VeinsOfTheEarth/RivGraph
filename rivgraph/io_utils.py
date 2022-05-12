@@ -57,17 +57,29 @@ def prepare_paths(path_results, name, path_mask):
     paths = dict()
 
     paths['basepath'] = basepath
-    paths['maskpath'] = path_mask                                                     # geotiff binary mask; must be input by user
-    paths['Iskel'] = os.path.join(basepath, name + "_skel.tif")                      # geotiff of skeletonized mask
-    paths['Idist'] = os.path.join(basepath, name + "_dist.tif")                      # geotiff of distance transform of mask
-    paths['network_pickle'] = os.path.join(basepath, name + "_network.pkl")          # links and nodes dictionaries, pickled
-    paths['fixlinks_csv'] = os.path.join(basepath, name + "_fixlinks.csv")           # csv file to manually fix link directionality, must be created by user
-    paths['linkdirs'] = os.path.join(basepath, name + "_link_directions.tif")        # tif file that shows link directionality
-    paths['metrics'] = os.path.join(basepath, name + "_metrics.pkl")                 # metrics dictionary
+    # geotiff binary mask; must be input by user
+    paths['maskpath'] = path_mask
+    # geotiff of skeletonized mask
+    paths['Iskel'] = os.path.join(basepath, name + "_skel.tif")
+    # geotiff of distance transform of mask
+    paths['Idist'] = os.path.join(basepath, name + "_dist.tif")
+    # links and nodes dictionaries, pickled
+    paths['network_pickle'] = os.path.join(basepath, name + "_network.pkl")
+    # csv file to manually fix link directionality, must be created by user
+    paths['fixlinks_csv'] = os.path.join(basepath, name + "_fixlinks.csv")
+    # tif file that shows link directionality
+    paths['linkdirs'] = os.path.join(basepath, name + "_link_directions.tif")
+    # metrics dictionary
+    paths['metrics'] = os.path.join(basepath, name + "_metrics.pkl")
+    # log file path
+    paths['log'] = os.path.join(basepath, name + "_log.log")
 
-    # The files at the following paths are not created by RivGraph, but by the user.
-    paths['shoreline'] = os.path.join(basepath, name + "_shoreline.shp")     # shoreline shapefile, must be created by user
-    paths['inlet_nodes'] = os.path.join(basepath, name + "_inlet_nodes.shp") # inlet nodes shapefile, must be created by user
+    # The files at the following paths are not created by RivGraph,
+    # but by the user.
+    # shoreline shapefile, must be created by user
+    paths['shoreline'] = os.path.join(basepath, name + "_shoreline.shp")
+    # inlet nodes shapefile, must be created by user
+    paths['inlet_nodes'] = os.path.join(basepath, name + "_inlet_nodes.shp")
 
     return paths
 

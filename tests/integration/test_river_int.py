@@ -4,10 +4,6 @@ import sys
 import os
 import io
 import numpy as np
-
-from inspect import getsourcefile
-basepath = os.path.dirname(os.path.dirname(os.path.abspath(getsourcefile(lambda:0))))
-sys.path.insert(0, basepath)
 from rivgraph.classes import river
 from rivgraph import geo_utils
 from rivgraph.rivers import river_utils as ru
@@ -84,63 +80,29 @@ def test_assign_flow_directions(test_river, known_river):
     assert match_counter / len(ind_list) > 0.9
 
 
-def test_assign_flow_directions_verbose(test_river):
-    """Test assigning flow directions verbosity."""
-    # set up capture string
-    capturedOutput = io.StringIO()
-    sys.stdout = capturedOutput
-
-    print(test_river)
-
-    test_river.verbose = True
-    test_river.assign_flow_directions()
-
-    # grab output
-    sys.stdout = sys.__stdout__
-    # assert output
-    
-    properVerbosity = False
-    if 'Setting link directionality...' in capturedOutput.getvalue()[:-1]:
-        if 'to manually set flow directions.' in capturedOutput.getvalue()[:-1]:
-            if 'Attempting to fix' in capturedOutput.getvalue()[:-1]:
-                properVerbosity = True
-  
-    assert properVerbosity == True
+# def test_assign_flow_directions_verbose(test_river):
+#     """Test assigning flow directions verbosity."""
+#     # set up capture string
+#     capturedOutput = io.StringIO()
+#     sys.stdout = capturedOutput
+#
+#     print(test_river)
+#
+#     test_river.verbose = True
+#     test_river.assign_flow_directions()
+#
+#     # grab output
+#     sys.stdout = sys.__stdout__
+#     # assert output
+#
+#     properVerbosity = False
+#     if 'Setting link directionality...' in capturedOutput.getvalue()[:-1]:
+#         if 'to manually set flow directions.' in capturedOutput.getvalue()[:-1]:
+#             if 'Attempting to fix' in capturedOutput.getvalue()[:-1]:
+#                 properVerbosity = True
+#
+#     assert properVerbosity == True
     # assert capturedOutput.getvalue()[:-1] == 'Setting link directionality...Using tests/results/brahma/Brahmclip_fixlinks.csv to manually set flow directions.\nAttempting to fix 3 cycles.\nCould not fix cycle links: [[1472, 1471, 1452, 1455, 1476], [1604, 1634, 1635, 1605]].\nUse the csv file at tests/results/brahma/Brahmclip_fixlinks.csv to manually fix link directions.\ndone.'
-
-
-def test_river_ne():
-    """Test river with exit sides 'ne'."""
-    img_path = os.path.join(basepath, os.path.normpath('tests/data/Brahma/brahma_mask_clip.tif'))
-    out_path = os.path.join(basepath, os.path.normpath('tests/results/brahma/cropped.tif'))
-    geo_utils.crop_geotif(img_path, npad=10, outpath=out_path)
-    test_ne = river('Brahmclip', out_path,
-                    os.path.join(basepath, os.path.normpath('tests/results/brahma/')), 
-                    exit_sides='ne')
-    test_ne.compute_network()
-    test_ne.compute_mesh()
-    test_ne.prune_network()
-
-    # make assertions
-    assert len(test_ne.nodes['inlets']) == 1
-    assert len(test_ne.nodes['outlets']) == 1
-    assert test_ne.exit_sides == 'ne'
-
-
-def test_river_sw():
-    """Test river with exit sides 'sw'."""
-    test_sw = river('Brahmclip', 
-                    os.path.join(basepath, os.path.normpath('tests/data/Brahma/brahma_mask_clip.tif')),
-                    os.path.join(basepath, os.path.normpath('tests/results/brahma/')), 
-                    exit_sides='sw')
-    test_sw.compute_network()
-    test_sw.compute_mesh()
-    test_sw.prune_network()
-
-    # make assertions
-    assert len(test_sw.nodes['inlets']) == 1
-    assert len(test_sw.nodes['outlets']) == 1
-    assert test_sw.exit_sides == 'sw'
 
 
 # def test_chan_width(test_river):
@@ -156,7 +118,7 @@ def test_river_sw():
 def test_max_valley_width(test_river):
     """Test max_valley_width function."""
     mvw = ru.max_valley_width(test_river.Imask)
-    
+
     # make assertions
     assert mvw == pytest.approx(479.8541445064323)
 
@@ -199,3 +161,35 @@ def test_centerline_mesh(test_river):
     assert np.shape(cl_resampled) == (95, 2)
     assert np.shape(s_out) == (86,)
     assert s_out[-1] == pytest.approx(134836.27933429673)
+
+
+def test_river_dirs(tmp_path):
+    """Test river with exit sides 'ne' and 'sw'."""
+    img_path = os.path.normpath(
+        'tests/integration/data/Brahma/brahma_mask_clip.tif')
+    out_path = os.path.join(tmp_path, 'cropped.tif')
+    geo_utils.crop_geotif(img_path, npad=10, outpath=out_path)
+    test_ne = river('Brahmclip', out_path,
+                    os.path.join(tmp_path, 'brahma'),
+                    exit_sides='ne')
+    test_ne.compute_network()
+    test_ne.compute_mesh()
+    test_ne.prune_network()
+
+    # make assertions
+    assert len(test_ne.nodes['inlets']) == 1
+    assert len(test_ne.nodes['outlets']) == 1
+    assert test_ne.exit_sides == 'ne'
+
+    # test sw
+    test_sw = river('Brahmclip', out_path,
+                    os.path.join(tmp_path, 'brahma'),
+                    exit_sides='sw')
+    test_sw.compute_network()
+    test_sw.compute_mesh()
+    test_sw.prune_network()
+
+    # make assertions
+    assert len(test_sw.nodes['inlets']) == 1
+    assert len(test_sw.nodes['outlets']) == 1
+    assert test_sw.exit_sides == 'sw'

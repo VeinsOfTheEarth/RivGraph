@@ -6,6 +6,7 @@ Directionality Utilities (directionality.py)
 Created on Wed Nov  7 11:38:16 2018
 @author: Jon
 """
+from loguru import logger
 import os
 import numpy as np
 import networkx as nx
@@ -1194,7 +1195,7 @@ def fix_cycles(links, nodes):
             # we just skip these and report them so they can be manually
             # corrected.
             if len(all_combos) > 1024:
-                print('The cycle links {} is too large to attempt to fix automatically.'.format(cycle_l))
+                logger.info('The cycle links {} is too large to attempt to fix automatically.'.format(cycle_l))
                 continue
 
             # Iterate through each combination and determine violations: there are four conditions that must be met:
@@ -1270,7 +1271,7 @@ def fix_cycles(links, nodes):
             poss_configs = [i for i, (nv, nc, hp, ms) in enumerate(zip(cont_violators, len_cycle, has_path, manually_set)) if nv == 0 and nc == 0 and hp == 1 and ms == 0]
 
             if len(poss_configs) == 0:
-                print('Unfixable cycle found at links: {}.'.format(cycle_l))
+                logger.info('Unfixable cycle found at links: {}.'.format(cycle_l))
                 continue
 
             # Choose the configuration that flips the fewest links
@@ -1322,13 +1323,13 @@ def dir_set_manually(links, nodes, manual_set_csv):
 
     # Read the csv file for fixing link directions.
     if os.path.isfile(manual_set_csv) is False:
-        print('No file found for manually setting link directions.')
+        logger.info('No file found for manually setting link directions.')
         io.create_manual_dir_csv(manual_set_csv)
-        print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
+        logger.info('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
 
         return links, nodes
     else:
-        print('Using {} to manually set flow directions.'.format(manual_set_csv))
+        logger.info('Using {} to manually set flow directions.'.format(manual_set_csv))
 
     df = pd.read_csv(manual_set_csv)
 
@@ -1437,7 +1438,7 @@ def set_continuity(links, nodes, checknodes='all'):
         conn = nodes['conn'][nindex]
 
         # Initialize bookkeeping for all the links connected to this node
-        linkdir = np.zeros((len(conn), 1), dtype=np.int)  # 0 if uncertain, 1 if into, 2 if out of
+        linkdir = np.zeros((len(conn), 1), dtype=int)  # 0 if uncertain, 1 if into, 2 if out of
 
         if linkdir.shape[0] < 2:
             continue
@@ -1937,7 +1938,7 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
     Method 1 sets a broken link if its counterpart is known.
     Method 2 sets a side of the loop if the other side is known.
     Method 3 sets both sides if the input to one of the end nodes is known.
-    
+
     Parameters
     ----------
     links : dict
@@ -1947,7 +1948,7 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
     checknodes : int or str, optional
         Node ids to check for presence of settable artificial links. If 'all',
         all nodes in the network are checked.
-    
+
     Returns
     -------
     links : dict

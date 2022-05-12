@@ -6,6 +6,7 @@ delta_utils
 A collection of functions for pruning a delta channel network.
 
 """
+from loguru import logger
 import geopandas as gpd
 from pyproj.crs import CRS
 import numpy as np
@@ -14,7 +15,8 @@ import rivgraph.geo_utils as gu
 import rivgraph.ln_utils as lnu
 
 
-def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
+def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj,
+                prune_less):
     """
     Prune a delta network.
 
@@ -34,6 +36,9 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
     gdobj : osgeo.gdal.Dataset
         gdal object corresponding to the georeferenced input binary channel
         mask
+    prune_less : bool
+        Boolean to prune the network less... the first spur removal can
+        create problems, especially for very small/simple networks.
 
     Returns
     -------
@@ -46,9 +51,10 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
     # Get inlet nodes
     nodes = find_inlet_nodes(nodes, inlets_shp, gdobj)
 
-    # Remove spurs from network (this includes valid inlets and outlets)
-    links, nodes = lnu.remove_all_spurs(links, nodes,
-                                        dontremove=list(nodes['inlets']))
+    if prune_less is False:
+        # Remove spurs from network (this includes valid inlets and outlets)
+        links, nodes = lnu.remove_all_spurs(links, nodes,
+                                            dontremove=list(nodes['inlets']))
 
     # Clip the network with a shoreline polyline, adding outlet nodes
     links, nodes = clip_by_shoreline(links, nodes, shoreline_shp, gdobj)
@@ -56,7 +62,7 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj):
     # Remove spurs from network (this includes valid inlets and outlets)
     links, nodes = lnu.remove_all_spurs(links, nodes,
                                         dontremove=list(nodes['inlets']) +
-                                                    list(nodes['outlets']))
+                                        list(nodes['outlets']))
 
     # Remove sets of links that are disconnected from inlets/outlets except for
     # a single bridge link (effectively re-pruning the network)
@@ -103,7 +109,7 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
     mask_crs = CRS(gdobj.GetProjection())
     if inlets_gpd.crs != mask_crs:
         inlets_gpd = inlets_gpd.to_crs(mask_crs)
-        print('Provided inlet points file does not have the same CRS as provided mask. Reprojecting.')
+        logger.info('Provided inlet points file does not have the same CRS as provided mask. Reprojecting.')
 
     # Convert all nodes to xy coordinates for distance search
     nodes_xy = gu.idx_to_coords(nodes['idx'], gdobj)
@@ -158,7 +164,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     # Enusre we have consistent CRS before intersecting
     if links_gdf.crs != shore_gdf.crs:
         shore_gdf = shore_gdf.to_crs(links_gdf.crs)
-        print('Provided shoreline file does not have the same CRS as provided mask. Reprojecting.')
+        logger.info('Provided shoreline file does not have the same CRS as provided mask. Reprojecting.')
 
 
     # Remove the links beyond the shoreline
@@ -242,7 +248,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
     # Ensure all inlets are contained in this network
     for nid in nodes['inlets']:
         if len(main_net - nx.node_connected_component(G, nid)) > 0:
-            print('Not all inlets found in main connected component.')
+            logger.info('Not all inlets found in main connected component.')
 
     # Remove all nodes not in the main network
     remove_nodes = [n for n in G.nodes if n not in main_net]

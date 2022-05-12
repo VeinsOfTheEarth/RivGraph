@@ -7,6 +7,7 @@ Created on Mon Sep 10 09:59:52 2018
 
 @author: Jon
 """
+from loguru import logger
 import shapely
 import numpy as np
 from scipy.stats import mode
@@ -47,7 +48,7 @@ def add_node(nodes, idx, linkconn):
         linkconn = [linkconn]
 
     if idx in nodes['idx']:
-        print('Node already in set; returning unchanged.')
+        logger.info('Node already in set; returning unchanged.')
         return nodes
 
     # Find new node ID
@@ -232,7 +233,7 @@ def delete_node(nodes, nodeid, warn=True):
     # Check that the node has no connectivity
     nodeidx = nodes['id'].index(nodeid)
     if len(nodes['conn'][nodeidx]) != 0 and warn == True:
-        print('You are deleting node {} which still has connections to links.'.format(nodeid))
+        logger.info('You are deleting node {} which still has connections to links.'.format(nodeid))
 
     # Remove the node and its properties
     for nk in nodekeys:
@@ -353,9 +354,17 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
 
     - 'wid' : the average width of all pixels of the link
 
-    - 'wid_adj' : the "adjusted" average width of all link pixels excluding "false" pixels
+    - 'wid_adj' : the "adjusted" average width of all link pixels excluding
+                  "false" pixels
 
-    - 'len_adj' : the "adjusted" length of the link after excluding "false" pixels
+    - 'wid_med' : median of 'adjusted' width values
+
+    - 'len_adj' : the "adjusted" length of the link after excluding
+                  "false" pixels
+
+    - 'sinuosity' : simple sinuosity using euclidean distances in the array-
+                    space. does not take projection or geoid into account.
+                    is length of channel / euclidean distance
 
     Parameters
     ----------
@@ -375,14 +384,14 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
         Network links with width and length properties appended.
 
     """
-    #TODO: add median width OR just change wid_adj to be median?
-
     # Initialize attribute storage
     links['wid_pix'] = []  # width at each pixel
     links['len'] = []
     links['wid'] = []
     links['wid_adj'] = []  # average of all link pixels considered to be part of actual channel
+    links['wid_med'] = []  # median of all link px in channel
     links['len_adj'] = []
+    links['sinuosity'] = []  # channel sinuosity for adjusted length
 
     dims = Idt.shape
 
@@ -404,24 +413,44 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
         dists = np.insert(dists, 0, 0) * pixlen
 
         # Compute distances along link in opposite direction
-        revdists = np.cumsum(np.flipud(np.sqrt(np.diff(xy[0])**2 + np.diff(xy[1])**2)))
+        revdists = np.cumsum(np.flipud(np.sqrt(np.diff(xy[0])**2 +
+                                               np.diff(xy[1])**2)))
         revdists = np.insert(revdists, 0, 0) * pixlen
 
         # Find the first and last pixel along the link that is at least a half-width's distance away
         startidx = np.argmin(np.abs(dists - widths[0]/2*width_mult))
-        endidx = len(dists) - np.argmin(np.abs(revdists - widths[-1]/2*width_mult)) - 1
+        endidx = len(dists) - np.argmin(np.abs(revdists - widths[-1] /
+                                               2*width_mult)) - 1
 
         # Ensure there are enough pixels to trim the ends by the pixel half-width
         if startidx >= endidx:
             links['wid_adj'].append(np.mean(widths))
+            links['wid_med'].append(np.median(widths))
             links['len_adj'].append(dists[-1])
+            # straight-line distance between first and last pixel of link
+            st_dist = np.sqrt((xy[0][0]-xy[0][-1])**2 +
+                              (xy[1][0]-xy[1][-1])**2) * pixlen
+            # sinuosity =  channel len / straight line length
+            links['sinuosity'].append(dists[-1] / st_dist)
         else:
             links['wid_adj'].append(np.mean(widths[startidx:endidx]))
+            links['wid_med'].append(np.median(widths[startidx:endidx]))
             links['len_adj'].append(dists[endidx] - dists[startidx])
+            # straight-line distance between first and last pixel of link
+            st_dist = np.sqrt((xy[0][startidx]-xy[0][endidx])**2 +
+                              (xy[1][startidx]-xy[1][endidx])**2) * pixlen
+            # sinuosity =  channel len / straight line length
+            links['sinuosity'].append((dists[endidx]-dists[startidx])/st_dist)
 
         # Unadjusted lengths and widths
         links['wid'].append(np.mean(widths))
         links['len'].append(dists[-1])
+
+        # Ensure the minimum width and length equal to the pixel resolution
+        links['wid'][-1] = max(pixlen, links['wid'][-1])
+        links['len'][-1] = max(pixlen, links['len'][-1])
+        links['wid_adj'][-1] = max(pixlen, links['wid_adj'][-1])
+        links['len_adj'][-1] = max(pixlen, links['len_adj'][-1])
 
     return links
 
@@ -912,10 +941,10 @@ def remove_two_link_nodes(links, nodes, dontremove):
             conn = nodes['conn'][nidx][:]
             # We want to combine links where a node has only two connections
             if len(conn) == 2 and nid not in dontremove:
-                
+
                 # First check if the node is connected to itself. This can
                 # happen for small subnetworks where all the spurs have been
-                # removed, leaving an isolated loop. (Occurs in masks that 
+                # removed, leaving an isolated loop. (Occurs in masks that
                 # have not been filtered to the largest connected component.)
                 # See https://github.com/jonschwenk/RivGraph/issues/32
                 if len(set(conn)) == 1:
@@ -1223,7 +1252,7 @@ def add_artificial_nodes(links, nodes, gd_obj):
         for tr in to_rem:
             if tr in links.keys():
                 del links[tr]
-        print('{} artificial nodes added. Link lengths and widths should be recomputed via the link_widths_and_lengths() function in ln_utils.'.format(len(arts)))
+        logger.info('{} artificial nodes added. Link lengths and widths should be recomputed via the link_widths_and_lengths() function in ln_utils.'.format(len(arts)))
 
     return links, nodes
 
@@ -1529,8 +1558,8 @@ def links_to_gpd(links, gdobj):
     links_gpd['id'] = links['id']
     links_gpd['us node'] = [c[0] for c in links['conn']]
     links_gpd['ds node'] = [c[1] for c in links['conn']]
-    
-    # Assign CRS - done last to avoid DeprecationWarning - need geometry 
+
+    # Assign CRS - done last to avoid DeprecationWarning - need geometry
     # to exist before assigning CRS.
     links_gpd.crs = CRS(gdobj.GetProjection())
 

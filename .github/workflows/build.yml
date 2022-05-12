@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.8]
+        python-version: [3.9]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
@@ -31,6 +31,7 @@ jobs:
           pip install pytest pytest-timeout pytest-cov coveralls coverage
           python setup.py install
           coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
+          conda list
 
   windows-build:
     runs-on: ${{ matrix.os }}
@@ -38,7 +39,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        python-version: [3.8]
+        python-version: [3.9]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
@@ -58,6 +59,7 @@ jobs:
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
           pytest --cov-config=.coveragerc --cov=rivgraph/
+          conda list
 
   macos-build:
     runs-on: ${{ matrix.os }}
@@ -65,7 +67,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest]
-        python-version: [3.8]
+        python-version: [3.9]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
@@ -85,3 +87,4 @@ jobs:
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
           pytest --cov-config=.coveragerc --cov=rivgraph/
+          conda list

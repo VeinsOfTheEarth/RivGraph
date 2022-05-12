@@ -248,7 +248,7 @@ def four_conn(idcs, I):
         Number of four-connected neighbors for each index in idcs.
     """
 
-    Iflat = np.ravel(np.array(I, dtype=np.bool))
+    Iflat = np.ravel(np.array(I, dtype=bool))
 
     fourconn = []
     for i in idcs:
@@ -306,7 +306,7 @@ def neighbor_idcs(c, r):
     column and row.
 
     Returns are ordered as
-    
+
     [0 1 2
      3   4
      5 6 7]
@@ -422,7 +422,7 @@ def neighbor_xy(c, r, idx):
     """
     Returns the coordinates of a neighbor of a pixel given the index of the
     desired neighbor. Indices should be provided according to
-    
+
     [0 1 2
      3   4
      5 6 7].
@@ -444,8 +444,8 @@ def neighbor_xy(c, r, idx):
         Row of the neighbor pixel.
 
     """
-    cs = np.array([-1, 0, 1, -1, 1 , -1, 0, 1], dtype=np.int)
-    rs = np.array([-1, -1, -1, 0, 0, 1, 1, 1], dtype=np.int)
+    cs = np.array([-1, 0, 1, -1, 1 , -1, 0, 1], dtype=int)
+    rs = np.array([-1, -1, -1, 0, 0, 1, 1, 1], dtype=int)
 
     c = c + cs[idx]
     r = r + rs[idx]
@@ -641,7 +641,7 @@ def regionprops(I, props, connectivity=2):
     cant_do = set(props) - set(props_do)
     if len(cant_do) > 0:
         print('Cannot compute the following properties: {}'.format(cant_do))
-    
+
     Ilabeled = measure.label(I, background=0, connectivity=connectivity)
     properties = measure.regionprops(Ilabeled, intensity_image=I)
 
@@ -654,7 +654,7 @@ def regionprops(I, props, connectivity=2):
         if prop == 'area':
             out[prop] = np.array([p.area for p in properties])
         elif prop == 'coords':
-            out[prop] = np.array(coords)
+            out[prop] = list(coords)
         elif prop == 'centroid':
             out[prop] = np.array([p.centroid for p in properties])
         elif prop == 'mean':
@@ -889,7 +889,7 @@ def fill_holes(I, maxholesize=0):
 
     """
 
-    I = np.array(I, dtype=np.bool)
+    I = np.array(I, dtype=bool)
 
     if maxholesize == 0:
         I = nd.morphology.binary_fill_holes(I)
@@ -1343,7 +1343,7 @@ def skel_pixel_curvature(Iskel, nwalk=4):
     px = np.ndarray.tolist(skelpix[:, 1])
 
     # Initialize storage image
-    I = np.zeros_like(Iskel, dtype=np.float)
+    I = np.zeros_like(Iskel, dtype=float)
     I.fill(np.nan)
 
     # Loop through each pixel to compute its curvature
@@ -1456,7 +1456,7 @@ def skel_pixel_curvature(Iskel, nwalk=4):
         if np.isnan(x1):
             if np.ptp(xs1) >= np.ptp(ys1):
                 w1fit = [np.array(xs1, ndmin=2), np.array(ys1, ndmin=2)]
-                m1 = np.linalg.lstsq(w1fit[0].T, w1fit[1].T)[0]
+                m1 = np.linalg.lstsq(w1fit[0].T, w1fit[1].T, rcond=-1)[0]
                 dx = 1 * np.sign(walks[0][0][-1]-walks[0][0][0])
                 if dx == 0:
                     dx = 1
@@ -1464,7 +1464,7 @@ def skel_pixel_curvature(Iskel, nwalk=4):
                 y1 = -m1 * dx
             else:
                 w1fit = [np.array(ys1, ndmin=2), np.array(xs1, ndmin=2)]
-                m1 = np.linalg.lstsq(w1fit[0].T, w1fit[1].T)[0]
+                m1 = np.linalg.lstsq(w1fit[0].T, w1fit[1].T, rcond=-1)[0]
                 dy = -(1 * np.sign(walks[0][1][-1] - walks[0][1][0]))
                 y1 = dy
                 x1 = -m1 * dy
@@ -1472,7 +1472,7 @@ def skel_pixel_curvature(Iskel, nwalk=4):
         if np.isnan(x2):
             if np.ptp(xs2) >= np.ptp(ys2):
                 w2fit = [np.array(xs2, ndmin=2), np.array(ys2, ndmin=2)]
-                m2 = np.linalg.lstsq(w2fit[0].T, w2fit[1].T)[0]
+                m2 = np.linalg.lstsq(w2fit[0].T, w2fit[1].T, rcond=-1)[0]
                 dx = 1 * np.sign(walks[1][0][-1]-walks[1][0][0])
                 if dx == 0:
                     dx = 1
@@ -1480,7 +1480,7 @@ def skel_pixel_curvature(Iskel, nwalk=4):
                 y2 = -m2 * dx
             else:
                 w2fit = [np.array(ys2, ndmin=2), np.array(xs2, ndmin=2)]
-                m2 = np.linalg.lstsq(w2fit[0].T, w2fit[1].T)[0]
+                m2 = np.linalg.lstsq(w2fit[0].T, w2fit[1].T, rcond=-1)[0]
                 dy = -(1 * np.sign(walks[1][1][-1] - walks[1][1][0]))
                 y2 = dy
                 x2 = -m2 * dy
