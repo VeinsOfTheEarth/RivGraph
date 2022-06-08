@@ -62,9 +62,10 @@ jobs:
       - name: install RivGraph + dependencies, then unit test
         run: |
           conda create -n rivgraph --file conda-win-64.lock
-          conda activate rivgraph          
+          conda activate rivgraph
+          conda env list
           pip install pytest pytest-timeout pytest-cov coveralls
-          python setup.py install
+          pip install --upgrade -e .
           python -m pytest --cov-config=.coveragerc --cov=rivgraph/
           conda list
 
