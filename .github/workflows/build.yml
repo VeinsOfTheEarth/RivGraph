@@ -31,7 +31,7 @@ jobs:
       - name: install RivGraph + dependencies, then unit test
         run: |
           conda env list
-          pip install wheel
+          conda install -c conda-forge pip
           pip install pytest pytest-timeout pytest-cov coveralls coverage
           pip install --upgrade -e .
           coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
@@ -60,7 +60,7 @@ jobs:
       - name: install RivGraph + dependencies, then unit test
         run: |          
           conda env list
-          pip install wheel
+          conda install -c conda-forge pip
           pip install pytest pytest-timeout pytest-cov coveralls
           pip install --upgrade -e .
           python -m pytest --cov-config=.coveragerc --cov=rivgraph/
