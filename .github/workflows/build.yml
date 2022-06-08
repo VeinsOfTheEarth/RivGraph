@@ -68,32 +68,3 @@ jobs:
           pip install --upgrade -e .
           python -m pytest --cov-config=.coveragerc --cov=rivgraph/
           conda list
-
-  macos-build:
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: sh -l {0}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest]
-        python-version: [3.9]
-    env:
-      OS: ${{ matrix.os }}
-      PYTHON: ${{ matrix.python-version }}
-    steps:
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          mamba-version: "*"
-          channels: conda-forge, defaults
-      - uses: actions/checkout@v2
-      - name: install RivGraph + dependencies, then unit test
-        run: |
-          conda env create -f environment.yml
-          conda activate rivgraph          
-          pip install pytest pytest-timeout pytest-cov coveralls
-          python setup.py install
-          python -m pytest --cov-config=.coveragerc --cov=rivgraph/
-          conda list
