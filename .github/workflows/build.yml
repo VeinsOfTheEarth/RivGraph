@@ -33,7 +33,6 @@ jobs:
         run: |
           conda env create -f environment.yml
           conda activate rivgraph
-          conda install shapely=1.7.1 -c conda-forge
           pip install pytest pytest-timeout pytest-cov coveralls coverage
           python setup.py install
           coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
@@ -57,12 +56,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           miniconda-version: "latest"
-          channels: conda-forge, defaults
+          channels: conda-forge
+          activate-environment: rivgraph
+          environment-file: conda-win-64.lock
       - uses: actions/checkout@v2
       - name: install RivGraph + dependencies, then unit test
-        run: |
-          conda create -n rivgraph --file conda-win-64.lock
-          conda activate rivgraph
+        run: |          
           conda env list
           pip install pytest pytest-timeout pytest-cov coveralls
           pip install --upgrade -e .
