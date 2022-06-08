@@ -61,7 +61,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: install RivGraph + dependencies, then unit test
         run: |
-          conda env create -f environment.yml
+          conda install -c conda-forge conda-lock
+          conda create -n rivrgraph --file conda-win-64.lock
           conda activate rivgraph          
           pip install pytest pytest-timeout pytest-cov coveralls
           python setup.py install
