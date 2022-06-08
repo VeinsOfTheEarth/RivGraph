@@ -19,20 +19,18 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.9]
     env:
       OS: ${{ matrix.os }}
-      PYTHON: ${{ matrix.python-version }}
     steps:
+      - uses: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: ${{ matrix.python-version }}
-          channels: conda-forge, defaults
-      - uses: actions/checkout@v2
+          channels: conda-forge
+          activate-environment: rivgraph
+          environment-file: conda-linux-64.lock
       - name: install RivGraph + dependencies, then unit test
         run: |
-          conda env create -f environment.yml
-          conda activate rivgraph
+          conda env list
           pip install pytest pytest-timeout pytest-cov coveralls coverage
           python setup.py install
           coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
