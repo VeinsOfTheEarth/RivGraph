@@ -4,8 +4,9 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Background &mdash; RivGraph 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Background &mdash; RivGraph 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
       <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
       <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
@@ -13,11 +14,12 @@
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -30,7 +32,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
                 0.4
@@ -88,9 +91,9 @@
            <div itemprop="articleBody">
              
   <section id="background">
-<span id="id1"></span><h1>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Background<a class="headerlink" href="#background" title="Permalink to this heading"></a></h1>
 <section id="the-birth-of-rivgraph">
-<h2>The Birth of RivGraph<a class="headerlink" href="#the-birth-of-rivgraph" title="Permalink to this headline">¶</a></h2>
+<h2>The Birth of RivGraph<a class="headerlink" href="#the-birth-of-rivgraph" title="Permalink to this heading"></a></h2>
 <p>In 2016, I walked into the postdoc office at the Saint Anthony Falls Laboratory to see deltas on display as 8.5 x 11 sheets of paper
 taped together with hand-drawn markings all over. My colleagues Alejandro Tejedor and Anthony Longjas were trying to whip these deltas
 into shape for a series of papers (<a class="reference external" href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016577%4010.1002/%28ISSN%291944-7973.CONART1">1</a>, <a class="reference external" href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016604">2</a>) introducing a new way to think about deltas: through the lens of their channel networks. As I
@@ -106,7 +109,7 @@ cases. However, as the user base continues to grow, improvements and upgrades ha
 to the mix and report any bugs you find using Github’s <a class="reference external" href="https://github.com/jonschwenk/RivGraph/issues">issue tracker</a>.</p>
 </section>
 <section id="what-s-different-about-rivgraph">
-<h2>What’s different about RivGraph?<a class="headerlink" href="#what-s-different-about-rivgraph" title="Permalink to this headline">¶</a></h2>
+<h2>What’s different about RivGraph?<a class="headerlink" href="#what-s-different-about-rivgraph" title="Permalink to this heading"></a></h2>
 <p>RivGraph fills a void in coding space by providing a full-featured package for working with masks of river channels.
 In my opinion, most of RivGraph is just a convenient collection of already-existing functionality like CRS handling, path management,
 etc. That said, there are three somewhat novel components of RivGraph that are not available elsewhere, or at least not available in
@@ -123,7 +126,7 @@ while transecting the centerline approximately perpendicularly. This was a surpr
 sure it’s <em>there</em> yet. The first iteration of this appeared in RivMAP, and there have probably been 3-4 method changes before settling on the current version, which uses Dynamic Time Warping (thanks <a class="reference external" href="https://pubs.geoscienceworld.org/gsa/geology/article/47/3/263/568705/High-curvatures-drive-river-meandering">Zoltan et. al</a> for introducing this to me, although I still contend that it’s inappropriate to use for measuring channel migration rates) to iteratively map vertices on buffered centerlines away from the original.</p>
 </section>
 <section id="is-rivgraph-only-for-channel-networks">
-<h2>Is RivGraph only for channel networks?<a class="headerlink" href="#is-rivgraph-only-for-channel-networks" title="Permalink to this headline">¶</a></h2>
+<h2>Is RivGraph only for channel networks?<a class="headerlink" href="#is-rivgraph-only-for-channel-networks" title="Permalink to this heading"></a></h2>
 <p>While RivGraph is designed around channel networks, it contains a smattering of tools that can be useful across a broad range of analyses.
 For instance, the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/mask_to_graph.py">mask_to_graph.py</a> script contains tools that will convert <em>any</em> binary mask to a vectorized skeleton, not just river
 channel networks. There are a number of image processing tools in <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py">im_utils.py</a> that I use frequently in other projects, like a Matlab-like

@@ -4,8 +4,9 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>rivers &mdash; RivGraph 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>rivers &mdash; RivGraph 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
       <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
       <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
@@ -13,11 +14,12 @@
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -29,7 +31,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
                 0.4
@@ -92,14 +95,14 @@
            <div itemprop="articleBody">
              
   <section id="rivers">
-<span id="id1"></span><h1>rivers<a class="headerlink" href="#rivers" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>rivers<a class="headerlink" href="#rivers" title="Permalink to this heading"></a></h1>
 <span class="target" id="module-rivgraph.rivers.river_directionality"></span><section id="river-directionality">
-<h2>river_directionality<a class="headerlink" href="#river-directionality" title="Permalink to this headline">¶</a></h2>
+<h2>river_directionality<a class="headerlink" href="#river-directionality" title="Permalink to this heading"></a></h2>
 <p>Created on Tue Nov  6 14:31:01 2018</p>
 <p>&#64;author: Jon</p>
-<dl class="function">
-<dt id="rivgraph.rivers.river_directionality.dir_centerline">
-<code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">dir_centerline</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>meshpolys</em>, <em>meshlines</em>, <em>Imask</em>, <em>gt</em>, <em>pixlen</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#dir_centerline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.dir_centerline" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_directionality.dir_centerline">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_directionality.</span></span><span class="sig-name descname"><span class="pre">dir_centerline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshpolys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Imask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixlen</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#dir_centerline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.dir_centerline" title="Permalink to this definition"></a></dt>
 <dd><p>Guess flow directions of links in a braided river channel.</p>
 <p>Guesses the flow direction of links in a braided river channel network by
 exploiting a “valleyline” centerline. Two metrics are computed to help
@@ -129,9 +132,9 @@ attributes appended.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_directionality.dir_link_widths">
-<code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">dir_link_widths</code><span class="sig-paren">(</span><em>links</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#dir_link_widths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.dir_link_widths" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_directionality.dir_link_widths">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_directionality.</span></span><span class="sig-name descname"><span class="pre">dir_link_widths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#dir_link_widths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.dir_link_widths" title="Permalink to this definition"></a></dt>
 <dd><p>Guess link directions based on link widths.</p>
 <p>Guesses each link’s direction based on link widths at the endpoints. The
 node with the larger width is guessed to be the upstream node. The ratio
@@ -152,9 +155,9 @@ appended.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_directionality.directional_info">
-<code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">directional_info</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>Imask</em>, <em>pixlen</em>, <em>exit_sides</em>, <em>gt</em>, <em>meshlines</em>, <em>meshpolys</em>, <em>Idt</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#directional_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.directional_info" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_directionality.directional_info">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_directionality.</span></span><span class="sig-name descname"><span class="pre">directional_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Imask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixlen</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_sides</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshpolys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Idt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#directional_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.directional_info" title="Permalink to this definition"></a></dt>
 <dd><p>Compute information for link direction setting.</p>
 <p>Computes all the information required for link directions to be set for
 a river channel network.</p>
@@ -183,9 +186,9 @@ downsteram sides of the image that the network intersects (e.g. ‘SW’).</p></
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_directionality.fix_river_cycle">
-<code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">fix_river_cycle</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>cyclelinks</em>, <em>cyclenodes</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#fix_river_cycle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.fix_river_cycle" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_directionality.fix_river_cycle">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_directionality.</span></span><span class="sig-name descname"><span class="pre">fix_river_cycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cyclelinks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cyclenodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imshape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#fix_river_cycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.fix_river_cycle" title="Permalink to this definition"></a></dt>
 <dd><p>Attempt to fix a single cycle.</p>
 <p>Attempts to resolve a single cycle within a river network. The general
 logic is that all link directions of the cycle are un-set except for those
@@ -216,9 +219,9 @@ possible.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_directionality.fix_river_cycles">
-<code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">fix_river_cycles</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#fix_river_cycles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.fix_river_cycles" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_directionality.fix_river_cycles">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_directionality.</span></span><span class="sig-name descname"><span class="pre">fix_river_cycles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imshape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#fix_river_cycles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.fix_river_cycles" title="Permalink to this definition"></a></dt>
 <dd><p>Attempt to resolve cycles in the network.</p>
 <p>Attempts to resolve all cycles within the river network. This function
 is essentially a wrapper for <a class="reference internal" href="#rivgraph.rivers.river_directionality.fix_river_cycle" title="rivgraph.rivers.river_directionality.fix_river_cycle"><code class="xref py py-func docutils literal notranslate"><span class="pre">fix_river_cycle()</span></code></a>, which is where the
@@ -246,9 +249,9 @@ unresolvable cycles.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_directionality.re_set_linkdirs">
-<code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">re_set_linkdirs</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>imshape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#re_set_linkdirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.re_set_linkdirs" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_directionality.re_set_linkdirs">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_directionality.</span></span><span class="sig-name descname"><span class="pre">re_set_linkdirs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imshape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#re_set_linkdirs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.re_set_linkdirs" title="Permalink to this definition"></a></dt>
 <dd><p>Reset link directions.</p>
 <p>Resets the link directions for a braided river channel network. This
 function is called to reset directions of links that belong to a cycle.</p>
@@ -270,9 +273,9 @@ function is called to reset directions of links that belong to a cycle.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_directionality.set_directionality">
-<code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">set_directionality</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>Imask</em>, <em>exit_sides</em>, <em>gt</em>, <em>meshlines</em>, <em>meshpolys</em>, <em>Idt</em>, <em>pixlen</em>, <em>manual_set_csv</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#set_directionality"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.set_directionality" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_directionality.set_directionality">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_directionality.</span></span><span class="sig-name descname"><span class="pre">set_directionality</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Imask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_sides</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshpolys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Idt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixlen</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">manual_set_csv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#set_directionality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.set_directionality" title="Permalink to this definition"></a></dt>
 <dd><p>Set direction of each link.</p>
 <p>This function sets the direction of each link within the network. It
 calls a number of helping functions and uses a somewhat-complicated logic
@@ -308,21 +311,21 @@ is None.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_directionality.set_unknown_cluster_by_widthpct">
-<code class="descclassname">rivgraph.rivers.river_directionality.</code><code class="descname">set_unknown_cluster_by_widthpct</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#set_unknown_cluster_by_widthpct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.set_unknown_cluster_by_widthpct" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_directionality.set_unknown_cluster_by_widthpct">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_directionality.</span></span><span class="sig-name descname"><span class="pre">set_unknown_cluster_by_widthpct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_directionality.html#set_unknown_cluster_by_widthpct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_directionality.set_unknown_cluster_by_widthpct" title="Permalink to this definition"></a></dt>
 <dd><p>Set unknown links based on width differences at endpoints.</p>
 <p>(flow goes wide-&gt;narrow)</p>
 </dd></dl>
 
 </section>
 <span class="target" id="module-rivgraph.rivers.river_utils"></span><section id="river-utils">
-<h2>river_utils<a class="headerlink" href="#river-utils" title="Permalink to this headline">¶</a></h2>
+<h2>river_utils<a class="headerlink" href="#river-utils" title="Permalink to this heading"></a></h2>
 <p>Created on Tue Nov  6 14:29:10 2018</p>
 <p>&#64;author: Jon</p>
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.centerline_mesh">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">centerline_mesh</code><span class="sig-paren">(</span><em>coords</em>, <em>width_chan</em>, <em>meshwidth</em>, <em>grid_spacing</em>, <em>smoothing_param=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#centerline_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.centerline_mesh" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_utils.centerline_mesh">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_utils.</span></span><span class="sig-name descname"><span class="pre">centerline_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_chan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#centerline_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.centerline_mesh" title="Permalink to this definition"></a></dt>
 <dd><p>Generate a centerline mesh.</p>
 <p>Generates a centerline mesh. Differs from <a class="reference internal" href="#rivgraph.rivers.river_utils.valleyline_mesh" title="rivgraph.rivers.river_utils.valleyline_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">valleyline_mesh()</span></code></a> in that
 it draws perpendiculars rather than offsetting the valley line to compute
@@ -340,23 +343,23 @@ don’t require an exceptionally wide mesh (i.e. not much change).</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.compute_eBI">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">compute_eBI</code><span class="sig-paren">(</span><em>path_meshlines</em>, <em>path_links</em>, <em>method='local'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#compute_eBI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.compute_eBI" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_utils.compute_eBI">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_utils.</span></span><span class="sig-name descname"><span class="pre">compute_eBI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_meshlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'local'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#compute_eBI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.compute_eBI" title="Permalink to this definition"></a></dt>
 <dd><p>method can be ‘local’ or ‘avg’</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.find_inlet_outlet_nodes">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">find_inlet_outlet_nodes</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>exit_sides</em>, <em>Iskel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#find_inlet_outlet_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.find_inlet_outlet_nodes" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_utils.find_inlet_outlet_nodes">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_utils.</span></span><span class="sig-name descname"><span class="pre">find_inlet_outlet_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_sides</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Iskel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#find_inlet_outlet_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.find_inlet_outlet_nodes" title="Permalink to this definition"></a></dt>
 <dd><p>Append inlet and outlet nodes to the node dictionary.</p>
 <p>Appends the inlet and outlet nodes to the nodes dictionary. Only works for
 rivers; deltas must be treated differently.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.mask_to_centerline">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">mask_to_centerline</code><span class="sig-paren">(</span><em>Imask</em>, <em>es</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#mask_to_centerline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.mask_to_centerline" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_utils.mask_to_centerline">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_utils.</span></span><span class="sig-name descname"><span class="pre">mask_to_centerline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Imask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">es</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#mask_to_centerline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.mask_to_centerline" title="Permalink to this definition"></a></dt>
 <dd><p>Extract centerline from a river mask.</p>
 <p>This function takes an input binary mask of a river and extracts its
 centerline. If there are multiple channels (and therefore islands) in the
@@ -391,9 +394,9 @@ Upstream should be first, followed by downstream.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.max_valley_width">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">max_valley_width</code><span class="sig-paren">(</span><em>Imask</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#max_valley_width"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.max_valley_width" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_utils.max_valley_width">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_utils.</span></span><span class="sig-name descname"><span class="pre">max_valley_width</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Imask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#max_valley_width"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.max_valley_width" title="Permalink to this definition"></a></dt>
 <dd><p>Computes the maximum valley width of the input mask. Finds the single
 largest blob in the mask, fills its holes, then uses the distance transform
 to find the largest width.</p>
@@ -411,24 +414,24 @@ are pixels, so be careful to re-convert.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.mirror_line_ends">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">mirror_line_ends</code><span class="sig-paren">(</span><em>xs</em>, <em>ys</em>, <em>npad</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#mirror_line_ends"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.mirror_line_ends" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_utils.mirror_line_ends">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_utils.</span></span><span class="sig-name descname"><span class="pre">mirror_line_ends</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npad</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#mirror_line_ends"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.mirror_line_ends" title="Permalink to this definition"></a></dt>
 <dd><p>Reflect both ends of a line.</p>
 <p>Reflects both ends of a line defined by x and y coordinates. The mirrored
 distance is set by npad, which refers to the number of vertices along the
 line to mirror.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.prune_river">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">prune_river</code><span class="sig-paren">(</span><em>links</em>, <em>nodes</em>, <em>exit_sides</em>, <em>Iskel</em>, <em>gdobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#prune_river"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.prune_river" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_utils.prune_river">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_utils.</span></span><span class="sig-name descname"><span class="pre">prune_river</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_sides</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Iskel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdobj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#prune_river"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.prune_river" title="Permalink to this definition"></a></dt>
 <dd><p>Prune river network.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="rivgraph.rivers.river_utils.valleyline_mesh">
-<code class="descclassname">rivgraph.rivers.river_utils.</code><code class="descname">valleyline_mesh</code><span class="sig-paren">(</span><em>coords</em>, <em>avg_chan_width</em>, <em>buf_halfwidth</em>, <em>grid_spacing</em>, <em>smoothing=0.15</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#valleyline_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.valleyline_mesh" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="rivgraph.rivers.river_utils.valleyline_mesh">
+<span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_utils.</span></span><span class="sig-name descname"><span class="pre">valleyline_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_chan_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buf_halfwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#valleyline_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.valleyline_mesh" title="Permalink to this definition"></a></dt>
 <dd><p>Generate a mesh over an input river centerline.</p>
 <p>This function generates a mesh over an input river centerline. The mesh
 is generated across the valley, not just the channel width, in order to

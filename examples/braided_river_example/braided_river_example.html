@@ -4,8 +4,9 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Let’s demo RivGraph on the Brahmaputra River! &mdash; RivGraph 0.4 documentation</title><link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <title>Let’s demo RivGraph on the Brahmaputra River! &mdash; RivGraph 0.4 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
@@ -13,11 +14,12 @@
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -30,7 +32,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html"><img src="../../_static/rg_logo_full.png" class="logo" alt="Logo"/>
+            <a href="../../index.html">
+            <img src="../../_static/rg_logo_full.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
                 0.4
@@ -102,7 +105,7 @@
            <div itemprop="articleBody">
              
   <section id="lets-demo-rivgraph-on-the-brahmaputra-river">
-<h1>Let’s demo RivGraph on the Brahmaputra River!<a class="headerlink" href="#lets-demo-rivgraph-on-the-brahmaputra-river" title="Permalink to this headline">¶</a></h1>
+<h1>Let’s demo RivGraph on the Brahmaputra River!<a class="headerlink" href="#lets-demo-rivgraph-on-the-brahmaputra-river" title="Permalink to this heading"></a></h1>
 <p>This demo shows some of the core functionality and convenient plotting
 and exporting features provided by RivGraph for a braided river network.
 The basic steps of RivGraph-ing a braided river include:</p>
@@ -121,7 +124,7 @@ you prefer) for inspection in QGIS. RivGraph requires a <strong>binary mask of
 the channel network</strong>, preferably georeferenced (i.e., a GeoTiff) in a
 projected coordinate reference system.</p>
 <section id="instantiate-river-class">
-<h2>1. Instantiate river class<a class="headerlink" href="#instantiate-river-class" title="Permalink to this headline">¶</a></h2>
+<h2>1. Instantiate river class<a class="headerlink" href="#instantiate-river-class" title="Permalink to this heading"></a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rivgraph.classes</span> <span class="kn">import</span> <span class="n">river</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -153,7 +156,7 @@ projected coordinate reference system.</p>
 <img alt="../../_images/output_2_1.png" src="../../_images/output_2_1.png" />
 </section>
 <section id="skeletonize-the-binary-mask">
-<h2>2. Skeletonize the binary mask<a class="headerlink" href="#skeletonize-the-binary-mask" title="Permalink to this headline">¶</a></h2>
+<h2>2. Skeletonize the binary mask<a class="headerlink" href="#skeletonize-the-binary-mask" title="Permalink to this heading"></a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simply use the skeletonize() method.</span>
 <span class="n">brahma</span><span class="o">.</span><span class="n">skeletonize</span><span class="p">()</span>
 
@@ -174,15 +177,15 @@ option is to save it as a geotiff and pull it up in a GIS (like QGIS).</p>
 <pre class="literal-block">Geotiff written to dataBrahmaputra_Braided_RiverResultsBrahma_skel.tif.</pre>
 <p>The georeferenced Brahmaputra skeleton has been written to disk, so we
 can pull it up in QGIS along with the georeferenced mask:</p>
-<figure class="align-center" id="id1">
+<figure class="align-default" id="id1">
 <img alt="brahma_qgis_mask_skel.PNG" src="../../_images/brahma_qgis_mask_skel.png" />
 <figcaption>
-<p><span class="caption-text">brahma_qgis_mask_skel.PNG</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">brahma_qgis_mask_skel.PNG</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>
 <section id="compute-the-network-links-and-nodes">
-<h2>3. Compute the network (links and nodes)<a class="headerlink" href="#compute-the-network-links-and-nodes" title="Permalink to this headline">¶</a></h2>
+<h2>3. Compute the network (links and nodes)<a class="headerlink" href="#compute-the-network-links-and-nodes" title="Permalink to this heading"></a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simply use the compute_network() method.</span>
 <span class="n">brahma</span><span class="o">.</span><span class="n">compute_network</span><span class="p">()</span>
 </pre></div>
@@ -244,7 +247,7 @@ outlet links by exploiting the <em>exit_sides</em> we supplied earlier. Let’s
 prune the network.</p>
 </section>
 <section id="prune-the-network">
-<h2>4. Prune the network<a class="headerlink" href="#prune-the-network" title="Permalink to this headline">¶</a></h2>
+<h2>4. Prune the network<a class="headerlink" href="#prune-the-network" title="Permalink to this heading"></a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">prune_network</span><span class="p">()</span>
 
 <span class="c1"># We see that &#39;inlets&#39; and &#39;outlets&#39; have been added to the nodes dictionary:</span>
@@ -262,7 +265,7 @@ prune the network.</p>
 </div>
 </section>
 <section id="compute-morphologic-metrics-lengths-widths">
-<h2>5. Compute morphologic metrics (lengths, widths)<a class="headerlink" href="#compute-morphologic-metrics-lengths-widths" title="Permalink to this headline">¶</a></h2>
+<h2>5. Compute morphologic metrics (lengths, widths)<a class="headerlink" href="#compute-morphologic-metrics-lengths-widths" title="Permalink to this heading"></a></h2>
 <p>Now that the network is resolved and pruned, we can compute some link
 metrics.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">compute_link_width_and_length</span><span class="p">()</span>
@@ -298,7 +301,7 @@ this unit:</p>
 </div>
 </section>
 <section id="compute-a-mesh">
-<h2>6. Compute a mesh<a class="headerlink" href="#compute-a-mesh" title="Permalink to this headline">¶</a></h2>
+<h2>6. Compute a mesh<a class="headerlink" href="#compute-a-mesh" title="Permalink to this heading"></a></h2>
 <p>In preparation for setting flow directions of each link, we will compute
 an “along-valley” mesh. This mesh is created based on the overall
 morphology of the braided river as opposed to individual channels within
@@ -340,10 +343,10 @@ a geovector file:</p>
 <p>The centerline is exported as a shapefile or GeoJSON, depending on the
 filetype you specify. (GeoJSON is default.) Let’s take a look at this
 centerline in QGIS:</p>
-<figure class="align-center" id="id2">
+<figure class="align-default" id="id2">
 <img alt="brahma_qgis_centerline.png" src="../../_images/brahma_qgis_centerline.png" />
 <figcaption>
-<p><span class="caption-text">brahma_qgis_centerline.png</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">brahma_qgis_centerline.png</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>A little jagged, but it’s fine for our purposes. The centerline is
@@ -364,10 +367,10 @@ can check the paths dictionary:</p>
 <pre class="literal-block">dataBrahmaputra_Braided_RiverResultsBrahma_meshlines.json
 dataBrahmaputra_Braided_RiverResultsBrahma_meshpolys.json</pre>
 <p>Let’s see what the mesh looks like by dragging these GeoJSONs into QGIS:</p>
-<figure class="align-center" id="id3">
+<figure class="align-default" id="id3">
 <img alt="brahma_qgis_initial_meshlines.png" src="../../_images/brahma_qgis_initial_meshlines.png" />
 <figcaption>
-<p><span class="caption-text">brahma_qgis_initial_meshlines.png</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">brahma_qgis_initial_meshlines.png</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>The mesh does a pretty good job of meeting our two criteria:
@@ -376,7 +379,7 @@ the centerline. It’s not perfect, but we can play with the parameters to
 adjust it.</p>
 </section>
 <section id="adjust-mesh-parameters">
-<h2>6.1 Adjust mesh parameters<a class="headerlink" href="#adjust-mesh-parameters" title="Permalink to this headline">¶</a></h2>
+<h2>6.1 Adjust mesh parameters<a class="headerlink" href="#adjust-mesh-parameters" title="Permalink to this heading"></a></h2>
 <p>We may want to alter certain features of the mesh, like the spacing of
 transects or the overall width of the mesh. When we call
 <code class="docutils literal notranslate"><span class="pre">compute_mesh()</span></code>, there are three optional keyword arguments we can
@@ -419,10 +422,10 @@ the same for comparison purposes.</p>
 </pre></div>
 </div>
 <p>Here’s a side-by-side comparison with the default mesh:</p>
-<figure class="align-center" id="id4">
+<figure class="align-default" id="id4">
 <img alt="brahma_mesh_comparison.png" src="../../_images/brahma_mesh_comparison.png" />
 <figcaption>
-<p><span class="caption-text">brahma_mesh_comparison.png</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">brahma_mesh_comparison.png</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>There are two primary differences between our custom mesh and the
@@ -434,7 +437,7 @@ to 0.25. These two parameters, plus <code class="docutils literal notranslate"><
 design a mesh to suit your needs.</p>
 </section>
 <section id="assign-flow-directions-to-each-link">
-<h2>7. Assign flow directions to each link<a class="headerlink" href="#assign-flow-directions-to-each-link" title="Permalink to this headline">¶</a></h2>
+<h2>7. Assign flow directions to each link<a class="headerlink" href="#assign-flow-directions-to-each-link" title="Permalink to this heading"></a></h2>
 <p>Now we want to determine the long-term, steady-state flow direction in
 each link. The algorithms used here are described in <a class="reference external" href="https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html">this
 paper</a>.</p>
@@ -483,10 +486,10 @@ inspection in QGIS:</p>
 </div>
 <pre class="literal-block">Geotiff written to dataBrahmaputra_Braided_RiverResultsBrahma_link_directions.tif.</pre>
 <p>Dragging into QGIS (and adding a colorbar legend), we see</p>
-<figure class="align-center" id="id5">
+<figure class="align-default" id="id5">
 <img alt="brahma_qgis_initial_directions.png" src="../../_images/brahma_qgis_initial_directions.png" />
 <figcaption>
-<p><span class="caption-text">brahma_qgis_initial_directions.png</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">brahma_qgis_initial_directions.png</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>I’ve circled two short links in yellow, and noted that their flow
@@ -501,10 +504,10 @@ direction as an example of how to manually set links.</p>
 <p>First, we need to identify the link ID’s of each of these links, as well
 as the desired upstream nodes. Using the Identify tool in QGIS with the
 links and nodes GeoJSON layers turned on, this is easy:</p>
-<figure class="align-center" id="id6">
+<figure class="align-default" id="id6">
 <img alt="brahma_qgis_identify_links_for_reversal.png" src="../../_images/brahma_qgis_identify_links_for_reversal.png" />
 <figcaption>
-<p><span class="caption-text">brahma_qgis_identify_links_for_reversal.png</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">brahma_qgis_identify_links_for_reversal.png</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>We see that the red-highlighted link’s ID is <code class="docutils literal notranslate"><span class="pre">2280</span></code>, and it’s
@@ -512,10 +515,10 @@ links and nodes GeoJSON layers turned on, this is easy:</p>
 order so that the upstream node ID is <code class="docutils literal notranslate"><span class="pre">1650</span></code>. Open the
 <code class="docutils literal notranslate"><span class="pre">Brahma_fixlinks</span></code> csv and enter this information. I have also done
 this for the link to the right of this one.</p>
-<figure class="align-center" id="id7">
+<figure class="align-default" id="id7">
 <img alt="brahma_fixlinks_csv.png" src="../../_images/brahma_fixlinks_csv.png" />
 <figcaption>
-<p><span class="caption-text">brahma_fixlinks_csv.png</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">brahma_fixlinks_csv.png</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>Simply save the .csv and re-run the <code class="docutils literal notranslate"><span class="pre">assign_flow_directions()</span></code> method:</p>
@@ -528,10 +531,10 @@ All cycles were resolved.
 done.</pre>
 <p>After exporting the <code class="docutils literal notranslate"><span class="pre">directions</span></code> geotiff again, we can plot it against
 the original:</p>
-<figure class="align-center" id="id8">
+<figure class="align-default" id="id8">
 <img alt="brahma_flow_direction_reversed_manually.png" src="../../_images/brahma_flow_direction_reversed_manually.png" />
 <figcaption>
-<p><span class="caption-text">brahma_flow_direction_reversed_manually.png</span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">brahma_flow_direction_reversed_manually.png</span><a class="headerlink" href="#id8" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>We see that RivGraph used the information in our .csv to manually set
@@ -548,7 +551,7 @@ direction has also been reversed, even though we didn’t specify it.
 Whether or not this is correct is determined by the user.</p>
 </section>
 <section id="a-note-on-topologic-metrics">
-<h2>8. A note on topologic metrics<a class="headerlink" href="#a-note-on-topologic-metrics" title="Permalink to this headline">¶</a></h2>
+<h2>8. A note on topologic metrics<a class="headerlink" href="#a-note-on-topologic-metrics" title="Permalink to this heading"></a></h2>
 <p>If you’ve looked through the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb">delta
 example</a>,
 you’ll see the final section covers computing topolgic metrics. In order

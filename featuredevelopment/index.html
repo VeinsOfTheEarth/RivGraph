@@ -4,8 +4,9 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Feature Development &mdash; RivGraph 0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Feature Development &mdash; RivGraph 0.4 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
       <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
       <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
@@ -13,11 +14,12 @@
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -30,7 +32,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
                 0.4
@@ -89,14 +92,14 @@
            <div itemprop="articleBody">
              
   <section id="feature-development">
-<span id="featuredevelopment"></span><h1>Feature Development<a class="headerlink" href="#feature-development" title="Permalink to this headline">¶</a></h1>
+<span id="featuredevelopment"></span><h1>Feature Development<a class="headerlink" href="#feature-development" title="Permalink to this heading"></a></h1>
 <p>There’s always more to be done! The features listed below are
 suggestions that require some significant amount of development. If
 you’re interested in tackling, or helping tackle, any of these, please
 email j………<a class="reference external" href="mailto:k&#37;&#52;&#48;gmail&#46;com">k<span>&#64;</span>gmail<span>&#46;</span>com</a> and we’ll add you to the RivGraph slack channel to
 start discussions.</p>
 <section id="automatic-shoreline-extraction">
-<h2>Automatic Shoreline Extraction<a class="headerlink" href="#automatic-shoreline-extraction" title="Permalink to this headline">¶</a></h2>
+<h2>Automatic Shoreline Extraction<a class="headerlink" href="#automatic-shoreline-extraction" title="Permalink to this heading"></a></h2>
 <p>Currently, users must provide their own shoreline file for each delta
 they wish to analyze. While the strategy for creating shorelines is
 <a class="reference external" href="https://jonschwenk.github.io/RivGraph/shoreline/index.html">documented</a>,
@@ -107,17 +110,17 @@ have been found to be too slow and/or need finegaling to interface with
 RivGraph.</p>
 </section>
 <section id="lake-wetland-connectivity">
-<h2>Lake/wetland connectivity<a class="headerlink" href="#lake-wetland-connectivity" title="Permalink to this headline">¶</a></h2>
+<h2>Lake/wetland connectivity<a class="headerlink" href="#lake-wetland-connectivity" title="Permalink to this heading"></a></h2>
 <p>Many deltas, especially Arctic ones, are lake-dense, and the
 connectivity of these lakes has implications for biogeochemical cycling
 and transport times of water and sediment. We have spent a few weeks
 developing a <code class="docutils literal notranslate"><span class="pre">rivgraph-lakes</span></code> branch that attempts to resolve lake
 connectivity. However, it’s a difficult problem and we didn’t quite
 cross the finish line.</p>
-<figure class="align-center" id="id1">
+<figure class="align-default" id="id1">
 <img alt="image-20220107142427137" src="../_images/lakemask_example.PNG" />
 <figcaption>
-<p><span class="caption-text">An example mask with labeled channel network (gray) and lakes (white).</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+<p><span class="caption-text">An example mask with labeled channel network (gray) and lakes (white).</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>In this formulation, a lake mask would be provided in conjunction with
@@ -138,7 +141,7 @@ user also had a mask of wetlands–or any objects that are connected to
 the channel network, this framework could handle those cases.</p>
 </section>
 <section id="machine-learned-flow-directions">
-<h2>Machine Learned Flow Directions<a class="headerlink" href="#machine-learned-flow-directions" title="Permalink to this headline">¶</a></h2>
+<h2>Machine Learned Flow Directions<a class="headerlink" href="#machine-learned-flow-directions" title="Permalink to this heading"></a></h2>
 <p>The current scheme for <a class="reference external" href="https://esurf.copernicus.org/articles/8/87/2020/">setting flow
 directions</a> in the
 links of a channel network is quite complicated. It is
@@ -164,7 +167,7 @@ larger deltas. Post-processing corrections would also be useful (for
 either approach, really).</p>
 </section>
 <section id="flow-direction-uncertainty">
-<h2>Flow Direction Uncertainty<a class="headerlink" href="#flow-direction-uncertainty" title="Permalink to this headline">¶</a></h2>
+<h2>Flow Direction Uncertainty<a class="headerlink" href="#flow-direction-uncertainty" title="Permalink to this heading"></a></h2>
 <p>Many links’ flow directions are not certain and may in fact be
 bidirectional. One approached proposed to handle this is: rather than
 export a single adjacency matrix with RivGraph’s “best guess,” we could
