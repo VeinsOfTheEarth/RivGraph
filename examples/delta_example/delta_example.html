@@ -357,8 +357,7 @@ difference is addressed in a separate Jupyter notebook called XXX.</p>
 <section id="assign-flow-directions-for-each-link">
 <h2>6. Assign flow directions for each link.<a class="headerlink" href="#assign-flow-directions-for-each-link" title="Permalink to this heading"></a></h2>
 <p>Now we wish to determine the long-term, steady-state flow direction in
-each link. The algorithms used here are described in <a class="reference external" href="https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html">this
-paper</a>.</p>
+each link. The algorithms used here are described in <a class="reference external" href="https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html">this paper</a>.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">colville</span><span class="o">.</span><span class="n">assign_flow_directions</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -371,8 +370,7 @@ were found in the graph. Great!</p>
 us to manually set flow directions. If we inspect the flow directions
 and find some that are incorrect, these can be fixed by entering the
 link ID and the appropriate upstream node in this .csv, and running
-<code class="docutils literal notranslate"><span class="pre">assign_flow_directions()</span></code> again. See the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb">braided river
-example</a>,
+<code class="docutils literal notranslate"><span class="pre">assign_flow_directions()</span></code> again. See the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/braided_river_example.ipynb">braided river example</a>,
 section 7 for more details. Note that any links entered into this .csv
 will be forced to have the upstream node as indicated. RivGraph sets
 links’ directions iteratively, so if you find a problematic area in the
@@ -421,8 +419,7 @@ junction angles at each node.</p>
 <p>RivGraph will compute a number of topologic metrics for your delta
 channel network. These metrics are explained and demonstrated in Tejedor
 et. al 2015a (doi.org/10.1002/2014WR016577)
-and
-2015b (doi.org/10.1002/2014WR016604).
+and 2015b (doi.org/10.1002/2014WR016604).
 Note that some pre-processing is done to the topology to compute these
 metrics; it is highly recommended that you understand these
 preprocessing steps and/or compute the metrics yourself.</p>

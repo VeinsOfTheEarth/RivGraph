@@ -123,12 +123,12 @@
 </section>
 <section id="what-is-a-mask">
 <span id="whatismask"></span><h2>What is a mask?<a class="headerlink" href="#what-is-a-mask" title="Permalink to this heading"></a></h2>
-<p>A mask is simply a binary image (only ones and zeros) where pixels belonging to the channel network are ones, like the right panel of the Lena Delta above. Before processing your mask with <em>RivGraph</em>, you should ensure that your mask contains <a class="reference external" href="https://github.com/jonschwenk/RivGraph/issues/34">no no-data</a>. One way to ensure this is to convert your mask to a boolean datatype, using for example numpy:</p>
+<p>A mask is simply a binary image (only ones and zeros) where pixels belonging to the channel network are ones, like the right panel of the Lena Delta above. Before processing your mask with <em>RivGraph</em>, you should ensure that your mask contains <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/issues/34">no no-data</a>. One way to ensure this is to convert your mask to a boolean datatype, using for example numpy:</p>
 <p><code class="code docutils literal notranslate"><span class="pre">Mask_binary</span> <span class="pre">=</span> <span class="pre">np.array(Mask,</span> <span class="pre">dtype=np.bool)</span></code></p>
 <p>The mask is the cornerstone for using <em>RivGraph</em>. You should always ensure that it contains the features you want and none of the ones you don’t.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Make sure to remove all the objects (connected “on” pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or <a class="reference external" href="https://github.com/jonschwenk/RivGraph/issues/32">errors</a>. Often, a quick way to achieve this is via the <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.im_utils.largest_blobs" title="rivgraph.im_utils.largest_blobs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.largest_blobs()</span></code></a> function, which will keep only the largest connected component.</p>
+<p>Make sure to remove all the objects (connected “on” pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/issues/32">errors</a>. Often, a quick way to achieve this is via the <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.im_utils.largest_blobs" title="rivgraph.im_utils.largest_blobs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.largest_blobs()</span></code></a> function, which will keep only the largest connected component.</p>
 </div>
 </section>
 <section id="what-does-rivgraph-expect-my-mask-to-look-like">
@@ -173,7 +173,7 @@ tool to convert the polygons to a binary raster (image). If you go this route, b
 <li><p><a class="reference external" href="https://esurf.copernicus.org/articles/8/87/2020/#section6">Indus and Brahmaputra Rivers</a>, clipped from GRWL dataset.</p></li>
 <li><p><a class="reference external" href="https://zenodo.org/record/1297434">Global mask</a> of Landsat-derived rivers at “mean annual discharge.” Has some issues at tile boundaries, and can be “feathery” along braided rivers, but not a bad global mask.</p></li>
 <li><p><a class="reference external" href="https://global-surface-water.appspot.com/">Global Surface Water Dataset</a> - provides all water pixels in the Landsat archive as monthly global images and as integrated-through-time images. For example, can threshold on the “Occurrence” product to make a mask. Use <a class="reference external" href="https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_2_GlobalSurfaceWater">Google Earth Engine</a> to access and create your masks.</p></li>
-<li><p>If you know of more, please mention them in the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/issues">Issue Tracker</a>!</p></li>
+<li><p>If you know of more, please mention them in the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/issues">Issue Tracker</a>!</p></li>
 </ul>
 </li>
 </ul>

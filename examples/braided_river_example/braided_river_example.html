@@ -495,9 +495,8 @@ inspection in QGIS:</p>
 <p>I’ve circled two short links in yellow, and noted that their flow
 direction was set as going right-to-left. Ideally, this junction would
 be comprised of a single node replacing these links, but RivGraph does
-not have the capability yet to simplify the network (<a class="reference external" href="https://github.com/jonschwenk/RivGraph/issues/11">a feature request
-has been made for
-this)</a>. From
+not have the capability yet to simplify the network (<a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/issues/11">a feature request
+has been made for this)</a>. From
 cursory inspection, we could make the argument that flow should instead
 go left-to-right for these two links. Let’s force flow the opposite
 direction as an example of how to manually set links.</p>
@@ -552,13 +551,11 @@ Whether or not this is correct is determined by the user.</p>
 </section>
 <section id="a-note-on-topologic-metrics">
 <h2>8. A note on topologic metrics<a class="headerlink" href="#a-note-on-topologic-metrics" title="Permalink to this heading"></a></h2>
-<p>If you’ve looked through the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb">delta
-example</a>,
+<p>If you’ve looked through the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/delta_example.ipynb">delta example</a>,
 you’ll see the final section covers computing topolgic metrics. In order
 to compute these metrics, some additional finagling of the network is
 required. We have not yet implemented the required pre-processing for
-braided rivers. However, many of the functions in the <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/deltas/delta_metrics.py">delta metrics
-script</a>
+braided rivers. However, many of the functions in the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/blob/master/rivgraph/deltas/delta_metrics.py">delta metrics script</a>
 can be used on braided rivers, provided you first pre-process your
 braided river network properly.</p>
 </section>
