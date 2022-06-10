@@ -540,8 +540,8 @@ I’ve circled two short links in yellow, and noted that their flow
 direction was set as going right-to-left. Ideally, this junction would
 be comprised of a single node replacing these links, but RivGraph does
 not have the capability yet to simplify the network (`a feature request
-has been made for
-this) <https://github.com/jonschwenk/RivGraph/issues/11>`__. From
+has been made for this)
+<https://github.com/VeinsOfTheEarth/RivGraph/issues/11>`__. From
 cursory inspection, we could make the argument that flow should instead
 go left-to-right for these two links. Let’s force flow the opposite
 direction as an example of how to manually set links.
@@ -605,12 +605,12 @@ Whether or not this is correct is determined by the user.
 8. A note on topologic metrics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you’ve looked through the `delta
-example <https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb>`__,
+If you’ve looked through the `delta example
+<https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/delta_example.ipynb>`__,
 you’ll see the final section covers computing topolgic metrics. In order
 to compute these metrics, some additional finagling of the network is
 required. We have not yet implemented the required pre-processing for
-braided rivers. However, many of the functions in the `delta metrics
-script <https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/deltas/delta_metrics.py>`__
+braided rivers. However, many of the functions in the `delta metrics script
+<https://github.com/VeinsOfTheEarth/RivGraph/blob/master/rivgraph/deltas/delta_metrics.py>`__
 can be used on braided rivers, provided you first pre-process your
 braided river network properly.

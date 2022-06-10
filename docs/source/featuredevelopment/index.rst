@@ -14,7 +14,7 @@ Automatic Shoreline Extraction
 
 Currently, users must provide their own shoreline file for each delta
 they wish to analyze. While the strategy for creating shorelines is
-`documented <https://jonschwenk.github.io/RivGraph/shoreline/index.html>`__,
+documented (see :doc:`/shoreline/index`),
 a preferable option would have RivGraph automatically generate
 shorelines. There have been a number of published softwares that attempt
 to solve this problem (e.g. opening-angle method), but in practice these

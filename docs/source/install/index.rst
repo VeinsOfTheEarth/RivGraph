@@ -14,7 +14,7 @@ Installation via *conda*
 
 The latest 'stable' version of *RivGraph* can be installed via `conda`.
 We recommend installing *RivGraph* into a fresh conda environment to minimize the risk of dependency clashes.
-The easiest way to do this is by first downloading the `environment.yml <https://github.com/jonschwenk/RivGraph/blob/master/environment.yml>`_ (go to link, click "Raw", then copy the contents into a text editor and save as 'environment.yml'), opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:
+The easiest way to do this is by first downloading the `environment.yml <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml>`_ (go to link, click "Raw", then copy the contents into a text editor and save as 'environment.yml'), opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:
 ::
 
    $ conda env create --file /path/to/environment.yml
@@ -31,7 +31,7 @@ If you would rather install *RivGraph* into a pre-existing environment "myenv", 
 .. warning::
 
  *RivGraph* dependencies may be pinned to specific versions of packages (e.g. geopandas 0.7) that may not mesh with your existing environment.
- Check the `environment file <https://github.com/jonschwenk/RivGraph/blob/master/environment.yml>`_ for these cases.
+ Check the `environment file <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml>`_ for these cases.
 
 Installation from source
 ------------------------
@@ -53,7 +53,7 @@ If you would prefer to install the *RivGraph* package from source, then follow t
    $ git clone https://github.com/jonschwenk/RivGraph.git
 
 2. Install dependencies; note these can be installed via conda from the
-`environment.yml <https://github.com/jonschwenk/RivGraph/blob/master/environment.yml>`_ file, however a list is also
+`environment.yml <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml>`_ file, however a list is also
 provided below with links to the homepage for each dependency.
 
 **RivGraph Dependencies:**

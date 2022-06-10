@@ -35,13 +35,13 @@ Maskmaker, Maskmaker Make Me a Mask
 ---------------
 What is a mask?
 ---------------
-A mask is simply a binary image (only ones and zeros) where pixels belonging to the channel network are ones, like the right panel of the Lena Delta above. Before processing your mask with *RivGraph*, you should ensure that your mask contains `no no-data <https://github.com/jonschwenk/RivGraph/issues/34>`_. One way to ensure this is to convert your mask to a boolean datatype, using for example numpy:
+A mask is simply a binary image (only ones and zeros) where pixels belonging to the channel network are ones, like the right panel of the Lena Delta above. Before processing your mask with *RivGraph*, you should ensure that your mask contains `no no-data <https://github.com/VeinsOfTheEarth/RivGraph/issues/34>`_. One way to ensure this is to convert your mask to a boolean datatype, using for example numpy:
 
 :code:`Mask_binary = np.array(Mask, dtype=np.bool)`
 
 The mask is the cornerstone for using *RivGraph*. You should always ensure that it contains the features you want and none of the ones you don't.
 
-.. tip:: Make sure to remove all the objects (connected "on" pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or `errors <https://github.com/jonschwenk/RivGraph/issues/32>`_. Often, a quick way to achieve this is via the :obj:`rivgraph.im_utils.largest_blobs()` function, which will keep only the largest connected component.
+.. tip:: Make sure to remove all the objects (connected "on" pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or `errors <https://github.com/VeinsOfTheEarth/RivGraph/issues/32>`_. Often, a quick way to achieve this is via the :obj:`rivgraph.im_utils.largest_blobs()` function, which will keep only the largest connected component.
 
 
 .. _maskconstraints:
@@ -107,7 +107,7 @@ Here are some resources that either provide masks or tools for you to make your 
   - `Indus and Brahmaputra Rivers <https://esurf.copernicus.org/articles/8/87/2020/#section6>`_, clipped from GRWL dataset.
   - `Global mask <https://zenodo.org/record/1297434>`_ of Landsat-derived rivers at "mean annual discharge." Has some issues at tile boundaries, and can be "feathery" along braided rivers, but not a bad global mask.
   - `Global Surface Water Dataset <https://global-surface-water.appspot.com/>`_ - provides all water pixels in the Landsat archive as monthly global images and as integrated-through-time images. For example, can threshold on the "Occurrence" product to make a mask. Use `Google Earth Engine <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_2_GlobalSurfaceWater>`_ to access and create your masks.
-  - If you know of more, please mention them in the `Issue Tracker <https://github.com/jonschwenk/RivGraph/issues>`_!
+  - If you know of more, please mention them in the `Issue Tracker <https://github.com/VeinsOfTheEarth/RivGraph/issues>`_!
 
 .. image:: ../../images/jrc_mackenzie.PNG
  :align: center
