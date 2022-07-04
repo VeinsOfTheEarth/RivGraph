@@ -696,7 +696,7 @@ class delta(rivnetwork):
 class river(rivnetwork):
     """
     A class to manage and organize data and methods for analyzing a braided river channel network.
-    This class inherets all the attributes and methods of the rivnewtwork class, but also includes delta-specific attributes and methods.
+    This class inherets all the attributes and methods of the rivnetwork class, but also includes delta-specific attributes and methods.
 
 
     Attributes
