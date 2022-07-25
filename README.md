@@ -31,7 +31,9 @@ Installing
 -----
 RivGraph v0.4 is hosted on the anaconda channel [jschwenk](https://anaconda.org/jschwenk/rivgraph). We recommend installing into a fresh conda environment to minimize the risk of dependency clashes. The easiest way to do this is to download the [environment.yml](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml) file, then open Terminal (Mac/Unix) or Anaconda Prompt (Windows) and type:
 
-<pre><code>conda env create --file /path/to/environment.yml  # the environment name will be 'rivgraph', but you can change the environment file to name it anything</code></pre>
+<pre><code>conda env create --file /path/to/environment.yml  # the environment name will be 'rivgraph', but you can change the environment file to name it anything
+conda activate rivgraph
+conda install rivgraph -c jschwenk</code></pre>
 
 You may then want to install Spyder or your preferred IDE. Conda should fetch all the required dependencies and handle versioning.
 
