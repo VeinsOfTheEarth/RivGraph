@@ -1,20 +1,13 @@
 name: rivgraph
-channels:
-  - jschwenk
+channels:  
   - conda-forge
-  - defaults
 dependencies:
   - python=3
-  - gdal
-  - numpy
   - geopandas
   - scikit-image
   - opencv
-  - networkx
+  - networkx<2.7 # necessary for correct numpy ops
+  - shapely=1.7.1
   - matplotlib
-  - pyproj
-  - shapely==1.7.1
-  - fiona
-  - rivgraph
   - fastdtw
-  - loguru  
+  - loguru

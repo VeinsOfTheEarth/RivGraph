@@ -92,7 +92,7 @@ def test_get_link_vec(known_net):
     pixlen = known_net.pixlen
     link_vec = di.get_link_vector(links, nodes, linkid, imshape, pixlen)
     # make assertion
-    assert pytest.approx(link_vec == np.array([0.19371217, 0.98105841]))
+    assert link_vec == pytest.approx(np.array([0.19371217, 0.98105841]))
 
 
 def test_get_link_vec_trim(known_net):
@@ -105,7 +105,7 @@ def test_get_link_vec_trim(known_net):
     link_vec = di.get_link_vector(links, nodes, linkid,
                                   imshape, pixlen, trim=True)
     # make assertion
-    assert pytest.approx(link_vec == np.array([0.37003286, 0.92901867]))
+    assert link_vec == pytest.approx(np.array([0.37003286, 0.92901867]))
 
 
 def test_source_sink(known_net):

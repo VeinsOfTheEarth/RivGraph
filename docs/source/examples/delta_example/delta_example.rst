@@ -353,8 +353,8 @@ We can do the same for the widths:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now we wish to determine the long-term, steady-state flow direction in
-each link. The algorithms used here are described in `this
-paper <https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html>`__.
+each link. The algorithms used here are described in `this paper
+<https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html>`__.
 
 .. code:: ipython3
 
@@ -375,8 +375,8 @@ We also notice that RivGraph mentiones that a .csv file was created for
 us to manually set flow directions. If we inspect the flow directions
 and find some that are incorrect, these can be fixed by entering the
 link ID and the appropriate upstream node in this .csv, and running
-``assign_flow_directions()`` again. See the `braided river
-example <https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb>`__,
+``assign_flow_directions()`` again. See the `braided river example
+<https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/braided_river_example.ipynb>`__,
 section 7 for more details. Note that any links entered into this .csv
 will be forced to have the upstream node as indicated. RivGraph sets
 links’ directions iteratively, so if you find a problematic area in the
@@ -445,8 +445,7 @@ junction angles at each node.
 RivGraph will compute a number of topologic metrics for your delta
 channel network. These metrics are explained and demonstrated in Tejedor
 et. al 2015a (doi.org/10.1002/2014WR016577)
-and
-2015b (doi.org/10.1002/2014WR016604).
+and 2015b (doi.org/10.1002/2014WR016604).
 Note that some pre-processing is done to the topology to compute these
 metrics; it is highly recommended that you understand these
 preprocessing steps and/or compute the metrics yourself.

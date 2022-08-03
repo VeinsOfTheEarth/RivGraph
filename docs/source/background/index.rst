@@ -22,7 +22,7 @@ rivers into the mix, and sometime in 2017, RivGraph officially became RivGraph.
 I cut my Python teeth while developing RivGraph, so there is a degree of inherited clunkiness and inefficiency baked in. Initially, there
 were also some implements (such as automatically adding artificial nodes to parallel edges) that were tailored to somewhat particular use
 cases. However, as the user base continues to grow, improvements and upgrades have been implemented to meet their needs. Please add your requests
-to the mix and report any bugs you find using Github's `issue tracker <https://github.com/jonschwenk/RivGraph/issues>`_.
+to the mix and report any bugs you find using Github's `issue tracker <https://github.com/VeinsOfTheEarth/RivGraph/issues>`_.
 
 --------------------------------
 What's different about RivGraph?
@@ -51,7 +51,7 @@ Is RivGraph only for channel networks?
 --------------------------------------
 
 While RivGraph is designed around channel networks, it contains a smattering of tools that can be useful across a broad range of analyses.
-For instance, the `mask_to_graph.py <https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/mask_to_graph.py>`_ script contains tools that will convert *any* binary mask to a vectorized skeleton, not just river
+For instance, the `mask_to_graph.py <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/rivgraph/mask_to_graph.py>`_ script contains tools that will convert *any* binary mask to a vectorized skeleton, not just river
 channel networks. There are a number of image processing tools in `im_utils.py <https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py>`_ that I use frequently in other projects, like a Matlab-like
-implementation of *regionprops()* for measuring blob properties of a binary image. I have personally found one of the most broadly useful tools in RivGraph is `write_geotiff <https://github.com/jonschwenk/RivGraph/blob/f2284de77a79b8f8812d04c579d52852f584de1d/rivgraph/io_utils.py#L281>`_, which does what it says.
+implementation of *regionprops()* for measuring blob properties of a binary image. I have personally found one of the most broadly useful tools in RivGraph is :obj:`rivgraph.io_utils.write_geotiff()`, which does what it says.
  
