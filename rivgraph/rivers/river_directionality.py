@@ -254,7 +254,7 @@ def directional_info(links, nodes, Imask, pixlen, exit_sides, gt, meshlines,
     return links, nodes
 
 
-def fix_river_cycles(links, nodes, imshape):
+def fix_river_cycles(links, nodes, imshape, skip_threshold=1000):
     """
     Attempt to resolve cycles in the network.
 
@@ -313,19 +313,23 @@ def fix_river_cycles(links, nodes, imshape):
         cfix_nodes = [cn for icn, cn in enumerate(c_nodes) if np.isnan(isin[icn][0])]
         cfix_links = [cl for icl, cl in enumerate(c_links) if np.isnan(isin[icl][0])]
 
-        print('Attempting to fix {} cycles.'.format(len(cfix_nodes)))
 
-        # Try to fix all the cycles
-        for cnodes, clinks in tqdm(zip(cfix_nodes, cfix_links),
-                                   "Fixing cycles", total=len(cfix_nodes)):
-            links, nodes, fixed = fix_river_cycle(links, nodes, clinks,
-                                                  cnodes, imshape)
-            if fixed == 0:
-                cantfix_nodes.append(cnodes)
-                cantfix_links.append(clinks)
+        if len(cfix_nodes) < skip_threshold:  # dont attempt to fix cycles if too many nodes as it takes ages
+            print('Attempting to fix {} cycles.'.format(len(cfix_nodes)))
+            # Try to fix all the cycles
+            for cnodes, clinks in tqdm(zip(cfix_nodes, cfix_links),
+                                    "Fixing cycles", total=len(cfix_nodes)):
+                links, nodes, fixed = fix_river_cycle(links, nodes, clinks,
+                                                    cnodes, imshape)
+                if fixed == 0:
+                    cantfix_nodes.append(cnodes)
+                    cantfix_links.append(clinks)
 
-        if len(cantfix_links) > 0:
-            print(f"Failed to fix {len(cantfix_links)} cycles.")
+            if len(cantfix_links) > 0:
+                print(f"Failed to fix {len(cantfix_links)} cycles.")
+        else:
+            print("Skipping fixing too many cycles %s" % len(cfix_nodes))
+            cantfix_nodes, cantfix_links = cfix_nodes, cfix_links
 
     return links, nodes, cantfix_links, cantfix_nodes
 

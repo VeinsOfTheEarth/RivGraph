@@ -40,18 +40,18 @@ class RiverNetwork(RGRiver):
         self.links_input = links
 
         self.nodes = {
-            'id': OrderedSet(nodes.index),
-            'idx': OrderedSet(nodes.idx),
+            'id': OrderedSet(assert_unique(nodes.index, "id of nodes")),
+            'idx': OrderedSet(assert_unique(nodes.idx, "idx of nodes")),
             'conn': nodes.conn.tolist(),
             'inlets': nodes.index[nodes.inlet].tolist(),
             'outlets': nodes.index[nodes.outlet].tolist(),
         }
 
         self.links = {
-            'id': OrderedSet(links.index),
+            'id': OrderedSet(assert_unique(links.index, "id of links")),
             'idx': links.idx.tolist(),
             'conn': links[["start_node", "end_node"]].values.tolist(),
-            'wid_pix': links.wid_pix.apply(lambda s: np.array(eval(s))).values.tolist(),
+            'wid_pix': links.wid_pix.apply(lambda s: np.array(s)).values.tolist(),
         }
 
         self.pixarea = res**2
@@ -87,7 +87,6 @@ class RiverNetwork(RGRiver):
 
     @property
     def nodes_direction_info(self):
-        self.compute_junction_angles()
         df = pd.DataFrame({c: self.nodes[c] for c in ["int_ang", "jtype", "width_ratio", "id"]}).set_index("id")
         # add cycles
         df["cycle"] = 0
@@ -108,6 +107,8 @@ class RiverNetwork(RGRiver):
         self.find_parallel_links()
         self.link_widths_and_lengths()
         self.assign_flow_directions()
+        self.compute_junction_angles()
+
         #self.resolve_cycles()
         # write output
         if output:
@@ -127,6 +128,13 @@ class RiverNetwork(RGRiver):
                 if stac > enac:
                     rgln.flip_link(self.links, l)
         return
+
+
+def assert_unique(ids_series, name):
+    if len(ids_series) != len(ids_series.unique()):
+        dups = ids_series[ids_series.duplicated(False)]
+        raise RuntimeError(f"{name} is non-unique:\n{dups}")
+    return ids_series
 
 
 def link_widths_and_lengths(links, dims, pixlen=1):

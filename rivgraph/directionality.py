@@ -173,7 +173,7 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
         pathnode_set.update(ap)
     pathnode_set = list(pathnode_set)
     belongs_to = [[] for i in range(len(pathnode_set))]
-    for i, p in enumerate(pathnode_set):
+    for i, p in tqdm(enumerate(pathnode_set)):
         for j, ap in enumerate(all_pathnodes):
             if p in ap:
                 belongs_to[i].append(j)
