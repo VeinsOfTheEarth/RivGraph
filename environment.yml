@@ -6,8 +6,8 @@ dependencies:
   - geopandas
   - scikit-image
   - opencv
-  - networkx <2.7 # necessary for correct numpy ops
-  - shapely =1.7.1
-  - matplotlib-base
+  - networkx<2.7 # necessary for correct numpy ops
+  - shapely=1.7.1
+  - matplotlib
   - fastdtw
   - loguru
