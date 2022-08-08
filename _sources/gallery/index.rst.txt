@@ -1,9 +1,5 @@
 :orphan:
 
-
-
-.. _sphx_glr_gallery:
-
 RivGraph in the wild
 ====================
 
@@ -16,14 +12,25 @@ Some selected publications that have used RivGraph to answer some cool science q
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019WR026867&gt;`_ made...">
 
 .. only:: html
 
- .. figure:: /gallery/images/thumb/sphx_glr_knights2020_thumb.png
-     :alt: Nitrate Removal Across Ecogeomorphic Zones in Wax Lake Delta, Louisiana (USA)
+  .. image:: /gallery/images/thumb/sphx_glr_knights2020_thumb.png
+    :alt: Nitrate Removal Across Ecogeomorphic Zones in Wax Lake Delta, Louisiana (USA)
 
-     :ref:`sphx_glr_gallery_knights2020.py`
+  :ref:`sphx_glr_gallery_knights2020.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Nitrate Removal Across Ecogeomorphic Zones in Wax Lake Delta, Louisiana (USA)</div>
+    </div>
+
 
 .. raw:: html
 
@@ -34,9 +41,6 @@ Some selected publications that have used RivGraph to answer some cool science q
    :hidden:
 
    /gallery/knights2020
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
 
 
 
