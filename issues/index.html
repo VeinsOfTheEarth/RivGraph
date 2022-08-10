@@ -109,7 +109,7 @@
 </section>
 <section id="non-point-intersection">
 <h3>Non-point intersection<a class="headerlink" href="#non-point-intersection" title="Permalink to this heading"></a></h3>
-<p>An assumption of <a class="reference internal" href="../apiref/deltas.html#rivgraph.deltas.delta_utils.clip_by_shoreline" title="rivgraph.deltas.delta_utils.clip_by_shoreline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.deltas.delta_utils.clip_by_shoreline</span></code></a> is that the channel skeleton and the shoreline intersect at a point, not at a line segment. If a shoreline was extracted using an automatic method such as the <a class="reference external" href="https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963">Opening Angle Method</a>, a line intersection can arise. It’s recommended to smooth the shoreline, e.g. using <a class="reference external" href="https://gis.stackexchange.com/questions/24827/smoothing-polygons-in-contour-map">spline interpolation</a> or manually adjust the shoreline in that case to ensure point intersection.</p>
+<p>An assumption of <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.deltas.delta_utils.clip_by_shoreline</span></code> is that the channel skeleton and the shoreline intersect at a point, not at a line segment. If a shoreline was extracted using an automatic method such as the <a class="reference external" href="https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963">Opening Angle Method</a>, a line intersection can arise. It’s recommended to smooth the shoreline, e.g. using <a class="reference external" href="https://gis.stackexchange.com/questions/24827/smoothing-polygons-in-contour-map">spline interpolation</a> or manually adjust the shoreline in that case to ensure point intersection.</p>
 </section>
 </section>
 <section id="mask-issues">
@@ -130,7 +130,7 @@
 <p>As changing this assumption may lead to unknown downstream changes in RivGraph’s functionality, there are no plans at this time to remove it from the skeletonization procedure.</p>
 <p>Therefore there are several options available to treat this issue if it arises. If the island is relevant to the problem at hand, i.e. represents a significant feature in the network being analyzed:</p>
 <ol class="arabic simple">
-<li><p>Comment out the following three lines in <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.mask_to_graph.skeletonize_mask" title="rivgraph.mask_to_graph.skeletonize_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.mask_to_graph.skeletonize_mask()</span></code></a> for your relevant class:</p></li>
+<li><p>Comment out the following three lines in <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.mask_to_graph.skeletonize_mask()</span></code> for your relevant class:</p></li>
 </ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Iskel</span> <span class="o">=</span> <span class="n">imu</span><span class="o">.</span><span class="n">fill_holes</span><span class="p">(</span><span class="n">Iskel</span><span class="p">,</span> <span class="n">maxholesize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 <span class="n">Iskel</span> <span class="o">=</span> <span class="n">morphology</span><span class="o">.</span><span class="n">skeletonize</span><span class="p">(</span><span class="n">Iskel</span><span class="p">)</span>
@@ -142,7 +142,7 @@
 </ol>
 <p>If the island doesn’t represent a significant feature in the network and could be removed:</p>
 <ol class="arabic simple" start="3">
-<li><p>Remove islands than 4 pixels during mask processing. The function <a class="reference internal" href="../apiref/rivgraph.html#rivgraph.im_utils.fill_holes" title="rivgraph.im_utils.fill_holes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.fill_holes()</span></code></a> provides this functionality.</p></li>
+<li><p>Remove islands than 4 pixels during mask processing. The function <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.fill_holes()</span></code> provides this functionality.</p></li>
 </ol>
 </section>
 </section>
