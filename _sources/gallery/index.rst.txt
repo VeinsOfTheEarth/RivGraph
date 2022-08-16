@@ -17,6 +17,23 @@ Some selected publications that have used RivGraph to answer some cool science q
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2022GL097897&gt;`_ use...">
+
+.. only:: html
+
+  .. image:: /gallery/images/thumb/sphx_glr_hariharan2022_thumb.png
+    :alt: Width-Based Discharge Partitioning in Distributary Networks: How Right We Are
+
+  :ref:`sphx_glr_gallery_hariharan2022.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Width-Based Discharge Partitioning in Distributary Networks: How Right We Are</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019WR026867&gt;`_ made...">
 
 .. only:: html
@@ -40,6 +57,7 @@ Some selected publications that have used RivGraph to answer some cool science q
 .. toctree::
    :hidden:
 
+   /gallery/hariharan2022
    /gallery/knights2020
 
 
