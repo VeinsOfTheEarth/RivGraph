@@ -99,17 +99,13 @@ Because of this, we recommend using <a class="reference external" href="https://
 <h2>Installation via <em>conda</em><a class="headerlink" href="#installation-via-conda" title="Permalink to this headline"></a></h2>
 <p>The latest ‘stable’ version of <em>RivGraph</em> can be installed via <cite>conda</cite>.
 We recommend installing <em>RivGraph</em> into a fresh conda environment to minimize the risk of dependency clashes.
-The easiest way to do this is by first downloading the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml">environment.yml</a> (go to link, click “Raw”, then copy the contents into a text editor and save as ‘environment.yml’), opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ conda env create --file /path/to/environment.yml
+The easiest way to do this is by opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ conda env create -n rivgraph_env rivgraph -c conda-forge
 </pre></div>
-</div>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>The default environment name is ‘rivgraph’ (per the <cite>environment.yml</cite> file), but you can change the environment file to name it anything you like.</p>
 </div>
 <p>If you would rather install <em>RivGraph</em> into a pre-existing environment “myenv”, you can use the following commands:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">myenv</span>
-<span class="n">conda</span> <span class="n">install</span> <span class="n">rivgraph</span> <span class="o">-</span><span class="n">c</span> <span class="n">jschwenk</span>
+<span class="n">conda</span> <span class="n">install</span> <span class="n">rivgraph</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -154,21 +150,27 @@ provided below with links to the homepage for each dependency.</p>
 </ul>
 </dd>
 </dl>
-<p>3. From the cloned folder, run the following in the command line:</p>
+<ol class="arabic" start="3">
+<li><p>From the cloned folder, run the following in the command line:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python setup.py install
 </pre></div>
 </div>
+</li>
+</ol>
 <p>to install the <em>RivGraph</em> package.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If you run into issues installing <em>RivGraph</em> at this stage, please check
 to see whether you’ve installed all of the required dependencies.</p>
 </div>
-<p>4. To test your installation, you need to install the <a class="reference external" href="https://docs.pytest.org/en/stable/index.html">pytest</a> package.
+<ol class="arabic" start="4">
+<li><p>To test your installation, you need to install the <a class="reference external" href="https://docs.pytest.org/en/stable/index.html">pytest</a> package.
 Then from the cloned folder you can run the unit tests with the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pytest
 </pre></div>
 </div>
+</li>
+</ol>
 </div>
 </div>
 
