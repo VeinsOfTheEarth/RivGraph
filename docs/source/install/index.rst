@@ -12,7 +12,7 @@ Installation Instructions
 Installation via *conda*
 --------------------------
 
-The latest 'stable' version of *RivGraph* can be installed via `conda`.
+The latest 'stable' version of *RivGraph* can be installed via `conda`; as of this writing we have tested this installation process for Python versions 3.9.x and 3.7.13 (per `issue 83 <https://github.com/VeinsOfTheEarth/RivGraph/issues/83>`_).
 We recommend installing *RivGraph* into a fresh conda environment to minimize the risk of dependency clashes.
 The easiest way to do this is by opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:
 ::
@@ -27,8 +27,10 @@ If you would rather install *RivGraph* into a pre-existing environment "myenv", 
 
 .. warning::
 
- *RivGraph* dependencies may be pinned to specific versions of packages (e.g. geopandas 0.7) that may not mesh with your existing environment.
- Check the `environment file <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml>`_ for these cases.
+   *RivGraph* dependencies may be pinned to specific versions of packages that may not mesh with your existing environment.
+   Check the `environment file <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml>`_ for these cases.
+   If you are having trouble getting the environment to resolve, or it is taking a very long time, consider using *mamba*
+   as a drop-in replacement for *conda* (see `mamba docs <https://mamba.readthedocs.io/en/latest/>`_).
 
 Installation from source
 ------------------------
