@@ -14,7 +14,7 @@ import numpy as np
 import geopandas as gpd
 import rivgraph.im_utils as iu
 import rivgraph.geo_utils as gu
-from scipy.ndimage.morphology import distance_transform_edt
+from scipy.ndimage import distance_transform_edt
 from shapely.geometry import Polygon
 from shapely.ops import cascaded_union
 from scipy import stats
