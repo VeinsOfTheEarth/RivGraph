@@ -99,7 +99,7 @@ Because of this, we recommend using <a class="reference external" href="https://
 </div>
 <section id="installation-via-conda">
 <h2>Installation via <em>conda</em><a class="headerlink" href="#installation-via-conda" title="Permalink to this heading"></a></h2>
-<p>The latest ‘stable’ version of <em>RivGraph</em> can be installed via <cite>conda</cite>.
+<p>The latest ‘stable’ version of <em>RivGraph</em> can be installed via <cite>conda</cite>; as of this writing we have tested this installation process for Python versions 3.9.x and 3.7.13 (per <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/issues/83">issue 83</a>).
 We recommend installing <em>RivGraph</em> into a fresh conda environment to minimize the risk of dependency clashes.
 The easiest way to do this is by opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ conda create -n rivgraph_env rivgraph -c conda-forge
@@ -112,8 +112,10 @@ The easiest way to do this is by opening Terminal (Mac/Unix) or Anaconda Prompt 
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><em>RivGraph</em> dependencies may be pinned to specific versions of packages (e.g. geopandas 0.7) that may not mesh with your existing environment.
-Check the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml">environment file</a> for these cases.</p>
+<p><em>RivGraph</em> dependencies may be pinned to specific versions of packages that may not mesh with your existing environment.
+Check the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml">environment file</a> for these cases.
+If you are having trouble getting the environment to resolve, or it is taking a very long time, consider using <em>mamba</em>
+as a drop-in replacement for <em>conda</em> (see <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">mamba docs</a>).</p>
 </div>
 </section>
 <section id="installation-from-source">
