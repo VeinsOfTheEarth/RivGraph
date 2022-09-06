@@ -15,7 +15,7 @@ except ModuleNotFoundError:
 import numpy as np
 import networkx as nx
 from pyproj.crs import CRS
-from scipy.ndimage.morphology import distance_transform_edt
+from scipy.ndimage import distance_transform_edt
 from matplotlib import pyplot as plt
 import geopandas as gpd
 from shapely.geometry import LineString

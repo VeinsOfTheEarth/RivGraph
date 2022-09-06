@@ -10,7 +10,7 @@ Created on Tue Nov  6 14:29:10 2018
 import numpy as np
 import networkx as nx
 from fastdtw import fastdtw
-from scipy.ndimage.morphology import distance_transform_edt
+from scipy.ndimage import distance_transform_edt
 import shapely
 from shapely.geometry import LineString, Polygon
 from scipy import signal
@@ -641,7 +641,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
             pts[i] = idxlist
 
         return pts
-    
+
 
     def get_transect_endpoints_xy(lpts, rpts):
         """

@@ -892,7 +892,7 @@ def fill_holes(I, maxholesize=0):
     I = np.array(I, dtype=bool)
 
     if maxholesize == 0:
-        I = nd.morphology.binary_fill_holes(I)
+        I = nd.binary_fill_holes(I)
         return I
     else:
         # Fill only holes less than maxholesize
