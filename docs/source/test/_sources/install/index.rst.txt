@@ -17,7 +17,7 @@ We recommend installing *RivGraph* into a fresh conda environment to minimize th
 The easiest way to do this is by opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:
 ::
 
-   $ conda env create -n rivgraph_env rivgraph -c conda-forge
+   $ conda create -n rivgraph_env rivgraph -c conda-forge
 
 If you would rather install *RivGraph* into a pre-existing environment "myenv", you can use the following commands:
 ::
