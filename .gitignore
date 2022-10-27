@@ -141,3 +141,6 @@ dmypy.json
 cython_debug/
 
 .vscode
+
+# MacOS
+*DS_Store
