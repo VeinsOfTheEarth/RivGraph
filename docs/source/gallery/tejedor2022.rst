@@ -18,8 +18,8 @@
 .. _sphx_glr_gallery_tejedor2022.py:
 
 
-The Entropic Braiding Index (eBI): a robust metric to account for the diversity of channel scales in multi-thread rivers 
-=============================================================================
+The Entropic Braiding Index (eBI): a robust metric to account for the diversity of channel scales in multi-thread rivers
+========================================================================================================================
 *Alejandro Tejedor, Jon Schwenk, Maarten Kleinhans, Ajay B. Limaye,
 Lawrence Vulis, Paul Carling, Holger Kantz, Efi Foufoula-Georgiou*
 
@@ -43,23 +43,18 @@ a new index of river multithreadedness
 
 .. _sphx_glr_download_gallery_tejedor2022.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: tejedor2022.py <tejedor2022.py>`
 
-     :download:`Download Python source code: tejedor2022.py <tejedor2022.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: tejedor2022.ipynb <tejedor2022.ipynb>`
+      :download:`Download Jupyter notebook: tejedor2022.ipynb <tejedor2022.ipynb>`
 
 
 .. only:: html

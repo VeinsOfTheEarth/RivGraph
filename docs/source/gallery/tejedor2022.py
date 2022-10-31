@@ -1,6 +1,6 @@
 """
-The Entropic Braiding Index (eBI): a robust metric to account for the diversity of channel scales in multi-thread rivers 
-=============================================================================
+The Entropic Braiding Index (eBI): a robust metric to account for the diversity of channel scales in multi-thread rivers
+========================================================================================================================
 *Alejandro Tejedor, Jon Schwenk, Maarten Kleinhans, Ajay B. Limaye,
 Lawrence Vulis, Paul Carling, Holger Kantz, Efi Foufoula-Georgiou*
 

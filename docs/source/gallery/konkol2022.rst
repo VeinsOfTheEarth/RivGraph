@@ -19,11 +19,11 @@
 
 
 Interplay of river and tidal forcings promotes loops in coastal channel networks
-=============================================================================
+================================================================================
 *Adam Konkol, Jon Schwenk, Eleni Katifori, and John Shaw*
 
 `This publication <https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2022GL098284>`_
-used RivGraph to determine the "loopiness" of 21 natural delta channel networks. 
+used RivGraph to determine the "loopiness" of 21 natural delta channel networks.
 
 .. image:: ../gallery_source/images/konkol_et_al_2022.PNG
 
@@ -42,23 +42,18 @@ used RivGraph to determine the "loopiness" of 21 natural delta channel networks.
 
 .. _sphx_glr_download_gallery_konkol2022.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: konkol2022.py <konkol2022.py>`
 
-     :download:`Download Python source code: konkol2022.py <konkol2022.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: konkol2022.ipynb <konkol2022.ipynb>`
+      :download:`Download Jupyter notebook: konkol2022.ipynb <konkol2022.ipynb>`
 
 
 .. only:: html
