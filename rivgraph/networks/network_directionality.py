@@ -13,6 +13,8 @@ import numpy as np
 import networkx as nx
 import geopandas as gpd
 from shapely.geometry import Polygon, Point
+from tqdm import tqdm
+
 import rivgraph.io_utils as io
 import rivgraph.ln_utils as lnu
 import rivgraph.geo_utils as gu
@@ -75,81 +77,85 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
     links, nodes = dy.dir_set_manually(links, nodes, manual_set_csv)
 
     # Append morphological information used to set directionality to links dict
+    print("Directional info...")
     links, nodes = directional_info(links, nodes, Imask, pixlen, exit_sides,
                                     gt, meshlines, meshpolys, Idt)
 
     # Begin setting link directionality
     # First, set inlet/outlet directions as they are always 100% accurate
+    print("Inlet/outlet directions...")
     links, nodes = dy.set_inletoutlet(links, nodes)
 
-    # Set the directions of the links that are more certain via centerline
-    # distance method
-    # alg = 22
-    alg = dy.algmap('cl_dist_set')
-    cl_distthresh = np.percentile(links['cldists'], 85)
-    for lid, cld, lg, lga, cert in zip(links['id'],  links['cldists'],
-                                       links['guess'], links['guess_alg'],
-                                       links['certain']):
-        if cert == 1:
-            continue
-        if cld >= cl_distthresh:
-            linkidx = links['id'].index(lid)
-            if dy.algmap('cl_dist_guess') in lga:
-                usnode = lg[lga.index(dy.algmap('cl_dist_guess'))]
-                links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
+    # # Set the directions of the links that are more certain via centerline
+    # # distance method
+    # # alg = 22
+    # alg = dy.algmap('cl_dist_set')
+    # cl_distthresh = np.percentile(links['cldists'], 85)
+    # for lid, cld, lg, lga, cert in zip(links['id'],  links['cldists'],
+    #                                    links['guess'], links['guess_alg'],
+    #                                    links['certain']):
+    #     if cert == 1:
+    #         continue
+    #     if cld >= cl_distthresh:
+    #         linkidx = links['id'].index(lid)
+    #         if dy.algmap('cl_dist_guess') in lga:
+    #             usnode = lg[lga.index(dy.algmap('cl_dist_guess'))]
+    #             links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
 
-    # Set the directions of the links that are more certain via centerline
-    # angle method
-    # alg = 23
-    alg = dy.algmap('cl_ang_set')
-    cl_angthresh = np.percentile(links['clangs'][np.isnan(links['clangs'])==0], 25)
-    for lid, cla, lg, lga, cert in zip(links['id'],  links['clangs'],
-                                       links['guess'], links['guess_alg'],
-                                       links['certain']):
-        if cert == 1:
-            continue
-        if np.isnan(cla) == True:
-            continue
-        if cla <= cl_angthresh:
-            linkidx = links['id'].index(lid)
-            if dy.algmap('cl_ang_guess') in lga:
-                usnode = lg[lga.index(dy.algmap('cl_ang_guess'))]
-                links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
+    # # Set the directions of the links that are more certain via centerline
+    # # angle method
+    # # alg = 23
+    # alg = dy.algmap('cl_ang_set')
+    # cl_angthresh = np.percentile(links['clangs'][np.isnan(links['clangs'])==0], 25)
+    # for lid, cla, lg, lga, cert in zip(links['id'],  links['clangs'],
+    #                                    links['guess'], links['guess_alg'],
+    #                                    links['certain']):
+    #     if cert == 1:
+    #         continue
+    #     if np.isnan(cla) == True:
+    #         continue
+    #     if cla <= cl_angthresh:
+    #         linkidx = links['id'].index(lid)
+    #         if dy.algmap('cl_ang_guess') in lga:
+    #             usnode = lg[lga.index(dy.algmap('cl_ang_guess'))]
+    #             links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
 
-    # Set the directions of the links that are more certain via centerline
-    # distance AND centerline angle methods
-    # alg = 24
-    alg = dy.algmap('cl_dist_and_ang')
-    cl_distthresh = np.percentile(links['cldists'], 70)
-    ang_thresh = np.percentile(links['clangs'][np.isnan(links['clangs']) == 0],
-                               35)
-    for lid, cld, cla, lg, lga, cert in zip(links['id'],  links['cldists'],
-                                            links['clangs'], links['guess'],
-                                            links['guess_alg'],
-                                            links['certain']):
-        if cert == 1:
-            continue
-        if cld >= cl_distthresh and cla < ang_thresh:
-            linkidx = links['id'].index(lid)
-            if dy.algmap('cl_dist_guess') in lga and dy.algmap('cl_ang_guess') in lga:
-                if lg[lga.index(dy.algmap('cl_dist_guess'))] == lg[lga.index(dy.algmap('cl_ang_guess'))]:
-                    usnode = lg[lga.index(dy.algmap('cl_dist_guess'))]
-                    links, nodes = dy.set_link(links, nodes, linkidx, usnode,
-                                               alg)
+    # # Set the directions of the links that are more certain via centerline
+    # # distance AND centerline angle methods
+    # # alg = 24
+    # alg = dy.algmap('cl_dist_and_ang')
+    # cl_distthresh = np.percentile(links['cldists'], 70)
+    # ang_thresh = np.percentile(links['clangs'][np.isnan(links['clangs']) == 0],
+    #                            35)
+    # for lid, cld, cla, lg, lga, cert in zip(links['id'],  links['cldists'],
+    #                                         links['clangs'], links['guess'],
+    #                                         links['guess_alg'],
+    #                                         links['certain']):
+    #     if cert == 1:
+    #         continue
+    #     if cld >= cl_distthresh and cla < ang_thresh:
+    #         linkidx = links['id'].index(lid)
+    #         if dy.algmap('cl_dist_guess') in lga and dy.algmap('cl_ang_guess') in lga:
+    #             if lg[lga.index(dy.algmap('cl_dist_guess'))] == lg[lga.index(dy.algmap('cl_ang_guess'))]:
+    #                 usnode = lg[lga.index(dy.algmap('cl_dist_guess'))]
+    #                 links, nodes = dy.set_link(links, nodes, linkidx, usnode,
+    #                                            alg)
 
     # Set directions by most-certain angles
     angthreshs = np.linspace(0, 0.4, 10)
-    for a in angthreshs:
+    for a in tqdm(angthreshs, "Directions by shallow angles"):
         links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,
                                                        angthresh=a,
                                                        lenthresh=3)
 
     # Set using direction of nearest main channel
+    print("Set directions by nearest main channel...")
     links, nodes = dy.set_by_nearest_main_channel(links, nodes, imshape,
                                                   nodethresh=1)
 
+    # Set directions by less-certain angles
     angthreshs = np.linspace(0, 1.5, 20)
-    for a in angthreshs:
+    for a in tqdm(angthreshs, "Directions by steep angles"):
         links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,
                                                        angthresh=a)
 
@@ -161,28 +167,32 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
 
     # Check for and try to fix cycles in the graph
     links, nodes, cantfix_cyclelinks, cantfix_cyclenodes = fix_river_cycles(links, nodes, imshape)
+    links["cycles"] = cantfix_cyclelinks
+    nodes["cycles"] = cantfix_cyclenodes
 
     # Check for sources or sinks within the graph
     cont_violators = dy.check_continuity(links, nodes)
+    nodes["continuity_violated"] = cont_violators
 
     # Summary of problems:
     manual_fix = 0
     if len(cantfix_cyclelinks) > 0:
-        print('Could not fix cycle links: {}.'.format(cantfix_cyclelinks))
+        nc = sum([len(lc) for lc in cantfix_cyclelinks])
+        print(f'Could not fix {nc} cycle links: {cantfix_cyclelinks}')
         manual_fix = 1
     else:
         print('All cycles were resolved.')
     if len(cont_violators) > 0:
-        print('Continuity violated at nodes {}.'.format(cont_violators))
+        print(f'Continuity violated at {len(cont_violators)} nodes: {cont_violators}')
         manual_fix = 1
 
-    # # Create a csv to store manual edits to directionality if does not exist
-    # if manual_fix == 1:
-    #     if os.path.isfile(manual_set_csv) is False:
-    #         io.create_manual_dir_csv(manual_set_csv)
-    #         print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
-    #     else:
-    #         print('Use the csv file at {} to manually fix link directions.'.format(manual_set_csv))
+    # Create a csv to store manual edits to directionality if does not exist
+    if manual_fix == 1:
+        if os.path.isfile(manual_set_csv) is False:
+            io.create_manual_dir_csv(manual_set_csv)
+            print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
+        else:
+            print('Use the csv file at {} to manually fix link directions.'.format(manual_set_csv))
 
     return links, nodes
 
@@ -230,16 +240,21 @@ def directional_info(links, nodes, Imask, pixlen, exit_sides, gt, meshlines,
         links = lnu.link_widths_and_lengths(links, Idt)
 
     # Compute all the information
-    links = dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt,
-                           pixlen)
+    # links = dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt,
+    #                        pixlen)
+    print("Direction link width...")
     links = dir_link_widths(links)
-    links, nodes = dy.dir_bridges(links, nodes)
-    links, nodes = dy.dir_main_channel(links, nodes)
 
+    #print("Direction network bridges...")
+    #links, nodes = dy.dir_bridges(links, nodes)
+
+    #for inl in tqdm(nodes['inlets'], 'Main channel direction'):
+    #    links, nodes = dy.dir_main_channel(links, nodes, inlet=inl)
+    links, nodes = dy.dir_main_channel(links, nodes)
     return links, nodes
 
 
-def fix_river_cycles(links, nodes, imshape):
+def fix_river_cycles(links, nodes, imshape, skip_threshold=1000):
     """
     Attempt to resolve cycles in the network.
 
@@ -298,15 +313,23 @@ def fix_river_cycles(links, nodes, imshape):
         cfix_nodes = [cn for icn, cn in enumerate(c_nodes) if np.isnan(isin[icn][0])]
         cfix_links = [cl for icl, cl in enumerate(c_links) if np.isnan(isin[icl][0])]
 
-        print('Attempting to fix {} cycles.'.format(len(cfix_nodes)))
 
-        # Try to fix all the cycles
-        for cnodes, clinks in zip(cfix_nodes, cfix_links):
-            links, nodes, fixed = fix_river_cycle(links, nodes, clinks,
-                                                  cnodes, imshape)
-            if fixed == 0:
-                cantfix_nodes.append(cnodes)
-                cantfix_links.append(clinks)
+        if len(cfix_nodes) < skip_threshold:  # dont attempt to fix cycles if too many nodes as it takes ages
+            print('Attempting to fix {} cycles.'.format(len(cfix_nodes)))
+            # Try to fix all the cycles
+            for cnodes, clinks in tqdm(zip(cfix_nodes, cfix_links),
+                                    "Fixing cycles", total=len(cfix_nodes)):
+                links, nodes, fixed = fix_river_cycle(links, nodes, clinks,
+                                                    cnodes, imshape)
+                if fixed == 0:
+                    cantfix_nodes.append(cnodes)
+                    cantfix_links.append(clinks)
+
+            if len(cantfix_links) > 0:
+                print(f"Failed to fix {len(cantfix_links)} cycles.")
+        else:
+            print("Skipping fixing too many cycles %s" % len(cfix_nodes))
+            cantfix_nodes, cantfix_links = cfix_nodes, cfix_links
 
     return links, nodes, cantfix_links, cantfix_nodes
 
@@ -476,20 +499,20 @@ def re_set_linkdirs(links, nodes, imshape):
 
     # Set the directions of the links that are more certain via centerline angle method
     # alg = 23.1
-    alg = dy.algmap('cl_ang_rs')
-    cl_angthresh = np.percentile(links['clangs'][np.isnan(links['clangs']) == 0], 40)
-    for lid, cla, lg, lga, cert in zip(links['id'],  links['clangs'],
-                                       links['guess'], links['guess_alg'],
-                                       links['certain']):
-        if cert == 1:
-            continue
-        if np.isnan(cla) == True:
-            continue
-        if cla <= cl_angthresh:
-            linkidx = links['id'].index(lid)
-            if dy.algmap('cl_ang_guess') in lga:
-                usnode = lg[lga.index(dy.algmap('cl_ang_guess'))]
-                links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
+    # alg = dy.algmap('cl_ang_rs')
+    # cl_angthresh = np.percentile(links['clangs'][np.isnan(links['clangs']) == 0], 40)
+    # for lid, cla, lg, lga, cert in zip(links['id'],  links['clangs'],
+    #                                    links['guess'], links['guess_alg'],
+    #                                    links['certain']):
+    #     if cert == 1:
+    #         continue
+    #     if np.isnan(cla) == True:
+    #         continue
+    #     if cla <= cl_angthresh:
+    #         linkidx = links['id'].index(lid)
+    #         if dy.algmap('cl_ang_guess') in lga:
+    #             usnode = lg[lga.index(dy.algmap('cl_ang_guess'))]
+    #             links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
 
     angthreshs = np.linspace(0, 1.3, 20)
     for a in angthreshs:
@@ -654,7 +677,7 @@ def dir_link_widths(links):
     alg = dy.algmap('wid_pctdiff')
 
     widpcts = np.zeros((len(links['id']), 1))
-    for i in range(len(links['id'])):
+    for i in tqdm(range(len(links['id'])), "Dir link width"):
 
         lw = links['wid_pix'][i]
 

@@ -7,11 +7,14 @@ import warnings
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from loguru import logger
 
 from rivgraph.classes import river as RGRiver
 import rivgraph.ln_utils as rgln
 from rivgraph.ordered_set import OrderedSet
 import rivgraph.io_utils as io
+
+from . import network_directionality as nd
 
 
 class RiverNetwork(RGRiver):
@@ -117,16 +120,21 @@ class RiverNetwork(RGRiver):
             with open(osp.join(self.paths['basepath'], 'flipped_links.csv'), 'w') as f:
                 f.writelines(['%s\n' % i for i in self.flipped_links])
         return
-    
-    def resolve_cycles(self):
-        """Set directions by accumulation in cycle links."""
-        for cyl, cyn in zip(self.links["cycles"], self.nodes["cycles"]):
-            # make sure widest river is flowing into node with greatest accumulation
-            for l in cyl:
-                stenn = self.links["conn"][self.links["id"].index(l)]
-                stac, enac = self.nodes_input.loc[stenn, "accumulation"]
-                if stac > enac:
-                    rgln.flip_link(self.links, l)
+
+
+    def assign_flow_directions(self):
+        """
+        Automatically sets flow directions for each link in a braided river
+        channel network.
+
+        """
+        logger.info('Setting link directionality...')
+
+        self.links, self.nodes = nd.set_directionality(
+            self.links, self.nodes, self.Imask, self.exit_sides, self.gt,
+            self.meshlines, self.meshpolys, self.Idist, self.pixlen, self.paths['fixlinks_csv'])
+
+        logger.info('link directionality has been set.')
         return
 
 
