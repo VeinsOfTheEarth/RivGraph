@@ -28,8 +28,8 @@ All of RivGraph's functionality maintains and respects georeferencing informatio
 You can see some description of RivGraph's functionality via this [AGU poster](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph), and the flow directionality logic and validation is described in our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html). Examples demonstrating the basic RivGraph features are available for a [delta channel network](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/delta_example.ipynb) and a [braided river](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/braided_river_example.ipynb).
 
 Installing
-
 -----
+
 RivGraph is hosted at conda-forge. We recommend installing into a fresh conda environment to minimize the risk of dependency clashes. The easiest way to do this is to open Terminal (Mac/Unix) or Anaconda Prompt (Windows) and type:
 
 <pre><code>conda create -n rivgraph_env rivgraph -c conda-forge
@@ -46,8 +46,8 @@ You may also [install RivGraph from this Github repo](https://VeinsOfTheEarth.gi
 Instructions for testing your installation are available [here](https://VeinsOfTheEarth.github.io/RivGraph/install/index.html#installation-from-source).
 
 How to use?
-
 -----
+
 Please see the [documentation](https://VeinsOfTheEarth.github.io/RivGraph/) for more detailed instructions.
 
 RivGraph requires that you provide a binary mask of your network. [This page](https://VeinsOfTheEarth.github.io/RivGraph/maskmaking/index.html) provides some help, hints, and tools for finding or creating your mask.
