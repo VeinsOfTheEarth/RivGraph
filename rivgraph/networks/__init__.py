@@ -49,13 +49,18 @@ class RiverNetwork(RGRiver):
             'inlets': nodes.index[nodes.inlet].tolist(),
             'outlets': nodes.index[nodes.outlet].tolist(),
         }
+        self.nodes.update({k: nodes[k].values for k in nodes.columns if k not in self.nodes})
+        ln = nodes.conn.apply(len)
+        ln_min_conn = np.min((ln[links["start_node"]], ln[links["end_node"]]), axis=0)
 
         self.links = {
             'id': OrderedSet(assert_unique(links.index, "id of links")),
             'idx': links.idx.tolist(),
             'conn': links[["start_node", "end_node"]].values.tolist(),
             'wid_pix': links.wid_pix.apply(lambda s: np.array(s)).values.tolist(),
+            'dangle': ln_min_conn == 1,
         }
+        self.links.update({k: links[k].values for k in links.columns if k not in self.links})
 
         self.pixarea = res**2
         self.pixlen = res
@@ -69,6 +74,9 @@ class RiverNetwork(RGRiver):
 
     def link_widths_and_lengths(self):
         self.links = link_widths_and_lengths(self.links, self.imshape, pixlen=self.pixlen)
+        # width combos
+        width = [[self.links["wid_adj"][self.links['id'].index(i)] for i in con] for con in self.nodes["conn"]]
+        self.nodes["width_combo"] = [np.array(w) / np.array([np.sum(w) - i for i in w]) for w in width]
         return self.links
 
     def find_parallel_links(self):
@@ -79,7 +87,6 @@ class RiverNetwork(RGRiver):
     def links_direction_info(self):
         cols = tuple(set(self.links.keys()) - set(list(self.links_input.columns)+["n_networks", "parallels", "conn"]))
         dat = {c: self.links[c] for c in cols if len(np.array(self.links[c]).shape) == 1}
-        dat['wid_pctdiff'] = self.links['wid_pctdiff'].flatten()
         # add cycles
         dat["cycle"] = pd.Series(0, index=dat['id'])
         dat.pop("cycles", [])
@@ -111,8 +118,8 @@ class RiverNetwork(RGRiver):
         self.link_widths_and_lengths()
         self.assign_flow_directions()
         self.compute_junction_angles()
+        self.find_mainstem()
 
-        #self.resolve_cycles()
         # write output
         if output:
             self.links_direction_info.to_csv(osp.join(self.paths['basepath'], 'links_direction_info.csv'))
@@ -136,6 +143,35 @@ class RiverNetwork(RGRiver):
 
         logger.info('link directionality has been set.')
         return
+
+    def find_mainstem(self):
+        """Find network mainstem by following the widest downstream link.
+        """
+        ms = np.zeros(len(self.links["id"]), dtype=int)
+
+        for inode in tqdm(self.nodes["inlets"], "Finding mainstems"):
+            while inode not in self.nodes["outlets"]:
+                ils = [self.links["id"].index(i) for i in
+                       self.nodes["conn"][self.nodes["id"].index(inode)]]
+                # filter links going out of nodes
+                ilds = [i for i in ils if inode == self.links["conn"][i][0]]
+                if not len(ilds):
+                    warnings.warn(f"No ds lines, discontinuity? At node {inode}")
+                    break
+                ilw = [self.links["wid_adj"][i] for i in ilds]
+                il = ilds[np.argmax(ilw)]
+                if ms[il] > 0:
+                    # already found mainstems here
+                    break
+                ms[il] = 1
+                inode = self.links["conn"][il][1]
+                # check if next node is in cycle
+                in_cycles = [inode in cy for cy in self.nodes["cycles"]]
+                if any(in_cycles):
+                    warnings.warn(f"Next node in cylce: {sum(in_cycles)}")
+                    break
+        self.links["is_mainstem"] = ms
+        return ms
 
 
 def assert_unique(ids_series, name):

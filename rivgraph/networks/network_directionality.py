@@ -9,6 +9,8 @@ Created on Tue Nov  6 14:31:01 2018
 """
 
 import os
+import itertools
+
 import numpy as np
 import networkx as nx
 import geopandas as gpd
@@ -86,87 +88,19 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
     print("Inlet/outlet directions...")
     links, nodes = dy.set_inletoutlet(links, nodes)
 
-    # # Set the directions of the links that are more certain via centerline
-    # # distance method
-    # # alg = 22
-    # alg = dy.algmap('cl_dist_set')
-    # cl_distthresh = np.percentile(links['cldists'], 85)
-    # for lid, cld, lg, lga, cert in zip(links['id'],  links['cldists'],
-    #                                    links['guess'], links['guess_alg'],
-    #                                    links['certain']):
-    #     if cert == 1:
-    #         continue
-    #     if cld >= cl_distthresh:
-    #         linkidx = links['id'].index(lid)
-    #         if dy.algmap('cl_dist_guess') in lga:
-    #             usnode = lg[lga.index(dy.algmap('cl_dist_guess'))]
-    #             links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
-
-    # # Set the directions of the links that are more certain via centerline
-    # # angle method
-    # # alg = 23
-    # alg = dy.algmap('cl_ang_set')
-    # cl_angthresh = np.percentile(links['clangs'][np.isnan(links['clangs'])==0], 25)
-    # for lid, cla, lg, lga, cert in zip(links['id'],  links['clangs'],
-    #                                    links['guess'], links['guess_alg'],
-    #                                    links['certain']):
-    #     if cert == 1:
-    #         continue
-    #     if np.isnan(cla) == True:
-    #         continue
-    #     if cla <= cl_angthresh:
-    #         linkidx = links['id'].index(lid)
-    #         if dy.algmap('cl_ang_guess') in lga:
-    #             usnode = lg[lga.index(dy.algmap('cl_ang_guess'))]
-    #             links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
-
-    # # Set the directions of the links that are more certain via centerline
-    # # distance AND centerline angle methods
-    # # alg = 24
-    # alg = dy.algmap('cl_dist_and_ang')
-    # cl_distthresh = np.percentile(links['cldists'], 70)
-    # ang_thresh = np.percentile(links['clangs'][np.isnan(links['clangs']) == 0],
-    #                            35)
-    # for lid, cld, cla, lg, lga, cert in zip(links['id'],  links['cldists'],
-    #                                         links['clangs'], links['guess'],
-    #                                         links['guess_alg'],
-    #                                         links['certain']):
-    #     if cert == 1:
-    #         continue
-    #     if cld >= cl_distthresh and cla < ang_thresh:
-    #         linkidx = links['id'].index(lid)
-    #         if dy.algmap('cl_dist_guess') in lga and dy.algmap('cl_ang_guess') in lga:
-    #             if lg[lga.index(dy.algmap('cl_dist_guess'))] == lg[lga.index(dy.algmap('cl_ang_guess'))]:
-    #                 usnode = lg[lga.index(dy.algmap('cl_dist_guess'))]
-    #                 links, nodes = dy.set_link(links, nodes, linkidx, usnode,
-    #                                            alg)
-
-    # Set directions by most-certain angles
-    angthreshs = np.linspace(0, 0.4, 10)
-    for a in tqdm(angthreshs, "Directions by shallow angles"):
-        links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,
-                                                       angthresh=a,
-                                                       lenthresh=3)
-
-    # Set using direction of nearest main channel
-    print("Set directions by nearest main channel...")
-    links, nodes = dy.set_by_nearest_main_channel(links, nodes, imshape,
-                                                  nodethresh=1)
-
-    # Set directions by less-certain angles
-    angthreshs = np.linspace(0, 1.5, 20)
-    for a in tqdm(angthreshs, "Directions by steep angles"):
-        links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,
-                                                       angthresh=a)
+    # the actual tricky directions
+    links, nodes = set_inexact(links, nodes, imshape)
 
     # At this point, if any links remain unset, they are just set randomly
     if np.sum(links['certain']) != len(links['id']):
         print('{} links were randomly set.'.format(len(links['id']) -
                                                    np.sum(links['certain'])))
-        links['certain'] = np.ones((len(links['id']), 1))
+        links["certain_alg"][links['certain'] == 0] = dy.algmap("random")
 
     # Check for and try to fix cycles in the graph
-    links, nodes, cantfix_cyclelinks, cantfix_cyclenodes = fix_river_cycles(links, nodes, imshape)
+    links, nodes, cantfix_cyclelinks, cantfix_cyclenodes = fix_river_cycles(
+        links, nodes, imshape, skip_threshold=200,
+    )
     links["cycles"] = cantfix_cyclelinks
     nodes["cycles"] = cantfix_cyclenodes
 
@@ -242,19 +176,19 @@ def directional_info(links, nodes, Imask, pixlen, exit_sides, gt, meshlines,
     # Compute all the information
     # links = dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt,
     #                        pixlen)
-    print("Direction link width...")
-    links = dir_link_widths(links)
+    # print("Direction link width...")
+    # links = dir_link_widths(links)
 
     #print("Direction network bridges...")
     #links, nodes = dy.dir_bridges(links, nodes)
 
     #for inl in tqdm(nodes['inlets'], 'Main channel direction'):
     #    links, nodes = dy.dir_main_channel(links, nodes, inlet=inl)
-    links, nodes = dy.dir_main_channel(links, nodes)
+    #links, nodes = dy.dir_main_channel(links, nodes)
     return links, nodes
 
 
-def fix_river_cycles(links, nodes, imshape, skip_threshold=1000):
+def fix_river_cycles(links, nodes, imshape, skip_threshold=200):
     """
     Attempt to resolve cycles in the network.
 
@@ -310,26 +244,31 @@ def fix_river_cycles(links, nodes, imshape, skip_threshold=1000):
                 elif len(set(cn) - set(cn2)) == 0:
                     isin[icn] = icn2
                     break
-        cfix_nodes = [cn for icn, cn in enumerate(c_nodes) if np.isnan(isin[icn][0])]
-        cfix_links = [cl for icl, cl in enumerate(c_links) if np.isnan(isin[icl][0])]
+        cfix_nodes = [cn for icn, cn in enumerate(c_nodes)
+                      if np.isnan(isin[icn][0])]
+        cfix_links = [cl for icl, cl in enumerate(c_links)
+                      if np.isnan(isin[icl][0])]
 
+        # start with smallest and respect skip threshold
+        cfixnlsorted = zip(*sorted(zip(cfix_nodes, cfix_links),
+                                   key=lambda x: len(x[1])))
+        cfn_all, cfl_all = [list(c) for c in cfixnlsorted]
+        cfix_nodes, cfix_links = [l[:min(skip_threshold, len(l))] for l in (cfn_all, cfl_all)]
 
-        if len(cfix_nodes) < skip_threshold:  # dont attempt to fix cycles if too many nodes as it takes ages
-            print('Attempting to fix {} cycles.'.format(len(cfix_nodes)))
-            # Try to fix all the cycles
-            for cnodes, clinks in tqdm(zip(cfix_nodes, cfix_links),
-                                    "Fixing cycles", total=len(cfix_nodes)):
-                links, nodes, fixed = fix_river_cycle(links, nodes, clinks,
-                                                    cnodes, imshape)
-                if fixed == 0:
-                    cantfix_nodes.append(cnodes)
-                    cantfix_links.append(clinks)
-
-            if len(cantfix_links) > 0:
-                print(f"Failed to fix {len(cantfix_links)} cycles.")
-        else:
-            print("Skipping fixing too many cycles %s" % len(cfix_nodes))
-            cantfix_nodes, cantfix_links = cfix_nodes, cfix_links
+        print('Attempting to fix {} cycles.'.format(len(cfix_nodes)))
+        # Try to fix all the cycles
+        for cnodes, clinks in tqdm(zip(cfix_nodes, cfix_links),
+                                "Fixing cycles", total=len(cfix_nodes)):
+            links, nodes, fixed = fix_river_cycle(links, nodes, clinks,
+                                                cnodes, imshape)
+            if fixed == 0:
+                cantfix_nodes.append(cnodes)
+                cantfix_links.append(clinks)
+        # ignored cycles are not fixed
+        cantfix_nodes.extend(cfn_all[min(skip_threshold, len(cfn_all)):])
+        cantfix_links.extend(cfl_all[min(skip_threshold, len(cfl_all)):])
+        if len(cantfix_links) > 0:
+            print(f"Failed to fix {len(cantfix_links)} cycles.")
 
     return links, nodes, cantfix_links, cantfix_nodes
 
@@ -706,49 +645,251 @@ def dir_link_widths(links):
     return links
 
 
-""" Functions below here are deprecated or unused, but might be useful later """
-""" No testing performed """
+def merge_shortest_path_guesses(links, nodes):
+    spl, spn = (dy.algmap(a) for a in ('sp_links', 'sp_nodes'))
+    for lix, (gu, ga) in enumerate(zip(links["guess"], links["guess_alg"])):
+        sli, sni = (ga.index(i) if i in ga else None for i in (spl, spn))
+        # has both guesses
+        if sli and sni:
+            # if they disagree remove both
+            if gu[sli] != gu[sni]:
+                links["guess"][lix].pop(sli)
+                links["guess_alg"][lix].pop(sli)
+                # new index after removal
+                sni = links["guess_alg"].index(spn)
+            links["guess"][lix].pop(sni)
+            links["guess_alg"][lix].pop(sni)
+    return links, nodes
 
 
-def set_unknown_cluster_by_widthpct(links, nodes):
+def set_inexact(links, nodes, imshape):
+    """Set links by inexact methods."""
+
+    # compute neighbour independent guesses
+    links, nodes = guess_synthetic_slope(links, nodes, min_slope=0.1)
+    links, nodes = guess_synthetic_slope(
+        links, nodes, alg=dy.algmap('main_channel_darea_grad'),
+        node_column="mainchannel_darea", ascending=True,
+        min_slope=0.001, max_slope=1,
+    )
+    links, nodes = drainage_area_gradient(links, nodes, guess=True)
+    # shortest network path and merge guesses
+    links, nodes = dy.dir_shortest_paths_nodes(links, nodes)
+    links, nodes = dy.dir_shortest_paths_links(links, nodes)
+    links, nodes = merge_shortest_path_guesses(links, nodes)
+
+    # set very certain darea gradients
+    certda = filter_ids(links, nodes, network_bridge=True, min_darea=1000)
+    if len(certda) > 0:
+        links, nodes = drainage_area_gradient(links, nodes, idx=certda)
+    certda = filter_ids(links, nodes, network_bridge=True, coastal=False,
+                        min_length=500, min_darea=50)
+    if len(certda) > 0:
+        links, nodes = drainage_area_gradient(links, nodes, idx=certda)
+
+    links, nodes = dy.set_width_continuity(links, nodes)
+
+    if np.all(links["certain"] == 1):
+        return links, nodes
+
+    # Set directions by most-certain angles
+    angthreshs = np.linspace(0, 0.7, 20)
+    fdr = dy.algmap("known_fdr")
+    for a in tqdm(angthreshs, "Directions by shallow angles"):
+        validlin = filter_ids(links, nodes, min_length=500)
+        links, nodes = dy.set_by_known_flow_directions(
+            links, nodes, imshape, idx=validlin, angthresh=a, guess=True,
+        )
+        # the direction must at least agree with two other guesses
+        links, nodes = set_by_guess_agreement(
+            links, nodes, min_guesses=3, min_agree=3,
+            must_agree=fdr, alg=fdr,
+        )
+        links, nodes = dy.set_width_continuity(links, nodes)
+
+    # set long coastal links where mainchannel_darea_grad and dist_coast_grad guesses agree
+    # this will seed messy directions in deltas
+    mcalg, cda = (dy.algmap(a) for a in ('main_channel_darea_grad', 'syn_dem'))
+    cstuns = filter_ids(links, nodes, coastal=True, min_length=5000)
+    guess = [(links["guess"][li], links["guess_alg"][li]) for li in cstuns]
+    setln = []
+    for li, (g, ga) in zip(cstuns, guess):
+        if (cda in ga and mcalg in ga):
+            if (g[ga.index(cda)] == g[ga.index(mcalg)]):
+                setln.append((li, g[ga.index(cda)]))
+    for li, usnd in setln:
+        links, nodes = dy.set_link(links, nodes, li, usnd, alg=cda, checkcontinuity=True)
+        links, nodes = dy.set_width_continuity(links, nodes, checknodes=links["conn"][li])
+
+    # update flow direction guess to less certain angles
+    links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, guess=True)
+    links, nodes = dy.set_width_continuity(links, nodes, guess=True, factor=2)
+
     """
-    Set unknown links based on width differences at endpoints.
-
-    (flow goes wide->narrow)
-
+    Guesses:
+        - darea gradient
+        - main channel darea gradient
+        - outlet distance gradient
+        - nodes + links shortest path (combine, merge if missing or same, remove if disagree)
+    Bonus guesses:
+        - flow direction (neighbour dependent)
+        - width continuity (neighbour dependent)
     """
-    alg = 26
 
-    # Get indices of uncertain links
-    uc_idx = np.where(links['certain'] == 0)[0].tolist()
+    # first set at least 3 agreeing with flow direction
+    must_alg = [fdr, None]
+    criteria = list(itertools.product(must_alg, [0, 1, 2], [5, 4, 3]))
+    for malg, ndisagg, nguess in tqdm(criteria, "Set by best guesses"):
+        # dont ever go below 3 guesses
+        if (nguess - ndisagg) < 3:
+            continue
+        # iterate until no more links can be set with the (ndisagg, nguess) criteria
+        n_unset = (links["certain"] == 0).sum()
+        while n_unset:
+            unset = links["certain"] == 0
+            links, nodes = set_by_guess_agreement(
+                links, nodes, min_guesses=nguess, min_agree=nguess - ndisagg, must_agree=malg,
+            )
+            n_unset = (unset & (links["certain"] == 1)).sum()
+            # make sure newly set links also inform the guesses of less certain links
+            #links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, angthresh=0.4)
+            links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, guess=True)
 
-    # Create graph to find clusters of uncertains
-    G = nx.Graph()
-    for idx in uc_idx:
-        lc = links['conn'][idx]
-        G.add_edge(lc[0], lc[1])
 
-    # Compute connected components (nodes)
-    cc = nx.connected_components(G)
-    ccs = [c for c in cc if len(c) > 1]
+    # # Set using direction of nearest main channel
+    # print("Set directions by nearest main channel...")
+    # links, nodes = dy.set_by_nearest_main_channel(links, nodes, imshape,
+    #                                           nodethresh=1)
 
-    # Convert cc nodes to cc edges
-    cc_edges = []
-    for ccnodes in ccs:
-        ccedge = []
-        for idx in uc_idx:
-            lc = links['conn'][idx]
-            if lc[0] in ccnodes and lc[1] in ccnodes:
-                ccedge.append(links['id'][idx])
-        cc_edges.append(ccedge)
+    # # Set directions by less-certain angles
+    # angthreshs = np.linspace(0, 1.5, 20)
+    # for a in tqdm(angthreshs, "Directions by steep angles"):
+    #     links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,
+    #                                                    angthresh=a)
+    return links, nodes
 
-    # Loop through all the unknown clusters, setting the most-certain-by-width
-    for lclust in cc_edges:
-        widpcts = [links['wid_pctdiff'][links['id'].index(l)][0] for l in lclust]
-        link_toset = lclust[widpcts.index(max(widpcts))]
-        linkidx = links['id'].index(link_toset)
-        usnode = links['guess'][linkidx][links['guess_alg'][linkidx].index(26)]
 
-        links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg=alg)
+def set_by_guess_agreement(links, nodes, idx=None, min_guesses=None,
+                           min_agree=None, must_agree=None, alg=None):
+    """Set links by guesses with various methods."""
+    nguess = np.array([len(g) for g in links["guess"]])
+    nmin = min_guesses or np.max(nguess)
+    alg = alg or dy.algmap("n_agree") + nmin / 10
+    con = (nguess >= nmin) & (links["certain"] == 0)
+    # all must agree if no level of agreement is given
+    if min_agree is None:
+        nagree = np.array([len(set(g)) for g in links["guess"]])
+        con = con & (nagree == 1)
+    # filter and get indeces
+    if idx is not None:
+        idx = np.array(list(set(np.where(con)[0]) & set(idx)))
+    else:
+        idx = np.where(con)[0]
+    # only continue if we have selected links
+    if len(idx) == 0:
+        return links, nodes
+    # sort by descending length
+    lenidx = np.argsort(np.array(links["len"])[idx])[::-1]
+    # get back to full indeces
+    lenidx = np.arange(len(links["id"]))[idx][lenidx]
+    for lix in lenidx:
+        # check if already certain in previous iteration
+        if links["certain"][lix] == 1:
+            continue
+        # get best agreement
+        usns, counts = np.unique(links["guess"][lix], return_counts=True)
+        bestix = np.argmax(counts)
+        usnode = usns[bestix]
+        # check if min_agree and must_agree fulfilled
+        als = [a for a, n in zip(links["guess_alg"][lix], links["guess"][lix]) if n == usnode]
+        if (min_agree and counts[bestix] < min_agree) or (must_agree and must_agree not in als):
+            continue
+        links, nodes = dy.set_link(
+            links, nodes, lix, usnode, alg=alg, checkcontinuity=True,
+        )
+        links, nodes = dy.set_width_continuity(links, nodes, checknodes=links["conn"][lix])
+    return links, nodes
 
+
+def filter_ids(links, nodes, ids=None, idx=None, min_darea=None, dangle=None,
+               min_length=None, min_width=None, min_darea_gradient=None,
+               min_len_width_ratio=None, network_bridge=None, coastal=None, min_guesses=None):
+    """Filter uncertain ids by link/node attributes and return link indeces (not ides)."""
+    if idx is None:
+        idx = np.arange(len(links['id'])) if ids is None else np.array([links["id"].index(i) for i in ids])
+    else:
+        idx = np.array(idx)
+    # apply constraints
+    idx = idx[links["certain"][idx] == 0]
+    if min_length:
+        idx = idx[np.array(links["len"])[idx] >= min_length]
+    if min_width:
+        idx = idx[np.array(links["wid_adj"])[idx] >= min_width]
+    if min_darea_gradient is not None:
+        idx = idx[np.abs(links["darea_gradient"][idx]) > min_darea_gradient]
+    if min_len_width_ratio:
+        lwr = np.array(links["len"])[idx] / np.array(links["wid_adj"])[idx]
+        idx = idx[lwr > min_len_width_ratio]
+    if network_bridge is not None:
+        idx = idx[links["bridge"][idx] == network_bridge]
+    if dangle is not None:
+        idx = idx[links["dangle"][idx] == dangle]
+    if coastal is not None:
+        lnds = np.array(links["conn"])[idx]
+        hascoast = [any([nodes["coastal"][nodes["id"].index(n)] for n in cn]) for cn in lnds]
+        idx = idx[np.array(hascoast) == coastal]
+    if min_darea:
+        mindarea = np.min((links["darea_start"][idx], links["darea_end"][idx]), axis=0)
+        idx = idx[mindarea >= min_darea]
+    if min_guesses:
+        nguess = np.array([len(g) for g in links["guess"]])[idx]
+        idx = idx[nguess >= min_guesses]
+
+
+    return idx
+
+
+def drainage_area_gradient(links, nodes, idx=None, alg=dy.algmap("darea_grad"),
+                           guess=False):
+    """
+    Set links by drainage area gradient iteratively starting with the ones with the largest darea.
+    """
+    idx = np.arange(len(links['id'])) if idx is None else np.array(idx)
+    mindarea = np.min((links["darea_start"], links["darea_end"]), axis=0)
+    
+    while len(idx):
+        lix = idx[np.argmax(mindarea[idx])]
+        grad = links["darea_gradient"][lix]
+        usnode = links["conn"][lix][int(grad < 0)]
+        if guess:
+            links['guess'][lix].append(usnode)
+            links['guess_alg'][lix].append(alg)
+        elif links["certain"][lix] == 0:
+            links, nodes = dy.set_link(links, nodes, lix, usnode, alg)
+        idx = filter_ids(links, nodes, idx=idx[idx != lix])
+    return links, nodes
+
+
+def guess_synthetic_slope(links, nodes, node_column="synthetic_elevation",
+                          alg=dy.algmap('syn_dem'), ascending=False, min_slope=0, max_slope=1):
+    """Guess directions by the slope of a synthetic elevation, e.g. distance to outlets.
+
+    Links are not flipped, only guessed upstream node is attached to links[guess].
+    """
+    slopes = np.zeros(len(links["id"]), dtype=float)
+    for linkidx, lid in enumerate(links['id']):
+        conn = links["conn"][linkidx]
+        elev = [nodes[node_column][nodes["id"].index(i)] for i in conn]
+        slope = (elev[-1] - elev[0]) / (links["len"][linkidx] / links["sinuosity"][linkidx])
+        # Make sure slope is negative, else flip direction
+        di = slope < 0 if ascending else slope > 0
+        if np.abs(slope) > min_slope and np.abs(slope) <= max_slope:
+            usnode = conn[int(di)]
+            # Store guess
+            links['guess'][linkidx].append(usnode)
+            links['guess_alg'][linkidx].append(alg)
+        # Store slope
+        slopes[linkidx] = slope * (-1 if di else 1)
+
+    links[node_column+'_slope'] = slopes
     return links, nodes
