@@ -100,7 +100,7 @@
 
 
 <div class="viewcode-block" id="handle_bp"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.handle_bp">[docs]</a><span class="k">def</span> <span class="nf">handle_bp</span><span class="p">(</span><span class="n">linkid</span><span class="p">,</span> <span class="n">bpnode</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">links2do</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Handle branchpoints.</span>
 
 <span class="sd">    When walking along a skeleton and encountering a branchpoint, we want to</span>
@@ -249,7 +249,7 @@
 
 
 <div class="viewcode-block" id="bp_cluster"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.bp_cluster">[docs]</a><span class="k">def</span> <span class="nf">bp_cluster</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find clusters of branchpoints.</span>
 
 <span class="sd">    Finds clusters of branchpoints; i.e. branchpoints that are immediately</span>
@@ -284,7 +284,7 @@
 
 
 <div class="viewcode-block" id="idcs_no_turnaround"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.idcs_no_turnaround">[docs]</a><span class="k">def</span> <span class="nf">idcs_no_turnaround</span><span class="p">(</span><span class="n">idcs</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find possible indices to walk to given two input indices.</span>
 
 <span class="sd">    Returns list of possible indices to walk toward given two input indices</span>
@@ -335,7 +335,7 @@
 
 
 <div class="viewcode-block" id="cant_walk"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.cant_walk">[docs]</a><span class="k">def</span> <span class="nf">cant_walk</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">linkidx</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find pixels that cannot be walked to.</span>
 
 <span class="sd">    Given an input link defined by linkidx, return all the pixels that cannot</span>
@@ -390,7 +390,7 @@
 
 
 <div class="viewcode-block" id="find_emanators"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.find_emanators">[docs]</a><span class="k">def</span> <span class="nf">find_emanators</span><span class="p">(</span><span class="n">bpnode</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find possible next steps along the skeleton.</span>
 
 <span class="sd">    Returns all possible next steps along the skeleton from a given pixel.</span>
@@ -424,7 +424,7 @@
 
 
 <div class="viewcode-block" id="walkable_neighbors"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.walkable_neighbors">[docs]</a><span class="k">def</span> <span class="nf">walkable_neighbors</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find all walkable neighbors from the end pixel of an input link.</span>
 
 <span class="sd">    Returns all the walkable neighbors from the end pixel of an input link.</span>
@@ -459,7 +459,7 @@
 
 
 <div class="viewcode-block" id="get_neighbors"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.get_neighbors">[docs]</a><span class="k">def</span> <span class="nf">get_neighbors</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get a flattened array of neighboring pixel indices.</span>
 
 <span class="sd">    Returns a flattened array of the neighboring pixel indices within Iskel</span>
@@ -496,7 +496,7 @@
 
 
 <div class="viewcode-block" id="delete_link"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.delete_link">[docs]</a><span class="k">def</span> <span class="nf">delete_link</span><span class="p">(</span><span class="n">linkid</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Delete a link from the links dictionary and update the nodes dictionary.</span>
 
 <span class="sd">    Deletes a link from the links dictionary and updates the nodes dictionary</span>
@@ -540,7 +540,7 @@
 
 
 <div class="viewcode-block" id="check_dup_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.check_dup_links">[docs]</a><span class="k">def</span> <span class="nf">check_dup_links</span><span class="p">(</span><span class="n">linkid</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">links2do</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check for duplicate links.</span>
 
 <span class="sd">    Checks that the link represented by linkid has no dubplicates in the</span>
@@ -605,7 +605,7 @@
 
 
 <div class="viewcode-block" id="is_bp"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.is_bp">[docs]</a><span class="k">def</span> <span class="nf">is_bp</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine if an index is a branchpoint.</span>
 
 <span class="sd">    Determines if the index given by idx is a branchpoint. Branchpoints are</span>
@@ -698,7 +698,7 @@
 
 
 <div class="viewcode-block" id="isbp_parsimonious"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.isbp_parsimonious">[docs]</a><span class="k">def</span> <span class="nf">isbp_parsimonious</span><span class="p">(</span><span class="n">Ic</span><span class="p">,</span> <span class="n">Icr</span><span class="p">,</span> <span class="n">Inar</span><span class="p">,</span> <span class="n">Infr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes parsimonious set of branchpoints.</span>
 
 <span class="sd">    Parameters</span>
@@ -793,7 +793,7 @@
 
 
 <div class="viewcode-block" id="isbp_walk_for_bps"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.isbp_walk_for_bps">[docs]</a><span class="k">def</span> <span class="nf">isbp_walk_for_bps</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">bpi</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find branchpoints by walking from a pixel.</span>
 
 <span class="sd">    Finds branchpoints by ensuring that all pixels in the sub-skeleton can be</span>
@@ -867,7 +867,7 @@
 
 
 <div class="viewcode-block" id="naxes_connectivity"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.walk.naxes_connectivity">[docs]</a><span class="k">def</span> <span class="nf">naxes_connectivity</span><span class="p">(</span><span class="n">I</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute number of axes of connectivity.</span>
 
 <span class="sd">    Computes the number of axes of connectivity for each pixel in an input</span>

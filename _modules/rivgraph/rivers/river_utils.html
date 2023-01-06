@@ -112,7 +112,7 @@
 
 
 <div class="viewcode-block" id="prune_river"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.prune_river">[docs]</a><span class="k">def</span> <span class="nf">prune_river</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">exit_sides</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Prune river network.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prune river network.&quot;&quot;&quot;</span>
     <span class="c1"># Get inlet nodes</span>
     <span class="n">nodes</span> <span class="o">=</span> <span class="n">find_inlet_outlet_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">exit_sides</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">)</span>
 
@@ -137,7 +137,7 @@
 
 
 <div class="viewcode-block" id="find_inlet_outlet_nodes"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.find_inlet_outlet_nodes">[docs]</a><span class="k">def</span> <span class="nf">find_inlet_outlet_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">exit_sides</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Append inlet and outlet nodes to the node dictionary.</span>
 
 <span class="sd">    Appends the inlet and outlet nodes to the nodes dictionary. Only works for</span>
@@ -217,7 +217,7 @@
 
 
 <div class="viewcode-block" id="mask_to_centerline"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.mask_to_centerline">[docs]</a><span class="k">def</span> <span class="nf">mask_to_centerline</span><span class="p">(</span><span class="n">Imask</span><span class="p">,</span> <span class="n">es</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract centerline from a river mask.</span>
 
 <span class="sd">    This function takes an input binary mask of a river and extracts its</span>
@@ -298,7 +298,7 @@
     <span class="c1"># Append link widths and lengths</span>
     <span class="n">hf_links</span> <span class="o">=</span> <span class="n">lnu</span><span class="o">.</span><span class="n">link_widths_and_lengths</span><span class="p">(</span><span class="n">hf_links</span><span class="p">,</span> <span class="n">Ihf_dist</span><span class="p">)</span>
 
-    <span class="sd">&quot;&quot;&quot; Find shortest path between inlet/outlet centerline nodes&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Find shortest path between inlet/outlet centerline nodes&quot;&quot;&quot;</span>
     <span class="c1"># Put skeleton into networkX graph object</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
     <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">hf_nodes</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
@@ -432,8 +432,32 @@
     <span class="k">return</span> <span class="n">coords</span><span class="p">,</span> <span class="n">pix_width</span></div>
 
 
+<div class="viewcode-block" id="mirror_line_ends"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.mirror_line_ends">[docs]</a><span class="k">def</span> <span class="nf">mirror_line_ends</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">npad</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reflect both ends of a line.</span>
+
+<span class="sd">    Reflects both ends of a line defined by x and y coordinates. The mirrored</span>
+<span class="sd">    distance is set by npad, which refers to the number of vertices along the</span>
+<span class="sd">    line to mirror.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Mirror the beginning of the line</span>
+    <span class="n">diff_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">npad</span><span class="p">])</span>
+    <span class="n">xs_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">diff_x</span><span class="p">)),</span> <span class="n">xs</span><span class="p">))</span>
+    <span class="n">diff_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">npad</span><span class="p">])</span>
+    <span class="n">ys_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">diff_y</span><span class="p">)),</span> <span class="n">ys</span><span class="p">))</span>
+
+    <span class="c1"># Mirror the end of the line</span>
+    <span class="n">diff_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="o">-</span><span class="n">npad</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">xs_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">xs_m</span><span class="p">,</span> <span class="n">xs_m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">diff_x</span><span class="p">)))</span>
+    <span class="n">diff_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="o">-</span><span class="n">npad</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ys_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">ys_m</span><span class="p">,</span> <span class="n">ys_m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">diff_y</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">xs_m</span><span class="p">,</span> <span class="n">ys_m</span></div>
+
+
 <div class="viewcode-block" id="centerline_mesh"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.centerline_mesh">[docs]</a><span class="k">def</span> <span class="nf">centerline_mesh</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">width_chan</span><span class="p">,</span> <span class="n">meshwidth</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="p">,</span> <span class="n">smoothing_param</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a centerline mesh.</span>
 
 <span class="sd">    Generates a centerline mesh. Differs from :func:`valleyline_mesh` in that</span>
@@ -447,17 +471,25 @@
 <span class="sd">        2xN list, tuple, np.array (xs, ys) of coordinates defining centerline</span>
 <span class="sd">    width_chan :</span>
 <span class="sd">        width of the river in same units of coords</span>
-<span class="sd">    mesh_dist :</span>
+<span class="sd">    meshwidth :</span>
 <span class="sd">        how wide should the mesh be, in same units of coords</span>
 <span class="sd">    grid_spacing :</span>
 <span class="sd">        how far apart should mesh cells be, in same units of coords</span>
-
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    transects : list of shapely.LineStrings</span>
+<span class="sd">        the &quot;perpendiculars&quot; to the centerline used to generate the mesh</span>
+<span class="sd">    polys : list of shapely.Polygons</span>
+<span class="sd">        coordinates of the polygons representing the grid cells of the mesh</span>
+<span class="sd">    cl_smooth : shapely.LineString</span>
+<span class="sd">        the smoothed centerline used to compute transects</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<span class="c1">#    coords = ken.centerline</span>
-<span class="c1">#    width_chan = ken.width_chans</span>
-<span class="c1">#    meshwidth = ken.max_valley_width_pixels * ken.pixlen * 1.1</span>
-<span class="c1">#    grid_spacing = meshwidth/10</span>
-<span class="c1">#    smoothing_param = 1</span>
+    <span class="c1"># coords = alaska.centerline</span>
+    <span class="c1"># width_chan = alaska.avg_chan_width</span>
+    <span class="c1"># meshwidth = alaska.max_valley_width_pixels * alaska.pixlen * 1.1</span>
+    <span class="c1"># grid_spacing = meshwidth/2</span>
+    <span class="c1"># smoothing_param = 1</span>
 
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">coords</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
@@ -474,6 +506,7 @@
     <span class="n">window_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">width_chan</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span> <span class="o">*</span> <span class="n">smoothing_param</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">window_len</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Window must be odd</span>
         <span class="n">window_len</span> <span class="o">=</span> <span class="n">window_len</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">window_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">window_len</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 
     <span class="c1"># Smooth</span>
     <span class="n">xs_sm</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">xs_m</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window_len</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
@@ -553,48 +586,24 @@
     <span class="c1"># Build the polygon mesh</span>
     <span class="n">polys</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_idx</span><span class="p">,</span> <span class="n">end_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-        <span class="n">polys</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">perp_aligned</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">perp_aligned</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">polys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Polygon</span><span class="p">([</span><span class="n">perp_aligned</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">perp_aligned</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
                       <span class="n">perp_aligned</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">perp_aligned</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
-                      <span class="n">perp_aligned</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]])</span>
+                      <span class="n">perp_aligned</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]]))</span>
 
-    <span class="n">perps_out</span> <span class="o">=</span> <span class="n">perp_aligned</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">cl_resampled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="s1">&#39;1,2,0&#39;</span><span class="p">,</span> <span class="n">xs_rs</span><span class="p">,</span> <span class="n">ys_rs</span><span class="p">]</span>
-    <span class="n">s_out</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">s</span><span class="p">[</span><span class="n">start_idx</span><span class="p">]</span>
+    <span class="c1"># Convert the transects and smooth centerline</span>
+    <span class="n">transects</span> <span class="o">=</span> <span class="p">[</span><span class="n">LineString</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">perp_aligned</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">cl_smooth</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">perps_out</span><span class="p">,</span> <span class="n">polys</span><span class="p">,</span> <span class="n">cl_resampled</span><span class="p">,</span> <span class="n">s_out</span></div>
-
-
-<div class="viewcode-block" id="mirror_line_ends"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.mirror_line_ends">[docs]</a><span class="k">def</span> <span class="nf">mirror_line_ends</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">npad</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reflect both ends of a line.</span>
-
-<span class="sd">    Reflects both ends of a line defined by x and y coordinates. The mirrored</span>
-<span class="sd">    distance is set by npad, which refers to the number of vertices along the</span>
-<span class="sd">    line to mirror.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Mirror the beginning of the line</span>
-    <span class="n">diff_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">npad</span><span class="p">])</span>
-    <span class="n">xs_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">diff_x</span><span class="p">)),</span> <span class="n">xs</span><span class="p">))</span>
-    <span class="n">diff_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">npad</span><span class="p">])</span>
-    <span class="n">ys_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">diff_y</span><span class="p">)),</span> <span class="n">ys</span><span class="p">))</span>
-
-    <span class="c1"># Mirror the end of the line</span>
-    <span class="n">diff_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="o">-</span><span class="n">npad</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">xs_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">xs_m</span><span class="p">,</span> <span class="n">xs_m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">diff_x</span><span class="p">)))</span>
-    <span class="n">diff_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="o">-</span><span class="n">npad</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">ys_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">ys_m</span><span class="p">,</span> <span class="n">ys_m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">diff_y</span><span class="p">)))</span>
-
-    <span class="k">return</span> <span class="n">xs_m</span><span class="p">,</span> <span class="n">ys_m</span></div>
+    <span class="k">return</span> <span class="n">transects</span><span class="p">,</span> <span class="n">polys</span><span class="p">,</span> <span class="n">cl_smooth</span></div>
 
 
 <div class="viewcode-block" id="valleyline_mesh"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.valleyline_mesh">[docs]</a><span class="k">def</span> <span class="nf">valleyline_mesh</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">avg_chan_width</span><span class="p">,</span> <span class="n">buf_halfwidth</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="p">,</span>
                     <span class="n">smoothing</span><span class="o">=</span><span class="mf">0.15</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a mesh over an input river centerline.</span>
 
 <span class="sd">    This function generates a mesh over an input river centerline. The mesh</span>
-<span class="sd">    is generated across the valley, not just the channel width, in order to</span>
+<span class="sd">    is generated across the valley, not just the channel extents, in order to</span>
 <span class="sd">    perform larger-scale spatial analyses. With the correct parameter</span>
 <span class="sd">    combinations, it can also be used to generate a mesh for smaller-scale</span>
 <span class="sd">    analysis, but it is optimized for larger and strange behavior may occur.</span>
@@ -621,15 +630,16 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    lines :</span>
+<span class="sd">    transects : list of shapely.LineStrings</span>
 <span class="sd">        the &quot;perpendiculars&quot; to the centerline used to generate the mesh</span>
-<span class="sd">    polys :</span>
+<span class="sd">    polys : list of shapely.Polygons</span>
 <span class="sd">        coordinates of the polygons representing the grid cells of the mesh</span>
-
+<span class="sd">    cl_smooth : shapely.LineString</span>
+<span class="sd">        the smoothed centerline used to compute transects</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">find_cl_intersection_pts_and_distance</span><span class="p">(</span><span class="n">endpts</span><span class="p">,</span> <span class="n">cl</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute intersection points along centerline.</span>
 
 <span class="sd">        Given a list of transect endpoints, this computes the intersection</span>
@@ -675,11 +685,9 @@
 
 
     <span class="k">def</span> <span class="nf">iterative_cl_pt_mapping</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">bufdists</span><span class="p">,</span> <span class="n">side</span><span class="p">):</span>
-
+        
         <span class="n">mapper</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
         <span class="n">old</span> <span class="o">=</span> <span class="n">cl</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">bd</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bufdists</span><span class="p">):</span>
 
@@ -698,12 +706,12 @@
             <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
 
             <span class="n">old</span> <span class="o">=</span> <span class="n">new</span>
-
+            
         <span class="k">return</span> <span class="n">lines</span><span class="p">,</span> <span class="n">mapper</span>
 
 
     <span class="k">def</span> <span class="nf">get_transect_indices_along_buffered_lines</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">mapper</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a map of the index of each offset line mapped from the</span>
 <span class="sd">        original centerline. Keys are original centerline indices; values</span>
 <span class="sd">        are lists the length of number of offsets (i.e. length of bufdists).</span>
@@ -730,7 +738,7 @@
 
 
     <span class="k">def</span> <span class="nf">get_transect_endpoints_xy</span><span class="p">(</span><span class="n">lpts</span><span class="p">,</span> <span class="n">rpts</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given dictionaries that map centerline points to indices along buffered</span>
 <span class="sd">        left and right lines, this returns the endpoints of each transect.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -749,7 +757,7 @@
 
 
     <span class="k">def</span> <span class="nf">shapely_offset_ls</span><span class="p">(</span><span class="n">ls</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">side</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Just a wrapper around shapely&#39;s offset_linestring() function. That</span>
 <span class="sd">        function adds little barbs sometimes to the end of the offset</span>
 <span class="sd">        linestring. This function detects and removes those.</span>
@@ -802,8 +810,8 @@
 
         <span class="k">return</span><span class="p">(</span><span class="n">xs_o2</span><span class="p">,</span> <span class="n">ys_o2</span><span class="p">)</span>
 
-    <span class="sd">&quot;&quot;&quot; Main function code begins here &quot;&quot;&quot;</span>
-    <span class="c1"># obj = ind</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Main function code begins here &quot;&quot;&quot;</span>
+    <span class="c1"># obj = alaska</span>
     <span class="c1"># coords = obj.centerline</span>
     <span class="c1"># avg_chan_width = obj.avg_chan_width</span>
     <span class="c1"># buf_halfwidth = obj.max_valley_width_pixels * obj.pixlen * 1.1</span>
@@ -823,6 +831,7 @@
     <span class="n">window_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xs_o</span><span class="p">)</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="n">window_len</span><span class="p">))</span>  <span class="c1"># Smoothing window cannot be longer than 1/5 the centerline</span>
     <span class="k">if</span> <span class="n">window_len</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Window must be odd</span>
         <span class="n">window_len</span> <span class="o">=</span> <span class="n">window_len</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">window_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">window_len</span><span class="p">)</span> <span class="c1"># must be at least 5 else savgol_filter will fail</span>
 
     <span class="c1"># Extend the centerline ends to avoid boundary effects; we&#39;ll clip them later</span>
     <span class="n">xs_o2</span><span class="p">,</span> <span class="n">ys_o2</span> <span class="o">=</span> <span class="n">mirror_lines</span><span class="p">(</span><span class="n">xs_o</span><span class="p">,</span> <span class="n">ys_o</span><span class="p">,</span> <span class="n">window_len</span><span class="p">)</span>
@@ -832,6 +841,11 @@
                                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
     <span class="n">ys_sm</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">ys_o2</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="n">window_len</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
+
+    <span class="c1"># plt.close(&#39;all&#39;)</span>
+    <span class="c1"># plt.plot(xs_o, ys_o)</span>
+    <span class="c1"># plt.plot(xs_sm, ys_sm)</span>
+    <span class="c1"># plt.axis(&#39;equal&#39;)</span>
 
     <span class="c1"># Create shapely LineString centerline</span>
     <span class="n">cl</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs_sm</span><span class="p">,</span> <span class="n">ys_sm</span><span class="p">)])</span>
@@ -892,8 +906,8 @@
     <span class="c1"># clip the transects to only those that are needed</span>
     <span class="n">cl_orig</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">xs_o</span><span class="p">,</span> <span class="n">ys_o</span><span class="p">))</span>
     <span class="n">intersects_cl</span> <span class="o">=</span> <span class="p">[</span><span class="n">LineString</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">cl_orig</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">transects</span><span class="p">]</span>
-    <span class="n">first_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">intersects_cl</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="n">last_idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersects_cl</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">intersects_cl</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># -1/+1 for explicitness</span>
+    <span class="n">first_idx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">intersects_cl</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">last_idx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">intersects_cl</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">intersects_cl</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">transects</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># -1/+1 for explicitness</span>
     <span class="n">transects</span> <span class="o">=</span> <span class="p">[</span><span class="n">transects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first_idx</span><span class="p">,</span> <span class="n">last_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
 
     <span class="c1"># Create mesh polygons</span>
@@ -915,7 +929,7 @@
 
 
 <div class="viewcode-block" id="max_valley_width"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.max_valley_width">[docs]</a><span class="k">def</span> <span class="nf">max_valley_width</span><span class="p">(</span><span class="n">Imask</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the maximum valley width of the input mask. Finds the single</span>
 <span class="sd">    largest blob in the mask, fills its holes, then uses the distance transform</span>
 <span class="sd">    to find the largest width.</span>
@@ -941,7 +955,7 @@
 
 
 <div class="viewcode-block" id="compute_eBI"><a class="viewcode-back" href="../../../apiref/rivers.html#rivgraph.rivers.river_utils.compute_eBI">[docs]</a><span class="k">def</span> <span class="nf">compute_eBI</span><span class="p">(</span><span class="n">path_meshlines</span><span class="p">,</span> <span class="n">path_links</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    method can be &#39;local&#39; or &#39;avg&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 

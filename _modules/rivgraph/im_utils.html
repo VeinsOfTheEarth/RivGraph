@@ -105,7 +105,7 @@
 
 
 <div class="viewcode-block" id="get_array"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.get_array">[docs]</a><span class="k">def</span> <span class="nf">get_array</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a sub-image of an input image, centered at a specified index within</span>
 <span class="sd">    the input image and a specified size.</span>
 
@@ -155,7 +155,7 @@
 
 
 <div class="viewcode-block" id="neighbors_flat"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.neighbors_flat">[docs]</a><span class="k">def</span> <span class="nf">neighbors_flat</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">imflat</span><span class="p">,</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">filt</span><span class="o">=</span><span class="s1">&#39;nonzero&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns all 8-neighbor pixel indices and values from an index of a</span>
 <span class="sd">    flattened image. Can filter out zero values with the filt keyword.</span>
 
@@ -231,7 +231,7 @@
 
 <div class="viewcode-block" id="reglobalize_flat_idx"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.reglobalize_flat_idx">[docs]</a><span class="k">def</span> <span class="nf">reglobalize_flat_idx</span><span class="p">(</span><span class="n">idxlist</span><span class="p">,</span> <span class="n">idxlistdims</span><span class="p">,</span> <span class="n">row_offset</span><span class="p">,</span> <span class="n">col_offset</span><span class="p">,</span>
                          <span class="n">globaldims</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Takes a list of indices from a subimage and returns their indices within</span>
 <span class="sd">    their parent image.</span>
 
@@ -282,7 +282,7 @@
 
 
 <div class="viewcode-block" id="nfour_connectivity"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.nfour_connectivity">[docs]</a><span class="k">def</span> <span class="nf">nfour_connectivity</span><span class="p">(</span><span class="n">I</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns an image of four-connectivity for each pixel, where the pixel value</span>
 <span class="sd">    is the number of 4-connected neighbors.</span>
 
@@ -316,7 +316,7 @@
 
 
 <div class="viewcode-block" id="four_conn"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.four_conn">[docs]</a><span class="k">def</span> <span class="nf">four_conn</span><span class="p">(</span><span class="n">idcs</span><span class="p">,</span> <span class="n">I</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the number of 4-connected neighbors for a given flat index in I.</span>
 <span class="sd">    idcs must be a list, even if a single value.</span>
 
@@ -346,7 +346,7 @@
 
 
 <div class="viewcode-block" id="edge_coords"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.edge_coords">[docs]</a><span class="k">def</span> <span class="nf">edge_coords</span><span class="p">(</span><span class="n">sizeI</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given an image size, returns the coordinates of all the edge pixels (4 edges).</span>
 <span class="sd">    Can return as indices (dtype=flat) or x,y coordinates (dtype=&#39;xy&#39;).</span>
 
@@ -387,7 +387,7 @@
 
 
 <div class="viewcode-block" id="neighbor_idcs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.neighbor_idcs">[docs]</a><span class="k">def</span> <span class="nf">neighbor_idcs</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the column, row coordinats of all eight neighbors of a given</span>
 <span class="sd">    column and row.</span>
 
@@ -419,7 +419,7 @@
 
 
 <div class="viewcode-block" id="neighbor_vals"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.neighbor_vals">[docs]</a><span class="k">def</span> <span class="nf">neighbor_vals</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the neighbor values in I of a specified pixel coordinate. Handles</span>
 <span class="sd">    edge cases.</span>
 
@@ -505,7 +505,7 @@
 
 
 <div class="viewcode-block" id="neighbor_xy"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.neighbor_xy">[docs]</a><span class="k">def</span> <span class="nf">neighbor_xy</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the coordinates of a neighbor of a pixel given the index of the</span>
 <span class="sd">    desired neighbor. Indices should be provided according to</span>
 
@@ -540,7 +540,7 @@
 
 
 <div class="viewcode-block" id="remove_blobs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.remove_blobs">[docs]</a><span class="k">def</span> <span class="nf">remove_blobs</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">blobthresh</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Remove blobs of a binary image that are smaller than blobthresh. A blob is</span>
 <span class="sd">    simply a set of connected &quot;on&quot; pixels.</span>
 
@@ -576,7 +576,7 @@
 
 
 <div class="viewcode-block" id="imshowpair"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.imshowpair">[docs]</a><span class="k">def</span> <span class="nf">imshowpair</span><span class="p">(</span><span class="n">I1</span><span class="p">,</span> <span class="n">I2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Overlays two binary images with a color scheme that shows their differences</span>
 <span class="sd">    and overlaps. Provides similar functionality to matlab&#39;s imshowpair. Useful</span>
 <span class="sd">    for quick diagnostic of differences between two binary images.</span>
@@ -612,7 +612,7 @@
 
 
 <div class="viewcode-block" id="largest_blobs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.largest_blobs">[docs]</a><span class="k">def</span> <span class="nf">largest_blobs</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">nlargest</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;remove&#39;</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides filtering for the largest blobs in a binary image. Can choose to</span>
 <span class="sd">    either keep or remove them.</span>
 
@@ -658,7 +658,7 @@
 
 
 <div class="viewcode-block" id="blob_idcs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.blob_idcs">[docs]</a><span class="k">def</span> <span class="nf">blob_idcs</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds all the indices for each blob within I.</span>
 
 <span class="sd">    Parameters</span>
@@ -687,7 +687,7 @@
 
 
 <div class="viewcode-block" id="regionprops"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.regionprops">[docs]</a><span class="k">def</span> <span class="nf">regionprops</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds blobs within a binary image and returns requested properties of</span>
 <span class="sd">    each blob.</span>
 
@@ -789,7 +789,7 @@
 
 
 <div class="viewcode-block" id="erode"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.erode">[docs]</a><span class="k">def</span> <span class="nf">erode</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">strel</span><span class="o">=</span><span class="s1">&#39;square&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Erodes a binary image using a specified kernel shape.</span>
 
 <span class="sd">    Parameters</span>
@@ -827,7 +827,7 @@
 
 
 <div class="viewcode-block" id="dilate"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.dilate">[docs]</a><span class="k">def</span> <span class="nf">dilate</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">strel</span><span class="o">=</span><span class="s1">&#39;square&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dilates a binary image using a specified kernel shape.</span>
 
 <span class="sd">    Parameters</span>
@@ -865,7 +865,7 @@
 
 
 <div class="viewcode-block" id="trim_idcs"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.trim_idcs">[docs]</a><span class="k">def</span> <span class="nf">trim_idcs</span><span class="p">(</span><span class="n">imshape</span><span class="p">,</span> <span class="n">idcs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Trims a list of indices by removing the indices that cannot fit within a</span>
 <span class="sd">    raster of imshape.</span>
 
@@ -892,7 +892,7 @@
 
 
 <div class="viewcode-block" id="crop_binary_im"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.crop_binary_im">[docs]</a><span class="k">def</span> <span class="nf">crop_binary_im</span><span class="p">(</span><span class="n">I</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Crops a binary image to the smallest bounding box containing all the &quot;on&quot;</span>
 <span class="sd">    pixels in the image.</span>
 
@@ -923,7 +923,7 @@
 
 
 <div class="viewcode-block" id="crop_binary_coords"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.crop_binary_coords">[docs]</a><span class="k">def</span> <span class="nf">crop_binary_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Crops an array of (row, col) coordinates (e.g. blob indices) to the smallest</span>
 <span class="sd">    possible array.</span>
 
@@ -956,7 +956,7 @@
 
 
 <div class="viewcode-block" id="fill_holes"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.fill_holes">[docs]</a><span class="k">def</span> <span class="nf">fill_holes</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">maxholesize</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fills holes up to a specified size in a binary image. The boundary pixels</span>
 <span class="sd">    of the image are turned off before identifying holes so that holes created</span>
 <span class="sd">    by the edge of the image are not considered holes.</span>
@@ -1005,7 +1005,7 @@
 
 
 <div class="viewcode-block" id="im_connectivity"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.im_connectivity">[docs]</a><span class="k">def</span> <span class="nf">im_connectivity</span><span class="p">(</span><span class="n">I</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns an image of 8-connectivity for an input image of all pixels in a</span>
 <span class="sd">    binary image.</span>
 
@@ -1037,7 +1037,7 @@
 
 
 <div class="viewcode-block" id="downsample_binary_image"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.downsample_binary_image">[docs]</a><span class="k">def</span> <span class="nf">downsample_binary_image</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">newsize</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given an input binary image and a new size, this downsamples (i.e. reduces</span>
 <span class="sd">    resolution) the input image to the new size. A pixel is considered &quot;on&quot;</span>
 <span class="sd">    in the new image if &#39;thresh&#39; fraction of its area is covered by the</span>
@@ -1089,7 +1089,7 @@
 
 
 <div class="viewcode-block" id="skel_endpoints"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.skel_endpoints">[docs]</a><span class="k">def</span> <span class="nf">skel_endpoints</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds all the endpoints of a skeleton.</span>
 
 <span class="sd">    Parameters</span>
@@ -1111,7 +1111,7 @@
 
 
 <div class="viewcode-block" id="skel_branchpoints"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.skel_branchpoints">[docs]</a><span class="k">def</span> <span class="nf">skel_branchpoints</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the branchpoints in a skeletonized image. Branchpoints are not simply</span>
 <span class="sd">    those with more than two neighbors; they are identified in a way that</span>
 <span class="sd">    minimizes the number of branchpoints required to resolve the skeleton</span>
@@ -1313,7 +1313,7 @@
 
 
 <div class="viewcode-block" id="bp_kernels"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.bp_kernels">[docs]</a><span class="k">def</span> <span class="nf">bp_kernels</span><span class="p">(</span><span class="n">caseno</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides kernels for convolving with branchpoints image to remove special</span>
 <span class="sd">    cases (where three branchpoints make an &quot;L&quot; shape). There are 8 possible</span>
 <span class="sd">    orientations (caseno&#39;s).</span>
@@ -1353,7 +1353,7 @@
 
 
 <div class="viewcode-block" id="skel_kernels"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.skel_kernels">[docs]</a><span class="k">def</span> <span class="nf">skel_kernels</span><span class="p">(</span><span class="n">caseno</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides kernels for convolving with skeleton image to remove the following case:</span>
 
 <span class="sd">    0 0 0</span>
@@ -1392,7 +1392,7 @@
 
 
 <div class="viewcode-block" id="skel_pixel_curvature"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.skel_pixel_curvature">[docs]</a><span class="k">def</span> <span class="nf">skel_pixel_curvature</span><span class="p">(</span><span class="n">Iskel</span><span class="p">,</span> <span class="n">nwalk</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides an estimate of the curvature at most pixels within a skeleton image.</span>
 <span class="sd">    Not all pixels are considered; some boundary pixels (i.e. those</span>
 <span class="sd">    near the end of the skeleton) will not be computed. The more pruned and</span>
@@ -1585,7 +1585,7 @@
 
 
 <div class="viewcode-block" id="hand_clean"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.im_utils.hand_clean">[docs]</a><span class="k">def</span> <span class="nf">hand_clean</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;erase&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allows user to hand-draw regions of interest on a binary mask that can</span>
 <span class="sd">    either be filled (set to True) or erased (set to False). Only one polygon</span>
 <span class="sd">    can be drawn per call.</span>

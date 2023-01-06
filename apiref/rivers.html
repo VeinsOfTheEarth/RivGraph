@@ -354,9 +354,17 @@ don’t require an exceptionally wide mesh (i.e. not much change).</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coords</strong> – 2xN list, tuple, np.array (xs, ys) of coordinates defining centerline</p></li>
 <li><p><strong>width_chan</strong> – width of the river in same units of coords</p></li>
-<li><p><strong>mesh_dist</strong> – how wide should the mesh be, in same units of coords</p></li>
+<li><p><strong>meshwidth</strong> – how wide should the mesh be, in same units of coords</p></li>
 <li><p><strong>grid_spacing</strong> – how far apart should mesh cells be, in same units of coords</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>transects</strong> (<em>list of shapely.LineStrings</em>) – the “perpendiculars” to the centerline used to generate the mesh</p></li>
+<li><p><strong>polys</strong> (<em>list of shapely.Polygons</em>) – coordinates of the polygons representing the grid cells of the mesh</p></li>
+<li><p><strong>cl_smooth</strong> (<em>shapely.LineString</em>) – the smoothed centerline used to compute transects</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -452,7 +460,7 @@ line to mirror.</p>
 <span class="sig-prename descclassname"><span class="pre">rivgraph.rivers.river_utils.</span></span><span class="sig-name descname"><span class="pre">valleyline_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_chan_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buf_halfwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rivgraph/rivers/river_utils.html#valleyline_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rivgraph.rivers.river_utils.valleyline_mesh" title="Permalink to this definition"></a></dt>
 <dd><p>Generate a mesh over an input river centerline.</p>
 <p>This function generates a mesh over an input river centerline. The mesh
-is generated across the valley, not just the channel width, in order to
+is generated across the valley, not just the channel extents, in order to
 perform larger-scale spatial analyses. With the correct parameter
 combinations, it can also be used to generate a mesh for smaller-scale
 analysis, but it is optimized for larger and strange behavior may occur.</p>
@@ -474,8 +482,9 @@ to create the valley centerline  (between 0 and 1)</p></li>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><em>lines</em> – the “perpendiculars” to the centerline used to generate the mesh</p></li>
-<li><p><em>polys</em> – coordinates of the polygons representing the grid cells of the mesh</p></li>
+<li><p><strong>transects</strong> (<em>list of shapely.LineStrings</em>) – the “perpendiculars” to the centerline used to generate the mesh</p></li>
+<li><p><strong>polys</strong> (<em>list of shapely.Polygons</em>) – coordinates of the polygons representing the grid cells of the mesh</p></li>
+<li><p><strong>cl_smooth</strong> (<em>shapely.LineString</em>) – the smoothed centerline used to compute transects</p></li>
 </ul>
 </p>
 </dd>

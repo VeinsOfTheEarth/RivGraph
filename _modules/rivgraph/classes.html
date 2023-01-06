@@ -119,7 +119,7 @@
 <span class="kn">import</span> <span class="nn">rivgraph.rivers.centerline_utils</span> <span class="k">as</span> <span class="nn">cu</span>
 
 <div class="viewcode-block" id="rivnetwork"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork">[docs]</a><span class="k">class</span> <span class="nc">rivnetwork</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base rivnetwork class.</span>
 
 <span class="sd">    The rivnetwork class organizes data and methods for channel networks. This</span>
@@ -132,7 +132,7 @@
 
 <div class="viewcode-block" id="rivnetwork.__init__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">exit_sides</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a channelnetwork class.</span>
 
 
@@ -152,6 +152,11 @@
 <span class="sd">        verbose : bool, optional</span>
 <span class="sd">            If True, print run information and warnings to the console, default</span>
 <span class="sd">            is False.</span>
+<span class="sd">        single_thread : bool, optional</span>
+<span class="sd">            If the input mask is mostly single-thread, set this to True to </span>
+<span class="sd">            avoid problems in mesh generation later. If True, uses a different</span>
+<span class="sd">            mesh generation algorithm that is tailored to single-thread, </span>
+<span class="sd">            meandering channels.</span>
 
 
 <span class="sd">        Attributes</span>
@@ -250,7 +255,7 @@
 
 
 <div class="viewcode-block" id="rivnetwork.init_logger"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.init_logger">[docs]</a>    <span class="k">def</span> <span class="nf">init_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Function to initialize the logger.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to initialize the logger.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
                 <span class="n">handlers</span><span class="o">=</span><span class="p">[</span>
@@ -273,7 +278,7 @@
 
 
 <div class="viewcode-block" id="rivnetwork.compute_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_network">[docs]</a>    <span class="k">def</span> <span class="nf">compute_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the links and nodes of the channel network mask.</span>
 <span class="sd">        First skeletonizes the mask if not already done, then resolves the</span>
 <span class="sd">        skeleton&#39;s graph.</span>
@@ -290,7 +295,7 @@
 
 
 <div class="viewcode-block" id="rivnetwork.compute_distance_transform"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_distance_transform">[docs]</a>    <span class="k">def</span> <span class="nf">compute_distance_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the distance transform of the channel network mask.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -307,7 +312,7 @@
 
 
 <div class="viewcode-block" id="rivnetwork.compute_link_width_and_length"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_link_width_and_length">[docs]</a>    <span class="k">def</span> <span class="nf">compute_link_width_and_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes widths and lengths of each link in the links dictionary and</span>
 <span class="sd">        appends them as dictionary attributes.</span>
 
@@ -328,7 +333,7 @@
 
 
 <div class="viewcode-block" id="rivnetwork.compute_junction_angles"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.compute_junction_angles">[docs]</a>    <span class="k">def</span> <span class="nf">compute_junction_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the angle at nodes where only three links are connected.</span>
 <span class="sd">        Directions must be assigned before angles can be computed. Also defines</span>
 <span class="sd">        each 3-link node as &#39;confluence&#39; or &#39;bifurcation&#39; and appends this</span>
@@ -353,7 +358,7 @@
 <div class="viewcode-block" id="rivnetwork.get_islands"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.get_islands">[docs]</a>    <span class="k">def</span> <span class="nf">get_islands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;area&#39;</span><span class="p">,</span> <span class="s1">&#39;maxwidth&#39;</span><span class="p">,</span> <span class="s1">&#39;major_axis_length&#39;</span><span class="p">,</span>
                                  <span class="s1">&#39;minor_axis_length&#39;</span><span class="p">,</span> <span class="s1">&#39;surrounding_links&#39;</span><span class="p">],</span>
                           <span class="n">connectivity</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds all the islands in the binary mask and computes their morphological</span>
 <span class="sd">        properties. Can be used to help &quot;clean&quot; masks of small islands. Must</span>
 <span class="sd">        run compute_network() first.</span>
@@ -407,7 +412,7 @@
 
 
 <div class="viewcode-block" id="rivnetwork.plot"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates matplotlib plots of the network.</span>
 
 <span class="sd">        Parameters</span>
@@ -447,7 +452,7 @@
 
 
 <div class="viewcode-block" id="rivnetwork.save_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.save_network">[docs]</a>    <span class="k">def</span> <span class="nf">save_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Writes the link and nodes dictionaries to a .pkl file.</span>
 
 <span class="sd">        Parameters</span>
@@ -469,7 +474,7 @@
 
 
 <div class="viewcode-block" id="rivnetwork.load_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.load_network">[docs]</a>    <span class="k">def</span> <span class="nf">load_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads the link and nodes dictionaries from a .pkl file.</span>
 
 <span class="sd">        Parameters</span>
@@ -493,7 +498,7 @@
 
 
 <div class="viewcode-block" id="rivnetwork.adjacency_matrix"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.adjacency_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">adjacency_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the adjacency matrix for a graph defined by links and nodes</span>
 <span class="sd">        dictionaries.</span>
 
@@ -523,7 +528,7 @@
 
 
 <div class="viewcode-block" id="rivnetwork.to_geovectors"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.to_geovectors">[docs]</a>    <span class="k">def</span> <span class="nf">to_geovectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">export</span><span class="o">=</span><span class="s1">&#39;network&#39;</span><span class="p">,</span> <span class="n">ftype</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Writes the links and nodes of the network to geovectors.</span>
 
 <span class="sd">        Parameters</span>
@@ -606,7 +611,7 @@
 
 
 <div class="viewcode-block" id="rivnetwork.to_geotiff"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.rivnetwork.to_geotiff">[docs]</a>    <span class="k">def</span> <span class="nf">to_geotiff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">export</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Writes geotiffs to disk.</span>
 
 <span class="sd">        Parameters</span>
@@ -648,7 +653,7 @@
 
 
 <div class="viewcode-block" id="delta"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta">[docs]</a><span class="k">class</span> <span class="nc">delta</span><span class="p">(</span><span class="n">rivnetwork</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to manage and organize data and methods for analyzing a delta channel network.</span>
 <span class="sd">    This class inherits all the attributes and methods of the rivnetwork class,</span>
 <span class="sd">    but also includes delta-specific attributes and methods.</span>
@@ -664,7 +669,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="delta.__init__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -678,11 +683,12 @@
 <span class="sd">            RivGraph will output processing progress if &#39;True&#39;. Default is &#39;False&#39;.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">rivnetwork</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span></div>
+        <span class="n">rivnetwork</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">single_thread</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="delta.skeletonize"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta.skeletonize">[docs]</a>    <span class="k">def</span> <span class="nf">skeletonize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Skeletonizes the delta binary mask.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -703,7 +709,7 @@
 
 <div class="viewcode-block" id="delta.prune_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta.prune_network">[docs]</a>    <span class="k">def</span> <span class="nf">prune_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_shoreline</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path_inletnodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">prune_less</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prunes the delta by removing spurs and links beyond the provided shoreline.</span>
 <span class="sd">        Paths may be provided to shoreline and inlet nodes shapefiles, otherwise</span>
 <span class="sd">        their location is specified by paths dictionary.</span>
@@ -746,7 +752,7 @@
 
 
 <div class="viewcode-block" id="delta.assign_flow_directions"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta.assign_flow_directions">[docs]</a>    <span class="k">def</span> <span class="nf">assign_flow_directions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes flow directions for each link in the delta channel network.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -766,7 +772,7 @@
 
 
 <div class="viewcode-block" id="delta.compute_topologic_metrics"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.delta.compute_topologic_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">compute_topologic_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes a suite of connectivity and network metrics for a delta channel network.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -780,7 +786,7 @@
 
 
 <div class="viewcode-block" id="river"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river">[docs]</a><span class="k">class</span> <span class="nc">river</span><span class="p">(</span><span class="n">rivnetwork</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to manage and organize data and methods for analyzing a braided river channel network.</span>
 <span class="sd">    This class inherits all the attributes and methods of the rivnetwork class, but also includes delta-specific attributes and methods.</span>
 
@@ -824,16 +830,17 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="river.__init__"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">exit_sides</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                 <span class="n">exit_sides</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">single_thread</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">exit_sides</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span><span class="s1">&#39;Must provide exit_sides for river class.&#39;</span><span class="p">)</span>
 
-        <span class="n">rivnetwork</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="p">,</span> <span class="n">exit_sides</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span></div>
+        <span class="n">rivnetwork</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_to_mask</span><span class="p">,</span> <span class="n">results_folder</span><span class="p">,</span> <span class="n">exit_sides</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">single_thread</span> <span class="o">=</span> <span class="n">single_thread</span></div>
 
 
 <div class="viewcode-block" id="river.skeletonize"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.skeletonize">[docs]</a>    <span class="k">def</span> <span class="nf">skeletonize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Skeletonizes the river binary mask.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -853,7 +860,7 @@
 
 
 <div class="viewcode-block" id="river.prune_network"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.prune_network">[docs]</a>    <span class="k">def</span> <span class="nf">prune_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prunes the computed river network.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -867,7 +874,7 @@
 
 
 <div class="viewcode-block" id="river.compute_centerline"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.compute_centerline">[docs]</a>    <span class="k">def</span> <span class="nf">compute_centerline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the centerline of the holes-filled river binary image.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -880,8 +887,8 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;centerline computation is done.&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="river.compute_mesh"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.compute_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">compute_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">buf_halfwidth</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="river.compute_mesh"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.compute_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">compute_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">buf_halfwidth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">single_thread</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates an along-centerline mesh that indicates a valley-direction</span>
 <span class="sd">        of sorts. The mesh is useful for computing spatial statistics as a function</span>
 <span class="sd">        of downstream distance. The resulting mesh captures the low-frequency</span>
@@ -901,8 +908,13 @@
 <span class="sd">            of the total centerline length. Range is [0, 1].</span>
 <span class="sd">        buf_halfwidth : float</span>
 <span class="sd">            Defines the offset distance of the left- and right-valleylines from</span>
-<span class="sd">            from the centerline. Units correspond to those of the CRS of the</span>
+<span class="sd">            from the centerline. buf_halfwidth * 2 is the length of each </span>
+<span class="sd">            transect. Units correspond to those of the CRS of the</span>
 <span class="sd">            input mask.</span>
+<span class="sd">        single_thread : bool</span>
+<span class="sd">            If True, uses a different mesh computing algorithm that is better-</span>
+<span class="sd">            suited for following single-thread channels (as opposed to a</span>
+<span class="sd">            multithread channel for which a valley-wide mesh must be computed).</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Need a centerline</span>
@@ -936,16 +948,22 @@
 
             <span class="c1"># Multiply by pixlen to keep units consistent</span>
             <span class="n">buf_halfwidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_valley_width_pixels</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixlen</span> <span class="o">*</span> <span class="mf">1.1</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_thread</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">single_thread</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating mesh...&#39;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">meshlines</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshpolys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centerline_smooth</span> <span class="o">=</span> <span class="n">ru</span><span class="o">.</span><span class="n">valleyline_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centerline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">avg_chan_width</span><span class="p">,</span> <span class="n">buf_halfwidth</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="n">smoothing</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">single_thread</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meshlines</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshpolys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centerline_smooth</span> <span class="o">=</span> <span class="n">ru</span><span class="o">.</span><span class="n">valleyline_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centerline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">avg_chan_width</span><span class="p">,</span> <span class="n">buf_halfwidth</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="n">smoothing</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meshlines</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshpolys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centerline_smooth</span> <span class="o">=</span> <span class="n">ru</span><span class="o">.</span><span class="n">centerline_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centerline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">avg_chan_width</span><span class="p">,</span> <span class="n">buf_halfwidth</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="p">,</span> <span class="n">smoothing_param</span><span class="o">=</span><span class="n">smoothing</span><span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mesh generation is done.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="river.assign_flow_directions"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.classes.river.assign_flow_directions">[docs]</a>    <span class="k">def</span> <span class="nf">assign_flow_directions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Automatically sets flow directions for each link in a braided river</span>
 <span class="sd">        channel network.</span>
 
@@ -972,7 +990,7 @@
 <span class="k">class</span> <span class="nc">centerline</span><span class="p">():</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">attribs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        attribs is a dictionary with attributes; can be single values like</span>
 <span class="sd">        average channel width or one value per coordinate like local width.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1016,7 +1034,7 @@
 
 
     <span class="k">def</span> <span class="nf">smooth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Smooths the x and y coordinates of the centerline using a k-th order</span>
 <span class="sd">        Savitzky-Golay filter.</span>
 
@@ -1052,7 +1070,7 @@
                                                <span class="n">polyorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;interp&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If no arguments are provided for x and y, will resample the smoothed</span>
 <span class="sd">        coordinates if available, else will resample the original coordinates.</span>
 
@@ -1083,7 +1101,7 @@
         <span class="k">return</span> <span class="n">dss</span>
 
     <span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Important: curvatures are negativized to match the zs approach</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1109,7 +1127,7 @@
         <span class="k">return</span> <span class="n">Cs</span>
 
     <span class="k">def</span> <span class="nf">infs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds inflection points.</span>
 
 <span class="sd">        N is the number of expected inflection points. It can be estimated</span>
@@ -1181,7 +1199,7 @@
 
 
     <span class="k">def</span> <span class="nf">mig_rate_transect_matching</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">dt_years</span><span class="p">,</span> <span class="n">path_matchers</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mig_spacing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path_mig_vectors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute migration rate using &quot;transect matching&quot;. Requires a user to</span>
 <span class="sd">        provide a geovector file (e.g. shapefile, geopackage, etc.) of that</span>
 <span class="sd">        contains transects that intersect both centerlines at their common</span>
@@ -1240,7 +1258,7 @@
 
 
     <span class="k">def</span> <span class="nf">mig_rate_zs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">dt_years</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute migration rate using Sylvester et al&#39;s method of</span>
 <span class="sd">        dynamic time warping. Also computes a smoothed version of the</span>
 <span class="sd">        migration rates, and a smoothed version with cutoff-affected</span>
@@ -1312,7 +1330,7 @@
 
 
     <span class="k">def</span> <span class="nf">zs_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Copied verbatim from https://github.com/zsylvester/curvaturepy/blob/master/Purus_2_migration_rates.ipynb</span>
 <span class="sd">        Slight modifications for meshing in the centerline class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>

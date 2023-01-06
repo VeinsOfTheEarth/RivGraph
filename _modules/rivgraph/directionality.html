@@ -104,7 +104,7 @@
 
 
 <div class="viewcode-block" id="add_directionality_trackers"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.add_directionality_trackers">[docs]</a><span class="k">def</span> <span class="nf">add_directionality_trackers</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">ntype</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds fields to the links and nodes dictionaries that are required for</span>
 <span class="sd">    setting and diagnosing directionality. Nodes are not altered in this</span>
 <span class="sd">    function, but passed for consistency and generalizability.</span>
@@ -143,7 +143,7 @@
 
 
 <div class="viewcode-block" id="algmap"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.algmap">[docs]</a><span class="k">def</span> <span class="nf">algmap</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a numeric key corresponding to each algorithm used by RivGraph to</span>
 <span class="sd">    set link directionality. These numbers are found in links[&#39;guess_alg&#39;] and</span>
 <span class="sd">    links[&#39;certain_alg&#39;] and are useful for diagnosing issues in setting</span>
@@ -193,7 +193,7 @@
 
 
 <div class="viewcode-block" id="set_by_nearest_main_channel"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_by_nearest_main_channel">[docs]</a><span class="k">def</span> <span class="nf">set_by_nearest_main_channel</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">imshape</span><span class="p">,</span> <span class="n">nodethresh</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets all possible links&#39; directions using the nearest main channel. The</span>
 <span class="sd">    main channels are found as the widest, shortest paths from each inlet to</span>
 <span class="sd">    each outlet. For each unknown link, the distance is computed from its</span>
@@ -309,7 +309,7 @@
 
 
 <div class="viewcode-block" id="nodepath_to_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.nodepath_to_links">[docs]</a><span class="k">def</span> <span class="nf">nodepath_to_links</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a path defined by node ids to a path defined by link ids.</span>
 
 <span class="sd">    Parameters</span>
@@ -337,7 +337,7 @@
 
 
 <div class="viewcode-block" id="widest_inlet_index"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.widest_inlet_index">[docs]</a><span class="k">def</span> <span class="nf">widest_inlet_index</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the index of the inlet occurring at the widest link. Index is with</span>
 <span class="sd">    respect to the nodes[&#39;id&#39;] list.</span>
 
@@ -368,7 +368,7 @@
 
 
 <div class="viewcode-block" id="dir_main_channel"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.dir_main_channel">[docs]</a><span class="k">def</span> <span class="nf">dir_main_channel</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Guesses directionality of links based on shortest paths from widest inlet</span>
 <span class="sd">    link to all the outlet links. Links are also weighted by width, such that</span>
 <span class="sd">    deviations from the &quot;main channel&quot; width cost more to traverse.</span>
@@ -426,7 +426,7 @@
 
 
 <div class="viewcode-block" id="dir_shortest_paths_nodes"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.dir_shortest_paths_nodes">[docs]</a><span class="k">def</span> <span class="nf">dir_shortest_paths_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Guesses link directionality based on the shortest path from its end</span>
 <span class="sd">    nodes to the nearest outlet (or pre-outlet). For each unknown link, if the</span>
 <span class="sd">    path flows through the link attached to the node (as opposed to immediately</span>
@@ -503,7 +503,7 @@
 
 
 <div class="viewcode-block" id="dir_shortest_paths_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.dir_shortest_paths_links">[docs]</a><span class="k">def</span> <span class="nf">dir_shortest_paths_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">difthresh</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Guesses a link&#39;s directionality by which of its endpoint nodes is</span>
 <span class="sd">    closer to the nearest outlet (or preoutlet). &quot;difthresh&quot; refers to the</span>
 <span class="sd">    difference in distances between endpoint nodes; higher means directionality</span>
@@ -577,7 +577,7 @@
 
 
 <div class="viewcode-block" id="dir_known_link_angles"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.dir_known_link_angles">[docs]</a><span class="k">def</span> <span class="nf">dir_known_link_angles</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">checklinks</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Guesses directionality for unknown links whose immediately adjacent links&#39;</span>
 <span class="sd">    directionalities are known. Computes the angle of &quot;flow&quot; between outlet and</span>
 <span class="sd">    inlet end nodes for each neighboring link, then sets the unknown link</span>
@@ -607,7 +607,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">angle_between</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the angle in degrees between vectors v1 and v2. Angle is computed</span>
 <span class="sd">        in the clockwise direction from v1.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -680,7 +680,7 @@
 
 
 <div class="viewcode-block" id="dir_bridges"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.dir_bridges">[docs]</a><span class="k">def</span> <span class="nf">dir_bridges</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Guesses directionality of bridge links. Bridge links are those which flow</span>
 <span class="sd">    must pass through to reach the outlet; in other words, if a bridge link is</span>
 <span class="sd">    removed from the network, there will no longer be just one connected</span>
@@ -778,7 +778,7 @@
 
 
 <div class="viewcode-block" id="cycle_get_original_orientation"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.cycle_get_original_orientation">[docs]</a><span class="k">def</span> <span class="nf">cycle_get_original_orientation</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">lids</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Saves the orientation of a set of links. Used before attempting to fix</span>
 <span class="sd">    cycles. Properties besides &#39;conn&#39; must also be reversed, so their original</span>
 <span class="sd">    orientations are also stored.</span>
@@ -810,7 +810,7 @@
 
 
 <div class="viewcode-block" id="cycle_return_to_original_orientation"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.cycle_return_to_original_orientation">[docs]</a><span class="k">def</span> <span class="nf">cycle_return_to_original_orientation</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">orig</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a set of links to its original orientation.</span>
 
 <span class="sd">    Parameters</span>
@@ -839,7 +839,7 @@
 
 
 <div class="viewcode-block" id="merge_list_of_lists"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.merge_list_of_lists">[docs]</a><span class="k">def</span> <span class="nf">merge_list_of_lists</span><span class="p">(</span><span class="n">inlist</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Merges a list of lists into a single list, but removes duplicates.</span>
 <span class="sd">    Uses networkx and itertools for a fun solution.</span>
 
@@ -867,7 +867,7 @@
 
 
 <div class="viewcode-block" id="set_link"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_link">[docs]</a><span class="k">def</span> <span class="nf">set_link</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">linkidx</span><span class="p">,</span> <span class="n">usnode</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="mi">9999</span><span class="p">,</span> <span class="n">checkcontinuity</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets a link directionality. Option to check for continuity (including</span>
 <span class="sd">    parallel links) after setting.</span>
 
@@ -920,7 +920,7 @@
 
 
 <div class="viewcode-block" id="fix_sources_and_sinks"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.fix_sources_and_sinks">[docs]</a><span class="k">def</span> <span class="nf">fix_sources_and_sinks</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fixes sources and sinks within the network by flipping link directionality</span>
 <span class="sd">    near the problem node(s). The links to flip are chosen by ensuring they do</span>
 <span class="sd">    not create a cycle; if multiple links can be flipped, the shortest one is</span>
@@ -999,7 +999,7 @@
 
 
 <div class="viewcode-block" id="check_continuity"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.check_continuity">[docs]</a><span class="k">def</span> <span class="nf">check_continuity</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds all sinks or sources within the network, excluding inlets and outlets.</span>
 <span class="sd">    Returns any nodes where continuity is violated. Only checks nodes for whom</span>
 <span class="sd">    all attached links are certain.</span>
@@ -1043,7 +1043,7 @@
 
 
 <div class="viewcode-block" id="find_a_cycle"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.find_a_cycle">[docs]</a><span class="k">def</span> <span class="nf">find_a_cycle</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds a single cycle in the network. Multiple cycles may exist; this</span>
 <span class="sd">    function returns only the first one encountered.</span>
 
@@ -1083,7 +1083,7 @@
 
 
 <div class="viewcode-block" id="get_cycles"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.get_cycles">[docs]</a><span class="k">def</span> <span class="nf">get_cycles</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">checknode</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds either all cycles in the network or cycles containing the checknode&#39;th</span>
 <span class="sd">    node. Cycles are returned as both nodes and links.</span>
 
@@ -1144,7 +1144,7 @@
 
 
 <div class="viewcode-block" id="flip_links_in_G"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.flip_links_in_G">[docs]</a><span class="k">def</span> <span class="nf">flip_links_in_G</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">links2flip</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Flips the directionality of links in a networkx graph object.</span>
 
 <span class="sd">    Parameters</span>
@@ -1174,7 +1174,7 @@
 
 
 <div class="viewcode-block" id="fix_cycles"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.fix_cycles">[docs]</a><span class="k">def</span> <span class="nf">fix_cycles</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempts to remove all cycles in the directed graph. A number of approaches</span>
 <span class="sd">    are tried, and if any of them result in a source/sink node or a cycle,</span>
 <span class="sd">    another approach is attempted until the cycle is resolved or we run out</span>
@@ -1379,7 +1379,7 @@
 
 
 <div class="viewcode-block" id="dir_set_manually"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.dir_set_manually">[docs]</a><span class="k">def</span> <span class="nf">dir_set_manually</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">manual_set_csv</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets link directions based on a user-provided csv-file. The csv file has</span>
 <span class="sd">    exactly two columns; one called &#39;link_id&#39;, and one called &#39;usnode&#39;.</span>
 <span class="sd">    This file can be created automatically by the function</span>
@@ -1432,7 +1432,7 @@
 
 
 <div class="viewcode-block" id="set_inletoutlet"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_inletoutlet">[docs]</a><span class="k">def</span> <span class="nf">set_inletoutlet</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets directions of links that are connected to inlets and outlets.</span>
 
 <span class="sd">    Parameters</span>
@@ -1487,7 +1487,7 @@
 
 
 <div class="viewcode-block" id="set_continuity"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_continuity">[docs]</a><span class="k">def</span> <span class="nf">set_continuity</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">checknodes</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets link directions by enforce continuity at each node such that there</span>
 <span class="sd">    are no sources or sinks within the network. Iterates until no more links</span>
 <span class="sd">    directions can be set.</span>
@@ -1563,7 +1563,7 @@
 
 
 <div class="viewcode-block" id="set_parallel_links"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_parallel_links">[docs]</a><span class="k">def</span> <span class="nf">set_parallel_links</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">knownlink</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets directionality of parallel links. If two links are parallel, they</span>
 <span class="sd">    share the same end nodes. If the direction of one of the links is known,</span>
 <span class="sd">    the other must be set in a direction to avoide creating a cycle within</span>
@@ -1627,7 +1627,7 @@
 
 <div class="viewcode-block" id="get_link_vector"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.get_link_vector">[docs]</a><span class="k">def</span> <span class="nf">get_link_vector</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">linkid</span><span class="p">,</span> <span class="n">imshape</span><span class="p">,</span> <span class="n">pixlen</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="n">trim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the normalized vector of a link that indicates the direction of</span>
 <span class="sd">    flow through a link based on its connectivity. This function will first trim</span>
 <span class="sd">    the link by its endpoint (half)width values to mitigate cases where where wide</span>
@@ -1709,7 +1709,7 @@
 <div class="viewcode-block" id="set_by_known_flow_directions"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_by_known_flow_directions">[docs]</a><span class="k">def</span> <span class="nf">set_by_known_flow_directions</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">imshape</span><span class="p">,</span> <span class="n">angthresh</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                                  <span class="n">lenthresh</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nknown_thresh</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                  <span class="n">alg</span><span class="o">=</span><span class="n">algmap</span><span class="p">(</span><span class="s1">&#39;known_fdr&#39;</span><span class="p">)):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets unknown link directions by determining which flow direction through</span>
 <span class="sd">    the link minimizes the overall change in flow direction at the connecting</span>
 <span class="sd">    nodes. For a set of links connected to a node, at least one of the links&#39;</span>
@@ -1754,7 +1754,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">get_candidates</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">lenthresh</span><span class="p">,</span> <span class="n">nknown_thresh</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns unknown links that have at least one known connected link</span>
 <span class="sd">        for setting by its direction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2015,7 +2015,7 @@
 
 
 <div class="viewcode-block" id="set_artificial_nodes"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.directionality.set_artificial_nodes">[docs]</a><span class="k">def</span> <span class="nf">set_artificial_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">checknodes</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is deprecated as of v0.3 and is no longer called.</span>
 
 <span class="sd">    Set the directionality of links where aritificial nodes were added. For such</span>

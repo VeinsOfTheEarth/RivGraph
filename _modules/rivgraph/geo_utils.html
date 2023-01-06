@@ -107,7 +107,7 @@
 
 
 <div class="viewcode-block" id="get_unit"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.geo_utils.get_unit">[docs]</a><span class="k">def</span> <span class="nf">get_unit</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the units for a projection defined by an EPSG code.</span>
 <span class="sd">    See https://en.wikibooks.org/wiki/PROJ.4#Units for a list of unit string</span>
 <span class="sd">    maps.</span>
@@ -155,7 +155,7 @@
 
 
 <div class="viewcode-block" id="geotiff_vals_from_coords"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.geo_utils.geotiff_vals_from_coords">[docs]</a><span class="k">def</span> <span class="nf">geotiff_vals_from_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">gd_obj</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns pixel values at specific coordinates from a geotiff object.</span>
 
 <span class="sd">    Arguments</span>
@@ -184,7 +184,7 @@
 
 
 <div class="viewcode-block" id="coords_to_xy"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.geo_utils.coords_to_xy">[docs]</a><span class="k">def</span> <span class="nf">coords_to_xy</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">gt</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transforms a set of xs, ys in projected coordinates to rows, columns within</span>
 <span class="sd">    a geotiff.</span>
 
@@ -215,7 +215,7 @@
 
 
 <div class="viewcode-block" id="idx_to_coords"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.geo_utils.idx_to_coords">[docs]</a><span class="k">def</span> <span class="nf">idx_to_coords</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">gd_obj</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transforms a set of indices from a geotiff image to their corresponding</span>
 <span class="sd">    coordinates.</span>
 
@@ -239,7 +239,7 @@
 
 
 <div class="viewcode-block" id="xy_to_coords"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.geo_utils.xy_to_coords">[docs]</a><span class="k">def</span> <span class="nf">xy_to_coords</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">gt</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transforms a set of x and y coordinates to their corresponding coordinates</span>
 <span class="sd">    within a geotiff image.</span>
 
@@ -267,7 +267,7 @@
 
 
 <div class="viewcode-block" id="transform_coords"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.geo_utils.transform_coords">[docs]</a><span class="k">def</span> <span class="nf">transform_coords</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">inputEPSG</span><span class="p">,</span> <span class="n">outputEPSG</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transforms a set of coordinates from one epsg to another.</span>
 <span class="sd">    This implementation differs from above by using pyproj.</span>
 
@@ -297,7 +297,7 @@
 
 
 <div class="viewcode-block" id="crop_geotif"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.geo_utils.crop_geotif">[docs]</a><span class="k">def</span> <span class="nf">crop_geotif</span><span class="p">(</span><span class="n">tif</span><span class="p">,</span> <span class="n">cropto</span><span class="o">=</span><span class="s1">&#39;first_nonzero&#39;</span><span class="p">,</span> <span class="n">npad</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">outpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Crops a geotiff to the minimum bounding box as defined by the first</span>
 <span class="sd">    nonzero pixels along each direction. The cropped image is written to</span>
 <span class="sd">    disk.</span>
@@ -369,7 +369,7 @@
 
 
 <div class="viewcode-block" id="downsample_binary_geotiff"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.geo_utils.downsample_binary_geotiff">[docs]</a><span class="k">def</span> <span class="nf">downsample_binary_geotiff</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">ds_factor</span><span class="p">,</span> <span class="n">output_name</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given binary geotiff, create a downsampled one.</span>
 
 <span class="sd">    Use :obj:`rivgraph.im_utils.downsample_binary_image()` and a bunch of</span>

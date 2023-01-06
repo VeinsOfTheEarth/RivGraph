@@ -101,7 +101,7 @@
 
 
 <div class="viewcode-block" id="skel_to_graph"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.skel_to_graph">[docs]</a><span class="k">def</span> <span class="nf">skel_to_graph</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Resolves a skeleton into its consitutent links and nodes.</span>
 <span class="sd">    This function finds a starting point to walk along a skeleton, then begins</span>
 <span class="sd">    the walk. Rules are in place to ensure the network is fully resolved. One</span>
@@ -152,7 +152,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">check_startpoint</span><span class="p">(</span><span class="n">spidx</span><span class="p">,</span> <span class="n">Iskel</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns True if a skeleton pixel&#39;s first neighbor is not a branchpoint</span>
 <span class="sd">        (i.e. the start pixel is valid for a walk), else returns False.</span>
 
@@ -182,7 +182,7 @@
 
 
     <span class="k">def</span> <span class="nf">find_starting_pixels</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds an endpoint pixel to begin walking to resolve network.</span>
 
 <span class="sd">        Parameters</span>
@@ -368,7 +368,7 @@
 
 
 <div class="viewcode-block" id="skeletonize_mask"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.skeletonize_mask">[docs]</a><span class="k">def</span> <span class="nf">skeletonize_mask</span><span class="p">(</span><span class="n">Imask</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Skeletonizes an input binary image, typically a mask. Also performs some</span>
 <span class="sd">    skeleton simplification by (1) removing pixels that don&#39;t alter connectivity,</span>
 <span class="sd">    and (2) filling small skeleton holes and reskeletonizing.</span>
@@ -405,7 +405,7 @@
 
 
 <div class="viewcode-block" id="skeletonize_river_mask"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.skeletonize_river_mask">[docs]</a><span class="k">def</span> <span class="nf">skeletonize_river_mask</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">es</span><span class="p">,</span> <span class="n">padscale</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Skeletonizes a binary mask of a river channel network. Differs from</span>
 <span class="sd">    skeletonize mask above by using knowledge of the exit sides of the river</span>
 <span class="sd">    with respect to the mask (I) to avoid edge effects of skeletonization by</span>
@@ -467,7 +467,7 @@
 
 
 <div class="viewcode-block" id="simplify_skel"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.simplify_skel">[docs]</a><span class="k">def</span> <span class="nf">simplify_skel</span><span class="p">(</span><span class="n">Iskel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function iterates through all skeleton pixels pixels that have</span>
 <span class="sd">    connectivity &gt; 2. It removes the pixel and checks if the</span>
 <span class="sd">    number of blobs has changed after removal. If so, the pixel is necessary to</span>
@@ -516,7 +516,7 @@
 
 
 <div class="viewcode-block" id="pad_river_im"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.mask_to_graph.pad_river_im">[docs]</a><span class="k">def</span> <span class="nf">pad_river_im</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">es</span><span class="p">,</span> <span class="n">pm</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pads the edges of a binary river image by extending the ends of the river.</span>
 <span class="sd">    Different than mirrored padding in that the &quot;mirror&quot; here is just a</span>
 <span class="sd">    rectangle. This simplifies skeletonization and interpretation in cases</span>

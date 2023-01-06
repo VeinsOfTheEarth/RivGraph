@@ -113,7 +113,7 @@
 
 
 <div class="viewcode-block" id="prepare_paths"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.prepare_paths">[docs]</a><span class="k">def</span> <span class="nf">prepare_paths</span><span class="p">(</span><span class="n">path_results</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path_mask</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a dictionary of paths for most of the RivGraph-exportable files.</span>
 
 <span class="sd">    Parameters</span>
@@ -171,7 +171,7 @@
 
 
 <div class="viewcode-block" id="pickle_links_and_nodes"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.pickle_links_and_nodes">[docs]</a><span class="k">def</span> <span class="nf">pickle_links_and_nodes</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">path_out</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Saves the links and nodes dictionaries to a pickle file for easy loading.</span>
 
 <span class="sd">    Parameters</span>
@@ -193,7 +193,7 @@
 
 
 <div class="viewcode-block" id="unpickle_links_and_nodes"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.unpickle_links_and_nodes">[docs]</a><span class="k">def</span> <span class="nf">unpickle_links_and_nodes</span><span class="p">(</span><span class="n">path_pickle</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unpickles a previously pickled network. Note that ordered_set is reloaded</span>
 <span class="sd">    within this function so that pickle can interpret OrderedSet object fields.</span>
 
@@ -221,7 +221,7 @@
 
 
 <div class="viewcode-block" id="get_driver"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.get_driver">[docs]</a><span class="k">def</span> <span class="nf">get_driver</span><span class="p">(</span><span class="n">path_file</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the proper geopandas driver for saving a geodataframe. Keys off the</span>
 <span class="sd">    extension in the filename, and supports either shapefiles or geojsons.</span>
 
@@ -247,7 +247,7 @@
 
 
 <div class="viewcode-block" id="nodes_to_geofile"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.nodes_to_geofile">[docs]</a><span class="k">def</span> <span class="nf">nodes_to_geofile</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">gt</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">path_export</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Saves the nodes of the network to a georeferencedshapefile or geojson.</span>
 <span class="sd">    Computed node properties are appended as attributes when available.</span>
 <span class="sd">    The filetype is specified by the export path.</span>
@@ -294,7 +294,7 @@
 
 
 <div class="viewcode-block" id="links_to_geofile"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.links_to_geofile">[docs]</a><span class="k">def</span> <span class="nf">links_to_geofile</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">gt</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">path_export</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Saves the links of the network to a georeferencedshapefile or geojson.</span>
 <span class="sd">    Computed link properties are saved as attributes when available. Note that</span>
 <span class="sd">    the &#39;wid_pix&#39; property, which stores the width at each pixel along the</span>
@@ -349,7 +349,7 @@
 
 
 <div class="viewcode-block" id="centerline_to_geovector"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.centerline_to_geovector">[docs]</a><span class="k">def</span> <span class="nf">centerline_to_geovector</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">path_export</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Exports centerline coordinates as a georeferenced linestring. Can be used</span>
 <span class="sd">    with any set of coordinates.</span>
 
@@ -384,7 +384,7 @@
 <div class="viewcode-block" id="write_geotiff"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.write_geotiff">[docs]</a><span class="k">def</span> <span class="nf">write_geotiff</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">gt</span><span class="p">,</span> <span class="n">wkt</span><span class="p">,</span> <span class="n">path_export</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">gdal</span><span class="o">.</span><span class="n">GDT_UInt16</span><span class="p">,</span>
                   <span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;COMPRESS=LZW&#39;</span><span class="p">],</span> <span class="n">nbands</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                   <span class="n">color_table</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes a georeferenced raster to disk.</span>
 
 <span class="sd">    Parameters</span>
@@ -464,7 +464,7 @@
 
 
 <div class="viewcode-block" id="colortable"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.colortable">[docs]</a><span class="k">def</span> <span class="nf">colortable</span><span class="p">(</span><span class="n">ctype</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a gdal-ingestible color table for a set of pre-defined options.</span>
 <span class="sd">    Can add your own colortable options. See https://gdal.org/doxygen/structGDALColorEntry.html</span>
 <span class="sd">    and https://gis.stackexchange.com/questions/158195/python-gdal-create-geotiff-from-array-with-colormapping</span>
@@ -507,7 +507,7 @@
 
 
 <div class="viewcode-block" id="shapely_list_to_geovectors"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.shapely_list_to_geovectors">[docs]</a><span class="k">def</span> <span class="nf">shapely_list_to_geovectors</span><span class="p">(</span><span class="n">shplist</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">path_export</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Exports a list of shapely geometries to a GIS-ingestible format.</span>
 
 <span class="sd">    Parameters</span>
@@ -532,7 +532,7 @@
 
 
 <div class="viewcode-block" id="write_linkdirs_geotiff"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.write_linkdirs_geotiff">[docs]</a><span class="k">def</span> <span class="nf">write_linkdirs_geotiff</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">gdobj</span><span class="p">,</span> <span class="n">path_export</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a geotiff where links are colored according to their directionality.</span>
 <span class="sd">    Pixels in each link are interpolated between 0 and 1 such that the upstream</span>
 <span class="sd">    pixel is 0 and the downstream-most pixel is 1. In a GIS, color can then</span>
@@ -573,7 +573,7 @@
 
 
 <div class="viewcode-block" id="create_manual_dir_csv"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.create_manual_dir_csv">[docs]</a><span class="k">def</span> <span class="nf">create_manual_dir_csv</span><span class="p">(</span><span class="n">path_csv</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a .csv file for fixing links manually.</span>
 
 <span class="sd">    Parameters</span>
@@ -591,7 +591,7 @@
 
 
 <div class="viewcode-block" id="coords_from_geovector"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.coords_from_geovector">[docs]</a><span class="k">def</span> <span class="nf">coords_from_geovector</span><span class="p">(</span><span class="n">path_geovector</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retreives coordinates from a shapefile containing a LineString or Points.</span>
 
 <span class="sd">    Parameters</span>
@@ -615,7 +615,7 @@
 
 
 <div class="viewcode-block" id="coords_to_geovector"><a class="viewcode-back" href="../../apiref/rivgraph.html#rivgraph.io_utils.coords_to_geovector">[docs]</a><span class="k">def</span> <span class="nf">coords_to_geovector</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">epsg</span><span class="p">,</span> <span class="n">path_export</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Exports coordinates to a Point shapefile.</span>
 
 <span class="sd">    Parameters</span>
