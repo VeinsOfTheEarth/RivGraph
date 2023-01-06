@@ -375,7 +375,7 @@
 
     <span class="c1"># Geopandas dataframe</span>
     <span class="n">cl_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">cl</span><span class="p">])</span>
-    <span class="n">cl_df</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">crs</span>
+    <span class="n">cl_df</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Save</span>
     <span class="n">cl_df</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">path_export</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="n">get_driver</span><span class="p">(</span><span class="n">path_export</span><span class="p">))</span></div>
