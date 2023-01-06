@@ -289,7 +289,7 @@ def centerline_to_geovector(cl, crs, path_export):
 
     # Geopandas dataframe
     cl_df = gpd.GeoDataFrame(geometry=[cl])
-    cl_df.crs = crs
+    cl_df.set_crs(crs, inplace=True)
 
     # Save
     cl_df.to_file(path_export, driver=get_driver(path_export))
