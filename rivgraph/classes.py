@@ -66,6 +66,11 @@ class rivnetwork:
         verbose : bool, optional
             If True, print run information and warnings to the console, default
             is False.
+        single_thread : bool, optional
+            If the input mask is mostly single-thread, set this to True to 
+            avoid problems in mesh generation later. If True, uses a different
+            mesh generation algorithm that is tailored to single-thread, 
+            meandering channels.
 
 
         Attributes
@@ -593,6 +598,7 @@ class delta(rivnetwork):
 
         """
         rivnetwork.__init__(self, name, path_to_mask, results_folder, verbose=verbose)
+        self.single_thread = False
 
 
     def skeletonize(self):
@@ -738,12 +744,13 @@ class river(rivnetwork):
     """
 
     def __init__(self, name, path_to_mask, results_folder=None,
-                 exit_sides=None, verbose=False):
+                 exit_sides=None, verbose=False, single_thread=False):
 
         if exit_sides is None:
             raise Warning('Must provide exit_sides for river class.')
 
         rivnetwork.__init__(self, name, path_to_mask, results_folder, exit_sides, verbose=verbose)
+        self.single_thread = single_thread
 
 
     def skeletonize(self):
@@ -794,7 +801,7 @@ class river(rivnetwork):
         logger.info('centerline computation is done.')
 
 
-    def compute_mesh(self, grid_spacing=None, smoothing=0.1, buf_halfwidth=None):
+    def compute_mesh(self, grid_spacing=None, smoothing=0.1, buf_halfwidth=None, single_thread=False):
         """
         Generates an along-centerline mesh that indicates a valley-direction
         of sorts. The mesh is useful for computing spatial statistics as a function
@@ -815,8 +822,13 @@ class river(rivnetwork):
             of the total centerline length. Range is [0, 1].
         buf_halfwidth : float
             Defines the offset distance of the left- and right-valleylines from
-            from the centerline. Units correspond to those of the CRS of the
+            from the centerline. buf_halfwidth * 2 is the length of each 
+            transect. Units correspond to those of the CRS of the
             input mask.
+        single_thread : bool
+            If True, uses a different mesh computing algorithm that is better-
+            suited for following single-thread channels (as opposed to a
+            multithread channel for which a valley-wide mesh must be computed).
 
         """
         # Need a centerline
@@ -850,10 +862,16 @@ class river(rivnetwork):
 
             # Multiply by pixlen to keep units consistent
             buf_halfwidth = self.max_valley_width_pixels * self.pixlen * 1.1
+            
+        if self.single_thread is True:
+            single_thread = True
 
         logger.info('Generating mesh...')
 
-        self.meshlines, self.meshpolys, self.centerline_smooth = ru.valleyline_mesh(self.centerline, self.avg_chan_width, buf_halfwidth, grid_spacing, smoothing=smoothing)
+        if single_thread is False:
+            self.meshlines, self.meshpolys, self.centerline_smooth = ru.valleyline_mesh(self.centerline, self.avg_chan_width, buf_halfwidth, grid_spacing, smoothing=smoothing)
+        else:
+            self.meshlines, self.meshpolys, self.centerline_smooth = ru.centerline_mesh(self.centerline, self.avg_chan_width, buf_halfwidth*2, grid_spacing, smoothing_param=smoothing)
 
         logger.info('mesh generation is done.')
 
