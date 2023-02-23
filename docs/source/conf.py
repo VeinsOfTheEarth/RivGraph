@@ -63,7 +63,7 @@ release = __version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -154,12 +154,6 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-# autodoc mock imports
-autodoc_mock_imports = ['numpy', 'scikit-image', 'opencv-python', 'pandas',
-                        'networkx', 'geopandas', 'pyproj', 'shapely', 'fiona',
-                        'matplotlib', 'gdal', 'scipy', 'skimage', 'cv2',
-                        'rivgraph']
-
 # -- Options for linkcheck -------------------------------------------
 
 # Some links are throwing 403s for unknown reasons; we simply skip checking them here.
@@ -171,4 +165,5 @@ linkcheck_ignore = [r'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2
 		    r'http://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963',
 		    r'https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2008GL033963',
 		    r'https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019WR026867',
+		    r'https://pubs.geoscienceworld.org/gsa/geology/article/doi/10.1130/G49935.1/614344/Quantitative-relationships-between-river-and',
 			]

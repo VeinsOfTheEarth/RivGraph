@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Let’s demo RivGraph on the Brahmaputra River! &mdash; RivGraph 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Maskmaking" href="../../maskmaking/index.html" />
+    <link rel="prev" title="Let’s demo RivGraph on the Colville Delta!" href="../delta_example/delta_example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html">
+            <img src="../../_static/rg_logo_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../background/index.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Installation Instructions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#delta-examples">Delta Examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#river-examples">River Examples</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Let’s demo RivGraph on the Brahmaputra River!</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#instantiate-river-class">1. Instantiate river class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skeletonize-the-binary-mask">2. Skeletonize the binary mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compute-the-network-links-and-nodes">3. Compute the network (links and nodes)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#prune-the-network">4. Prune the network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compute-morphologic-metrics-lengths-widths">5. Compute morphologic metrics (lengths, widths)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compute-a-mesh">6. Compute a mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#adjust-mesh-parameters">6.1 Adjust mesh parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#assign-flow-directions-to-each-link">7. Assign flow directions to each link</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#a-note-on-topologic-metrics">8. A note on topologic metrics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../maskmaking/index.html">Maskmaking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shoreline/index.html">Shoreline creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linksnodes/index.html">Link and Node Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../issues/index.html">Known issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../featuredevelopment/index.html">Feature Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gallery/index.html">RivGraph in the wild</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apiref/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RivGraph</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Let’s demo RivGraph on the Brahmaputra River!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/braided_river_example/braided_river_example.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="lets-demo-rivgraph-on-the-brahmaputra-river">
+<h1>Let’s demo RivGraph on the Brahmaputra River!<a class="headerlink" href="#lets-demo-rivgraph-on-the-brahmaputra-river" title="Permalink to this headline"></a></h1>
+<p>This demo shows some of the core functionality and convenient plotting
+and exporting features provided by RivGraph for a braided river network.
+The basic steps of RivGraph-ing a braided river include:</p>
+<ol class="arabic simple">
+<li><p>Instantiate river class</p></li>
+<li><p>Skeletonize the binary mask</p></li>
+<li><p>Compute the network (links and nodes)</p></li>
+<li><p>Prune the network</p></li>
+<li><p>Compute morphologic metrics (lengths, widths)</p></li>
+<li><p>Compute a mesh (6.1 - Adjust mesh parameters)</p></li>
+<li><p>Assign flow directions for each link</p></li>
+<li><p>A note on topologic metrics</p></li>
+</ol>
+<p>Along the way, we’ll export some geotiffs and GeoJSONs (or shapefiles if
+you prefer) for inspection in QGIS. RivGraph requires a <strong>binary mask of
+the channel network</strong>, preferably georeferenced (i.e., a GeoTiff) in a
+projected coordinate reference system.</p>
+<div class="section" id="instantiate-river-class">
+<h2>1. Instantiate river class<a class="headerlink" href="#instantiate-river-class" title="Permalink to this headline"></a></h2>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rivgraph.classes</span> <span class="kn">import</span> <span class="n">river</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># Define the path to the georeferenced binary image.</span>
+<span class="n">mask_path</span> <span class="o">=</span> <span class="s1">&#39;./data/Brahmaputra_Braided_River/Brahmaputra_mask.tif&#39;</span>
+
+<span class="c1"># Results will be saved with this name</span>
+<span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Brahma&#39;</span>
+
+<span class="c1"># Where to store RivGraph-generated geotiff and geovector files.</span>
+<span class="n">results_folder</span> <span class="o">=</span> <span class="s1">&#39;./data/Brahmaputra_Braided_River/Results&#39;</span>
+
+<span class="c1"># Set the exit sides of the river relative to the image. In this case, the</span>
+<span class="c1"># Brahmaputra is &quot;entering&quot; the image from the North and &quot;exiting&quot; the</span>
+<span class="c1"># image from the South.</span>
+<span class="n">es</span> <span class="o">=</span> <span class="s1">&#39;NS&#39;</span> <span class="c1"># The first character is the upstream side</span>
+
+<span class="c1"># Boot up the river class! We set verbose=True to see progress of processing.</span>
+<span class="n">brahma</span> <span class="o">=</span> <span class="n">river</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">mask_path</span><span class="p">,</span> <span class="n">results_folder</span><span class="p">,</span> <span class="n">exit_sides</span><span class="o">=</span><span class="n">es</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># The mask has been re-binarized and stored as an attribute of brahma:</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">Imask</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">AxesImage</span> <span class="n">at</span> <span class="mh">0x1eb4f279e50</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<img alt="../../_images/output_2_1.png" src="../../_images/output_2_1.png" />
+</div>
+<div class="section" id="skeletonize-the-binary-mask">
+<h2>2. Skeletonize the binary mask<a class="headerlink" href="#skeletonize-the-binary-mask" title="Permalink to this headline"></a></h2>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simply use the skeletonize() method.</span>
+<span class="n">brahma</span><span class="o">.</span><span class="n">skeletonize</span><span class="p">()</span>
+
+<span class="c1"># The skeletonized image is stored as an attribute to the brahm class. Let&#39;s take a look.</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">Iskel</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">AxesImage</span> <span class="n">at</span> <span class="mh">0x1eb4f7e90a0</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<img alt="../../_images/output_4_1.png" src="../../_images/output_4_1.png" />
+<p>The skeleton is hard to see; perhaps we’d like to look at it closer? One
+option is to save it as a geotiff and pull it up in a GIS (like QGIS).</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># We use the write_geotiff() method with the &#39;skeleton&#39; option.</span>
+<span class="n">brahma</span><span class="o">.</span><span class="n">to_geotiff</span><span class="p">(</span><span class="s1">&#39;skeleton&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<pre class="literal-block">Geotiff written to dataBrahmaputra_Braided_RiverResultsBrahma_skel.tif.</pre>
+<p>The georeferenced Brahmaputra skeleton has been written to disk, so we
+can pull it up in QGIS along with the georeferenced mask:</p>
+<div class="figure align-default" id="id1">
+<img alt="brahma_qgis_mask_skel.PNG" src="../../_images/brahma_qgis_mask_skel.png" />
+<p class="caption"><span class="caption-text">brahma_qgis_mask_skel.PNG</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+</div>
+</div>
+<div class="section" id="compute-the-network-links-and-nodes">
+<h2>3. Compute the network (links and nodes)<a class="headerlink" href="#compute-the-network-links-and-nodes" title="Permalink to this headline"></a></h2>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simply use the compute_network() method.</span>
+<span class="n">brahma</span><span class="o">.</span><span class="n">compute_network</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Resolving</span> <span class="n">links</span> <span class="ow">and</span> <span class="n">nodes</span><span class="o">...</span><span class="n">done</span><span class="o">.</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Now we can see that the &quot;links&quot; and &quot;nodes&quot; dictionaries ahve been added</span>
+<span class="c1"># as attributes to the brahma class:</span>
+<span class="n">links</span> <span class="o">=</span> <span class="n">brahma</span><span class="o">.</span><span class="n">links</span>
+<span class="n">nodes</span> <span class="o">=</span> <span class="n">brahma</span><span class="o">.</span><span class="n">nodes</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;links: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">links</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;nodes: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">links</span><span class="p">:</span> <span class="n">dict_keys</span><span class="p">([</span><span class="s1">&#39;idx&#39;</span><span class="p">,</span> <span class="s1">&#39;conn&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;n_networks&#39;</span><span class="p">])</span>
+<span class="n">nodes</span><span class="p">:</span> <span class="n">dict_keys</span><span class="p">([</span><span class="s1">&#39;idx&#39;</span><span class="p">,</span> <span class="s1">&#39;conn&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The <em>links</em> dictionary currently contains four keys: - idx: a list of
+all the pixel indices that make up the link (indices created with input
+mask shape and np.ravel_multi_index) - conn : a two-element list
+containing the node <em>id</em>s of the link’s endpoints - id: each link has
+a unique <em>id</em>; the ordering is irrelevant - n_networks: the number of
+disconnected networks (==1 if the input mask contains a single connected
+blob)</p>
+<p>The <em>nodes</em> dictionary currently contains three keys: - idx: the index
+of the node’s position within the original image
+(i.e. np.ravel_multi_index()) - conn: an N-element list containing the N
+link <em>id</em>s of the links connected to this node. - id: each node has a
+unique <em>id</em>; the ordering is irrelevant</p>
+<p>We can visualze the network in a couple of ways. First, we can plot with
+matplotlib:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;network&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/output_12_0.png" src="../../_images/output_12_0.png" />
+<p>Nodes and links are labeled with their ids. We can zoom in if plotting
+in an interactive matplotlib window, <em>or</em> we can export the network
+links and nodes as geovector files and pull ’em into QGIS:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">to_geovectors</span><span class="p">(</span><span class="s1">&#39;network&#39;</span><span class="p">,</span> <span class="n">ftype</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>
+
+<span class="c1"># Let&#39;s see where the network geovector files were written:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<pre class="literal-block">dataBrahmaputra_Braided_RiverResultsBrahma_links.json
+dataBrahmaputra_Braided_RiverResultsBrahma_nodes.json</pre>
+<p>And dragging these into QGIS: <img alt="brahma_qgis_network_unpruned.PNG" src="../../_images/brahma_qgis_network_unpruned.png" /> You can
+query different links and nodes using the Identify tool. Note that their
+properties (‘conn’ and ‘id’) are appended.</p>
+<p>If you pan around a bit, you’ll notice that there are many “dangling”
+links, or links connected only at one end. These links play no role in
+the connectivity of the network, and we therefore may want to remove
+them. We don’t want to remove the inlet and outlet links, however.
+RivGraph will prune these dangling links but preserve the inlet and
+outlet links by exploiting the <em>exit_sides</em> we supplied earlier. Let’s
+prune the network.</p>
+</div>
+<div class="section" id="prune-the-network">
+<h2>4. Prune the network<a class="headerlink" href="#prune-the-network" title="Permalink to this headline"></a></h2>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">prune_network</span><span class="p">()</span>
+
+<span class="c1"># We see that &#39;inlets&#39; and &#39;outlets&#39; have been added to the nodes dictionary:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<span class="c1"># We can get the node ids of the inlets and outlets</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;inlets:&#39;</span><span class="p">,</span> <span class="n">brahma</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;inlets&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;outlets:&#39;</span><span class="p">,</span> <span class="n">brahma</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dict_keys</span><span class="p">([</span><span class="s1">&#39;idx&#39;</span><span class="p">,</span> <span class="s1">&#39;conn&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;inlets&#39;</span><span class="p">,</span> <span class="s1">&#39;outlets&#39;</span><span class="p">])</span>
+<span class="n">inlets</span><span class="p">:</span> <span class="p">[</span><span class="mi">247</span><span class="p">]</span>
+<span class="n">outlets</span><span class="p">:</span> <span class="p">[</span><span class="mi">1919</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="compute-morphologic-metrics-lengths-widths">
+<h2>5. Compute morphologic metrics (lengths, widths)<a class="headerlink" href="#compute-morphologic-metrics-lengths-widths" title="Permalink to this headline"></a></h2>
+<p>Now that the network is resolved and pruned, we can compute some link
+metrics.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">compute_link_width_and_length</span><span class="p">()</span>
+
+<span class="c1"># Let&#39;s look at histograms of link widths and lengths:</span>
+<span class="n">trash</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="s1">&#39;len_adj&#39;</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;link length (m)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Histogram of link lengths&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Computing</span> <span class="n">distance</span> <span class="n">transform</span><span class="o">...</span><span class="n">done</span><span class="o">.</span>
+<span class="n">Computing</span> <span class="n">link</span> <span class="n">widths</span> <span class="ow">and</span> <span class="n">lengths</span><span class="o">...</span><span class="n">done</span><span class="o">.</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;Histogram of link lengths&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/output_20_2.png" src="../../_images/output_20_2.png" />
+<p>In the above figure, we see that almost all the links are shorter than 5
+km. This histogram will be different for each braided river, and can
+depend on the resolution of your input binary mask. Resolving smaller
+channels generally, though not always, produces smaller average link
+lengths as longer links are broken to connect to the smaller ones.</p>
+<p><strong>Note</strong>: the lengths are reported in <strong>meters</strong> bcause that is the unit
+of the provided mask’s CRS (coordinate reference system). You can check
+this unit:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">meter</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="compute-a-mesh">
+<h2>6. Compute a mesh<a class="headerlink" href="#compute-a-mesh" title="Permalink to this headline"></a></h2>
+<p>In preparation for setting flow directions of each link, we will compute
+an “along-valley” mesh. This mesh is created based on the overall
+morphology of the braided river as opposed to individual channels within
+the network. The objective of the mesh is to create an along-channel
+grid that contains transects that are roughly perpendicular to the river
+“centerline” and approximately evenly-spaced.</p>
+<p>While this mesh is necessary for setting flow directions, it is also
+useful for measuring along-river characteristics (like width, erosion
+rates, braiding index, etc.). The generation of this mesh requires a few
+parameters that ideally would be user-defined each time. However, for
+simplicity, RivGraph will make estimates of these parameters based
+primarily off the average link width. These parameters are described
+after we generate a default mesh.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Note that we provide no arguments to the compute_mesh() function.</span>
+<span class="n">brahma</span><span class="o">.</span><span class="n">compute_mesh</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Computing</span> <span class="n">centerline</span><span class="o">...</span><span class="n">done</span><span class="o">.</span>
+<span class="n">Computing</span> <span class="n">link</span> <span class="n">widths</span> <span class="ow">and</span> <span class="n">lengths</span><span class="o">...</span><span class="n">done</span><span class="o">.</span>
+<span class="n">Generating</span> <span class="n">mesh</span><span class="o">...</span><span class="n">done</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Before we play with the mesh-generation parameters, let’s take a look at
+what we’ve generated with the <code class="docutils literal notranslate"><span class="pre">compute_mesh()</span></code> function.</p>
+<p>First, we see that a centerline was computed. We can access this
+centerline:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">centerline</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">array</span><span class="p">([</span><span class="mf">764625.</span><span class="p">,</span> <span class="mf">764595.</span><span class="p">,</span> <span class="mf">764565.</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="mf">785475.</span><span class="p">,</span> <span class="mf">785505.</span><span class="p">,</span> <span class="mf">785535.</span><span class="p">]),</span> <span class="n">array</span><span class="p">([</span><span class="mf">2753535.</span><span class="p">,</span> <span class="mf">2753505.</span><span class="p">,</span> <span class="mf">2753475.</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="mf">2633625.</span><span class="p">,</span> <span class="mf">2633655.</span><span class="p">,</span> <span class="mf">2633655.</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>We get a numpy array of two arrays of columns, rows of the centerline.
+This isn’t very interpretable as-is, but we can export the centerline as
+a geovector file:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">to_geovectors</span><span class="p">(</span><span class="s1">&#39;centerline&#39;</span><span class="p">,</span> <span class="n">ftype</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The centerline is exported as a shapefile or GeoJSON, depending on the
+filetype you specify. (GeoJSON is default.) Let’s take a look at this
+centerline in QGIS:</p>
+<div class="figure align-default" id="id2">
+<img alt="brahma_qgis_centerline.png" src="../../_images/brahma_qgis_centerline.png" />
+<p class="caption"><span class="caption-text">brahma_qgis_centerline.png</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+</div>
+<p>A little jagged, but it’s fine for our purposes. The centerline is
+computed by filling in all the islands of the network, then using a
+distance transform to find the “centermost” pixels.</p>
+<p>Now let’s take a look at the mesh we generated. We first need to export
+it:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">to_geovectors</span><span class="p">(</span><span class="s1">&#39;mesh&#39;</span><span class="p">,</span> <span class="n">ftype</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The mesh consists of two files: <code class="docutils literal notranslate"><span class="pre">meshlines</span></code>, or transects, and
+<code class="docutils literal notranslate"><span class="pre">meshpolys</span></code>. If we want to see where these files were generated, we
+can check the paths dictionary:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;meshlines&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;meshpolys&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<pre class="literal-block">dataBrahmaputra_Braided_RiverResultsBrahma_meshlines.json
+dataBrahmaputra_Braided_RiverResultsBrahma_meshpolys.json</pre>
+<p>Let’s see what the mesh looks like by dragging these GeoJSONs into QGIS:</p>
+<div class="figure align-default" id="id3">
+<img alt="brahma_qgis_initial_meshlines.png" src="../../_images/brahma_qgis_initial_meshlines.png" />
+<p class="caption"><span class="caption-text">brahma_qgis_initial_meshlines.png</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+</div>
+<p>The mesh does a pretty good job of meeting our two criteria:
+approximately perpendicular to the centerline, and evenly-spaced along
+the centerline. It’s not perfect, but we can play with the parameters to
+adjust it.</p>
+</div>
+<div class="section" id="adjust-mesh-parameters">
+<h2>6.1 Adjust mesh parameters<a class="headerlink" href="#adjust-mesh-parameters" title="Permalink to this headline"></a></h2>
+<p>We may want to alter certain features of the mesh, like the spacing of
+transects or the overall width of the mesh. When we call
+<code class="docutils literal notranslate"><span class="pre">compute_mesh()</span></code>, there are three optional keyword arguments we can
+provide to control mesh properties. These are:</p>
+<p><code class="docutils literal notranslate"><span class="pre">grid_spacing</span></code> : The along-centerline distance between each transect.
+The default value is the average link width, found by
+<code class="docutils literal notranslate"><span class="pre">np.mean(brahm.links['wid_adj'])</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">smoothing</span></code> : The degree of smoothing to perform on the centerline
+before creating its offsets. This parameter is expressed in terms of the
+fraction of the total centerline length, so the default
+<code class="docutils literal notranslate"><span class="pre">smoothing=0.1</span></code> will use a moving-average with a window size of 10% of
+the length of the centerline.</p>
+<p><code class="docutils literal notranslate"><span class="pre">buf_halfwidth</span></code> : The distance from the centerline to each edgeline of
+the buffer. The default is 10% wider than the maximum width of the mask,
+which ensures that the mask is fully covered by the mesh.</p>
+<p>We can check what values of each of these were used above:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># grid_spacing</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;grid_spacing: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">avg_chan_width</span><span class="p">))</span>
+<span class="c1"># buf_halfwidth</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;buf_halfwidth: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">brahma</span><span class="o">.</span><span class="n">max_valley_width_pixels</span> <span class="o">*</span> <span class="n">brahma</span><span class="o">.</span><span class="n">pixlen</span> <span class="o">*</span> <span class="mf">1.1</span><span class="p">))</span>
+<span class="c1"># smoothing by default was 0.1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;smoothing: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mf">0.1</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grid_spacing</span><span class="p">:</span> <span class="mf">623.1819853141467</span>
+<span class="n">buf_halfwidth</span><span class="p">:</span> <span class="mf">15631.83213830036</span>
+<span class="n">smoothing</span><span class="p">:</span> <span class="mf">0.1</span>
+</pre></div>
+</div>
+<p>You may have noticed that the mesh transects near the beginning of the
+reach (top of image) aren’t quite a perpendicular to the centerline as
+we might like. Let’s try smoothing the centerline a bit more and
+reducing the buffer width to make these more perpendicular. The grid
+spacing will not affect the overall mesh strucutre, so we’ll leave it
+the same for comparison purposes.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">compute_mesh</span><span class="p">(</span><span class="n">buf_halfwidth</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Generating</span> <span class="n">mesh</span><span class="o">...</span><span class="n">done</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Here’s a side-by-side comparison with the default mesh:</p>
+<div class="figure align-default" id="id4">
+<img alt="brahma_mesh_comparison.png" src="../../_images/brahma_mesh_comparison.png" />
+<p class="caption"><span class="caption-text">brahma_mesh_comparison.png</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
+</div>
+<p>There are two primary differences between our custom mesh and the
+default one. First, the custom mesh is narrower as a direct result of us
+reducing <code class="docutils literal notranslate"><span class="pre">buf_halfwidth</span></code> from 15631 to 10000. Secondly, the custom
+mesh transects are significantly more parallel to the centerline than
+the default mesh. This resulted from increasing <code class="docutils literal notranslate"><span class="pre">smoothing</span></code> from 0.1
+to 0.25. These two parameters, plus <code class="docutils literal notranslate"><span class="pre">grid_spacing</span></code>, can be used to
+design a mesh to suit your needs.</p>
+</div>
+<div class="section" id="assign-flow-directions-to-each-link">
+<h2>7. Assign flow directions to each link<a class="headerlink" href="#assign-flow-directions-to-each-link" title="Permalink to this headline"></a></h2>
+<p>Now we want to determine the long-term, steady-state flow direction in
+each link. The algorithms used here are described in <a class="reference external" href="https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html">this
+paper</a>.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">assign_flow_directions</span><span class="p">()</span>
+</pre></div>
+</div>
+<pre class="literal-block">Setting link directionality...Using dataBrahmaputra_Braided_RiverResultsBrahma_fixlinks.csv to manually set flow directions.
+Attempting to fix 2 cycles.
+All cycles were resolved.
+done.</pre>
+<p>A statement appears that tells us that a .csv file was created for us to
+set flow directions manually. This file is only created if it does not
+already exist. So if we re-run <code class="docutils literal notranslate"><span class="pre">assign_flow_directions()</span></code>, we should
+not see this message again.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">assign_flow_directions</span><span class="p">()</span>
+</pre></div>
+</div>
+<pre class="literal-block">Setting link directionality...Using dataBrahmaputra_Braided_RiverResultsBrahma_fixlinks.csv to manually set flow directions.
+Attempting to fix 2 cycles.
+All cycles were resolved.
+done.</pre>
+<p>Now we see a message stating that RivGraph will use the .csv file to set
+flow directions manually. However, we haven’t populated the file yet so
+no there is no information for RivGraph to use. We’ll revisit this at
+the end of this section.</p>
+<p>We also see a message stating that RivGraph is
+<code class="docutils literal notranslate"><span class="pre">Attempting</span> <span class="pre">to</span> <span class="pre">fix</span> <span class="pre">2</span> <span class="pre">cycles.</span></code> A cycle is a set of links within a graph
+that feeds into itself. RivGraph’s directionality algorithms enforce the
+condition that no cycles should be present in the resulting graph. If
+any cycles are found after setting all link directions, RivGraph
+attempts to fix them. This does not mean that all the links’ directions
+are correct, but rather that the resulting graph contains no cycles. In
+this case, RivGraph was able to resolve both cycles.</p>
+<p>Let’s inspect the resulting link directions. We again have two options:
+we can plot the links via matplotlib within Python:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;directions&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/output_44_0.png" src="../../_images/output_44_0.png" />
+<p>Cyan represents the upstream portion of a link, and magenta the
+downstream. As before, this is difficult to see without zoooming. So we
+can export a geotiff that contains directionality information for
+inspection in QGIS:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">to_geotiff</span><span class="p">(</span><span class="s1">&#39;directions&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<pre class="literal-block">Geotiff written to dataBrahmaputra_Braided_RiverResultsBrahma_link_directions.tif.</pre>
+<p>Dragging into QGIS (and adding a colorbar legend), we see</p>
+<div class="figure align-default" id="id5">
+<img alt="brahma_qgis_initial_directions.png" src="../../_images/brahma_qgis_initial_directions.png" />
+<p class="caption"><span class="caption-text">brahma_qgis_initial_directions.png</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
+</div>
+<p>I’ve circled two short links in yellow, and noted that their flow
+direction was set as going right-to-left. Ideally, this junction would
+be comprised of a single node replacing these links, but RivGraph does
+not have the capability yet to simplify the network (<a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/issues/11">a feature request
+has been made for this)</a>. From
+cursory inspection, we could make the argument that flow should instead
+go left-to-right for these two links. Let’s force flow the opposite
+direction as an example of how to manually set links.</p>
+<p>First, we need to identify the link ID’s of each of these links, as well
+as the desired upstream nodes. Using the Identify tool in QGIS with the
+links and nodes GeoJSON layers turned on, this is easy:</p>
+<div class="figure align-default" id="id6">
+<img alt="brahma_qgis_identify_links_for_reversal.png" src="../../_images/brahma_qgis_identify_links_for_reversal.png" />
+<p class="caption"><span class="caption-text">brahma_qgis_identify_links_for_reversal.png</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
+</div>
+<p>We see that the red-highlighted link’s ID is <code class="docutils literal notranslate"><span class="pre">2280</span></code>, and it’s
+(upstream, downstream) nodes are <code class="docutils literal notranslate"><span class="pre">1631,</span> <span class="pre">1650</span></code>. We want to reverse this
+order so that the upstream node ID is <code class="docutils literal notranslate"><span class="pre">1650</span></code>. Open the
+<code class="docutils literal notranslate"><span class="pre">Brahma_fixlinks</span></code> csv and enter this information. I have also done
+this for the link to the right of this one.</p>
+<div class="figure align-default" id="id7">
+<img alt="brahma_fixlinks_csv.png" src="../../_images/brahma_fixlinks_csv.png" />
+<p class="caption"><span class="caption-text">brahma_fixlinks_csv.png</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
+</div>
+<p>Simply save the .csv and re-run the <code class="docutils literal notranslate"><span class="pre">assign_flow_directions()</span></code> method:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">brahma</span><span class="o">.</span><span class="n">assign_flow_directions</span><span class="p">()</span>
+</pre></div>
+</div>
+<pre class="literal-block">Setting link directionality...Using dataBrahmaputra_Braided_RiverResultsBrahma_fixlinks.csv to manually set flow directions.
+Attempting to fix 2 cycles.
+All cycles were resolved.
+done.</pre>
+<p>After exporting the <code class="docutils literal notranslate"><span class="pre">directions</span></code> geotiff again, we can plot it against
+the original:</p>
+<div class="figure align-default" id="id8">
+<img alt="brahma_flow_direction_reversed_manually.png" src="../../_images/brahma_flow_direction_reversed_manually.png" />
+<p class="caption"><span class="caption-text">brahma_flow_direction_reversed_manually.png</span><a class="headerlink" href="#id8" title="Permalink to this image"></a></p>
+</div>
+<p>We see that RivGraph used the information in our .csv to manually set
+the flow directions for both these links in the opposite direction of
+the original solution. It is important to note that RivGraph guarantees
+that whatever link flow directions are specified in the .csv will be
+preserved throughout the direction-setting process. RivGraph uses an
+iterative approach to set link directionalities, where knowing the
+direction of a nearby link can be used to set links of unknown
+directions. This means that if you incorrectly set a link’s direction
+manually, you could “infect” the nearby links with wrong directions!
+Indeed, we see from the above comparison that the upper-right link’s
+direction has also been reversed, even though we didn’t specify it.
+Whether or not this is correct is determined by the user.</p>
+</div>
+<div class="section" id="a-note-on-topologic-metrics">
+<h2>8. A note on topologic metrics<a class="headerlink" href="#a-note-on-topologic-metrics" title="Permalink to this headline"></a></h2>
+<p>If you’ve looked through the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/delta_example.ipynb">delta example</a>,
+you’ll see the final section covers computing topolgic metrics. In order
+to compute these metrics, some additional finagling of the network is
+required. We have not yet implemented the required pre-processing for
+braided rivers. However, many of the functions in the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/blob/master/rivgraph/deltas/delta_metrics.py">delta metrics script</a>
+can be used on braided rivers, provided you first pre-process your
+braided river network properly.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../delta_example/delta_example.html" class="btn btn-neutral float-left" title="Let’s demo RivGraph on the Colville Delta!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../maskmaking/index.html" class="btn btn-neutral float-right" title="Maskmaking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, J. Schwenk &amp; J. Hariharan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

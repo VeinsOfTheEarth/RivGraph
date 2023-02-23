@@ -12,26 +12,25 @@ Installation Instructions
 Installation via *conda*
 --------------------------
 
-The latest 'stable' version of *RivGraph* can be installed via `conda`.
+The latest 'stable' version of *RivGraph* can be installed via `conda`; as of this writing we have tested this installation process for Python versions 3.9.x and 3.7.13 (per `issue 83 <https://github.com/VeinsOfTheEarth/RivGraph/issues/83>`_).
 We recommend installing *RivGraph* into a fresh conda environment to minimize the risk of dependency clashes.
-The easiest way to do this is by first downloading the `environment.yml <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml>`_ (go to link, click "Raw", then copy the contents into a text editor and save as 'environment.yml'), opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:
+The easiest way to do this is by opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:
 ::
 
-   $ conda env create --file /path/to/environment.yml
-
-.. tip::
-   The default environment name is 'rivgraph' (per the `environment.yml` file), but you can change the environment file to name it anything you like.
+   $ conda create -n rivgraph_env rivgraph -c conda-forge
 
 If you would rather install *RivGraph* into a pre-existing environment "myenv", you can use the following commands:
 ::
 
    conda activate myenv
-   conda install rivgraph -c jschwenk
+   conda install rivgraph -c conda-forge
 
 .. warning::
 
- *RivGraph* dependencies may be pinned to specific versions of packages (e.g. geopandas 0.7) that may not mesh with your existing environment.
- Check the `environment file <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml>`_ for these cases.
+   *RivGraph* dependencies may be pinned to specific versions of packages that may not mesh with your existing environment.
+   Check the `environment file <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml>`_ for these cases.
+   If you are having trouble getting the environment to resolve, or it is taking a very long time, consider using *mamba*
+   as a drop-in replacement for *conda* (see `mamba docs <https://mamba.readthedocs.io/en/latest/>`_).
 
 Installation from source
 ------------------------
@@ -71,7 +70,7 @@ provided below with links to the homepage for each dependency.
    - `FastDTW <https://github.com/slaypni/fastdtw>`_
 
 3. From the cloned folder, run the following in the command line:
-::
+   ::
 
    $ python setup.py install
 
@@ -82,7 +81,7 @@ to install the *RivGraph* package.
    to see whether you've installed all of the required dependencies.
 
 4. To test your installation, you need to install the `pytest <https://docs.pytest.org/en/stable/index.html>`_ package.
-Then from the cloned folder you can run the unit tests with the following command:
-::
+   Then from the cloned folder you can run the unit tests with the following command:
+   ::
 
    $ pytest

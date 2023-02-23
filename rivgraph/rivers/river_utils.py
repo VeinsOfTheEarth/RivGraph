@@ -10,7 +10,7 @@ Created on Tue Nov  6 14:29:10 2018
 import numpy as np
 import networkx as nx
 from fastdtw import fastdtw
-from scipy.ndimage.morphology import distance_transform_edt
+from scipy.ndimage import distance_transform_edt
 import shapely
 from shapely.geometry import LineString, Polygon
 from scipy import signal
@@ -346,6 +346,30 @@ def mask_to_centerline(Imask, es):
     return coords, pix_width
 
 
+def mirror_line_ends(xs, ys, npad):
+    """
+    Reflect both ends of a line.
+
+    Reflects both ends of a line defined by x and y coordinates. The mirrored
+    distance is set by npad, which refers to the number of vertices along the
+    line to mirror.
+
+    """
+    # Mirror the beginning of the line
+    diff_x = np.diff(xs[0:npad])
+    xs_m = np.concatenate((np.flipud(xs[1] - np.cumsum(diff_x)), xs))
+    diff_y = np.diff(ys[0:npad])
+    ys_m = np.concatenate((np.flipud(ys[1] - np.cumsum(diff_y)), ys))
+
+    # Mirror the end of the line
+    diff_x = np.diff(xs[-npad:][::-1])
+    xs_m = np.concatenate((xs_m, xs_m[-1] - np.cumsum(diff_x)))
+    diff_y = np.diff(ys[-npad:][::-1])
+    ys_m = np.concatenate((ys_m, ys_m[-1] - np.cumsum(diff_y)))
+
+    return xs_m, ys_m
+
+
 def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param=1):
     """
     Generate a centerline mesh.
@@ -361,17 +385,25 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
         2xN list, tuple, np.array (xs, ys) of coordinates defining centerline
     width_chan :
         width of the river in same units of coords
-    mesh_dist :
+    meshwidth :
         how wide should the mesh be, in same units of coords
     grid_spacing :
         how far apart should mesh cells be, in same units of coords
-
+        
+    Returns
+    -------
+    transects : list of shapely.LineStrings
+        the "perpendiculars" to the centerline used to generate the mesh
+    polys : list of shapely.Polygons
+        coordinates of the polygons representing the grid cells of the mesh
+    cl_smooth : shapely.LineString
+        the smoothed centerline used to compute transects
     """
-#    coords = ken.centerline
-#    width_chan = ken.width_chans
-#    meshwidth = ken.max_valley_width_pixels * ken.pixlen * 1.1
-#    grid_spacing = meshwidth/10
-#    smoothing_param = 1
+    # coords = alaska.centerline
+    # width_chan = alaska.avg_chan_width
+    # meshwidth = alaska.max_valley_width_pixels * alaska.pixlen * 1.1
+    # grid_spacing = meshwidth/2
+    # smoothing_param = 1
 
     if np.shape(coords)[0] == 2 and np.size(coords) != 4:
         coords = np.transpose(coords)
@@ -388,6 +420,7 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
     window_len = int(width_chan / np.mean(ds) * smoothing_param)
     if window_len % 2 == 0:  # Window must be odd
         window_len = window_len + 1
+    window_len = max(window_len, 5)
 
     # Smooth
     xs_sm = signal.savgol_filter(xs_m, window_length=window_len, polyorder=3,
@@ -467,39 +500,15 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
     # Build the polygon mesh
     polys = []
     for i in range(start_idx, end_idx+1):
-        polys.append([perp_aligned[i][0], perp_aligned[i][1],
+        polys.append(Polygon([perp_aligned[i][0], perp_aligned[i][1],
                       perp_aligned[i+1][1], perp_aligned[i+1][0],
-                      perp_aligned[i][0]])
+                      perp_aligned[i][0]]))
 
-    perps_out = perp_aligned[start_idx:end_idx+1]
-    cl_resampled = np.r_['1,2,0', xs_rs, ys_rs]
-    s_out = s[start_idx:end_idx+1] - s[start_idx]
+    # Convert the transects and smooth centerline
+    transects = [LineString(p) for p in perp_aligned[start_idx:end_idx+1]]
+    cl_smooth = LineString(zip(xs_sm, ys_sm))
 
-    return perps_out, polys, cl_resampled, s_out
-
-
-def mirror_line_ends(xs, ys, npad):
-    """
-    Reflect both ends of a line.
-
-    Reflects both ends of a line defined by x and y coordinates. The mirrored
-    distance is set by npad, which refers to the number of vertices along the
-    line to mirror.
-
-    """
-    # Mirror the beginning of the line
-    diff_x = np.diff(xs[0:npad])
-    xs_m = np.concatenate((np.flipud(xs[1] - np.cumsum(diff_x)), xs))
-    diff_y = np.diff(ys[0:npad])
-    ys_m = np.concatenate((np.flipud(ys[1] - np.cumsum(diff_y)), ys))
-
-    # Mirror the end of the line
-    diff_x = np.diff(xs[-npad:][::-1])
-    xs_m = np.concatenate((xs_m, xs_m[-1] - np.cumsum(diff_x)))
-    diff_y = np.diff(ys[-npad:][::-1])
-    ys_m = np.concatenate((ys_m, ys_m[-1] - np.cumsum(diff_y)))
-
-    return xs_m, ys_m
+    return transects, polys, cl_smooth
 
 
 def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
@@ -508,7 +517,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
     Generate a mesh over an input river centerline.
 
     This function generates a mesh over an input river centerline. The mesh
-    is generated across the valley, not just the channel width, in order to
+    is generated across the valley, not just the channel extents, in order to
     perform larger-scale spatial analyses. With the correct parameter
     combinations, it can also be used to generate a mesh for smaller-scale
     analysis, but it is optimized for larger and strange behavior may occur.
@@ -535,11 +544,12 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
 
     Returns
     -------
-    lines :
+    transects : list of shapely.LineStrings
         the "perpendiculars" to the centerline used to generate the mesh
-    polys :
+    polys : list of shapely.Polygons
         coordinates of the polygons representing the grid cells of the mesh
-
+    cl_smooth : shapely.LineString
+        the smoothed centerline used to compute transects
     """
 
     def find_cl_intersection_pts_and_distance(endpts, cl):
@@ -589,11 +599,9 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
 
 
     def iterative_cl_pt_mapping(cl, bufdists, side):
-
+        
         mapper = []
         lines = []
-        plt.close()
-
         old = cl
         for i, bd in enumerate(bufdists):
 
@@ -612,7 +620,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
             lines.append(new)
 
             old = new
-
+            
         return lines, mapper
 
 
@@ -641,7 +649,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
             pts[i] = idxlist
 
         return pts
-    
+
 
     def get_transect_endpoints_xy(lpts, rpts):
         """
@@ -717,7 +725,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
         return(xs_o2, ys_o2)
 
     """ Main function code begins here """
-    # obj = ind
+    # obj = alaska
     # coords = obj.centerline
     # avg_chan_width = obj.avg_chan_width
     # buf_halfwidth = obj.max_valley_width_pixels * obj.pixlen * 1.1
@@ -737,6 +745,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
     window_len = int(min(len(xs_o)/5, window_len))  # Smoothing window cannot be longer than 1/5 the centerline
     if window_len % 2 == 0:  # Window must be odd
         window_len = window_len + 1
+    window_len = max(5, window_len) # must be at least 5 else savgol_filter will fail
 
     # Extend the centerline ends to avoid boundary effects; we'll clip them later
     xs_o2, ys_o2 = mirror_lines(xs_o, ys_o, window_len)
@@ -746,6 +755,11 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
                                  mode='interp')
     ys_sm = signal.savgol_filter(ys_o2, window_length=window_len, polyorder=3,
                                  mode='interp')
+
+    # plt.close('all')
+    # plt.plot(xs_o, ys_o)
+    # plt.plot(xs_sm, ys_sm)
+    # plt.axis('equal')
 
     # Create shapely LineString centerline
     cl = LineString([(x, y) for x, y in zip(xs_sm, ys_sm)])
@@ -806,8 +820,8 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
     # clip the transects to only those that are needed
     cl_orig = LineString(zip(xs_o, ys_o))
     intersects_cl = [LineString(t).intersects(cl_orig) for t in transects]
-    first_idx = np.argmax(intersects_cl) - 1
-    last_idx = len(intersects_cl) - np.argmax(intersects_cl[::-1]) - 1 + 1  # -1/+1 for explicitness
+    first_idx = max(0,np.argmax(intersects_cl) - 1)
+    last_idx = min(len(intersects_cl) - np.argmax(intersects_cl[::-1]) - 1 + 1, len(transects)-1)  # -1/+1 for explicitness
     transects = [transects[i] for i in range(first_idx, last_idx + 1)]
 
     # Create mesh polygons
