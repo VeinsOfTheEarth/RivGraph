@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>rivers &mdash; RivGraph 0.5.0 documentation</title>
@@ -15,10 +15,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,15 +30,19 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
                 0.5.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -99,7 +101,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">API Reference</a></li>
       <li class="breadcrumb-item active">rivers</li>
       <li class="wy-breadcrumbs-aside">
@@ -129,7 +131,7 @@ transects (meshlines) that the link crosses. The second is the local angle
 of the centerline compared to the link’s angle. These metrics are appended
 to the links dictionary as links[‘cldist’] and links[‘clangs’].</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
@@ -140,11 +142,11 @@ to the links dictionary as links[‘cldist’] and links[‘clangs’].</p>
 <li><p><strong>pixlen</strong> (<em>float</em>) – Length resolution of each pixel.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>links</strong> – Network links and associated properties with ‘cldists’ and ‘clangs’
 attributes appended.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
@@ -160,14 +162,14 @@ of guessed upstream to guessed downstream node widths is appended to links.
 If the width at a link’s endpoint is 0, the percent is set to 1000. This
 ratio is appended to the links dictionary as links[‘wid_pctdiff’].</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>links</strong> – Network links and associated properties with ‘wid_pctdiff’ property
 appended.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
@@ -180,7 +182,7 @@ appended.</p>
 <p>Computes all the information required for link directions to be set for
 a river channel network.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
@@ -194,7 +196,7 @@ downsteram sides of the image that the network intersects (e.g. ‘SW’).</p></
 <li><p><strong>Idt</strong> (<em>np.array</em><em>(</em><em>)</em>) – Distance transform of Imask.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties including directional info.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties including directional info.</p></li>
@@ -215,7 +217,7 @@ recipe is implemented to re-set these algorithms. This was developed
 according to the most commonly-encountered cases for real braided rivers,
 but could certainly be improved.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
@@ -224,7 +226,7 @@ but could certainly be improved.</p>
 <li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of binary mask as (nrows, ncols).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with the cycle fixed if
 possible.</p></li>
@@ -246,14 +248,14 @@ is essentially a wrapper for <a class="reference internal" href="#rivgraph.river
 heavy lifting is actually done. This function finds cycles, calls
 <a class="reference internal" href="#rivgraph.rivers.river_directionality.fix_river_cycle" title="rivgraph.rivers.river_directionality.fix_river_cycle"><code class="xref py py-func docutils literal notranslate"><span class="pre">fix_river_cycle()</span></code></a> on each one, then aggregates the results.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
 <li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of binary mask as (nrows, ncols).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with all possible cycles fixed.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with all possible cycles fixed.</p></li>
@@ -274,14 +276,14 @@ unresolvable cycles.</p></li>
 <p>Resets the link directions for a braided river channel network. This
 function is called to reset directions of links that belong to a cycle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
 <li><p><strong>imshape</strong> (<em>tuple</em>) – Shape of binary mask as (nrows, ncols).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with the directions re-set.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with the directions re-set.</p></li>
@@ -303,7 +305,7 @@ paper: <a class="reference external" href="https://esurf.copernicus.org/articles
 recomputed. This includes checking for manually set links via the provided
 csv.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties.</p></li>
@@ -319,7 +321,7 @@ downsteram sides of the image that the network intersects (e.g. ‘SW’).</p></
 is None.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>links</strong> (<em>dict</em>) – Network links and associated properties with all directions set.</p></li>
 <li><p><strong>nodes</strong> (<em>dict</em>) – Network nodes and associated properties with all directions set.</p></li>
@@ -350,7 +352,7 @@ it draws perpendiculars rather than offsetting the valley line to compute
 mesh polygons. This method is more effective for narrower channels that
 don’t require an exceptionally wide mesh (i.e. not much change).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coords</strong> – 2xN list, tuple, np.array (xs, ys) of coordinates defining centerline</p></li>
 <li><p><strong>width_chan</strong> – width of the river in same units of coords</p></li>
@@ -358,7 +360,7 @@ don’t require an exceptionally wide mesh (i.e. not much change).</p>
 <li><p><strong>grid_spacing</strong> – how far apart should mesh cells be, in same units of coords</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>transects</strong> (<em>list of shapely.LineStrings</em>) – the “perpendiculars” to the centerline used to generate the mesh</p></li>
 <li><p><strong>polys</strong> (<em>list of shapely.Polygons</em>) – coordinates of the polygons representing the grid cells of the mesh</p></li>
@@ -400,7 +402,7 @@ one channel. This avoids ambiguity in identifying inlet/outlet links</p></li>
 </ol>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>Imask</strong> (<em>ndarray</em>) – the mask image (numpy array)</p></li>
 <li><p><strong>es</strong> (<em>str</em>) – two-character string comprinsed of “n”, “e”, “s”, or “w”. Exit sides
@@ -408,7 +410,7 @@ correspond to the sides of the image that the river intersects.
 Upstream should be first, followed by downstream.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>dt.tif</strong> (<em>geotiff</em>) – geotiff of the distance transform of the binary mask</p></li>
 <li><p><strong>skel.tif</strong> (<em>geotiff</em>) – geotiff of the skeletonized binary mask</p></li>
@@ -427,14 +429,14 @@ Upstream should be first, followed by downstream.</p></li>
 largest blob in the mask, fills its holes, then uses the distance transform
 to find the largest width.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>Imask</strong> (<em>np.array</em>) – Binary mask from which the centerline was computed.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>max_valley_width</strong> – Maximum width of the channel belt, useful for computing a mesh. Units
 are pixels, so be careful to re-convert.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -467,7 +469,7 @@ analysis, but it is optimized for larger and strange behavior may occur.</p>
 <p>Many plotting commands are commented out throughout this script as it’s
 still somewhat in beta mode.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coords</strong> – Nx2 list, tuple, or np.array of x,y coordinates. Coordinates MUST be
 in projected CRS for viable results.</p></li>
@@ -480,7 +482,7 @@ to create the valley centerline  (between 0 and 1)</p></li>
 <li><p><strong>smoothing</strong> – fraction of centerline length to use for smoothing window</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>transects</strong> (<em>list of shapely.LineStrings</em>) – the “perpendiculars” to the centerline used to generate the mesh</p></li>
 <li><p><strong>polys</strong> (<em>list of shapely.Polygons</em>) – coordinates of the polygons representing the grid cells of the mesh</p></li>

@@ -17,12 +17,12 @@ Some selected publications that have used RivGraph to answer some cool science q
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://pubs.geoscienceworld.org/gsa/geology/article/doi/10.1130/G49935.1/61...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication used RivGraph to find channel centerlines, widths, and number of channels en r...">
 
 .. only:: html
 
   .. image:: /gallery/images/thumb/sphx_glr_dong2022_thumb.png
-    :alt: Quantitative relationships between river and channel-belt planform patterns
+    :alt:
 
   :ref:`sphx_glr_gallery_dong2022.py`
 
@@ -34,12 +34,12 @@ Some selected publications that have used RivGraph to answer some cool science q
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2022GL099681&gt;`_ used...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication used RivGraph to extract channel counts and widths in order to present and tes...">
 
 .. only:: html
 
   .. image:: /gallery/images/thumb/sphx_glr_tejedor2022_thumb.png
-    :alt: The Entropic Braiding Index (eBI): a robust metric to account for the diversity of channel scales in multi-thread rivers
+    :alt:
 
   :ref:`sphx_glr_gallery_tejedor2022.py`
 
@@ -51,12 +51,12 @@ Some selected publications that have used RivGraph to answer some cool science q
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2022GL097897&gt;`_ use...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication used RivGraph to test optimal discharge partitioning schemes at channel bifurc...">
 
 .. only:: html
 
   .. image:: /gallery/images/thumb/sphx_glr_hariharan2022_thumb.png
-    :alt: Width-Based Discharge Partitioning in Distributary Networks: How Right We Are
+    :alt:
 
   :ref:`sphx_glr_gallery_hariharan2022.py`
 
@@ -68,12 +68,12 @@ Some selected publications that have used RivGraph to answer some cool science q
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2022GL098284&gt;`_ used...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication used RivGraph to determine the &quot;loopiness&quot; of 21 natural delta channel network...">
 
 .. only:: html
 
   .. image:: /gallery/images/thumb/sphx_glr_konkol2022_thumb.png
-    :alt: Interplay of river and tidal forcings promotes loops in coastal channel networks
+    :alt:
 
   :ref:`sphx_glr_gallery_konkol2022.py`
 
@@ -85,12 +85,12 @@ Some selected publications that have used RivGraph to answer some cool science q
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019WR026867&gt;`_ made...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication made use of RivGraph&#x27;s flux modeling to estimate nitrate uptake rates in chann...">
 
 .. only:: html
 
   .. image:: /gallery/images/thumb/sphx_glr_knights2020_thumb.png
-    :alt: Nitrate Removal Across Ecogeomorphic Zones in Wax Lake Delta, Louisiana (USA)
+    :alt:
 
   :ref:`sphx_glr_gallery_knights2020.py`
 
