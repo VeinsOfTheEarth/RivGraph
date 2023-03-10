@@ -882,7 +882,7 @@ class river(rivnetwork):
         channel network.
 
         """
-        if 'inlets' not in self.nodes.keys():
+        if hasattr(self, 'nodes') is False or 'inlets' not in self.nodes.keys():
             raise AttributeError('Cannot assign flow directions until prune_network() has been run.')
 
         if hasattr(self, 'centerline') is False:
