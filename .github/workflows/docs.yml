@@ -4,7 +4,11 @@ name: docs
 
 on: 
   push:
+    paths:
+      - "docs/**"
   pull_request:
+  schedule:
+    - cron: '0 0 1 * *'  # run workflow at 12AM on first day of every month
 
 jobs:
   docs:
