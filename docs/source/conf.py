@@ -169,4 +169,5 @@ linkcheck_ignore = [r'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2
 		    r'https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2022GL099681',
 		    r'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2022GL097897',
 		    r'https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2022GL098284',
+            r'https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2022GL102201'
 		    ]

@@ -42,18 +42,23 @@ used RivGraph to determine the "loopiness" of 21 natural delta channel networks.
 
 .. _sphx_glr_download_gallery_konkol2022.py:
 
-.. only:: html
 
-  .. container:: sphx-glr-footer sphx-glr-footer-example
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
 
 
-    .. container:: sphx-glr-download sphx-glr-download-python
 
-      :download:`Download Python source code: konkol2022.py <konkol2022.py>`
+  .. container:: sphx-glr-download sphx-glr-download-python
 
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
+     :download:`Download Python source code: konkol2022.py <konkol2022.py>`
 
-      :download:`Download Jupyter notebook: konkol2022.ipynb <konkol2022.ipynb>`
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: konkol2022.ipynb <konkol2022.ipynb>`
 
 
 .. only:: html
