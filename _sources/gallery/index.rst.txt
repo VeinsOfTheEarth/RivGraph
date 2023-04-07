@@ -102,6 +102,23 @@ Some selected publications that have used RivGraph to answer some cool science q
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication made use of RivGraph&#x27;s flux modeling to estimate nitrate retention in Arctic r...">
+
+.. only:: html
+
+  .. image:: /gallery/images/thumb/sphx_glr_knights2023_thumb.jpg
+    :alt:
+
+  :ref:`sphx_glr_gallery_knights2023.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Seasonal and Morphological Controls on Nitrate Retention in Arctic Deltas</div>
+    </div>
+
+
+.. raw:: html
+
     </div>
 
 
@@ -113,6 +130,7 @@ Some selected publications that have used RivGraph to answer some cool science q
    /gallery/hariharan2022
    /gallery/konkol2022
    /gallery/knights2020
+   /gallery/knights2023
 
 
 
