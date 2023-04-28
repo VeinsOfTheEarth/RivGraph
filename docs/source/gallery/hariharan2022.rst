@@ -42,18 +42,23 @@ used RivGraph to test optimal discharge partitioning schemes at channel bifurcat
 
 .. _sphx_glr_download_gallery_hariharan2022.py:
 
-.. only:: html
 
-  .. container:: sphx-glr-footer sphx-glr-footer-example
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
 
 
-    .. container:: sphx-glr-download sphx-glr-download-python
 
-      :download:`Download Python source code: hariharan2022.py <hariharan2022.py>`
+  .. container:: sphx-glr-download sphx-glr-download-python
 
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
+     :download:`Download Python source code: hariharan2022.py <hariharan2022.py>`
 
-      :download:`Download Jupyter notebook: hariharan2022.ipynb <hariharan2022.ipynb>`
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: hariharan2022.ipynb <hariharan2022.ipynb>`
 
 
 .. only:: html

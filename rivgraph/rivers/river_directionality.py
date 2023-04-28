@@ -541,6 +541,7 @@ def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
 
     """
     # alg = 20
+    
     alg = dy.algmap('cl_dist_guess')
 
     # Create geodataframes for intersecting meshpolys with nodes

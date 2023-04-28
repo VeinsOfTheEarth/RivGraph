@@ -43,18 +43,23 @@ a new index of river multithreadedness
 
 .. _sphx_glr_download_gallery_tejedor2022.py:
 
-.. only:: html
 
-  .. container:: sphx-glr-footer sphx-glr-footer-example
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
 
 
-    .. container:: sphx-glr-download sphx-glr-download-python
 
-      :download:`Download Python source code: tejedor2022.py <tejedor2022.py>`
+  .. container:: sphx-glr-download sphx-glr-download-python
 
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
+     :download:`Download Python source code: tejedor2022.py <tejedor2022.py>`
 
-      :download:`Download Jupyter notebook: tejedor2022.ipynb <tejedor2022.ipynb>`
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: tejedor2022.ipynb <tejedor2022.ipynb>`
 
 
 .. only:: html

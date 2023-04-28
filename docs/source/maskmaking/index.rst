@@ -49,7 +49,7 @@ The mask is the cornerstone for using *RivGraph*. You should always ensure that 
 -----------------------------------------------
 What does RivGraph expect my mask to look like?
 -----------------------------------------------
-*RivGraph* can handle two types of masks: deltas and braided (or single-threaded) rivers. 
+*RivGraph* can handle two types of masks: deltas and braided (or single-threaded) rivers.
 
 **All masks should contain a single connected component** (or blob). Before doing your analysis, use the :obj:`rivgraph.im_utils.largest_blobs()` to ensure you have only one connected component. This will remove any isolated portions of the mask. For example,
 
@@ -58,9 +58,9 @@ What does RivGraph expect my mask to look like?
    from rivgraph import im_utils
    Mask_one_blob = im_utils.largest_blobs(Mask, nlargest=1, action='keep')
 
-This will create an image wherein only the largest connected component remains (hopefully your channel network). 
+This will create an image wherein only the largest connected component remains (hopefully your channel network).
 
-Delta masks often have a large waterbody (ocean or lake) connecting all the outlets. This is completely fine, as the waterbody will be removed in the pruning stage. 
+Delta masks often have a large waterbody (ocean or lake) connecting all the outlets. This is completely fine, as the waterbody will be removed in the pruning stage.
 
 
 .. _maskcapture:
@@ -93,7 +93,7 @@ Masks can come from a variety of sources, but in my experience there are three p
 There are *many* methods available for creating masks automatically from remotely-sensed imagery. We won't get into the details of those here, but note that machine learning has proved a very valuable tool for maskmaking. There are also simple, proven techniques available as well. The Brahmaputra masks above were created by thresholding the Landsat-derived NDVI (`Normalized Difference Vegetation Index <https://www.usgs.gov/core-science-systems/nli/landsat/landsat-normalized-difference-vegetation-index>`_
 ), which is a simple ratio of band values. 
 
-Drawing a mask by hand is often not an ideal choice, but might be the most efficient way to move forward. In these cases, I would typically use QGIS to draw polygons that cover the channel network, then use the `Rasterize  <https://docs.qgis.org/2.8/en/docs/user_manual/processing_algs/gdalogr/gdal_conversion/rasterize.html>`_
+Drawing a mask by hand is often not an ideal choice, but might be the most efficient way to move forward. In these cases, I would typically use QGIS to draw polygons that cover the channel network, then use the `Rasterize  <https://docs.qgis.org/3.28/en/docs/user_manual/processing_algs/gdal/vectorconversion.html>`_
 tool to convert the polygons to a binary raster (image). If you go this route, be sure to specify an appropriate coordinate reference system for your polygons in order to preserve the georeferencing information (don't use EPSG:4326). You will also need to specify a pixel resolution for your mask upon conversion.
 
 If you're analyzing the output of a simulation, it is unlikely that the simulation will provide binary channel masks as an output. In these cases, you will need to develop a way to identify the channel network from the available simulation results. For example, while developing the entropic Braided Index (`eBI <https://ui.adsabs.harvard.edu/abs/2019AGUFMEP51E2163T/abstract>`_
