@@ -121,7 +121,7 @@ Here are some resources that either provide masks or tools for you to make your 
 
 - `DeepWaterMap  <https://github.com/isikdogan/deepwatermap>`_ is a trained deep convolutional neural network that you can apply to Landsat/Sentinel multispectral imagery to create your own masks. You can also improve DeepWaterMap's base model by adding more training data. Requires some knowledge of Tensorflow.
 
-- A recent development as of April 2023 is the release of the *Segment Anything Model* `(SAM) <https://segment-anything.com/>`_ from Meta Research which allows rapid segmentation of any image, including satellite imagery. The SAM model has an API in Python via `segment-geospatial <https://github.com/opengeos/segment-geospatial>`_. *segment-geospatial* and could be used for rapid identification of water from various sensors.
+- A recent development as of April 2023 is the release of the *Segment Anything Model* `(SAM) <https://segment-anything.com/>`_ from Meta Research which allows rapid segmentation of any image, including satellite imagery. The SAM model has an API in Python via `segment-geospatial <https://github.com/opengeos/segment-geospatial>`_. *segment-geospatial* and could be used for rapid identification of water from various satellite imagery sources, e.g. Planet or Landsat.
 
 
 
