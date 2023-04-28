@@ -106,7 +106,7 @@ Here are some resources that either provide masks or tools for you to make your 
   - `Arctic deltas <https://data.ess-dive.lbl.gov/view/doi:10.15485/1505624>`_, made with eCognition and Landsat imagery.
   - `Indus and Brahmaputra Rivers <https://esurf.copernicus.org/articles/8/87/2020/#section6>`_, clipped from GRWL dataset.
   - `Global mask <https://zenodo.org/record/1297434>`_ of Landsat-derived rivers at "mean annual discharge." Has some issues at tile boundaries, and can be "feathery" along braided rivers, but not a bad global mask.
-  - `Global Surface Water Dataset <https://global-surface-water.appspot.com/>`_ - provides all water pixels in the Landsat archive as monthly global images and as integrated-through-time images. For example, can threshold on the "Occurrence" product to make a mask. Use `Google Earth Engine <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater>`_ to access and create your masks. You can also access individual monthly water masks `here <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_MonthlyHistory>`.
+  - `Global Surface Water Dataset <https://global-surface-water.appspot.com/>`_ - provides all water pixels in the Landsat archive as monthly global images and as integrated-through-time images. For example, you can threshold on the "Occurrence" product to make a mask. Use `Google Earth Engine <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater>`_ to access and create your masks. You can also access individual monthly water masks `here <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_MonthlyHistory>`.
   - If you know of more, please mention them in the `Issue Tracker <https://github.com/VeinsOfTheEarth/RivGraph/issues>`_!
 
 .. image:: ../../images/jrc_mackenzie.PNG
@@ -120,7 +120,7 @@ Here are some resources that either provide masks or tools for you to make your 
 
 - `DeepWaterMap  <https://github.com/isikdogan/deepwatermap>`_ is a trained deep convolutional neural network that you can apply to Landsat/Sentinel multispectral imagery to create your own masks. You can also improve DeepWaterMap's base model by adding more training data. Requires some knowledge of Tensorflow.
 
-- A recent development as of April 2023 is the release of the *Segment Anything Model* `(SAM) <https://segment-anything.com/>`_ from Meta Research which allows rapid segmentation of any image, including satellite imagery. The SAM model has an API in Python via `segment-geospatial <https://github.com/opengeos/segment-geospatial>`_. *segment-geospatial* and could be used for rapid identification of water from various satellite imagery sources, e.g. Planet or Landsat.
+- A recent development as of April 2023 is the release of the *Segment Anything Model* `(SAM) <https://segment-anything.com/>`_ from Meta Research which allows rapid segmentation of any image, including satellite imagery. The SAM model has an API in Python via `segment-geospatial <https://github.com/opengeos/segment-geospatial>`_ that could be used for rapid identification of water from various satellite imagery sources, e.g. Planet or Landsat.
 
 
 
