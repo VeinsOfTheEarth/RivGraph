@@ -149,18 +149,17 @@ def test_centerline_mesh(test_river):
     avg_chan_width = np.sum(test_river.Imask) * test_river.pixarea / np.sum(test_river.links['len_adj'])
     mvw = ru.max_valley_width(test_river.Imask)
 
-    perps_out, polys, cl_resampled, s_out = ru.centerline_mesh(test_river.centerline,
+    perps_out, polys, cl_smoothed = ru.centerline_mesh(test_river.centerline,
                                             avg_chan_width,
                                             mvw*test_river.pixlen*1.1,
                                             mvw*test_river.pixlen*1.1/10,
                                             1)
 
     # make assertions
-    assert np.shape(perps_out) == (86, 2, 2)
-    assert np.shape(polys) == (86, 5, 2)
-    assert np.shape(cl_resampled) == (95, 2)
-    assert np.shape(s_out) == (86,)
-    assert s_out[-1] == pytest.approx(134836.27933429673)
+    assert np.shape(perps_out) == (86,)
+    assert np.shape(polys) == (86,)
+    assert len(cl_smoothed.xy[0]) == 4721
+    assert cl_smoothed.length == pytest.approx(151134.13414783287)
 
 
 def test_river_dirs(tmp_path):

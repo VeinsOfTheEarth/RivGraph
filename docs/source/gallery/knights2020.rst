@@ -45,18 +45,23 @@ in channels on the Wax Lake Delta.
 
 .. _sphx_glr_download_gallery_knights2020.py:
 
-.. only:: html
 
-  .. container:: sphx-glr-footer sphx-glr-footer-example
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
 
 
-    .. container:: sphx-glr-download sphx-glr-download-python
 
-      :download:`Download Python source code: knights2020.py <knights2020.py>`
+  .. container:: sphx-glr-download sphx-glr-download-python
 
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
+     :download:`Download Python source code: knights2020.py <knights2020.py>`
 
-      :download:`Download Jupyter notebook: knights2020.ipynb <knights2020.ipynb>`
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: knights2020.ipynb <knights2020.ipynb>`
 
 
 .. only:: html

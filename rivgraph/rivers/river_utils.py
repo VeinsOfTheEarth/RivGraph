@@ -579,7 +579,11 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
 
             # Project the intersection point to the centerline and return
             # the along-centerline distance of this point
-            dist_to_int.append(float(cl.project(int_pt)))
+            projpt = float(cl.project(int_pt))
+            if projpt == -1: # This catches GEOS Runtime errors (return -1s)
+                dist_to_int.append(None)
+            else:
+                dist_to_int.append(float(cl.project(int_pt)))
 
             # int_pts.append(int_pt)
 
@@ -725,7 +729,7 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
         return(xs_o2, ys_o2)
 
     """ Main function code begins here """
-    # obj = alaska
+    # obj = test_river
     # coords = obj.centerline
     # avg_chan_width = obj.avg_chan_width
     # buf_halfwidth = obj.max_valley_width_pixels * obj.pixlen * 1.1
