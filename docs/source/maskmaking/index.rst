@@ -99,7 +99,6 @@ tool to convert the polygons to a binary raster (image). If you go this route, b
 If you're analyzing the output of a simulation, it is unlikely that the simulation will provide binary channel masks as an output. In these cases, you will need to develop a way to identify the channel network from the available simulation results. For example, while developing the entropic Braided Index (`eBI <https://ui.adsabs.harvard.edu/abs/2019AGUFMEP51E2163T/abstract>`_
 ), we used Delft3D simulations to test hypotheses about how the eBI changes under various sedimentation schemes. To make masks, we developed a combined depth + discharge threshold to identify which pixels were part of the "active river channel."
 
-
 Here are some resources that either provide masks or tools for you to make your own.
 
 - Published masks:
