@@ -92,6 +92,9 @@ class RiverNetwork(RGRiver):
         dat.pop("cycles", [])
         for ic, cyc in enumerate(self.links["cycles"]):
             dat['cycle'][cyc] = ic + 1
+        # cycle = -1 for ignored cycle links 
+        if "cycles_ignore_links" in dat:
+            dat["cycle"][dat.pop("cycles_ignore_links")] = -1
         link_dir_info = pd.DataFrame(dat).set_index("id")
         return link_dir_info
 

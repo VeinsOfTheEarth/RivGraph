@@ -403,7 +403,7 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
         reset = 1
 
     # See if the fix resolved the cycle - if not, reset to original
-    cyc_n, cyc_l = dy.get_cycles(links, nodes, checknode=cyclenodes[0])
+    cyc_n, cyc_l = dy.get_cycles(links, nodes, checknode=cyclenodes)
     if cyc_n is not None and cyclenodes[0] in cyc_n[0]:
         reset = 1
 
@@ -437,7 +437,7 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
             reset = 1
 
         # See if the fix resolved the cycle - if not, reset to original
-        cyc_n, cyc_l = dy.get_cycles(links, nodes, checknode=cyclenodes[0])
+        cyc_n, cyc_l = dy.get_cycles(links, nodes, checknode=cyclenodes)
         if cyc_n is not None and cyclenodes[0] in cyc_n[0]:
             reset = 1
 

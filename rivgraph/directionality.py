@@ -1034,40 +1034,36 @@ def get_cycles(links, nodes, checknode='all'):
         returned in cyclic order and in terms of link ids.
 
     """
-    G = nx.DiGraph()
+    G = nx.MultiDiGraph()
     G.add_nodes_from(nodes['id'])
-    for lc in links['conn']:
-        G.add_edge(lc[0], lc[1])
+    edges = zip(links["id"], links["conn"])
+    if "cycles_ignore_links" in links:
+        edges = [(i, lc) for i, lc in edges
+                 if i not in links["cycles_ignore_links"]]
+    for id, lc in edges:
+        G.add_edge(lc[0], lc[1], id=id)
 
-    if checknode == 'all':
-        cycle_nodes = nx.simple_cycles(G)
-        # Unpack the iterator
-        cycle_nodes = list(cycle_nodes)
-    else:
-        try:
-            single_cycle = nx.find_cycle(G, source=checknode)
-            single_cycle = list(single_cycle)
-            cycle_nodes = []
-            for cn in single_cycle:
-                cycle_nodes.append(cn[0])
-            cycle_nodes = [cycle_nodes]
-        except Exception:
-            cycle_nodes = None
+    # get cycles and cycle clusters/adjacent cycles
+    cycles_simple = nx.simple_cycles(G)
+    Gcy = G.subgraph(set([n for c in cycles_simple for n in c]))
+    cycle_nodes = nx.connected_components(Gcy.to_undirected())
+    # Unpack the iterator
+    cycle_nodes = [list(c) for c in cycle_nodes]
+
+    if checknode != 'all':
+        cycle_nodes = [n for n in cycle_nodes if set(n) & set(checknode)]
+        # keep original None output if no cycles with checknodes found
+        cycle_nodes = cycle_nodes if len(cycle_nodes) else None
 
     # Get links of cycles
-    cycles_links = []
-    if cycle_nodes is not None:
-        for c in cycle_nodes:
-            pathlinks = []
-            for us, vs in zip(c, c[1:] + [c[0]]):
-                ulinks = nodes['conn'][nodes['id'].index(us)]
-                vlinks = nodes['conn'][nodes['id'].index(vs)]
-                pathlinks.append([ul for ul in ulinks if ul in vlinks][0])
-            cycles_links.append(pathlinks)
+    cycle_links = []
+    if cycle_nodes:
+        for cn in cycle_nodes:
+            sg = G.subgraph(cn)
+            cycle_links.append([attr["id"] for _, _, attr in sg.edges(data=True)])
     else:
-        cycles_links = cycle_nodes
-
-    return cycle_nodes, cycles_links
+        cycle_links = cycle_nodes
+    return cycle_nodes, cycle_links
 
 
 def flip_links_in_G(G, links2flip):
