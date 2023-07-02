@@ -257,24 +257,297 @@ def fix_river_cycles(links, nodes, imshape, skip_threshold=200):
         cfix_nodes, cfix_links = [l[:min(skip_threshold, len(l))] for l in (cfn_all, cfl_all)]
 
         print('Attempting to fix {} cycles.'.format(len(cfix_nodes)))
+        reset_functions = [
+            re_set_linkdirs_flow_direction,
+            re_set_linkdirs_darea_gradient,
+            re_set_linkdirs_best_guess,
+            re_set_linkdirs_main_channel_darea_grad,
+            re_set_linkdirs_dir_shortest_paths,
+        ]
         # Try to fix all the cycles
         for cnodes, clinks in tqdm(zip(cfix_nodes, cfix_links),
                                 "Fixing cycles", total=len(cfix_nodes)):
-            links, nodes, fixed = fix_river_cycle(links, nodes, clinks,
-                                                cnodes, imshape)
+            for func in reset_functions:
+                links, nodes, fixed = fix_river_cycle(
+                    links, nodes, clinks, cnodes, imshape, reset_function=func)
+                if fixed != 0:
+                    print(f"Fixed {clinks} with {func}")
+                    break
             if fixed == 0:
+                # try inlet outlet fix
+                links, nodes, fixed, reason = fix_cycle_inlet_outlet(links, nodes, clinks, cnodes)
+            if fixed == 0:
+                print(f"Cant fix cycle {clinks}, reason: {reason}")
                 cantfix_nodes.append(cnodes)
                 cantfix_links.append(clinks)
+            # continues cycle checking in case any new ones appear
+            ctfn, ctfl = dy.get_cycles(links, nodes)
+            ctfl = [l for c in ctfl for l in c]
+            print(f"Cycle (link) count: {len(ctfn)} {len(ctfl)}")
         # ignored cycles are not fixed
         cantfix_nodes.extend(cfn_all[min(skip_threshold, len(cfn_all)):])
         cantfix_links.extend(cfl_all[min(skip_threshold, len(cfl_all)):])
-        if len(cantfix_links) > 0:
+        # check cycles again as new ones might have been created
+        cantfix_nodes, cantfix_links = dy.get_cycles(links, nodes)
+        if cantfix_links:
             print(f"Failed to fix {len(cantfix_links)} cycles.")
 
     return links, nodes, cantfix_links, cantfix_nodes
 
 
-def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
+def re_set_linkdirs_flow_direction(links, nodes, imshape):
+    """
+    Reset link directions.
+
+    Resets the link directions for a braided river channel network. This
+    function is called to reset directions of links that belong to a cycle.
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with the directions re-set.
+    nodes : dict
+        Network nodes and associated properties with the directions re-set.
+
+    """
+    links, nodes = dy.set_continuity(links, nodes)
+
+    # Set the directions of the links that are more certain via centerline angle method
+    # alg = 23.1
+    # alg = dy.algmap('cl_ang_rs')
+    # cl_angthresh = np.percentile(links['clangs'][np.isnan(links['clangs']) == 0], 40)
+    # for lid, cla, lg, lga, cert in zip(links['id'],  links['clangs'],
+    #                                    links['guess'], links['guess_alg'],
+    #                                    links['certain']):
+    #     if cert == 1:
+    #         continue
+    #     if np.isnan(cla) == True:
+    #         continue
+    #     if cla <= cl_angthresh:
+    #         linkidx = links['id'].index(lid)
+    #         if dy.algmap('cl_ang_guess') in lga:
+    #             usnode = lg[lga.index(dy.algmap('cl_ang_guess'))]
+    #             links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
+
+    angthreshs = np.linspace(0, 1.3, 20)
+    for a in angthreshs:
+        links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,
+                                                       angthresh=a,
+                                                       lenthresh=0,
+                                                       alg=dy.algmap('known_fdr_rs'))
+    if np.sum(links['certain']) != len(links['id']):
+        links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
+        print('Links {} were not set by re_set_linkdirs_flow_direction.'.format(links_notset))
+
+    return links, nodes
+
+
+def re_set_linkdirs_darea_gradient(links, nodes, imshape=None):
+    """
+    Reset link directions.
+
+    Resets the link directions for a braided river channel network. This
+    function is called to reset directions of links that belong to a cycle.
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with the directions re-set.
+    nodes : dict
+        Network nodes and associated properties with the directions re-set.
+
+    """
+    links, nodes = dy.set_continuity(links, nodes)
+
+    links, nodes = drainage_area_gradient(links, nodes)
+
+    if np.sum(links['certain']) != len(links['id']):
+        links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
+        print('Links {} were not set by re_set_linkdirs_darea_gradient.'.format(links_notset))
+
+    return links, nodes
+
+
+def re_set_linkdirs_best_guess(links, nodes, imshape=None):
+    """
+    Reset link directions.
+
+    Resets the link directions for a braided river channel network. This
+    function is called to reset directions of links that belong to a cycle.
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with the directions re-set.
+    nodes : dict
+        Network nodes and associated properties with the directions re-set.
+
+    """
+    links, nodes = dy.set_continuity(links, nodes)
+
+    links, nodes = set_by_guess_agreement(links, nodes)
+
+    if np.sum(links['certain']) != len(links['id']):
+        links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
+        print('Links {} were not set by re_set_linkdirs_best_guess.'.format(links_notset))
+
+    return links, nodes
+
+
+def re_set_linkdirs_main_channel_darea_grad(links, nodes, imshape=None):
+    """
+    Reset link directions.
+
+    Resets the link directions for a braided river channel network. This
+    function is called to reset directions of links that belong to a cycle.
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with the directions re-set.
+    nodes : dict
+        Network nodes and associated properties with the directions re-set.
+
+    """
+    links, nodes = dy.set_continuity(links, nodes)
+
+    # recalculate main channel gradient
+    alg = dy.algmap('main_channel_darea_grad')
+    links, nodes = guess_synthetic_slope(
+            links, nodes, alg=alg,
+            node_column="mainchannel_darea", ascending=True,
+        )
+    links, nodes = set_by_guess_agreement(links, nodes, guess_algs=[alg])
+
+    if np.sum(links['certain']) != len(links['id']):
+        links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
+        print('Links {} were not set by re_set_linkdirs_main_channel_darea_grad.'.format(links_notset))
+
+    return links, nodes
+
+
+def re_set_linkdirs_dir_shortest_paths(links, nodes, imshape=None):
+    """
+    Reset link directions.
+
+    Resets the link directions for a braided river channel network. This
+    function is called to reset directions of links that belong to a cycle.
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    imshape : tuple
+        Shape of binary mask as (nrows, ncols).
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties with the directions re-set.
+    nodes : dict
+        Network nodes and associated properties with the directions re-set.
+
+    """
+    links, nodes = dy.set_continuity(links, nodes)
+
+    # recalculate main channel gradient
+    alg_nodes = dy.algmap('sp_nodes')
+    alg_links = dy.algmap('sp_links')
+
+    links, nodes = dy.dir_shortest_paths_links(links, nodes)
+
+    links, nodes = set_by_guess_agreement(links, nodes, min_guesses=1,
+                           min_agree=1, alg=alg_links,
+                           guess_algs=[alg_links])
+
+    if np.sum(links['certain']) != len(links['id']):
+        links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
+        print('Links {} were not set by re_set_linkdirs_dir_shortest_paths.'.format(links_notset))
+
+    return links, nodes
+
+
+def fix_cycle_inlet_outlet(links, nodes, cycle_links, cycle_nodes):
+    """Set directions of cycle by identifying the inlets and outlets of the
+    cycle and if both exist connect each inlet node to its nearest outlet node.
+
+    """
+    fixed = 0
+    G = nx.MultiDiGraph()
+    allcon = set([l for n in cycle_nodes for l in nodes["conn"][nodes["id"].index(n)]])
+    G.add_edges_from([tuple(links["conn"][links["id"].index(l)]) + ({"id": l},)
+                      for l in allcon])
+    # cycle nodes where outflows are connected
+    outflows = [list(G.in_edges(n))[0][0] for n in G
+                if len(G.out_edges(n)) == 0 and len(G.in_edges(n)) == 1]
+    # cycle nodes where inflows are connected
+    inflows = [list(G.out_edges(n))[0][1] for n in G
+               if len(G.out_edges(n)) == 1 and len(G.in_edges(n)) == 0]
+    # unsuccessful if either not found
+    if not (outflows and inflows):
+        reason = "no inflows" if outflows else "no outflows"
+        return links, nodes, fixed, reason
+    # find shortest paths between inflows and outflows and set lines accordingly
+    Gund = G.to_undirected()
+    for inf in inflows:
+        paths = nx.shortest_path(Gund, inf)
+        # nodes along shortest path to closest outlet
+        shortest = sorted([paths[i] for i in outflows], key=len)[0]
+        # set directions
+        for s, e in zip(shortest[:-1], shortest[1:]):
+            lid = links["id"].index(Gund.edges[s, e, 0]['id'])  # ignores possible parallel edges
+            links, nodes = dy.set_link(links, nodes, lid, s)
+    # check again
+    cn, cl = dy.get_cycles(links, nodes, checknode=cycle_nodes)
+    if cn:
+        print(f"Tried to resolve cycle {cycle_links} with nearest inlet-outlet, but failed.")
+        reason = "in/outflows but failed"
+    else:
+        fixed = 1
+        reason = "fixed"
+    return links, nodes, fixed, reason
+
+
+def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape,
+                    reset_function=re_set_linkdirs_flow_direction):
     """
     Attempt to fix a single cycle.
 
@@ -358,7 +631,7 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
                 links['certain'][lidx] = 0
 
     # Resolve the unknown cycle links
-    links, nodes = re_set_linkdirs(links, nodes, imshape)
+    links, nodes = reset_function(links, nodes, imshape)
 
     # See if the fix violated continuity - if not, reset to original
     post_sourcesink = dy.check_continuity(links, nodes)
@@ -392,7 +665,7 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
             if links['certain_alg'][lidx] not in dont_reset_algs:
                 links['certain'][lidx] = 0
 
-        links, nodes = re_set_linkdirs(links, nodes, imshape)
+        links, nodes = reset_function(links, nodes, imshape)
 
         # See if the fix violated continuity - if not, reset to original
         post_sourcesink = dy.check_continuity(links, nodes)
@@ -409,63 +682,6 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
             fixed = 0
 
     return links, nodes, fixed
-
-
-def re_set_linkdirs(links, nodes, imshape):
-    """
-    Reset link directions.
-
-    Resets the link directions for a braided river channel network. This
-    function is called to reset directions of links that belong to a cycle.
-
-    Parameters
-    ----------
-    links : dict
-        Network links and associated properties.
-    nodes : dict
-        Network nodes and associated properties.
-    imshape : tuple
-        Shape of binary mask as (nrows, ncols).
-
-    Returns
-    -------
-    links : dict
-        Network links and associated properties with the directions re-set.
-    nodes : dict
-        Network nodes and associated properties with the directions re-set.
-
-    """
-    links, nodes = dy.set_continuity(links, nodes)
-
-    # Set the directions of the links that are more certain via centerline angle method
-    # alg = 23.1
-    # alg = dy.algmap('cl_ang_rs')
-    # cl_angthresh = np.percentile(links['clangs'][np.isnan(links['clangs']) == 0], 40)
-    # for lid, cla, lg, lga, cert in zip(links['id'],  links['clangs'],
-    #                                    links['guess'], links['guess_alg'],
-    #                                    links['certain']):
-    #     if cert == 1:
-    #         continue
-    #     if np.isnan(cla) == True:
-    #         continue
-    #     if cla <= cl_angthresh:
-    #         linkidx = links['id'].index(lid)
-    #         if dy.algmap('cl_ang_guess') in lga:
-    #             usnode = lg[lga.index(dy.algmap('cl_ang_guess'))]
-    #             links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
-
-    angthreshs = np.linspace(0, 1.3, 20)
-    for a in angthreshs:
-        links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,
-                                                       angthresh=a,
-                                                       lenthresh=0,
-                                                       alg=dy.algmap('known_fdr_rs'))
-
-    if np.sum(links['certain']) != len(links['id']):
-        links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
-        print('Links {} were not set by re_set_linkdirs.'.format(links_notset))
-
-    return links, nodes
 
 
 def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
@@ -756,7 +972,8 @@ def set_inexact(links, nodes, imshape):
             #links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, angthresh=0.4)
             links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, guess=True)
 
-
+    # set the rest by any remaining guess
+    links, nodes = set_by_guess_agreement(links, nodes)
     # # Set using direction of nearest main channel
     # print("Set directions by nearest main channel...")
     # links, nodes = dy.set_by_nearest_main_channel(links, nodes, imshape,
@@ -771,10 +988,11 @@ def set_inexact(links, nodes, imshape):
 
 
 def set_by_guess_agreement(links, nodes, idx=None, min_guesses=None,
-                           min_agree=None, must_agree=None, alg=None):
+                           min_agree=None, must_agree=None, alg=None,
+                           guess_algs=None):
     """Set links by guesses with various methods."""
     nguess = np.array([len(g) for g in links["guess"]])
-    nmin = min_guesses or np.max(nguess)
+    nmin = min_guesses or (len(guess_algs) if guess_algs else np.min(nguess))
     alg = alg or dy.algmap("n_agree") + nmin / 10
     con = (nguess >= nmin) & (links["certain"] == 0)
     # all must agree if no level of agreement is given
@@ -798,11 +1016,17 @@ def set_by_guess_agreement(links, nodes, idx=None, min_guesses=None,
         if links["certain"][lix] == 1:
             continue
         # get best agreement
-        usns, counts = np.unique(links["guess"][lix], return_counts=True)
+        gualgs, guesses = links["guess_alg"][lix], links["guess"][lix]
+        if guess_algs is not None:
+            guesses = [g for a, g in zip(links["guess_alg"][lix], links["guess"][lix]) if a in guess_algs]
+            gualgs = [a for a in links["guess_alg"][lix] if a in guess_algs]
+        if len(guesses) == 0:
+            continue
+        usns, counts = np.unique(guesses, return_counts=True)
         bestix = np.argmax(counts)
         usnode = usns[bestix]
         # check if min_agree and must_agree fulfilled
-        als = [a for a, n in zip(links["guess_alg"][lix], links["guess"][lix]) if n == usnode]
+        als = [a for a, n in zip(gualgs, guesses) if n == usnode]
         if (min_agree and counts[bestix] < min_agree) or (must_agree and must_agree not in als):
             continue
         links, nodes = dy.set_link(
