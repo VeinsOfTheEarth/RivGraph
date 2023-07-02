@@ -183,7 +183,7 @@ class rivnetwork:
                 ],
                 activation=[("", True)],
             )
-        logger.info("-"*10 + " New Run " + "-"*10)
+        logger.info("-"*10 + f" New Run: {self.name}" + "-"*10)
 
 
     def compute_network(self):

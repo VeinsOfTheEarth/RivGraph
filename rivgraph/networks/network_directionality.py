@@ -96,6 +96,8 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
         print('{} links were randomly set.'.format(len(links['id']) -
                                                    np.sum(links['certain'])))
         links["certain_alg"][links['certain'] == 0] = dy.algmap("random")
+        # random ones need to be set to certain for cycle resetting to work
+        links['certain'][:] = 1
 
     # Check for and try to fix cycles in the graph
     links, nodes, cantfix_cyclelinks, cantfix_cyclenodes = fix_river_cycles(
@@ -233,7 +235,6 @@ def fix_river_cycles(links, nodes, imshape, skip_threshold=200):
 
         # Get list of cycles to fix
         c_nodes, c_links = dy.get_cycles(links, nodes)
-
         # Remove any cycles that are subsets of larger cycles
         isin = np.empty((len(c_links), 1))
         isin[:] = np.nan
