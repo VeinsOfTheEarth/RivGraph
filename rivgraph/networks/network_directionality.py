@@ -274,8 +274,9 @@ def fix_river_cycles(links, nodes, imshape, skip_threshold=200):
                     print(f"Fixed {clinks} with {func}")
                     break
             if fixed == 0:
-                # try inlet outlet fix
-                links, nodes, fixed, reason = fix_cycle_inlet_outlet(links, nodes, clinks, cnodes)
+                # try inlet outlet fix, update cycle in case the fix attempts have created adjacent cycles
+                ncnd, nclk = dy.get_cycles(links, nodes, checknode=cnodes)
+                links, nodes, fixed, reason = fix_cycle_inlet_outlet(links, nodes, nclk[0], ncnd[0])
             if fixed == 0:
                 print(f"Cant fix cycle {clinks}, reason: {reason}")
                 cantfix_nodes.append(cnodes)
@@ -527,20 +528,28 @@ def fix_cycle_inlet_outlet(links, nodes, cycle_links, cycle_nodes):
         return links, nodes, fixed, reason
     # find shortest paths between inflows and outflows and set lines accordingly
     Gund = G.to_undirected()
-    for inf in inflows:
-        paths = nx.shortest_path(Gund, inf)
+    shortest_paths = dict(nx.all_pairs_shortest_path(Gund))
+    strong_links = []
+    for inf in cycle_nodes:
         # nodes along shortest path to closest outlet
-        shortest = sorted([paths[i] for i in outflows], key=len)[0]
+        shortest = sorted([shortest_paths[inf][o] for o in outflows], key=len)[0]
         # set directions
         for s, e in zip(shortest[:-1], shortest[1:]):
             lid = links["id"].index(Gund.edges[s, e, 0]['id'])  # ignores possible parallel edges
-            links, nodes = dy.set_link(links, nodes, lid, s)
+            if not (s, e, 0) in strong_links:
+                strong_links.append((s, e, 0))
+                links, nodes = dy.set_link(links, nodes, lid, s, alg=dy.algmap("sp_links"))
+    # tag weak links of cycle
+    Gund.remove_edges_from(strong_links)
+    weak_links = set([i for _, _, i in Gund.edges(data="id")]) & set(cycle_links)
+    links["certain_alg"][[links["id"].index(l) for l in weak_links]] = 9999
     # check again
     cn, cl = dy.get_cycles(links, nodes, checknode=cycle_nodes)
     if cn:
         print(f"Tried to resolve cycle {cycle_links} with nearest inlet-outlet, but failed.")
         reason = "in/outflows but failed"
     else:
+        print(f"Fixed {cycle_links} with nearest inlet-outlet.")
         fixed = 1
         reason = "fixed"
     return links, nodes, fixed, reason
@@ -972,8 +981,9 @@ def set_inexact(links, nodes, imshape):
             #links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, angthresh=0.4)
             links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape, guess=True)
 
-    # set the rest by any remaining guess
-    links, nodes = set_by_guess_agreement(links, nodes)
+    # set the rest by shortest path to outlet
+    spalg = dy.algmap("sp_links")
+    links, nodes = set_by_guess_agreement(links, nodes, alg=spalg, guess_algs=[spalg], min_agree=1)
     # # Set using direction of nearest main channel
     # print("Set directions by nearest main channel...")
     # links, nodes = dy.set_by_nearest_main_channel(links, nodes, imshape,

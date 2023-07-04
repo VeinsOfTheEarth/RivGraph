@@ -44,17 +44,17 @@ def add_directionality_trackers(links, nodes, ntype):
     """
 
     # Add a 'certain' entry to the links dict to keep track of links whose directions have been set
-    links['certain'] = np.zeros(len(links['id']))  # tracks whether a link's directinoality is certain or not
-    links['certain_order'] = np.zeros(len(links['id']))  # tracks the order in which links certainty is set
-    links['certain_alg'] = np.zeros(len(links['id']))  # tracks the algorithm used to set certainty
+    links.setdefault('certain', np.zeros(len(links['id'])))  # tracks whether a link's directinoality is certain or not
+    links.setdefault('certain_order', np.zeros(len(links['id'])))  # tracks the order in which links certainty is set
+    links.setdefault('certain_alg', np.zeros(len(links['id'])))  # tracks the algorithm used to set certainty
 
     # Add a "guess" entry to keep track of the different algorithms' guesses for flow directionality
-    links['guess'] = [[] for a in range(len(links['id']))]  # contains guess at upstream ndoe
-    links['guess_alg'] = [[] for a in range(len(links['id']))]  # contains algorithm that made guess
+    links.setdefault('guess', [[] for a in range(len(links['id']))])  # contains guess at upstream ndoe
+    links.setdefault('guess_alg', [[] for a in range(len(links['id']))])  # contains algorithm that made guess
 
     # Add network-type-specific properties
     if ntype == 'river':
-        links['maxang'] = np.ones(len(links['id'])) * np.nan  # saves the angle used in set_by_flow_directions, diagnostic only
+        links.setdefault('maxang', np.ones(len(links['id'])) * np.nan)  # saves the angle used in set_by_flow_directions, diagnostic only
 
     return links, nodes
 
@@ -92,6 +92,7 @@ def algmap(key=None):
               'syn_dem_med' : 10.1,
               'sym_dem_leftover' : 10.2,
               'sp_links' : 11,
+              'sp_links_sink' : 11.1,
               'sp_nodes' : 12,
               'longest_steepest' : 13,
               'three_agree' : 15,
@@ -417,7 +418,7 @@ def dir_shortest_paths_nodes(links, nodes):
 
         if alg in links['guess_alg'][linkidx]:
             # If the guess agrees with previously guessed for this algorithm, move on
-            if links['guess'][linkidx][links['guess_alg'].index(alg)] == nid:
+            if links['guess'][linkidx][links['guess_alg'][linkidx].index(alg)] == nid:
                 continue
             else:
                 links['guess'][linkidx].remove(nid)

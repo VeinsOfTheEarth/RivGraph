@@ -8,11 +8,14 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from loguru import logger
+import networkx as nx
 
 from rivgraph.classes import river as RGRiver
 import rivgraph.ln_utils as rgln
 from rivgraph.ordered_set import OrderedSet
 import rivgraph.io_utils as io
+import rivgraph.directionality as dy
+
 
 from . import network_directionality as nd
 
@@ -120,6 +123,10 @@ class RiverNetwork(RGRiver):
         self.find_parallel_links()
         self.link_widths_and_lengths()
         self.assign_flow_directions()
+        self.find_sink_source_nodes()
+        if self.nodes["sinks"]:
+            self.reset_sink_flow_catchments()
+            self.assign_flow_directions()
         self.compute_junction_angles()
         self.find_mainstem()
 
@@ -145,6 +152,120 @@ class RiverNetwork(RGRiver):
             self.meshlines, self.meshpolys, self.Idist, self.pixlen, self.paths['fixlinks_csv'])
 
         logger.info('link directionality has been set.')
+        return
+
+    def find_sink_source_nodes(self):
+        """Find sink and source nodes from cycles and discontinuities.
+        """
+        assert ("cycles" in self.links and "cycles" in self.nodes), "Directions not yet set."
+
+        self.nodes["sinks"] = []
+        self.nodes["sources"] = []
+
+        # check cycles
+        for cycle_nodes in self.nodes["cycles"]:
+            G = nx.MultiDiGraph()
+            allcon = set([l for n in cycle_nodes
+                          for l in self.nodes["conn"][self.nodes["id"].index(n)]])
+            G.add_edges_from([tuple(self.links["conn"][self.links["id"].index(l)]) + ({"id": l},)
+                            for l in allcon])
+            # cycle nodes where outflows are connected
+            outflows = [list(G.in_edges(n))[0][0] for n in G
+                        if len(G.out_edges(n)) == 0 and len(G.in_edges(n)) == 1]
+            # cycle nodes where inflows are connected
+            inflows = [list(G.out_edges(n))[0][1] for n in G
+                       if len(G.out_edges(n)) == 1 and len(G.in_edges(n)) == 0]
+            # check if sink or source
+            if (not outflows) and inflows:
+                self.nodes["sinks"] += cycle_nodes
+            if (not inflows) and outflows:
+                self.nodes["sources"] += cycle_nodes
+
+        logger.info(f'Found {len(self.nodes["sinks"])} cycle sink nodes and '
+                    f'{len(self.nodes["sources"])} cycle source nodes.')
+        # check discontinuities
+        G = nx.MultiDiGraph()
+        G.add_edges_from(self.links["conn"])
+        sink_nodes = [n for n in G if len(G.out_edges(n)) == 0 and len(G.in_edges(n)) > 1]
+        self.nodes["sinks"] += sink_nodes
+        source_nodes = [n for n in G if len(G.in_edges(n)) == 0 and len(G.out_edges(n)) > 1]
+        self.nodes["sources"] += source_nodes
+        logger.info(f'Found {len(sink_nodes)} single sink nodes and '
+                    f'{len(source_nodes)} single source nodes.')
+        return
+
+    def check_width_continuity(self):
+        """
+        After all directions are assigned, calculate the ratio between total inflow and total outflow width.
+        Where this ratio is far from 1 (either very large or very small), directions are likely wrong.
+        """
+        G = self.nx_graph
+        ids = self.nodes["id"]
+        self.nodes["in_out_width_ratio"] = np.ones(len(ids)) * np.nan
+
+        for n in tqdm(G, "Checking width in/out ratios"):
+            inedg, outedg = G.in_edges(n, data=True), G.out_edges(n, data=True)
+            if not (len(inedg) and len(outedg)):
+                continue
+            inwidth = sum([d["wid_adj"] for _, _, d in inedg])
+            outwidth = sum([d["wid_adj"] for _, _, d in outedg])
+            nodes["in_out_width_ratio"][ids.index(n)] = inwidth / outwidth
+
+        return
+
+    @property
+    def nx_graph(self):
+        G = nx.MultiDiGraph()
+        ids = self.links["id"]
+        G.add_edges_from([tuple(conn) + ({k: v[i] for k, v in self.links.items() if len(v) == len(ids)},)
+                          for i, (lid, conn) in enumerate(zip(ids, self.links["conn"]))])
+        return G
+
+    def reset_sink_flow_catchments(self):
+        """Reset all links upstream of nodes, determine their closest path to an outlet,
+        set the directions of that path within their original catchment. The other reset
+        directions need to be assigned again.
+        """
+        sink_nodes = self.nodes["sinks"]
+        outlets = self.nodes["outlets"]
+
+        # directed graph with line ids
+        G = self.nx_graph
+
+        # get the upstream catchments of all sink nodes
+        catchment = G.subgraph([n for cn in sink_nodes for n in nx.bfs_tree(G, cn, reverse=True)])
+        catchment_lines_idx = np.array([self.links["id"].index(i) for _,_,i in catchment.edges(data='id')])
+
+        logger.info(f"Resetting directions in {len(catchment_lines_idx)} links upstream of sinks.")
+        self.links["certain"][catchment_lines_idx] = 0 
+        self.links["certain_alg"][catchment_lines_idx] = 0 
+        self.links["certain_order"][catchment_lines_idx] = 0 
+        self.links["guess_alg"] = [[] if i in catchment_lines_idx else g for i, g in enumerate(self.links["guess_alg"])]
+        self.links["guess"] = [[] if i in catchment_lines_idx else g for i, g in enumerate(self.links["guess"])]
+        # reset directions to original otherwise 
+        inp = self.links_input[["start_node", "end_node"]].values.tolist()
+        self.links["conn"] = [inp[i] if i in catchment_lines_idx else l for i, l in enumerate(self.links["conn"])]
+
+        # path to nearest outlet through undirected graph
+        Gund = G.to_undirected()
+        # dict of path line ids with upstream nodes
+        reset_lines = {}
+        for cn in sink_nodes:
+            # find shortest path to next outlet
+            outlpaths = [nx.shortest_path(Gund, cn, o) for o in outlets]
+            shortest = sorted(outlpaths, key=len)[0]
+            # get line ids including possible multi links
+            # line ids with upstream node and downstream within catchment
+            line_path = {lid: f for f, t in zip(shortest[:-1], shortest[1:])
+                        for _, _, lid in Gund.subgraph([f, t]).edges(data="id")
+                        if t in catchment}
+            reset_lines.update(line_path)
+
+        logger.info(f"Setting {len(reset_lines)} lines out of sinks via shortest path to outlet.")
+        alg = dy.algmap("sp_links_sink")
+        for lid, upn in reset_lines.items():
+            lidx = self.links["id"].index(lid)
+            self.links, self.nodes = dy.set_link(self.links, self.nodes, lidx, upn, alg=alg)
         return
 
     def find_mainstem(self):
