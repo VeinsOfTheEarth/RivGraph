@@ -223,6 +223,7 @@ def fix_river_cycles(links, nodes, imshape, skip_threshold=200):
 
     """
     # Create networkx graph object
+    #TODO: test with MultiDiGraph
     G = nx.DiGraph()
     G.add_nodes_from(nodes['id'])
     for lc in links['conn']:
@@ -263,31 +264,40 @@ def fix_river_cycles(links, nodes, imshape, skip_threshold=200):
             re_set_linkdirs_best_guess,
             re_set_linkdirs_main_channel_darea_grad,
             re_set_linkdirs_dir_shortest_paths,
+            fix_cycle_inlet_outlet,
         ]
         # Try to fix all the cycles
-        for cnodes, clinks in tqdm(zip(cfix_nodes, cfix_links),
-                                "Fixing cycles", total=len(cfix_nodes)):
+        ncnd, nclk = cfix_nodes, cfix_links
+        fixed_cycles = []
+        n = 0
+        nmax = len(cfix_nodes) * 2
+        # try for each initial cycle twice at most (prevents flip-flop cycles)
+        pbar = tqdm(total=nmax)
+        while len(ncnd) and n <= nmax:
             for func in reset_functions:
                 links, nodes, fixed = fix_river_cycle(
-                    links, nodes, clinks, cnodes, imshape, reset_function=func)
+                    links, nodes, nclk[0], ncnd[0], imshape, reset_function=func,
+                    n_expand=5,
+                )
                 if fixed != 0:
-                    print(f"Fixed {clinks} with {func}")
+                    print(f"Fixed {nclk[0]} with {func}")
+                    fixed_cycles.append(ncnd[0])
                     break
             if fixed == 0:
-                # try inlet outlet fix, update cycle in case the fix attempts have created adjacent cycles
-                ncnd, nclk = dy.get_cycles(links, nodes, checknode=cnodes)
-                links, nodes, fixed, reason = fix_cycle_inlet_outlet(links, nodes, nclk[0], ncnd[0])
-            if fixed == 0:
-                print(f"Cant fix cycle {clinks}, reason: {reason}")
-                cantfix_nodes.append(cnodes)
-                cantfix_links.append(clinks)
-            # continues cycle checking in case any new ones appear
-            ctfn, ctfl = dy.get_cycles(links, nodes)
-            ctfl = [l for c in ctfl for l in c]
-            print(f"Cycle (link) count: {len(ctfn)} {len(ctfl)}")
-        # ignored cycles are not fixed
-        cantfix_nodes.extend(cfn_all[min(skip_threshold, len(cfn_all)):])
-        cantfix_links.extend(cfl_all[min(skip_threshold, len(cfl_all)):])
+                print(f"Cant fix cycle {nclk[0]}.")
+                cantfix_nodes.append(ncnd[0])
+                cantfix_links.append(nclk[0])
+            # update cycle in case the fix attempts have created adjacent cycles
+            ncnd, nclk = dy.get_cycles(links, nodes)
+            cfns = set([n for c in cantfix_nodes for n in c])
+            # update cycles
+            ncnl = [[cn, cl] for cn, cl in zip(ncnd, nclk) if set(cn) - cfns]
+            ncnd, nclk = zip(*ncnl) if ncnl else ([], [])
+            ctfl = [l for c in nclk for l in c]
+            print(f"{n}: cycle (link) count: {len(nclk)} {len(ctfl)}")
+            n += 1
+            pbar.update(1)
+        pbar.close()
         # check cycles again as new ones might have been created
         cantfix_nodes, cantfix_links = dy.get_cycles(links, nodes)
         if cantfix_links:
@@ -296,7 +306,7 @@ def fix_river_cycles(links, nodes, imshape, skip_threshold=200):
     return links, nodes, cantfix_links, cantfix_nodes
 
 
-def re_set_linkdirs_flow_direction(links, nodes, imshape):
+def re_set_linkdirs_flow_direction(links, nodes, imshape, **kwargs):
     """
     Reset link directions.
 
@@ -344,15 +354,16 @@ def re_set_linkdirs_flow_direction(links, nodes, imshape):
         links, nodes = dy.set_by_known_flow_directions(links, nodes, imshape,
                                                        angthresh=a,
                                                        lenthresh=0,
-                                                       alg=dy.algmap('known_fdr_rs'))
+                                                       alg=dy.algmap('known_fdr')*-1)
     if np.sum(links['certain']) != len(links['id']):
         links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
         print('Links {} were not set by re_set_linkdirs_flow_direction.'.format(links_notset))
-
+        # resetting means all need to be set at the end, otherwise the discontinuity check wont work
+        links["certain"][:] = 1
     return links, nodes
 
 
-def re_set_linkdirs_darea_gradient(links, nodes, imshape=None):
+def re_set_linkdirs_darea_gradient(links, nodes, imshape=None, **kwargs):
     """
     Reset link directions.
 
@@ -378,16 +389,22 @@ def re_set_linkdirs_darea_gradient(links, nodes, imshape=None):
     """
     links, nodes = dy.set_continuity(links, nodes)
 
-    links, nodes = drainage_area_gradient(links, nodes)
+    # set using the previous guess as the drainage_area_gradient function relies on
+    # original orientations of links
+    #links, nodes = drainage_area_gradient(links, nodes)
+    spalg = dy.algmap("darea_grad")
+    links, nodes = set_by_guess_agreement(links, nodes, alg=spalg*-1,
+                                          guess_algs=[spalg], min_agree=1)
 
     if np.sum(links['certain']) != len(links['id']):
         links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
         print('Links {} were not set by re_set_linkdirs_darea_gradient.'.format(links_notset))
-
+        # resetting means all need to be set at the end, otherwise the discontinuity check wont work
+        links["certain"][:] = 1
     return links, nodes
 
 
-def re_set_linkdirs_best_guess(links, nodes, imshape=None):
+def re_set_linkdirs_best_guess(links, nodes, imshape=None, **kwargs):
     """
     Reset link directions.
 
@@ -413,16 +430,18 @@ def re_set_linkdirs_best_guess(links, nodes, imshape=None):
     """
     links, nodes = dy.set_continuity(links, nodes)
 
-    links, nodes = set_by_guess_agreement(links, nodes)
+    alg = dy.algmap("n_agree")
+    links, nodes = set_by_guess_agreement(links, nodes, alg=alg*-1, min_agree=2)
 
     if np.sum(links['certain']) != len(links['id']):
         links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
         print('Links {} were not set by re_set_linkdirs_best_guess.'.format(links_notset))
-
+        # resetting means all need to be set at the end, otherwise the discontinuity check wont work
+        links["certain"][:] = 1
     return links, nodes
 
 
-def re_set_linkdirs_main_channel_darea_grad(links, nodes, imshape=None):
+def re_set_linkdirs_main_channel_darea_grad(links, nodes, imshape=None, **kwargs):
     """
     Reset link directions.
 
@@ -454,16 +473,17 @@ def re_set_linkdirs_main_channel_darea_grad(links, nodes, imshape=None):
             links, nodes, alg=alg,
             node_column="mainchannel_darea", ascending=True,
         )
-    links, nodes = set_by_guess_agreement(links, nodes, guess_algs=[alg])
+    links, nodes = set_by_guess_agreement(links, nodes, guess_algs=[alg], alg=alg*-1)
 
     if np.sum(links['certain']) != len(links['id']):
         links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
         print('Links {} were not set by re_set_linkdirs_main_channel_darea_grad.'.format(links_notset))
-
+        # resetting means all need to be set at the end, otherwise the discontinuity check wont work
+        links["certain"][:] = 1
     return links, nodes
 
 
-def re_set_linkdirs_dir_shortest_paths(links, nodes, imshape=None):
+def re_set_linkdirs_dir_shortest_paths(links, nodes, imshape=None, **kwargs):
     """
     Reset link directions.
 
@@ -489,29 +509,25 @@ def re_set_linkdirs_dir_shortest_paths(links, nodes, imshape=None):
     """
     links, nodes = dy.set_continuity(links, nodes)
 
-    # recalculate main channel gradient
-    alg_nodes = dy.algmap('sp_nodes')
     alg_links = dy.algmap('sp_links')
 
-    links, nodes = dy.dir_shortest_paths_links(links, nodes)
-
     links, nodes = set_by_guess_agreement(links, nodes, min_guesses=1,
-                           min_agree=1, alg=alg_links,
+                           min_agree=1, alg=alg_links*-1,
                            guess_algs=[alg_links])
 
     if np.sum(links['certain']) != len(links['id']):
         links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
         print('Links {} were not set by re_set_linkdirs_dir_shortest_paths.'.format(links_notset))
-
+        # resetting means all need to be set at the end, otherwise the discontinuity check wont work
+        links["certain"][:] = 1
     return links, nodes
 
 
-def fix_cycle_inlet_outlet(links, nodes, cycle_links, cycle_nodes):
+def fix_cycle_inlet_outlet(links, nodes, cycle_links, cycle_nodes, **kwargs):
     """Set directions of cycle by identifying the inlets and outlets of the
     cycle and if both exist connect each inlet node to its nearest outlet node.
 
     """
-    fixed = 0
     G = nx.MultiDiGraph()
     allcon = set([l for n in cycle_nodes for l in nodes["conn"][nodes["id"].index(n)]])
     G.add_edges_from([tuple(links["conn"][links["id"].index(l)]) + ({"id": l},)
@@ -524,8 +540,9 @@ def fix_cycle_inlet_outlet(links, nodes, cycle_links, cycle_nodes):
                if len(G.out_edges(n)) == 1 and len(G.in_edges(n)) == 0]
     # unsuccessful if either not found
     if not (outflows and inflows):
-        reason = "no inflows" if outflows else "no outflows"
-        return links, nodes, fixed, reason
+        print("Found no inlet/outlet.")
+        return links, nodes
+    print(f"Found {len(inflows)} inlets and {len(outflows)} outlets.")
     # find shortest paths between inflows and outflows and set lines accordingly
     Gund = G.to_undirected()
     shortest_paths = dict(nx.all_pairs_shortest_path(Gund))
@@ -538,25 +555,17 @@ def fix_cycle_inlet_outlet(links, nodes, cycle_links, cycle_nodes):
             lid = links["id"].index(Gund.edges[s, e, 0]['id'])  # ignores possible parallel edges
             if not (s, e, 0) in strong_links:
                 strong_links.append((s, e, 0))
-                links, nodes = dy.set_link(links, nodes, lid, s, alg=dy.algmap("sp_links"))
+                links, nodes = dy.set_link(links, nodes, lid, s, alg=dy.algmap("sp_links")*-1)
     # tag weak links of cycle
-    Gund.remove_edges_from(strong_links)
-    weak_links = set([i for _, _, i in Gund.edges(data="id")]) & set(cycle_links)
-    links["certain_alg"][[links["id"].index(l) for l in weak_links]] = 9999
-    # check again
-    cn, cl = dy.get_cycles(links, nodes, checknode=cycle_nodes)
-    if cn:
-        print(f"Tried to resolve cycle {cycle_links} with nearest inlet-outlet, but failed.")
-        reason = "in/outflows but failed"
-    else:
-        print(f"Fixed {cycle_links} with nearest inlet-outlet.")
-        fixed = 1
-        reason = "fixed"
-    return links, nodes, fixed, reason
+    #Gund.remove_edges_from(strong_links)
+    #weak_links = set([i for _, _, i in Gund.edges(data="id")]) & set(cycle_links)
+    #links["certain_alg"][[links["id"].index(l) for l in weak_links]] = 9999
+
+    return links, nodes
 
 
 def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape,
-                    reset_function=re_set_linkdirs_flow_direction):
+                    reset_function=re_set_linkdirs_flow_direction, n_expand=1):
     """
     Attempt to fix a single cycle.
 
@@ -578,6 +587,8 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape,
         List of link ids that comprise a cycle.
     cyclenodes : list
         List of node ids taht comprise a cycle.
+    n_expand : int
+        Iterations to expand search around cycle.
     imshape : tuple
         Shape of binary mask as (nrows, ncols).
 
@@ -640,13 +651,14 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape,
                 links['certain'][lidx] = 0
 
     # Resolve the unknown cycle links
-    links, nodes = reset_function(links, nodes, imshape)
+    rfkwargs = dict(links=links, nodes=nodes, imshape=imshape, cycle_links=cyclelinks,
+                    cycle_nodes=cyclenodes)
+    links, nodes = reset_function(**rfkwargs)
 
-    # See if the fix violated continuity - if not, reset to original
+    # See if the fix violated continuity - if so, reset to original
     post_sourcesink = dy.check_continuity(links, nodes)
-    if len(set(post_sourcesink) - set(pre_sourcesink)) > 0:
+    if len(set(post_sourcesink) - set(pre_sourcesink)) > 0 or len(set(post_sourcesink) & set(cyclenodes)):
         reset = 1
-
     # See if the fix resolved the cycle - if not, reset to original
     cyc_n, cyc_l = dy.get_cycles(links, nodes, checknode=cyclenodes)
     if cyc_n is not None and cyclenodes[0] in cyc_n[0]:
@@ -657,38 +669,46 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape,
     if reset == 1:
 
         links = dy.cycle_return_to_original_orientation(links, orig_links)
+        # nodes to expand
+        focus_nodes = cyclenodes
 
-        # Try a second method to fix the cycle: unset all the links of the
-        # cycle AND the links connected to those links
-        set_to_zero = set()
-        for cn in cyclenodes:
-            conn = nodes['conn'][nodes['id'].index(cn)]
-            set_to_zero.update(conn)
-        set_to_zero = list(set_to_zero)
+        for _ in range(n_expand):
+            # Try a second method to fix the cycle: unset all the links of the
+            # cycle AND the links connected to those links
+            set_to_zero = set()
+            for cn in focus_nodes:
+                conn = nodes['conn'][nodes['id'].index(cn)]
+                set_to_zero.update(conn)
+            set_to_zero = list(set_to_zero)
 
-        # Save original orientation in case cycle cannot be fixed
-        orig_links = dy.cycle_get_original_orientation(links, set_to_zero)
+            # Save original orientation in case cycle cannot be fixed
+            orig_links = dy.cycle_get_original_orientation(links, set_to_zero)
 
-        for s in set_to_zero:
-            lidx = links['id'].index(s)
-            if links['certain_alg'][lidx] not in dont_reset_algs:
-                links['certain'][lidx] = 0
+            for s in set_to_zero:
+                lidx = links['id'].index(s)
+                if links['certain_alg'][lidx] not in dont_reset_algs:
+                    links['certain'][lidx] = 0
 
-        links, nodes = reset_function(links, nodes, imshape)
+            links, nodes = reset_function(**rfkwargs)
 
-        # See if the fix violated continuity - if not, reset to original
-        post_sourcesink = dy.check_continuity(links, nodes)
-        if len(set(post_sourcesink) - set(pre_sourcesink)) > 0:
-            reset = 1
+            # See if the fix violated continuity - if not, reset to original
+            post_sourcesink = dy.check_continuity(links, nodes)
+            if len(set(post_sourcesink) - set(pre_sourcesink)) > 0:
+                reset = 1
 
-        # See if the fix resolved the cycle - if not, reset to original
-        cyc_n, cyc_l = dy.get_cycles(links, nodes, checknode=cyclenodes)
-        if cyc_n is not None and cyclenodes[0] in cyc_n[0]:
-            reset = 1
+            # See if the fix resolved the cycle - if not, reset to original
+            cyc_n, cyc_l = dy.get_cycles(links, nodes, checknode=cyclenodes)
+            if cyc_n is not None and cyclenodes[0] in cyc_n[0]:
+                reset = 1
 
-        if reset == 1:
-            links = dy.cycle_return_to_original_orientation(links, orig_links)
-            fixed = 0
+            if reset == 1:
+                links = dy.cycle_return_to_original_orientation(links, orig_links)
+                fixed = 0
+                # get expanded nodes
+                focus_nodes = set([n for l in set_to_zero for n in links["conn"][links['id'].index(s)]])
+            else:
+                fixed = 1
+                break
 
     return links, nodes, fixed
 

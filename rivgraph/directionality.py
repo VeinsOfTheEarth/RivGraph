@@ -92,7 +92,7 @@ def algmap(key=None):
               'syn_dem_med' : 10.1,
               'sym_dem_leftover' : 10.2,
               'sp_links' : 11,
-              'sp_links_sink' : 11.1,
+              'sp_links_sink' : -11.1,
               'sp_nodes' : 12,
               'longest_steepest' : 13,
               'three_agree' : 15,
@@ -794,7 +794,7 @@ def merge_list_of_lists(inlist):
     return merged
 
 
-def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True):
+def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True, check_width_continuity=True):
     """
     Sets a link directionality. Option to check for continuity (including
     parallel links) after setting.
@@ -844,6 +844,10 @@ def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True):
         # of a parallel set, set the others in the set
         links, nodes = set_parallel_links(links, nodes, knownlink=links['id'][linkidx])
 
+        if check_width_continuity:
+            # check width continuity
+            links, nodes = set_width_continuity(links, nodes, checknodes=links['conn'][linkidx][:],
+                                                recursive=True)
     return links, nodes
 
 
@@ -1387,10 +1391,10 @@ def set_inletoutlet(links, nodes):
 
         for c in conn:
             linkidx = links['id'].index(c)
-
-            # Set link directionality
-            links, nodes = set_link(links, nodes, linkidx, i, alg=alg,
-                                    checkcontinuity=True)
+            if links["certain"][linkidx] == 0:
+                # Set link directionality
+                links, nodes = set_link(links, nodes, linkidx, i, alg=alg,
+                                        checkcontinuity=False, check_width_continuity=False)
 
     # Set directionality of outlet links
     for o in tqdm(nodes['outlets'], 'Outlet links'):
@@ -1400,13 +1404,15 @@ def set_inletoutlet(links, nodes):
 
         for c in conn:
             linkidx = links['id'].index(c)
+            if links["certain"][linkidx] == 0:
+                # Set link directionality
+                usnode = links['conn'][linkidx][:]
+                usnode.remove(o)
+                links, nodes = set_link(links, nodes, linkidx, usnode[0], alg=alg,
+                                        checkcontinuity=False, check_width_continuity=False)
 
-            # Set link directionality
-            usnode = links['conn'][linkidx][:]
-            usnode.remove(o)
-            links, nodes = set_link(links, nodes, linkidx, usnode[0], alg=alg,
-                                    checkcontinuity=True)
-
+    # rather than checking for continuity after every set_link, do it now when all in/out links are set
+    links, nodes = set_continuity(links, nodes)
     return links, nodes
 
 
@@ -1607,10 +1613,14 @@ def set_width_continuity(links, nodes, factor=5, len_wid_factor=3, checknodes='a
             if in_factor_range(bif, factor) and isconf.sum() == 1:
                 cert_link = [links['id'].index(unklid[isconf][0])]
                 al = alg
-            # width continuity is violated, junction type is certain
-            elif not in_factor_range(bif, factor) and isconf.sum() == 0:
-                cert_link = [links['id'].index(i) for i in unklid]
-                al = algvio
+            # width continuity is violated, junction type is still uncertain
+            # although we could guess but this is problematic at river-lake interfaces
+            #elif not in_factor_range(bif, factor) and isconf.sum() == 0:
+            #    cert_link = [links['id'].index(i) for i in unklid]
+            #    al = algvio
+            # treatment of more likely scenario here is missing
+            # <-.-> or <-.<- or ->.-> or ->.<- (known link in the middle)
+
             # set link(s)
             for cl in cert_link:
                 if knldir == 1:  # The unknown link must be out of the node

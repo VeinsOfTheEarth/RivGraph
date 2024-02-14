@@ -103,7 +103,8 @@ class RiverNetwork(RGRiver):
 
     @property
     def nodes_direction_info(self):
-        df = pd.DataFrame({c: self.nodes[c] for c in ["int_ang", "jtype", "width_ratio", "id"]}).set_index("id")
+        columns = ["int_ang", "jtype", "width_ratio", "id", "in_out_width_ratio"]
+        df = pd.DataFrame({c: self.nodes[c] for c in columns if c in self.nodes}).set_index("id")
         # add cycles
         df["cycle"] = 0
         for ic, cyc in enumerate(self.nodes["cycles"]):
@@ -124,10 +125,12 @@ class RiverNetwork(RGRiver):
         self.link_widths_and_lengths()
         self.assign_flow_directions()
         self.find_sink_source_nodes()
-        if self.nodes["sinks"]:
+        if len(self.nodes["sinks"]):
             self.reset_sink_flow_catchments()
             self.assign_flow_directions()
         self.compute_junction_angles()
+        self.check_width_continuity()
+        self.bifurcation_shares()
         self.find_mainstem()
 
         # write output
@@ -209,7 +212,7 @@ class RiverNetwork(RGRiver):
                 continue
             inwidth = sum([d["wid_adj"] for _, _, d in inedg])
             outwidth = sum([d["wid_adj"] for _, _, d in outedg])
-            nodes["in_out_width_ratio"][ids.index(n)] = inwidth / outwidth
+            self.nodes["in_out_width_ratio"][ids.index(n)] = inwidth / outwidth
 
         return
 
@@ -217,6 +220,7 @@ class RiverNetwork(RGRiver):
     def nx_graph(self):
         G = nx.MultiDiGraph()
         ids = self.links["id"]
+        # add edges with all links attributes that have the same length as ids
         G.add_edges_from([tuple(conn) + ({k: v[i] for k, v in self.links.items() if len(v) == len(ids)},)
                           for i, (lid, conn) in enumerate(zip(ids, self.links["conn"]))])
         return G
@@ -233,18 +237,23 @@ class RiverNetwork(RGRiver):
         G = self.nx_graph
 
         # get the upstream catchments of all sink nodes
-        catchment = G.subgraph([n for cn in sink_nodes for n in nx.bfs_tree(G, cn, reverse=True)])
-        catchment_lines_idx = np.array([self.links["id"].index(i) for _,_,i in catchment.edges(data='id')])
+        catchment = G.subgraph([n for cn in sink_nodes
+                                for n in nx.bfs_tree(G, cn, reverse=True)])
+        catchment_lines_idx = np.array([self.links["id"].index(i)
+                                for _,_,i in catchment.edges(data='id')])
 
         logger.info(f"Resetting directions in {len(catchment_lines_idx)} links upstream of sinks.")
         self.links["certain"][catchment_lines_idx] = 0 
-        self.links["certain_alg"][catchment_lines_idx] = 0 
+        self.links["certain_alg"][catchment_lines_idx] = 0
         self.links["certain_order"][catchment_lines_idx] = 0 
-        self.links["guess_alg"] = [[] if i in catchment_lines_idx else g for i, g in enumerate(self.links["guess_alg"])]
-        self.links["guess"] = [[] if i in catchment_lines_idx else g for i, g in enumerate(self.links["guess"])]
+        self.links["guess_alg"] = [[] if i in catchment_lines_idx else g
+                                for i, g in enumerate(self.links["guess_alg"])]
+        self.links["guess"] = [[] if i in catchment_lines_idx else g
+                                for i, g in enumerate(self.links["guess"])]
         # reset directions to original otherwise 
         inp = self.links_input[["start_node", "end_node"]].values.tolist()
-        self.links["conn"] = [inp[i] if i in catchment_lines_idx else l for i, l in enumerate(self.links["conn"])]
+        self.links["conn"] = [inp[i] if i in catchment_lines_idx else l
+                                for i, l in enumerate(self.links["conn"])]
 
         # path to nearest outlet through undirected graph
         Gund = G.to_undirected()
@@ -265,15 +274,85 @@ class RiverNetwork(RGRiver):
         alg = dy.algmap("sp_links_sink")
         for lid, upn in reset_lines.items():
             lidx = self.links["id"].index(lid)
-            self.links, self.nodes = dy.set_link(self.links, self.nodes, lidx, upn, alg=alg)
+            # only way out, no continuity checks as exact links have also been reset
+            self.links, self.nodes = dy.set_link(self.links, self.nodes, lidx, upn, alg=alg, checkcontinuity=False)
         return
 
-    def find_mainstem(self):
+    def bifurcation_shares(self):
+        """Add bifurcation_share attribute. Links ds of bifurcations get shares weighted by sensible width, all others 1."""
+
+        length_attr = "len_adj"
+        width_attr = "wid_adj"
+        max_inflow_share = 0.2
+
+        share = np.ones(len(self.links["id"]), dtype=float)
+        meandswidth = np.zeros(len(self.links["id"]), dtype=float)
+        G = self.nx_graph
+
+        def next_link_width(links, **kw):
+            """Generator that recursively follows the widest link and yields link info until
+            max_inflow_share is exceeded."""
+            if len(links) == 1:
+                s, e, k, d = links[0]
+                out = dict(width=d[width_attr], length=d[length_attr])
+                bifshare = 0
+            else:
+                wid = np.array([d[width_attr] for s, e, k, d in links])
+                # combine width of all downstream and continue down widest link
+                s, e, k, d = links[np.argmax(wid)]
+                totalw = wid.sum()
+                out = dict(width=totalw, length=d[length_attr])
+                ### TODO: dont continue if minor link out of bifurcation exceeds max_inflow_share
+                bifshare = (totalw - d[width_attr]) / totalw
+            # return len/wid/id
+            out["id"] = d["id"]
+            out.update(kw)
+            yield out
+            # check inflow of ds node
+            dsin = list(G.in_edges(e, keys=True, data=True))
+            dsin.remove((s, e, k, d))
+            if len(dsin):
+                widin = sum([d[width_attr] for _, _, _, d in dsin])
+                # dont continue if inflow width exceeds threshold
+                if widin / d[width_attr] > max_inflow_share:
+                    return
+            else:
+                widin = 0
+            nxt = G.out_edges(e, keys=True, data=True)
+            if len(nxt) and bifshare < max_inflow_share:
+                yield from next_link_width(list(nxt), ds_inflow=widin)
+
+        # loop over all nodes and calculate share for segments downstream of bifurcations
+        for n in tqdm(G, total=G.size()):
+            oe = G.out_edges(n, keys=True, data=True)
+            if len(oe) < 2:  # confluence
+                continue
+            # bifurcation, check all downstream links until next large inflow
+            width = [pd.DataFrame(list(next_link_width([l], ds_inflow=0))) for l in oe]
+            idx = [self.links["id"].index(d["id"]) for _, _, _, d in oe]
+            for i, w in enumerate(width):
+                # 1) make sure none of the considered segments overlap
+                other_ids = list(set().union(*[set(ww.id) for ii, ww in enumerate(width) if ii != i]))
+                # 2) ..and make sure not more than max_inflow_share of mean has been accumulated
+                valid_w = w[(~w.id.isin(other_ids)) & (w.ds_inflow.cumsum() < w.width.median() * max_inflow_share)].copy()
+                # 3) use distance from furthest noden and length to weight width mean
+                valid_w["distance_to_end"] = valid_w.length[::-1].cumsum()[::-1]
+                valid_w["mean_weight"] =  valid_w.distance_to_end * valid_w.length
+                # take weighted mean
+                meandswidth[idx[i]] = (valid_w.mean_weight / valid_w.mean_weight.sum() * valid_w.width).sum()
+            share[idx] = meandswidth[idx] / meandswidth[idx].sum()
+
+        self.links["bifurcation_share"] = share
+        self.links["bifurcation_share_width"] = share
+        return
+
+    def find_mainstem(self, attr="wid_adj"):
         """Find network mainstem by following the widest downstream link.
         """
         ms = np.zeros(len(self.links["id"]), dtype=int)
 
         for inode in tqdm(self.nodes["inlets"], "Finding mainstems"):
+            # go downstream until outlet reached
             while inode not in self.nodes["outlets"]:
                 ils = [self.links["id"].index(i) for i in
                        self.nodes["conn"][self.nodes["id"].index(inode)]]
@@ -282,7 +361,7 @@ class RiverNetwork(RGRiver):
                 if not len(ilds):
                     warnings.warn(f"No ds lines, discontinuity? At node {inode}")
                     break
-                ilw = [self.links["wid_adj"][i] for i in ilds]
+                ilw = [self.links[attr][i] for i in ilds]
                 il = ilds[np.argmax(ilw)]
                 if ms[il] > 0:
                     # already found mainstems here
