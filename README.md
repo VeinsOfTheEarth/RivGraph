@@ -29,16 +29,17 @@ You can see some description of RivGraph's functionality via this [AGU poster](h
 
 Installing
 -----
-RivGraph v0.4 is hosted on the anaconda channel [jschwenk](https://anaconda.org/jschwenk/rivgraph). We recommend installing into a fresh conda environment to minimize the risk of dependency clashes. The easiest way to do this is to download the [environment.yml](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml) file, then open Terminal (Mac/Unix) or Anaconda Prompt (Windows) and type:
 
-<pre><code>conda env create --file /path/to/environment.yml  # the environment name will be 'rivgraph', but you can change the environment file to name it anything
-conda activate rivgraph
-conda install rivgraph -c jschwenk</code></pre>
+RivGraph is hosted at conda-forge. We recommend installing into a fresh conda environment to minimize the risk of dependency clashes. The easiest way to do this is to open Terminal (Mac/Unix) or Anaconda Prompt (Windows) and type:
+
+<pre><code>conda create -n rivgraph_env rivgraph -c conda-forge
+conda activate rivgraph_env
+</code></pre>
 
 You may then want to install Spyder or your preferred IDE. Conda should fetch all the required dependencies and handle versioning.
 
 If you want to install RivGraph into an already-existing environment, you can run <pre><code>conda activate myenv
-conda install rivgraph -c jschwenk</code></pre>
+conda install rivgraph -c conda-forge</code></pre>
 
 You may also [install RivGraph from this Github repo](https://VeinsOfTheEarth.github.io/RivGraph/install/index.html#installation-from-source).
 
@@ -46,6 +47,7 @@ Instructions for testing your installation are available [here](https://VeinsOfT
 
 How to use?
 -----
+
 Please see the [documentation](https://VeinsOfTheEarth.github.io/RivGraph/) for more detailed instructions.
 
 RivGraph requires that you provide a binary mask of your network. [This page](https://VeinsOfTheEarth.github.io/RivGraph/maskmaking/index.html) provides some help, hints, and tools for finding or creating your mask.
@@ -56,9 +58,9 @@ RivGraph contains two primary classes (`delta` and `river`) that provide conveni
 
 **Note**: there are many functions under the hood that may be useful to you. Check out the [im_utils script](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/rivgraph/im_utils.py) (image utilities) in particular for functions to help whip your mask into shape!
 
-
 Contributing
 ------------
+
 If you think you're not skilled or experienced enough to contribute, think again! We agree wholeheartedly with the sentiments expressed by this [Imposter syndrome disclaimer](https://github.com/Unidata/MetPy#contributing). We welcome all forms of user contributions including feature requests, bug reports, code, documentation requests, and code. Simply open an issue in the [tracker](https://github.com/VeinsOfTheEarth/RivGraph/issues). For code development contributions, please contact us via email to be added to our slack channel where we can hash out a plan for your contribution.
 
 Citing RivGraph
@@ -72,7 +74,6 @@ Contacting us
 -------------
 
 The best way to get in touch is to [open an issue](https://github.com/VeinsOfTheEarth/rivgraph/issues/new) or comment on any open issue or pull request. Otherwise, send an email to j.........k@gmail.com
-
 
 License
 ------------

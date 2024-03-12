@@ -49,7 +49,7 @@ The mask is the cornerstone for using *RivGraph*. You should always ensure that 
 -----------------------------------------------
 What does RivGraph expect my mask to look like?
 -----------------------------------------------
-*RivGraph* can handle two types of masks: deltas and braided (or single-threaded) rivers. 
+*RivGraph* can handle two types of masks: deltas and braided (or single-threaded) rivers.
 
 **All masks should contain a single connected component** (or blob). Before doing your analysis, use the :obj:`rivgraph.im_utils.largest_blobs()` to ensure you have only one connected component. This will remove any isolated portions of the mask. For example,
 
@@ -58,9 +58,9 @@ What does RivGraph expect my mask to look like?
    from rivgraph import im_utils
    Mask_one_blob = im_utils.largest_blobs(Mask, nlargest=1, action='keep')
 
-This will create an image wherein only the largest connected component remains (hopefully your channel network). 
+This will create an image wherein only the largest connected component remains (hopefully your channel network).
 
-Delta masks often have a large waterbody (ocean or lake) connecting all the outlets. This is completely fine, as the waterbody will be removed in the pruning stage. 
+Delta masks often have a large waterbody (ocean or lake) connecting all the outlets. This is completely fine, as the waterbody will be removed in the pruning stage.
 
 
 .. _maskcapture:
@@ -91,9 +91,9 @@ Masks can come from a variety of sources, but in my experience there are three p
   - model/simulation outputs
 
 There are *many* methods available for creating masks automatically from remotely-sensed imagery. We won't get into the details of those here, but note that machine learning has proved a very valuable tool for maskmaking. There are also simple, proven techniques available as well. The Brahmaputra masks above were created by thresholding the Landsat-derived NDVI (`Normalized Difference Vegetation Index <https://www.usgs.gov/core-science-systems/nli/landsat/landsat-normalized-difference-vegetation-index>`_
-), which is a simple ratio of band values.
+), which is a simple ratio of band values. 
 
-Drawing a mask by hand is often not an ideal choice, but might be the most efficient way to move forward. In these cases, I would typically use QGIS to draw polygons that cover the channel network, then use the `Rasterize  <https://docs.qgis.org/2.8/en/docs/user_manual/processing_algs/gdalogr/gdal_conversion/rasterize.html>`_
+Drawing a mask by hand is often not an ideal choice, but might be the most efficient way to move forward. In these cases, I would typically use QGIS to draw polygons that cover the channel network, then use the `Rasterize  <https://docs.qgis.org/3.28/en/docs/user_manual/processing_algs/gdal/vectorconversion.html>`_
 tool to convert the polygons to a binary raster (image). If you go this route, be sure to specify an appropriate coordinate reference system for your polygons in order to preserve the georeferencing information (don't use EPSG:4326). You will also need to specify a pixel resolution for your mask upon conversion.
 
 If you're analyzing the output of a simulation, it is unlikely that the simulation will provide binary channel masks as an output. In these cases, you will need to develop a way to identify the channel network from the available simulation results. For example, while developing the entropic Braided Index (`eBI <https://ui.adsabs.harvard.edu/abs/2019AGUFMEP51E2163T/abstract>`_
@@ -106,7 +106,7 @@ Here are some resources that either provide masks or tools for you to make your 
   - `Arctic deltas <https://data.ess-dive.lbl.gov/view/doi:10.15485/1505624>`_, made with eCognition and Landsat imagery.
   - `Indus and Brahmaputra Rivers <https://esurf.copernicus.org/articles/8/87/2020/#section6>`_, clipped from GRWL dataset.
   - `Global mask <https://zenodo.org/record/1297434>`_ of Landsat-derived rivers at "mean annual discharge." Has some issues at tile boundaries, and can be "feathery" along braided rivers, but not a bad global mask.
-  - `Global Surface Water Dataset <https://global-surface-water.appspot.com/>`_ - provides all water pixels in the Landsat archive as monthly global images and as integrated-through-time images. For example, can threshold on the "Occurrence" product to make a mask. Use `Google Earth Engine <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_2_GlobalSurfaceWater>`_ to access and create your masks.
+  - `Global Surface Water Dataset <https://global-surface-water.appspot.com/>`_ - provides all water pixels in the Landsat archive as monthly global images and as integrated-through-time images. For example, you can threshold on the "Occurrence" product to make a mask. Use `Google Earth Engine <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater>`_ to access and create your masks. You can also access individual monthly water masks `here <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_MonthlyHistory>`_.
   - If you know of more, please mention them in the `Issue Tracker <https://github.com/VeinsOfTheEarth/RivGraph/issues>`_!
 
 .. image:: ../../images/jrc_mackenzie.PNG
@@ -120,6 +120,7 @@ Here are some resources that either provide masks or tools for you to make your 
 
 - `DeepWaterMap  <https://github.com/isikdogan/deepwatermap>`_ is a trained deep convolutional neural network that you can apply to Landsat/Sentinel multispectral imagery to create your own masks. You can also improve DeepWaterMap's base model by adding more training data. Requires some knowledge of Tensorflow.
 
+- A recent development as of April 2023 is the release of the *Segment Anything Model* `(SAM) <https://segment-anything.com/>`_ from Meta Research which allows rapid segmentation of any image, including satellite imagery. The SAM model has an API in Python via `segment-geospatial <https://github.com/opengeos/segment-geospatial>`_ that could be used for rapid identification of water from various satellite imagery sources, e.g. Planet or Landsat.
 
 
 

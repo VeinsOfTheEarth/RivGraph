@@ -16,6 +16,90 @@ Some selected publications that have used RivGraph to answer some cool science q
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://pubs.geoscienceworld.org/gsa/geology/article/doi/10.1130/G49935.1/61...">
+
+.. only:: html
+
+ .. figure:: /gallery/images/thumb/sphx_glr_dong2022_thumb.png
+     :alt: Quantitative relationships between river and channel-belt planform patterns
+
+     :ref:`sphx_glr_gallery_dong2022.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gallery/dong2022
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2022GL099681&gt;`_ used...">
+
+.. only:: html
+
+ .. figure:: /gallery/images/thumb/sphx_glr_tejedor2022_thumb.png
+     :alt: The Entropic Braiding Index (eBI): a robust metric to account for the diversity of channel scales in multi-thread rivers
+
+     :ref:`sphx_glr_gallery_tejedor2022.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gallery/tejedor2022
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2022GL097897&gt;`_ use...">
+
+.. only:: html
+
+ .. figure:: /gallery/images/thumb/sphx_glr_hariharan2022_thumb.png
+     :alt: Width-Based Discharge Partitioning in Distributary Networks: How Right We Are
+
+     :ref:`sphx_glr_gallery_hariharan2022.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gallery/hariharan2022
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2022GL098284&gt;`_ used...">
+
+.. only:: html
+
+ .. figure:: /gallery/images/thumb/sphx_glr_konkol2022_thumb.png
+     :alt: Interplay of river and tidal forcings promotes loops in coastal channel networks
+
+     :ref:`sphx_glr_gallery_konkol2022.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gallery/konkol2022
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019WR026867&gt;`_ made...">
 
 .. only:: html
@@ -34,6 +118,27 @@ Some selected publications that have used RivGraph to answer some cool science q
    :hidden:
 
    /gallery/knights2020
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2022GL102201&gt;`_ made use...">
+
+.. only:: html
+
+ .. figure:: /gallery/images/thumb/sphx_glr_knights2023_thumb.jpg
+     :alt: Seasonal and Morphological Controls on Nitrate Retention in Arctic Deltas
+
+     :ref:`sphx_glr_gallery_knights2023.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /gallery/knights2023
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

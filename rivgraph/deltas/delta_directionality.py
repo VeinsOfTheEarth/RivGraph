@@ -15,7 +15,7 @@ import networkx as nx
 from scipy.stats import mode, linregress
 from scipy.interpolate import interp1d
 from scipy.spatial import ConvexHull
-from scipy.ndimage.morphology import distance_transform_edt
+from scipy.ndimage import distance_transform_edt
 import rivgraph.io_utils as io
 import rivgraph.directionality as dy
 
