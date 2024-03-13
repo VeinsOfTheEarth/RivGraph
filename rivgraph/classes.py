@@ -138,34 +138,34 @@ class rivnetwork:
 
         # Handle georeferencing
         # GA_Update required for setting dummy projection/geotransform
-        self.gdobj = gdal.Open(self.paths['input_mask'], gdal.GA_Update)
-        self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
+        if path_to_mask:
+            self.gdobj = gdal.Open(self.paths['input_mask'], gdal.GA_Update)
+            self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
 
-        # Create dummy georeferencing if none is supplied
-        if self.gdobj.GetProjection() == '':
-            logger.info('Input mask is unprojected; assigning a dummy projection.')
-            # Creates a dummy projection in EPSG:4326 with UL coordinates (0,0)
-            # and pixel resolution = 1.
-            self.wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]' # 4326
-            self.gdobj.SetProjection(self.wkt)
-            self.gdobj.SetGeoTransform((0, 1, 0, self.imshape[1], 0, -1))
-        else:
-            self.wkt = self.gdobj.GetProjection()
-        self.gt = self.gdobj.GetGeoTransform()
+            # Create dummy georeferencing if none is supplied
+            if self.gdobj.GetProjection() == '':
+                logger.info('Input mask is unprojected; assigning a dummy projection.')
+                # Creates a dummy projection in EPSG:4326 with UL coordinates (0,0)
+                # and pixel resolution = 1.
+                self.wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]' # 4326
+                self.gdobj.SetProjection(self.wkt)
+                self.gdobj.SetGeoTransform((0, 1, 0, self.imshape[1], 0, -1))
+            else:
+                self.wkt = self.gdobj.GetProjection()
+            self.gt = self.gdobj.GetGeoTransform()
 
-        # Store crs as pyproj CRS object for interacting with geopandas
-        self.crs = CRS(self.gdobj.GetProjection())
-        self.unit = gu.get_unit(self.crs)
+            # Store crs as pyproj CRS object for interacting with geopandas
+            self.crs = CRS(self.gdobj.GetProjection())
+            self.unit = gu.get_unit(self.crs)
 
-        self.pixarea = abs(self.gt[1] * self.gt[5])
-        self.pixlen = abs(self.gt[1])
+            self.pixarea = abs(self.gt[1] * self.gt[5])
+            self.pixlen = abs(self.gt[1])
+            # Load mask into memory
+            self.Imask = self.gdobj.ReadAsArray()
 
         # Save exit sides
         if exit_sides is not None:
             self.exit_sides = exit_sides.lower()
-
-        # Load mask into memory
-        self.Imask = self.gdobj.ReadAsArray()
 
 
     def init_logger(self):
@@ -188,7 +188,7 @@ class rivnetwork:
                 ],
                 activation=[("", True)],
             )
-        logger.info("-"*10 + " New Run " + "-"*10)
+        logger.info("-"*10 + f" New Run: {self.name}" + "-"*10)
 
 
     def compute_network(self):

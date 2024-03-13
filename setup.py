@@ -1,6 +1,11 @@
 from setuptools import setup, find_packages
 from rivgraph import __version__
 
+# needs to specify dependencies here:
+# fastdtw
+# loguru
+
+
 setup(
     name="rivgraph",
     packages=find_packages(),
