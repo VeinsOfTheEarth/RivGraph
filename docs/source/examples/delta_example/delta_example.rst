@@ -412,7 +412,7 @@ for inspection in a GIS:
 
 Pulling this into QGIS and applying a similar color ramp, we see
 
-.. figure:: images/colville_link_directions.PNG
+.. figure:: images/colville_link_directions.png
    :alt: colville_link_directions.PNG
 
    colville_link_directions.PNG
