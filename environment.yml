@@ -13,3 +13,5 @@ dependencies:
   - loguru
   - scipy<1.9.0
   - numpy<1.23.0
+  - pip
+  - pytest
