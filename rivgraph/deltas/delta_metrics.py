@@ -676,6 +676,7 @@ def top_resistance_distance(deltavars, epsilon=10**-15):
     resistance between the two nodes when each link in the network is replaced
     by a 1 ohm resistor.
     """
+    print("Warning: resistance distances are incorrect. See https://github.com/VeinsOfTheEarth/RivGraph/issues/103 for more details.")
 
     apexid = deltavars['apex']
     outlets = deltavars['outlets']
