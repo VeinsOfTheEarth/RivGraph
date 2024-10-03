@@ -6,6 +6,7 @@ Directionality Utilities (directionality.py)
 Created on Wed Nov  7 11:38:16 2018
 @author: Jon
 """
+import warnings
 from loguru import logger
 import os
 import numpy as np
@@ -13,6 +14,8 @@ import networkx as nx
 import itertools
 import pandas as pd
 from scipy.stats import mode
+from tqdm import tqdm
+
 from rivgraph import ln_utils as lnu
 from rivgraph import io_utils as io
 
@@ -41,22 +44,22 @@ def add_directionality_trackers(links, nodes, ntype):
     """
 
     # Add a 'certain' entry to the links dict to keep track of links whose directions have been set
-    links['certain'] = np.zeros(len(links['id']))  # tracks whether a link's directinoality is certain or not
-    links['certain_order'] = np.zeros(len(links['id']))  # tracks the order in which links certainty is set
-    links['certain_alg'] = np.zeros(len(links['id']))  # tracks the algorithm used to set certainty
+    links.setdefault('certain', np.zeros(len(links['id'])))  # tracks whether a link's directinoality is certain or not
+    links.setdefault('certain_order', np.zeros(len(links['id'])))  # tracks the order in which links certainty is set
+    links.setdefault('certain_alg', np.zeros(len(links['id'])))  # tracks the algorithm used to set certainty
 
     # Add a "guess" entry to keep track of the different algorithms' guesses for flow directionality
-    links['guess'] = [[] for a in range(len(links['id']))]  # contains guess at upstream ndoe
-    links['guess_alg'] = [[] for a in range(len(links['id']))]  # contains algorithm that made guess
+    links.setdefault('guess', [[] for a in range(len(links['id']))])  # contains guess at upstream ndoe
+    links.setdefault('guess_alg', [[] for a in range(len(links['id']))])  # contains algorithm that made guess
 
     # Add network-type-specific properties
     if ntype == 'river':
-        links['maxang'] = np.ones(len(links['id'])) * np.nan  # saves the angle used in set_by_flow_directions, diagnostic only
+        links.setdefault('maxang', np.ones(len(links['id'])) * np.nan)  # saves the angle used in set_by_flow_directions, diagnostic only
 
     return links, nodes
 
 
-def algmap(key):
+def algmap(key=None):
     """
     Returns a numeric key corresponding to each algorithm used by RivGraph to
     set link directionality. These numbers are found in links['guess_alg'] and
@@ -74,7 +77,8 @@ def algmap(key):
         Numeric representation of direction-setting algorithm.
     """
 
-    mapper = {'sourcesinkfix' : -2,
+    mapper = {
+              'sourcesinkfix' : -2,
               'manual_set' : -1,
               'inletoutlet' : 0,
               'continuity' : 1,
@@ -88,6 +92,7 @@ def algmap(key):
               'syn_dem_med' : 10.1,
               'sym_dem_leftover' : 10.2,
               'sp_links' : 11,
+              'sp_links_sink' : -11.1,
               'sp_nodes' : 12,
               'longest_steepest' : 13,
               'three_agree' : 15,
@@ -99,11 +104,16 @@ def algmap(key):
               'cl_ang_rs' : 23.1,
               'cl_dist_and_ang' : 24,
               'short_no_bktrck' : 25,
-              'wid_pctdiff' : 26}
+              'wid_pctdiff' : 26,
+              'wid_continuity' : 27,
+              'wid_continuity_violation' : 27.1,
+              'darea_grad': 28,
+              'random': 29,
+              'n_agree': 30.,  # decimal indicates number of agreement
+              'main_channel_darea_grad': 31,
+    }
 
-    algno = mapper[key]
-
-    return algno
+    return mapper[key] if key else mapper
 
 
 def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
@@ -137,6 +147,7 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
     """
+    from networkx.exception import NetworkXNoPath
 
     # alg = 3 # identifier for diagnostics
     alg = algmap('parallels')
@@ -156,17 +167,20 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
 
     # Get all paths from inlet(s) to outlets
     all_pathnodes = []
-    for inl in nodes['inlets']:
-        for o in nodes['outlets']:
-            all_pathnodes.append(nx.dijkstra_path(G, nodes['inlets'][inlet_idx], o, weight='weight'))
-
+    randout = np.random.choice(nodes['outlets'], len(nodes['inlets']))
+    for inl, out in tqdm(zip(nodes['inlets'], randout), "Main channels", total=len(nodes['inlets'])):
+        #for o in nodes['outlets']:
+        try:
+            all_pathnodes.append(nx.dijkstra_path(G, inl, out, weight='weight'))
+        except NetworkXNoPath:
+            warnings.warn(f'No path found btw {inl} and {out}')
     # Reduce all pathnodes to smallest set, saving associated path for each node
     pathnode_set = set()
     for ap in all_pathnodes:
         pathnode_set.update(ap)
     pathnode_set = list(pathnode_set)
     belongs_to = [[] for i in range(len(pathnode_set))]
-    for i, p in enumerate(pathnode_set):
+    for i, p in tqdm(enumerate(pathnode_set)):
         for j, ap in enumerate(all_pathnodes):
             if p in ap:
                 belongs_to[i].append(j)
@@ -177,7 +191,7 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
 
     # Find the nearest path to all uncertain links
     uncertains = np.where(links['certain'] == 0)[0]
-    for u in uncertains:
+    for u in tqdm(uncertains, 'Dir by nearest main channel'):
 
         # Since we're not updating uncertains as links are being set, need to
         # recheck that the link hasn't been set by continuity/aritifical node
@@ -404,7 +418,7 @@ def dir_shortest_paths_nodes(links, nodes):
 
         if alg in links['guess_alg'][linkidx]:
             # If the guess agrees with previously guessed for this algorithm, move on
-            if links['guess'][linkidx][links['guess_alg'].index(alg)] == nid:
+            if links['guess'][linkidx][links['guess_alg'][linkidx].index(alg)] == nid:
                 continue
             else:
                 links['guess'][linkidx].remove(nid)
@@ -651,7 +665,7 @@ def dir_bridges(links, nodes):
                 break
 
     # Guess the bridge link
-    for bl, bn in zip(bridgelinks, bridgenodes):
+    for bl, bn in tqdm(zip(bridgelinks, bridgenodes), "Dir bridges", total=len(bridgelinks)):
         # Remove edge from graph
         G.remove_edge(bn[0], bn[1])
         # See which bridgenode connects to upstream node(s) -
@@ -780,7 +794,7 @@ def merge_list_of_lists(inlist):
     return merged
 
 
-def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True):
+def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True, check_width_continuity=True):
     """
     Sets a link directionality. Option to check for continuity (including
     parallel links) after setting.
@@ -830,6 +844,10 @@ def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True):
         # of a parallel set, set the others in the set
         links, nodes = set_parallel_links(links, nodes, knownlink=links['id'][linkidx])
 
+        if check_width_continuity:
+            # check width continuity
+            links, nodes = set_width_continuity(links, nodes, checknodes=links['conn'][linkidx][:],
+                                                recursive=True)
     return links, nodes
 
 
@@ -1021,40 +1039,36 @@ def get_cycles(links, nodes, checknode='all'):
         returned in cyclic order and in terms of link ids.
 
     """
-    G = nx.DiGraph()
+    G = nx.MultiDiGraph()
     G.add_nodes_from(nodes['id'])
-    for lc in links['conn']:
-        G.add_edge(lc[0], lc[1])
+    edges = zip(links["id"], links["conn"])
+    if "cycles_ignore_links" in links:
+        edges = [(i, lc) for i, lc in edges
+                 if i not in links["cycles_ignore_links"]]
+    for id, lc in edges:
+        G.add_edge(lc[0], lc[1], id=id)
 
-    if checknode == 'all':
-        cycle_nodes = nx.simple_cycles(G)
-        # Unpack the iterator
-        cycle_nodes = list(cycle_nodes)
-    else:
-        try:
-            single_cycle = nx.find_cycle(G, source=checknode)
-            single_cycle = list(single_cycle)
-            cycle_nodes = []
-            for cn in single_cycle:
-                cycle_nodes.append(cn[0])
-            cycle_nodes = [cycle_nodes]
-        except Exception:
-            cycle_nodes = None
+    # get cycles and cycle clusters/adjacent cycles
+    cycles_simple = nx.simple_cycles(G)
+    Gcy = G.subgraph(set([n for c in cycles_simple for n in c]))
+    cycle_nodes = nx.connected_components(Gcy.to_undirected())
+    # Unpack the iterator
+    cycle_nodes = [list(c) for c in cycle_nodes]
+
+    if checknode != 'all':
+        cycle_nodes = [n for n in cycle_nodes if set(n) & set(checknode)]
+        # keep original None output if no cycles with checknodes found
+        cycle_nodes = cycle_nodes if len(cycle_nodes) else None
 
     # Get links of cycles
-    cycles_links = []
-    if cycle_nodes is not None:
-        for c in cycle_nodes:
-            pathlinks = []
-            for us, vs in zip(c, c[1:] + [c[0]]):
-                ulinks = nodes['conn'][nodes['id'].index(us)]
-                vlinks = nodes['conn'][nodes['id'].index(vs)]
-                pathlinks.append([ul for ul in ulinks if ul in vlinks][0])
-            cycles_links.append(pathlinks)
+    cycle_links = []
+    if cycle_nodes:
+        for cn in cycle_nodes:
+            sg = G.subgraph(cn)
+            cycle_links.append([attr["id"] for _, _, attr in sg.edges(data=True)])
     else:
-        cycles_links = cycle_nodes
-
-    return cycle_nodes, cycles_links
+        cycle_links = cycle_nodes
+    return cycle_nodes, cycle_links
 
 
 def flip_links_in_G(G, links2flip):
@@ -1370,33 +1384,35 @@ def set_inletoutlet(links, nodes):
     alg = algmap('inletoutlet')
 
     # Set directionality of inlet links
-    for i in nodes['inlets']:
+    for i in tqdm(nodes['inlets'], 'Inlet links'):
 
         # Get links attached to inlets
         conn = nodes['conn'][nodes['id'].index(i)]
 
         for c in conn:
             linkidx = links['id'].index(c)
-
-            # Set link directionality
-            links, nodes = set_link(links, nodes, linkidx, i, alg=alg,
-                                    checkcontinuity=True)
+            if links["certain"][linkidx] == 0:
+                # Set link directionality
+                links, nodes = set_link(links, nodes, linkidx, i, alg=alg,
+                                        checkcontinuity=False, check_width_continuity=False)
 
     # Set directionality of outlet links
-    for o in nodes['outlets']:
+    for o in tqdm(nodes['outlets'], 'Outlet links'):
 
         # Get links attached to outlets
         conn = nodes['conn'][nodes['id'].index(o)]
 
         for c in conn:
             linkidx = links['id'].index(c)
+            if links["certain"][linkidx] == 0:
+                # Set link directionality
+                usnode = links['conn'][linkidx][:]
+                usnode.remove(o)
+                links, nodes = set_link(links, nodes, linkidx, usnode[0], alg=alg,
+                                        checkcontinuity=False, check_width_continuity=False)
 
-            # Set link directionality
-            usnode = links['conn'][linkidx][:]
-            usnode.remove(o)
-            links, nodes = set_link(links, nodes, linkidx, usnode[0], alg=alg,
-                                    checkcontinuity=True)
-
+    # rather than checking for continuity after every set_link, do it now when all in/out links are set
+    links, nodes = set_continuity(links, nodes)
     return links, nodes
 
 
@@ -1476,6 +1492,153 @@ def set_continuity(links, nodes, checknodes='all'):
     return links, nodes
 
 
+def in_factor_range(value, factor):
+    """Check if a value is within 1 / factor -- factor."""
+    return ((value < factor) & (value > 1 / factor))
+
+
+def set_width_continuity(links, nodes, factor=5, len_wid_factor=3, checknodes='all',
+                         recursive=True, guess=False):
+    """
+    Sets link directions by width continuity at each node if width combinations
+    are more than *factor* the input width. Iterates until no more links
+    directions can be set.
+
+    Parameters
+    ----------
+    links : dict
+        Network links and associated properties.
+    nodes : dict
+        Network nodes and associated properties.
+    factor : float
+        Factor of input width to discriminate impossible pathways.
+    len_wid_factor : float
+        Minimum length/width ratio all links need to have to be valid.
+    guess : bool
+        Only add upstream node and algorithm to guess.
+    checknodes : list OR str, optional
+        Each link connected to each node id in this list will be checked for
+        continuity. All nodes will be checked if using the default value 'all'.
+
+    Returns
+    -------
+    links : dict
+        Network links and associated properties updated to set directionality
+        according to this algorithm.
+    nodes : dict
+        Network nodes and associated properties updated to set directionality
+        according to this algorithm.
+
+    """
+    def set_or_guess(links, nodes, lix, usnode, alg):
+        if guess:
+            links["guess"][lix].append(usnode)
+            links["guess_alg"][lix].append(alg)
+        else:
+            links, nodes = set_link(links, nodes, lix, usnode, alg=al)
+        return links, nodes
+
+    alg, algvio = algmap('wid_continuity'), algmap('wid_continuity_violation')
+
+    if checknodes == 'all':
+        checknodes = np.unique(np.array(links["conn"])[links["certain"] == 0].flatten())
+
+    setnodes = []
+    for nid in checknodes:
+        nindex = nodes['id'].index(nid)
+        nidx = nodes['idx'][nindex]
+        conn = np.array(nodes['conn'][nindex])
+        # only works on three way nodes
+        if len(conn) != 3:
+            continue
+        width = np.array([links["wid_adj"][links['id'].index(lid)] for lid in conn])
+        lenwid_ratio = [0, 0, 0]
+        # Initialize bookkeeping for all the links connected to this node
+        linkdir = np.zeros(len(conn), dtype=int)  # 0 if uncertain, 1 if into, 2 if out of
+        # Populate linkdir
+        for il, lid in enumerate(conn):
+            lidx = links['id'].index(lid)
+            lenwid_ratio[il] = (links["len"][lidx] / width[il]) >= len_wid_factor
+            # Determine if link is flowing into node or out of node
+            # Skip if we're uncertain about the link's direction
+            if links['certain'][lidx] == 0:
+                continue
+            elif links['idx'][lidx][0] == nidx:  # out of
+                linkdir[il] = 2
+            elif links['idx'][lidx][-1] == nidx:  # into
+                linkdir[il] = 1
+        # one out, one in, one unknown
+        if np.sum(lenwid_ratio) == 3 and set(linkdir) == {0, 1, 2}:
+            inw, outw = width[linkdir == 1][0], width[linkdir == 2][0]
+            cl = links['id'].index(conn[linkdir == 0][0])
+            ukw = width[linkdir == 0][0]
+            conratio, bifratio = (inw + ukw) / outw, inw / (outw + ukw)
+            al = alg
+            cr, br = 0, 0
+            # if both types violate width continuity
+            if (~in_factor_range(conratio, factor) and ~in_factor_range(bifratio, factor)):
+                al = algvio
+                # ratios against 1, closer == more plausible
+                cr = 1 / conratio if conratio > 1 else conratio
+                br = 1 / bifratio if bifratio > 1 else bifratio
+            if (~in_factor_range(conratio, factor) and in_factor_range(bifratio, factor)) or (br > cr):
+                # bifurcation, unknown must be leaving node
+                links, nodes = set_or_guess(links, nodes, cl, nid, alg=al)
+                setnodes += links['conn'][cl][:]
+            elif (in_factor_range(conratio, factor) and ~in_factor_range(bifratio, factor)) or (cr > br):
+                # confluence, unknown is going into node
+                lconn = links['conn'][cl][:]
+                usnode = [n for n in lconn if n != nid][0]
+                links, nodes = set_or_guess(links, nodes, cl, usnode, alg=al)
+                setnodes += lconn
+        # With two unknown links
+        elif np.sum(lenwid_ratio) == 3 and np.sum(linkdir == 0) == 2:
+            unklix = np.where(linkdir == 0)[0]
+            unklid = conn[unklix]
+            unklwid = width[unklix]
+            knlix = np.where(linkdir > 0)[0][0]
+            knldir = linkdir[knlix]
+            knlwid = width[knlix]
+
+            # 3 options of width combination ratios
+            # depending on known direction: into / out of
+            # confluence into / bifurcation from either unknown link (either way)
+            conf = (unklwid[::-1] + knlwid) / unklwid
+            # bifurcation into / confluence from both unknown links
+            bif = np.sum(unklwid) / knlwid
+            # can we eliminate one option?
+            isconf = in_factor_range(conf, factor)
+            # only possible if bif is possible and one confluence combo
+            cert_link = []
+            if in_factor_range(bif, factor) and isconf.sum() == 1:
+                cert_link = [links['id'].index(unklid[isconf][0])]
+                al = alg
+            # width continuity is violated, junction type is still uncertain
+            # although we could guess but this is problematic at river-lake interfaces
+            #elif not in_factor_range(bif, factor) and isconf.sum() == 0:
+            #    cert_link = [links['id'].index(i) for i in unklid]
+            #    al = algvio
+            # treatment of more likely scenario here is missing
+            # <-.-> or <-.<- or ->.-> or ->.<- (known link in the middle)
+
+            # set link(s)
+            for cl in cert_link:
+                if knldir == 1:  # The unknown link must be out of the node
+                    links, nodes = set_or_guess(links, nodes, cl, nid, alg=al)
+                    setnodes += links['conn'][cl][:]
+                elif knldir == 2:  # The unknown link must be into the node
+                    lconn = links['conn'][cl][:]
+                    usnode = [n for n in lconn if n != nid][0]
+                    links, nodes = set_or_guess(links, nodes, cl, usnode, alg=al)
+                    setnodes += lconn
+
+    if len(setnodes) > 0 and recursive and not guess:
+        links, nodes = set_width_continuity(
+            links, nodes, factor=factor, len_wid_factor=len_wid_factor, checknodes=set(setnodes)
+        )
+    return links, nodes
+
+
 def set_parallel_links(links, nodes, knownlink):
     """
     Sets directionality of parallel links. If two links are parallel, they
@@ -1523,7 +1686,10 @@ def set_parallel_links(links, nodes, knownlink):
             usnode = links['conn'][lidx][1]
 
         # Check if any parallel sets are connected to the known link
-        ppnodes = links['conn'][links['id'].index(parpairs[0])][:]
+        if parpairs[0] in links['id']:
+            ppnodes = links['conn'][links['id'].index(parpairs[0])][:]
+        else:
+            continue
         for parlink in parpairs:
             if links['certain'][links['id'].index(parlink)] == 0:
                 if dsnode in ppnodes:
@@ -1620,9 +1786,9 @@ def get_link_vector(links, nodes, linkid, imshape, pixlen=1, normalized=True,
     return link_vec
 
 
-def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
-                                 lenthresh=0, nknown_thresh=1,
-                                 alg=algmap('known_fdr')):
+def set_by_known_flow_directions(links, nodes, imshape, angthresh=2, lenthresh=0,
+                                 nknown_thresh=1, idx=None, width_factor=2, guess=False,
+                                 allow_dangles=False, alg=algmap('known_fdr')):
     """
     Sets unknown link directions by determining which flow direction through
     the link minimizes the overall change in flow direction at the connecting
@@ -1644,12 +1810,19 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
         Network nodes and associated properties.
     imshape : tuple
         Shape of the binary mask as (nrows, ncols).
+    idx : iterable
+        Only consider the links with those indeces (i.e. not ids).
     angthresh : float, optional
         Angle in radians to determine if an unknown link is parallel enough to
         its connected known links to set its direction. The default is 2.
     lenthresh : int, optional
         Length in pixels of the minimum link length required to use this
         algorithm to set its directionality. The default is 0.
+    width_factor : float
+        Max factor of unknown/known width, i.e. directions of larger known links
+        can determine smaller unknown but not vice versa.
+    allow_dangles : bool
+        Allow dangles to determine directions.
     nknown_thresh : int, optional
         Number of known connected links required to use this algorithm to
         set the unknown link's directionality. The default is 1.
@@ -1673,7 +1846,7 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
         for setting by its direction.
         """
 
-        unknown_links = np.array(links['id'])[np.where(links['certain'] == 0)[0]]
+        unknown_links = np.array(links['id'])[(links['certain'] == 0) if idx is None else idx]
 
         if len(unknown_links) == 0:
             return []
@@ -1690,7 +1863,11 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
             nknown = 0
             for nid in conn:
                 conn_links = nodes['conn'][nodes['id'].index(nid)]
-                nknown = nknown + sum([1 for c in conn_links if links['certain'][links['id'].index(c)] == 1])
+                for c in conn_links:
+                    clix = links['id'].index(c)
+                    # is it set and has minimum length?
+                    if links['certain'][clix] == 1 and len(links['wid_pix'][clix]) >= lenthresh:
+                        nknown += 1
 
             if nknown > 0:
                 dolinks.append(lid)
@@ -1737,6 +1914,7 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
         # Get the first unknown link to set
         dolink = dolinks.pop(0)
         lidx = links['id'].index(dolink)
+        uknwid = links["wid_adj"][lidx]
 
         # In case the link was set by continuity
         if links['certain'][lidx] == 1:
@@ -1757,7 +1935,13 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
             lconn = nodes['conn'][nodes['id'].index(n)]
 
             # Find the connected links that are known
-            known_links = [l for l in lconn if links['certain'][links['id'].index(l)]==1]
+            known_links = []
+            for l in lconn:
+                klix = links['id'].index(l)
+                ir = (uknwid / links["wid_adj"][klix]) <= width_factor
+                dan = True if allow_dangles else ~links["dangle"][klix]
+                if (links['certain'][klix] == 1) and ir and dan:
+                    known_links.append(l)
 
             # Determine which set links are into/out of the node
             in_links = []
@@ -1833,8 +2017,16 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
         # Ensure threshold is met
         if min_ang < angthresh:
             usnode = us_node_guess[ang_guess.index(min_ang)]
-            links, nodes = set_link(links, nodes, lidx, usnode,
-                                    alg = alg, checkcontinuity=True)
+            if guess:
+                if alg in links['guess_alg'][lidx]:
+                    ig = links['guess_alg'][lidx].index(alg)
+                    links['guess'][lidx][ig] = usnode
+                else:
+                    links['guess'][lidx].append(usnode)
+                    links['guess_alg'][lidx].append(alg)
+            else:
+                links, nodes = set_link(links, nodes, lidx, usnode,
+                                        alg=alg, checkcontinuity=True)
 
     return links, nodes
 

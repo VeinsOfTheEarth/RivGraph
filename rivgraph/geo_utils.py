@@ -16,7 +16,6 @@ except ImportError:
 import numpy as np
 from pyproj import Transformer
 import warnings
-import rivgraph.io_utils as io
 import rivgraph.im_utils as im
 
 
@@ -234,7 +233,7 @@ def crop_geotif(tif, cropto='first_nonzero', npad=0, outpath=None):
     output_file : str
         Path to the saved, cropped geotiff.
     """
-
+    from rivgraph.io_utils import write_geotiff
     # Prepare output file path
     if outpath is None:
         output_file = tif.split('.')[-2] + '_cropped.tif'
@@ -276,7 +275,7 @@ def crop_geotif(tif, cropto='first_nonzero', npad=0, outpath=None):
     if datatype in [1, 2, 3, 4, 5]:  # Int types: see the list at the end of this file
         options.append('COMPRESS=LZW')
 
-    io.write_geotiff(tifcropped, crop_gt, tif_obj.GetProjection(), output_file,
+    write_geotiff(tifcropped, crop_gt, tif_obj.GetProjection(), output_file,
                      dtype=datatype, options=options)
 
     return output_file
@@ -315,6 +314,7 @@ def downsample_binary_geotiff(input_file, ds_factor, output_name, thresh=None):
         Path to the saved, downsampled geotiff.
 
     """
+    from rivgraph.io_utils import write_geotiff
     # check ds_factor
     if ds_factor >= 1.0:
         raise ValueError('ds_factor must be < 1.')
@@ -354,7 +354,7 @@ def downsample_binary_geotiff(input_file, ds_factor, output_name, thresh=None):
     dest_gm = (newgm[0], (newgm[1]*img_x)/rs_x, newgm[2],
                newgm[3], newgm[4], (newgm[5]*img_y)/rs_y)
     # save new geotiff
-    io.write_geotiff(img_rs, dest_gm, og.GetProjection(),
+    write_geotiff(img_rs, dest_gm, og.GetProjection(),
                      output_name, dtype=gdal.GDT_Byte)
 
     return output_name
