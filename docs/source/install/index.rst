@@ -72,7 +72,7 @@ provided below with links to the homepage for each dependency.
 3. From the cloned folder, run the following in the command line:
    ::
 
-   $ python setup.py install
+   $ pip install -e .
 
 to install the *RivGraph* package.
 

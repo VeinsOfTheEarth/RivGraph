@@ -46,7 +46,7 @@ If you would prefer to install the *RivGraph* package from source, then follow t
 2. From the cloned folder, run the following in the command line:
 ::
 
-   $ python setup.py install
+   $ pip install -e .
 
 to install the *RivGraph* package.
 

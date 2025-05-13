@@ -27,18 +27,14 @@ jobs:
         init-shell: bash
     - name: Install RivGraph, dependencies, and Sphinx then build docs
       shell: bash -l {0}
-      run: |
-        conda activate rivgraph
-        python setup.py install
-        python -m pip install --upgrade pip
-        pip install sphinx
-        sudo apt update -y && sudo apt install -y latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended dvipng
-        pip install sphinx-rtd-theme
-        pip install sphinx-gallery
-        pip install ipython
-        pip install ipykernel
-        (cd docs && make docs)
-        (cd docs && make html)
+    run: |
+      conda activate rivgraph
+      python -m pip install --upgrade pip
+      pip install -e .  
+      pip install sphinx sphinx-rtd-theme sphinx-gallery ipython ipykernel
+      sudo apt update -y && sudo apt install -y latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended dvipng
+      (cd docs && make docs)
+      (cd docs && make html)
     - name: Debug
       run: |
         echo $REF
