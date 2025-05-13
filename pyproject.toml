@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rivgraph"
+version = "0.4.0"
+description = "Python package for extracting and analyzing river networks from remote sensing imagery."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+  { name = "Jon Schwenk", email = "jonschwXXX@gmail.com" }
+]
+dependencies = [
+  "matplotlib",
+  "scikit-image",
+  "numpy<1.23.0",
+  "scipy<1.9.0",
+  "loguru",
+  "networkx<2.7",
+  "shapely==1.7.1",
+  "geopandas",
+]
+requires-python = ">=3.7"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["rivgraph"]
