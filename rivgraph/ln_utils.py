@@ -1544,23 +1544,17 @@ def links_to_gpd(links, gdobj):
         GDAL dataset of the original mask, created via gdal.Open().
 
     """
-    # Create geodataframe
-    links_gpd = gpd.GeoDataFrame()
-
     # Append geometries
     geoms = []
     for i, lidx in enumerate(links['idx']):
         coords = gu.idx_to_coords(lidx, gdobj)
         geoms.append(shapely.geometry.LineString(zip(coords[0], coords[1])))
-    links_gpd['geometry'] = geoms
+
+    links_gpd = gpd.GeoDataFrame(geometry = geoms, crs=CRS(gdobj.GetProjection()))
 
     # Append ids and connectivity
     links_gpd['id'] = links['id']
     links_gpd['us node'] = [c[0] for c in links['conn']]
     links_gpd['ds node'] = [c[1] for c in links['conn']]
-
-    # Assign CRS - done last to avoid DeprecationWarning - need geometry
-    # to exist before assigning CRS.
-    links_gpd.crs = CRS(gdobj.GetProjection())
 
     return links_gpd

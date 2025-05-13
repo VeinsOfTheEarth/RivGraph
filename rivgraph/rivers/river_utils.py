@@ -883,7 +883,7 @@ def compute_eBI(path_meshlines, path_links, method='local'):
     if 'wid_adj' not in links_gdf.keys():
         raise RuntimeError('Widths have not been appended to links yet; cannot compute eBI.')
 
-    inter = gpd.sjoin(meshline_gdf, links_gdf, op='intersects')
+    inter = gpd.sjoin(meshline_gdf, links_gdf, predicate='intersects')
 
     # Conver link widths to floats
     widths = links_gdf.wid_adj.values

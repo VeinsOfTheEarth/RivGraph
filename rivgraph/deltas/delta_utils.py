@@ -169,7 +169,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
 
     # Remove the links beyond the shoreline
     # Intersect links with shoreline
-    shore_int = gpd.sjoin(links_gdf, shore_gdf, op='intersects',
+    shore_int = gpd.sjoin(links_gdf, shore_gdf, predicate='intersects',
                           lsuffix='left')
 
     # Get ids of intersecting links
