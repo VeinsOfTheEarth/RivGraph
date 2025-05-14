@@ -291,6 +291,10 @@ def delete_link(links, nodes, linkid):
         if len(nodes['conn'][cnodeidx]) == 0:  # If there are no connections to the node, remove it
             nodes = delete_node(nodes, cni)
 
+    # Remove the link from link_conn if it has been computed
+    if 'link_conn' in links.keys():
+        links['link_conn'] = [[item for item in sublist if item != linkid] for sublist in links['link_conn']]
+
     return links, nodes
 
 
@@ -453,6 +457,22 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
         links['len_adj'][-1] = max(pixlen, links['len_adj'][-1])
 
     return links
+
+
+def add_link_conn(links, nodes):
+    """
+    Adds a field to the links dictionary called 'link_conn' that
+    contains the link ids of all links connected to the given link.
+
+    This functionality was added for incorporation of RivGraph'ed 
+    networks into SWOT, which requires this field. May, 2025.
+    """
+    conn_links = []
+    for cnodes, link_id in zip(links['conn'], links['id']):
+        conn_links.append(list(set([lid for cn in cnodes for lid in nodes['conn'][nodes['id'].index(cn)] if lid != link_id])))
+    links['link_conn'] = conn_links
+    return links
+
 
 
 def junction_angles(links, nodes, imshape, pixlen, weight=None):
@@ -649,7 +669,7 @@ def junction_angles(links, nodes, imshape, pixlen, weight=None):
     return nodes
 
 
-def conn_links(nodes, links, node_idx):
+def conn_links_endpixels(nodes, links, node_idx):
     """
     Find first and last pixels of all links connected to a node.
 

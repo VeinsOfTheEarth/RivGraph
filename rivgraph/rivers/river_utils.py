@@ -47,6 +47,9 @@ def prune_river(links, nodes, exit_sides, Iskel, gdobj):
     # Remove one-pixel links
     links, nodes = lnu.remove_single_pixel_links(links, nodes)
 
+    # Add link connectivity (for SWOT)
+    links = lnu.add_link_conn(links, nodes)
+
     return links, nodes
 
 

@@ -1689,8 +1689,8 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
             # is the only unknown link; it is a candidate
             nknown = 0
             for nid in conn:
-                conn_links = nodes['conn'][nodes['id'].index(nid)]
-                nknown = nknown + sum([1 for c in conn_links if links['certain'][links['id'].index(c)] == 1])
+                conn_links_endpixels = nodes['conn'][nodes['id'].index(nid)]
+                nknown = nknown + sum([1 for c in conn_links_endpixels if links['certain'][links['id'].index(c)] == 1])
 
             if nknown > 0:
                 dolinks.append(lid)
