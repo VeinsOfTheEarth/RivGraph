@@ -522,6 +522,16 @@ class rivnetwork:
                     io.centerline_to_geovector(self.centerline_smooth, self.crs, self.paths['centerline_smooth'])
                 else:
                     logger.info('Smoothed centerline has not been computed and thus cannot be exported.')
+            if te == 'sword':
+                if self.unit == 'degree':
+                    raise Warning('You are exporting to SWORD format, but this requires a projected CRS (i.e. one with consistent length units). Your units are degrees, so this export will be wrong. Project your mask into a CRS with meters and reanalyze for proper results.')
+                if hasattr(self, 'links') is True:
+                    ext = 'shp'
+                    self.paths['reaches_sword'] = os.path.join(self.paths['basepath'], self.name + '_SWORD_reaches.' + ext)
+                    self.paths['nodes_sword'] = os.path.join(self.paths['basepath'], self.name + '_SWORD_nodes.' + ext)
+                    io.export_for_sword(self.links, self.gdobj, self.crs, self.paths, self.unit)
+                    if self.verbose:
+                        print(f'SWORD files exported to {self.paths["reaches_sword"]} and {self.paths["nodes_sword"]}.')
 
 
     def to_geotiff(self, export):
@@ -618,7 +628,7 @@ class delta(rivnetwork):
 
             self.Iskel = m2g.skeletonize_mask(self.Imask)
 
-            logger.info('done skeletonization.')
+            logger.info('done with skeletonization.')
 
 
     def prune_network(self, path_shoreline=None, path_inletnodes=None,

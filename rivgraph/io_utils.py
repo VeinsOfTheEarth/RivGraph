@@ -22,8 +22,11 @@ except ImportError:
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-import rivgraph.geo_utils as gu
 from shapely.geometry import Point, LineString
+
+import rivgraph.geo_utils as gu
+from rivgraph.rivers import centerline_utils as cu
+
 
 
 def prepare_paths(path_results, name, path_mask):
@@ -584,3 +587,79 @@ def coords_to_geovector(coords, epsg, path_export):
 
     # Save and close everything
     datasource = layer = feat = geom = None
+
+    return
+
+def export_for_sword(links, gdobj, crs, paths, unit):
+    """
+    Exports a reaches and nodes shapefiles that are formatted
+    consistently with the SWORD database to the best of RivGraph's ability.
+
+    Currently the notion of directionality (upstream/downstream) is not
+    included. An additional flag called dfir_set indicates if the exported
+    data have considered flow directaionality. This will always be False
+    until directionality is implemented into this function.
+    """
+    if unit != 'meter':
+        raise TypeError('Reproject your mask to a meters-based CRS for SWORD exports. Or raise an issue for RivGraph to handle more unit types.')
+
+    node_spacing = 200 # meters, a SWORD default
+
+    # Make nodes for each link that are at least node_spacing apart
+    # SWORD calls these nodes, but RG uses nodes for something different so here we call them segs/segments
+    # initialize dictionary to store all the segment nodes' properties, including their geometries
+    segprops = ['geometry', 'node_id_rg', 'node_len', 'reach_id_rg', 'width', 'width_var', 'max_width', 'sinuosity']
+    segs = {prop: [] for prop in segprops}
+
+    reachprops = ['geometry', 'reach_id_rg', 'reach_len', 'n_nodes', 'width', 'width_var', 'max_width', 'n_rch_up', 'n_rch_down', 'fdir_set', 'conn_reach']
+    reaches = {prop:[] for prop in reachprops}
+    for i in range(len(links['idx'])):
+        this_idx = links['idx'][i]
+        this_x, this_y = gu.idx_to_coords(this_idx, gdobj)
+        this_s, _ = cu.s_ds(this_x, this_y)
+
+        # Segment the link, storing the indices along it
+        segments = []
+        start_idx = 0
+        for j in range(1, len(this_s)):
+            if this_s[j] - this_s[start_idx] >= node_spacing:
+                segments.append((start_idx, j))
+                start_idx = j
+        if len(segments) == 0: # If the segment is too short, use the whole thing
+            segments = [[0, len(this_idx)-1]]
+
+        # Now find a central vertex to use as the representative SWORD node (this defines the coordinate of the SWORD node)
+        for seg in segments:
+            seg_idx = int(sum(seg)/2)
+            segs['geometry'].append(Point(this_x[seg_idx], this_y[seg_idx]))
+
+            segs['node_id_rg'].append(this_idx[seg_idx])
+            segs['node_len'].append(this_s[seg[1]] - this_s[seg[0]])
+            segs['reach_id_rg'].append(links['id'][i])
+            seg_widths = links['wid_pix'][i][seg[0]:seg[1]]
+            segs['width'].append(np.mean(seg_widths))
+            segs['width_var'].append(np.var(seg_widths))
+            segs['max_width'].append(np.max(seg_widths))
+            segs['sinuosity'].append(segs['node_len'][-1] / np.hypot(this_x[seg[1]] - this_x[seg[0]], this_y[seg[1]] - this_y[seg[0]]))
+
+        # Handle the SWORD reaches
+        reaches['geometry'].append(LineString(zip(this_x, this_y)))
+        reaches['reach_id_rg'].append(links['id'][i])
+        reaches['reach_len'].append(links['len'][i])
+        reaches['n_nodes'].append(len(segments))
+        reaches['width'].append(links['wid_adj'][i])
+        reaches['width_var'].append(np.var(links['wid_pix'][i]))
+        reaches['max_width'].append(max(links['wid_pix'][i]))
+        reaches['n_rch_up'].append('NA')
+        reaches['n_rch_down'].append('NA')
+        reaches['conn_reach'].append(', '.join(str(x) for x in links['link_conn'][i]))
+        reaches['fdir_set'].append(False)
+
+    # Convert to GeoDataFrames and write to disk
+    sword_nodes = gpd.GeoDataFrame(segs, crs=crs)
+    sword_reaches = gpd.GeoDataFrame(reaches, crs=crs)
+
+    sword_nodes.to_file(paths['nodes_sword'])
+    sword_reaches.to_file(paths['reaches_sword'])
+
+    return
