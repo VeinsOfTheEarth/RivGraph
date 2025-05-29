@@ -24,7 +24,6 @@ dependencies = [
   "fastdtw",
   "pytest"
 ]
-requires-python = ">=3.7"
 
 readme = "README.md"
 license = { text = "BSD-3" }
