@@ -1,13 +1,11 @@
 [build-system]
-requires = ["setuptools>=42"]
+requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "rivgraph"
 version = "0.5.0"
 description = "Python package for extracting and analyzing river networks from remote sensing imagery."
-readme = "README.md"
-license = { text = "MIT" }
 authors = [
   { name = "Jon Schwenk", email = "jonschwXXX@gmail.com" }
 ]
