@@ -590,7 +590,7 @@ def coords_to_geovector(coords, epsg, path_export):
 
     return
 
-def export_for_sword(links, gdobj, crs, paths, unit):
+def export_for_sword(links, gdobj, crs, paths, unit, metadata={}):
     """
     Exports a reaches and nodes shapefiles that are formatted
     consistently with the SWORD database to the best of RivGraph's ability.
@@ -599,20 +599,31 @@ def export_for_sword(links, gdobj, crs, paths, unit):
     included. An additional flag called dfir_set indicates if the exported
     data have considered flow directaionality. This will always be False
     until directionality is implemented into this function.
+
+    Georeferenced fields are exported in WGS84 (EPSG:4326).
     """
     if unit != 'meter':
         raise TypeError('Reproject your mask to a meters-based CRS for SWORD exports. Or raise an issue for RivGraph to handle more unit types.')
 
     node_spacing = 200 # meters, a SWORD default
 
+    # Initialize dictionary to store all the segment nodes' properties, including their geometries
+    segprops = ['geometry', 'x', 'y', 'node_id_rg', 'node_len', 'reach_id_R', 'width', 'width_var', 'max_width', 'sinuosity']
+    segs = {prop: [] for prop in segprops}
+    reachprops = ['geometry', 'x', 'y', 'reach_id_R', 'reach_len', 'n_nodes', 'width', 'width_var', 'max_width', 'rch_id_up', 'rch_id_dn', 'n_rch_up', 'n_rch_down', 'fdir_set', 'conn_reach']
+    reaches = {prop:[] for prop in reachprops}
+
+    # Define attributes that RG will not compute (some of these are computable by RG) to ensure matching with existing SWORD structure.
+    sword_empty_segprops = ['node_id', 'reach_id', 'wse', 'wse_var', 'facc', 'n_chan_max', 'n_chan_mod', 'obstr_type', 'grod_id', 'hfalls_id',
+                    'dist_out', 'lakeflag', 'manual_add', 'meand_len', 'type', 'river_name', 'edit_flag', 'trib_flag',
+                    'path_freq', 'path_order', 'path_segs', 'main_side', 'strm_order', 'end_reach', 'network']
+    sword_empty_reachprops = ['wse', 'wse_var', 'facc', 'n_chan_max', 'n_chan_mod', 'obstr_type', 'grod_id', 'hfalls_id',
+                            'dist_out', 'lakeflag', 'swot_orbit', 'swot_obs',
+                            'type', 'river_name', 'edit_flag', 'trib_flag', 'path_freq', 'path_order', 'path_segs',
+                            'main_side', 'strm_order', 'end_reach', 'network']
+
     # Make nodes for each link that are at least node_spacing apart
     # SWORD calls these nodes, but RG uses nodes for something different so here we call them segs/segments
-    # initialize dictionary to store all the segment nodes' properties, including their geometries
-    segprops = ['geometry', 'node_id_rg', 'node_len', 'reach_id_rg', 'width', 'width_var', 'max_width', 'sinuosity']
-    segs = {prop: [] for prop in segprops}
-
-    reachprops = ['geometry', 'reach_id_rg', 'reach_len', 'n_nodes', 'width', 'width_var', 'max_width', 'n_rch_up', 'n_rch_down', 'fdir_set', 'conn_reach']
-    reaches = {prop:[] for prop in reachprops}
     for i in range(len(links['idx'])):
         this_idx = links['idx'][i]
         this_x, this_y = gu.idx_to_coords(this_idx, gdobj)
@@ -628,14 +639,16 @@ def export_for_sword(links, gdobj, crs, paths, unit):
         if len(segments) == 0: # If the segment is too short, use the whole thing
             segments = [[0, len(this_idx)-1]]
 
-        # Now find a central vertex to use as the representative SWORD node (this defines the coordinate of the SWORD node)
+        # Find a central vertex to use as the representative SWORD node (this defines the coordinate of the SWORD node)
         for seg in segments:
             seg_idx = int(sum(seg)/2)
             segs['geometry'].append(Point(this_x[seg_idx], this_y[seg_idx]))
-
+            lon, lat = gu.transform_coords(this_x[seg_idx], this_y[seg_idx], crs.to_epsg(), 4326)
+            segs['x'].append(lon)
+            segs['y'].append(lat)
             segs['node_id_rg'].append(this_idx[seg_idx])
             segs['node_len'].append(this_s[seg[1]] - this_s[seg[0]])
-            segs['reach_id_rg'].append(links['id'][i])
+            segs['reach_id_R'].append(links['id'][i])
             seg_widths = links['wid_pix'][i][seg[0]:seg[1]]
             segs['width'].append(np.mean(seg_widths))
             segs['width_var'].append(np.var(seg_widths))
@@ -644,22 +657,69 @@ def export_for_sword(links, gdobj, crs, paths, unit):
 
         # Handle the SWORD reaches
         reaches['geometry'].append(LineString(zip(this_x, this_y)))
-        reaches['reach_id_rg'].append(links['id'][i])
+        reaches['reach_id_R'].append(links['id'][i])
         reaches['reach_len'].append(links['len'][i])
         reaches['n_nodes'].append(len(segments))
         reaches['width'].append(links['wid_adj'][i])
         reaches['width_var'].append(np.var(links['wid_pix'][i]))
         reaches['max_width'].append(max(links['wid_pix'][i]))
-        reaches['n_rch_up'].append('NA')
-        reaches['n_rch_down'].append('NA')
+        
+        # Need a representative x, y (lon, lat) for each reach; use midpoint along reach
+        # Must be in WGS84 (EPSG:4326)
+        line = reaches['geometry'][-1]
+        midpoint = line.interpolate(0.5 * line.length)
+        lon, lat = gu.transform_coords(midpoint.x, midpoint.y, crs.to_epsg(), 4326)
+        reaches['x'].append(lon)
+        reaches['y'].append(lat)
+
+        # Handle directionality if set
+        if 'certain' not in links.keys():
+            reaches['n_rch_up'].append(links['conn'][i][0])
+            reaches['n_rch_down'].append('NA')
+            reaches['rch_id_up'].append(' ')
+            reaches['reach_id_down'].append(' ')
+            reaches['fdir_set'].append(False)
+        else:
+            # Get upstream/downstream reaches
+            conn_nodes = links['conn'][i]
+            us_node, ds_node = conn_nodes[0], conn_nodes[1]
+            conn_links = links['link_conn'][i]
+            us_links, ds_links = [], []
+            for cl in conn_links:
+                this_link_idx = links['id'].index(cl)
+                this_conn_nodes = links['conn'][this_link_idx]
+                if this_conn_nodes[-1] == conn_nodes[0]: # Upstream links
+                    us_links.append(links['id'][this_link_idx])
+                elif this_conn_nodes[0] == conn_nodes[-1]: # Downstream links
+                    ds_links.append(links['id'][this_link_idx])
+            reaches['n_rch_up'].append(len(us_links))
+            reaches['n_rch_down'].append(len(ds_links))
+            reaches['rch_id_up'].append(' '.join([str(s) for s in us_links]))
+            reaches['rch_id_dn'].append(' '.join([str(s) for s in ds_links]))
+            reaches['fdir_set'].append(True)
+
         reaches['conn_reach'].append(', '.join(str(x) for x in links['link_conn'][i]))
-        reaches['fdir_set'].append(False)
 
     # Convert to GeoDataFrames and write to disk
     sword_nodes = gpd.GeoDataFrame(segs, crs=crs)
     sword_reaches = gpd.GeoDataFrame(reaches, crs=crs)
 
+    # SWORD expects EPSG:4326
+    sword_nodes = sword_nodes.to_crs(epsg=4326)
+    sword_reaches = sword_reaches.to_crs(epsg=4326)
+
+    # Append metadata
+    if metadata:
+        for k in metadata.keys():
+            sword_reaches[k] = metadata[k]
+            sword_nodes[k] = metadata[k]
+
+    # Add all the empty (non-RG-computed but exist in SWORD properties
+    for segempty in sword_empty_segprops:
+        sword_nodes[segempty] = None
+    for reachempty in sword_empty_reachprops:
+        sword_reaches[reachempty] = None
+
     sword_nodes.to_file(paths['nodes_sword'])
     sword_reaches.to_file(paths['reaches_sword'])
-
     return

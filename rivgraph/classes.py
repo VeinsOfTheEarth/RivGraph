@@ -441,7 +441,7 @@ class rivnetwork:
         return A
 
 
-    def to_geovectors(self, export='network', ftype='json'):
+    def to_geovectors(self, export='network', ftype='json', metadata={}):
         """
         Writes the links and nodes of the network to geovectors.
 
@@ -529,7 +529,7 @@ class rivnetwork:
                     ext = 'shp'
                     self.paths['reaches_sword'] = os.path.join(self.paths['basepath'], self.name + '_SWORD_reaches.' + ext)
                     self.paths['nodes_sword'] = os.path.join(self.paths['basepath'], self.name + '_SWORD_nodes.' + ext)
-                    io.export_for_sword(self.links, self.gdobj, self.crs, self.paths, self.unit)
+                    io.export_for_sword(self.links, self.gdobj, self.crs, self.paths, self.unit, metadata=metadata)
                     if self.verbose:
                         print(f'SWORD files exported to {self.paths["reaches_sword"]} and {self.paths["nodes_sword"]}.')
 
