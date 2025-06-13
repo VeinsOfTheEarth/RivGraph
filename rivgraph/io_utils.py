@@ -653,7 +653,7 @@ def export_for_sword(links, gdobj, crs, paths, unit, metadata={}):
             segs['width'].append(np.mean(seg_widths))
             segs['width_var'].append(np.var(seg_widths))
             segs['max_width'].append(np.max(seg_widths))
-            segs['sinuosity'].append(segs['node_len'][-1] / np.hypot(this_x[seg[1]] - this_x[seg[0]], this_y[seg[1]] - this_y[seg[0]]))
+            segs['sinuosity'].append(max(0, segs['node_len'][-1] / np.hypot(this_x[seg[1]] - this_x[seg[0]], this_y[seg[1]] - this_y[seg[0]])))
 
         # Handle the SWORD reaches
         reaches['geometry'].append(LineString(zip(this_x, this_y)))
