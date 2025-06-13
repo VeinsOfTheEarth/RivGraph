@@ -86,7 +86,7 @@ def set_link_directions(links, nodes, imshape, manual_set_csv=None):
     # if os.path.isfile(manual_set_csv) is False:
     #     if len(cont_violators) > 0 or allcyclesfixed == 0:
     #         io.create_manual_dir_csv(manual_set_csv)
-    #         print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
+    #         print('A .csv file for manual fixes to link directions was created at {}.'.format(manual_set_csv))
 
     if allcyclesfixed == 2:
         logger.info('No cycles were found in network.')

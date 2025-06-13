@@ -1325,7 +1325,7 @@ def dir_set_manually(links, nodes, manual_set_csv):
     if os.path.isfile(manual_set_csv) is False:
         logger.info('No file found for manually setting link directions.')
         io.create_manual_dir_csv(manual_set_csv)
-        logger.info('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
+        logger.info('A .csv file was created for manual fixes to link directions at {}.'.format(manual_set_csv))
 
         return links, nodes
     else:
