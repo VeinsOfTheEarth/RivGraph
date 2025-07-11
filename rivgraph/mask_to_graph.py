@@ -5,7 +5,6 @@ Mask to Graph Utilities (mask_to_graph.py)
 Functions for converting a binary channel mask to a graphical representation.
 """
 from loguru import logger
-import cv2
 import numpy as np
 from skimage import morphology, measure
 from rivgraph import walk
@@ -400,6 +399,8 @@ def simplify_skel(Iskel):
         The simplified skeleton.
 
     """
+    import cv2
+
     Iskel = np.array(Iskel, dtype=np.uint8)
     Ic = imu.im_connectivity(Iskel)
     ypix, xpix = np.where(Ic > 2) # Get all pixels with connectivity > 2

@@ -9,7 +9,6 @@ Created on Tue Nov  6 14:29:10 2018
 """
 import numpy as np
 import networkx as nx
-from fastdtw import fastdtw
 from scipy.ndimage.morphology import distance_transform_edt
 import shapely
 from shapely.geometry import LineString, Polygon
@@ -589,6 +588,8 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
 
 
     def iterative_cl_pt_mapping(cl, bufdists, side):
+        # optional imports
+        from fastdtw import fastdtw
 
         mapper = []
         lines = []

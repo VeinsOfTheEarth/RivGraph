@@ -10,7 +10,6 @@ Image Utilities (im_utils.py)
 Many of these functions are wrappers around functionality found in skimage or
 opencv that either add additonal functionality or provide convenience.
 """
-import cv2
 import numpy as np
 from scipy import ndimage as nd
 from skimage import morphology, measure, util
@@ -633,6 +632,8 @@ def regionprops(I, props, connectivity=2):
         can be returned by specifying 'label' as a property.
 
     """
+    import cv2
+
     # Check that appropriate props are requested
     available_props = ['area', 'coords', 'perimeter', 'centroid', 'mean', 'perim_len',
               'convex_area', 'eccentricity', 'major_axis_length',
@@ -934,6 +935,8 @@ def im_connectivity(I):
         Image of 8-connectivity count for each pixel in the input image.
 
     """
+    import cv2
+
     # Fix input
     I = I.copy()
     I[I != 0] = 1
@@ -1042,6 +1045,8 @@ def skel_branchpoints(Iskel):
         Binary image of shape Iskel where only branchpoints are on.
 
     """
+    import cv2
+
     Ibps = np.uint16(im_connectivity(Iskel))
 
     # Initial branchpoints are defined by pixels with conn > 2
