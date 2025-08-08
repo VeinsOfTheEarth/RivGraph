@@ -6,6 +6,8 @@ on:
   push:
     paths:
       - "docs/**"
+    branches:
+      - main
   pull_request:
   schedule:
     - cron: '0 0 1 * *'  # run workflow at 12AM on first day of every month
@@ -27,14 +29,14 @@ jobs:
         init-shell: bash
     - name: Install RivGraph, dependencies, and Sphinx then build docs
       shell: bash -l {0}
-    run: |
-      conda activate rivgraph
-      python -m pip install --upgrade pip
-      pip install -e .  
-      pip install sphinx sphinx-rtd-theme sphinx-gallery ipython ipykernel
-      sudo apt update -y && sudo apt install -y latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended dvipng
-      (cd docs && make docs)
-      (cd docs && make html)
+      run: |
+        conda activate rivgraph
+        python -m pip install --upgrade pip
+        pip install -e .  
+        pip install sphinx sphinx-rtd-theme sphinx-gallery ipython ipykernel
+        sudo apt update -y && sudo apt install -y latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended dvipng
+        (cd docs && make docs)
+        (cd docs && make html)
     - name: Debug
       run: |
         echo $REF
