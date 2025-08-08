@@ -32,7 +32,7 @@ jobs:
           conda env list
           conda info
           conda list
-          conda install -c conda-forge pip
+          conda env update --file environment.yml
           pip install pytest pytest-timeout pytest-cov coveralls coverage
           pip install --upgrade -e .
           coverage run -m pytest --cov-config=.coveragerc --cov=rivgraph/
