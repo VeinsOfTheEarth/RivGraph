@@ -11,6 +11,12 @@ import networkx as nx
 import rivgraph.directionality as dy
 import rivgraph.ln_utils as lnu
 
+from ._delta_metrics_core import (
+    attach_edge_values,
+    build_delta_graph,
+    solve_steady_state,
+)
+
 """
 This script contains algorithms that were ported from Matlab scripts provided
 by Alejandro Tejedor to compute topologic and dynamic metrics on deltas. The
@@ -27,7 +33,14 @@ Use at your own risk.
 """
 
 
-def compute_delta_metrics(links, nodes):
+def compute_delta_metrics(
+    links,
+    nodes,
+    *,
+    routing="width",
+    inlet=None,
+    inlet_weights=None,
+):    
     """Compute delta metrics."""
     # Delta metrics require a single apex node
     # This is not the ideal way to force a single inlet; adding the super-apex
@@ -341,63 +354,44 @@ def find_inlet_outlet_nodes(A):
     return apex, outlets
 
 
-def compute_steady_state_link_fluxes(G, links, nodes, weight_name='flux_ss'):
-    """Compute steady state fluxes through the network graph.
-
-    Computes the steady state fluxes through links given a directed, weighted,
-    NetworkX graph. The network should have only a single inlet (use either
-    ensure_single_inlet() or add_super_apex() to do this). Additionally,
-    this method will fail if the network has parallel edges. You should first
-    run ln_utils artificial_nodes() function to break parallel edges, then
-    re-compute link widths and lengths. Method after Tejedor et al 2015 [1]_.
-
-    .. [1] Tejedor, Alejandro, et al. "Delta channel networks: 1. A
-       graph‐theoretic approach for studying connectivity and steady state
-       transport on deltaic surfaces."
-       Water Resources Research 51.6 (2015): 3998-4018.
+def compute_steady_state_link_fluxes(
+    G,
+    links,
+    nodes,
+    weight_name="flux_ss",
+    routing="width",
+    inlet=None,
+    inlet_weights=None,
+    validate=True,
+):
+    """
+    Compute steady-state link fluxes.
 
     Parameters
     ----------
-    G : networkx.DiGraph
-        NetworkX DiGraph object from graphiphy()
+    G : networkx graph
+        Kept for backward compatibility but ignored by the new implementation.
     links : dict
-        RivGraph links dictionary
     nodes : dict
-        RivGraph nodes dictionary
     weight_name : str, optional
-        Name to give the new attribute in the links dictionary, is optional,
-        if not provided will be 'flux_ss' (flux steady-state)
-
-    Returns
-    -------
-    links : dict
-        RivGraph links dictionary with new attribute
+    routing : str, optional
+        Routing policy. Currently supports 'width' and 'uniform'.
+    inlet : str, optional
+        Inlet partition policy. Currently supports 'width', 'equal', and 'user'.
+        If None, width-based inlet partitioning is used.
+    inlet_weights : dict, optional
+        Required when inlet='user'. Mapping of inlet node id to nonnegative weight.
+    validate : bool, optional
     """
-    # Normalize the adjacency matrix
-    An = normalize_adj_matrix(G)
-    # Transposed adjacency required for computing F
-    An_t = np.transpose(An)
-    # Compute steady-state flux distribution
-    fluxes, _ = delta_subN_F(An_t)
-
-    # Fluxes are at-a-node and need to be translated to links
-    fluxes = np.expand_dims(fluxes, 1)
-    # Expand node-fluxes back to full adjacency matrix
-    fw = fluxes * An
-    # All nonzero elements in fw represent links where there is flux
-    rows, cols = np.where(fw > 0)
-    Gnodes = list(G.nodes)
-    linkfluxes = np.zeros((len(links['id']), 1))  # Preallocate storage
-    for (r, c) in zip(rows, cols):
-        u = Gnodes[r]
-        v = Gnodes[c]
-        link_id = G.edges[u, v]['linkid']
-        linkfluxes[links['id'].index(link_id)] = fw[r, c]
-
-    # Store the fluxes in the links dict
-    links[weight_name] = np.array(linkfluxes).flatten().tolist()
-
-    return links
+    graph = build_delta_graph(links, nodes)
+    result = solve_steady_state(
+        graph,
+        routing=routing,
+        inlet=inlet,
+        inlet_weights=inlet_weights,
+        validate=validate,
+    )
+    return attach_edge_values(links, result.edge_flux, attr_name=weight_name)
 
 
 def delta_subN_F(A, epsilon=10**-10):
