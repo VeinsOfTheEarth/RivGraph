@@ -14,6 +14,7 @@ import rivgraph.ln_utils as lnu
 from ._delta_metrics_core import (
     attach_edge_values,
     build_delta_graph,
+    build_intermediate_context_from_weighted_adjacency,
     solve_adjacency_steady_state,
     solve_steady_state,
 )
@@ -296,46 +297,28 @@ def normalize_adj_matrix(G):
     return A
 
 
-def intermediate_vars(G):
+def intermediate_vars(G, epsilon=10**-10):
     """
-    Compute interemediate variables and matrices.
+    Compute intermediate variables and matrices.
 
     Computes the intermediate variables and matrices required to compute
     delta metrics. This function prevents the re-computation of many matrices
     required in the metric functions.
 
+    Notes
+    -----
+    Historically this function built several adjacency variants and repeatedly
+    called the legacy eigen-based steady-state solver. The returned dictionary
+    shape is preserved, but the shared plumbing is now handled by the
+    propagation-based core in ``_delta_metrics_core``.
     """
-    deltavars = dict()
-
     # The weighted adjacency matrix (A) of a Directed Acyclic Graph (DAG) has
     # entries a_{uv} that correspond to the fraction of the flux
     # present at node v that flows through the channel (vu). Flux partitioning
     # is done via channel widths.
-
-    # Compute normalized weighted adjacency matrix
     A = normalize_adj_matrix(G)
-
-    deltavars['A_w'] = A.T
-
-    # Apex and outlet nodes
-    deltavars['apex'], deltavars['outlets'] = find_inlet_outlet_nodes(deltavars['A_w'])
-
-    """ Weighted Adj """
-    deltavars['F_w'], deltavars['SubN_w'] = delta_subN_F(deltavars['A_w'])
-
-    """ Weighted transitional"""
-    deltavars['A_w_trans'] = np.matmul(deltavars['A_w'], np.linalg.pinv(np.diag(np.sum(deltavars['A_w'], axis=0))))
-    deltavars['F_w_trans'], deltavars['SubN_w_trans'] = delta_subN_F(deltavars['A_w_trans'])
-
-    """ Unweighted Adj"""
-    deltavars['A_uw'] = np.array(deltavars['A_w'].copy(), dtype=bool)
-    deltavars['F_uw'], deltavars['SubN_uw'] = delta_subN_F(deltavars['A_uw'])
-
-    """ Unweighted transitional"""
-    deltavars['A_uw_trans'] = np.matmul(deltavars['A_uw'], np.linalg.pinv(np.diag(np.sum(deltavars['A_uw'], axis=0))))
-    deltavars['F_uw_trans'], deltavars['SubN_uw_trans'] = delta_subN_F(deltavars['A_uw_trans'])
-
-    return deltavars
+    ctx = build_intermediate_context_from_weighted_adjacency(A.T, atol=epsilon)
+    return ctx.to_legacy_dict()
 
 
 def find_inlet_outlet_nodes(A):

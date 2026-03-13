@@ -319,6 +319,41 @@ def solve_steady_state(
 
 
 
+
+
+@dataclass
+class AdjacencyVariantResult:
+    adjacency: np.ndarray
+    steady_state: "AdjacencySteadyStateResult"
+
+
+@dataclass
+class IntermediateContext:
+    apex: np.ndarray
+    outlets: np.ndarray
+    weighted: AdjacencyVariantResult
+    weighted_transitional: AdjacencyVariantResult
+    unweighted: AdjacencyVariantResult
+    unweighted_transitional: AdjacencyVariantResult
+
+    def to_legacy_dict(self) -> dict[str, np.ndarray]:
+        return {
+            "A_w": self.weighted.adjacency,
+            "F_w": np.squeeze(self.weighted.steady_state.node_flux),
+            "SubN_w": self.weighted.steady_state.subnetwork_membership,
+            "A_w_trans": self.weighted_transitional.adjacency,
+            "F_w_trans": np.squeeze(self.weighted_transitional.steady_state.node_flux),
+            "SubN_w_trans": self.weighted_transitional.steady_state.subnetwork_membership,
+            "A_uw": self.unweighted.adjacency,
+            "F_uw": np.squeeze(self.unweighted.steady_state.node_flux),
+            "SubN_uw": self.unweighted.steady_state.subnetwork_membership,
+            "A_uw_trans": self.unweighted_transitional.adjacency,
+            "F_uw_trans": np.squeeze(self.unweighted_transitional.steady_state.node_flux),
+            "SubN_uw_trans": self.unweighted_transitional.steady_state.subnetwork_membership,
+            "apex": self.apex,
+            "outlets": self.outlets,
+        }
+
 @dataclass
 class AdjacencySteadyStateResult:
     node_flux: np.ndarray
@@ -425,6 +460,50 @@ def solve_adjacency_steady_state(A: np.ndarray, *, atol: float = 1e-12) -> Adjac
         outlets=outlets.astype(int),
         transition_matrix=P,
     )
+
+
+
+def build_intermediate_context_from_weighted_adjacency(
+    A_w: np.ndarray,
+    *,
+    atol: float = 1e-12,
+) -> IntermediateContext:
+    """Build legacy delta-metric intermediates from a weighted adjacency.
+
+    Parameters
+    ----------
+    A_w : np.ndarray
+        Historical delta-metrics adjacency orientation where ``A_w[v, u]`` is
+        the weighted score from upstream node ``u`` to downstream node ``v``.
+        This is typically the transpose of a row-normalized NetworkX adjacency.
+    atol : float, optional
+        Tolerance used for validation and zero-detection.
+    """
+    A_w = np.asarray(A_w, dtype=float)
+    weighted_ss = solve_adjacency_steady_state(A_w, atol=atol)
+
+    A_w_trans = _column_normalize_adjacency(A_w)
+    weighted_trans_ss = solve_adjacency_steady_state(A_w_trans, atol=atol)
+
+    A_uw = (A_w > atol).astype(float)
+    unweighted_ss = solve_adjacency_steady_state(A_uw, atol=atol)
+
+    A_uw_trans = _column_normalize_adjacency(A_uw)
+    unweighted_trans_ss = solve_adjacency_steady_state(A_uw_trans, atol=atol)
+
+    return IntermediateContext(
+        apex=np.array([weighted_ss.apex], dtype=int),
+        outlets=weighted_ss.outlets.astype(int),
+        weighted=AdjacencyVariantResult(adjacency=A_w, steady_state=weighted_ss),
+        weighted_transitional=AdjacencyVariantResult(
+            adjacency=A_w_trans, steady_state=weighted_trans_ss
+        ),
+        unweighted=AdjacencyVariantResult(adjacency=A_uw, steady_state=unweighted_ss),
+        unweighted_transitional=AdjacencyVariantResult(
+            adjacency=A_uw_trans, steady_state=unweighted_trans_ss
+        ),
+    )
+
 
 def attach_edge_values(
     links: dict,
