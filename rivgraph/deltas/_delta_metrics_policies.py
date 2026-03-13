@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Mapping, Protocol, TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from ._delta_metrics_core import DeltaGraph, EdgeRecord
 
@@ -33,6 +35,10 @@ class WidthRoutingPolicy:
             raise KeyError(
                 f"Edge {edge.edge_id} missing routing attribute '{self.attr}'."
             ) from exc
+        if not np.isfinite(score):
+            raise ValueError(
+                f"Edge {edge.edge_id} has non-finite routing score {score}."
+            )
         if score < 0:
             raise ValueError(
                 f"Edge {edge.edge_id} has negative routing score {score}."
@@ -73,6 +79,10 @@ class WidthInletPolicy:
             score = 0.0
             for edge in graph.out_edges(inlet):
                 val = float(edge.attrs.get(self.attr, 0.0))
+                if not np.isfinite(val):
+                    raise ValueError(
+                        f"Inlet edge {edge.edge_id} has non-finite '{self.attr}'={val}."
+                    )
                 if val < 0:
                     raise ValueError(
                         f"Inlet edge {edge.edge_id} has negative '{self.attr}'={val}."
@@ -103,6 +113,8 @@ class UserInletPolicy:
             raise ValueError(f"User-specified inlet weights include non-inlets: {sorted(extra)}")
 
         raw = {nid: float(self.weights[nid]) for nid in graph.inlets}
+        if any(not np.isfinite(v) for v in raw.values()):
+            raise ValueError("Inlet weights must be finite.")
         if any(v < 0 for v in raw.values()):
             raise ValueError("Inlet weights must be nonnegative.")
 

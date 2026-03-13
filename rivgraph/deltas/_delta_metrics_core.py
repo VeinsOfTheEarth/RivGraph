@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass, field
 from typing import Any, Mapping
 
@@ -28,34 +29,43 @@ class DeltaGraph:
     inlets: list[int]
     outlets: list[int]
     node_attrs: dict[int, dict[str, Any]] = field(default_factory=dict)
+    _out_edges_by_node: dict[int, list[EdgeRecord]] = field(init=False, repr=False)
+    _in_edges_by_node: dict[int, list[EdgeRecord]] = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._out_edges_by_node = {nid: [] for nid in self.nodes}
+        self._in_edges_by_node = {nid: [] for nid in self.nodes}
+        for edge in self.edges:
+            self._out_edges_by_node.setdefault(edge.u, []).append(edge)
+            self._in_edges_by_node.setdefault(edge.v, []).append(edge)
 
     def node_index(self) -> dict[int, int]:
         return {nid: i for i, nid in enumerate(self.nodes)}
 
     def out_edges(self, node: int) -> list[EdgeRecord]:
-        return [e for e in self.edges if e.u == node]
+        return list(self._out_edges_by_node.get(node, []))
 
     def in_edges(self, node: int) -> list[EdgeRecord]:
-        return [e for e in self.edges if e.v == node]
+        return list(self._in_edges_by_node.get(node, []))
 
     def successors(self, node: int) -> list[int]:
-        return list(dict.fromkeys(e.v for e in self.out_edges(node)))
+        return list(dict.fromkeys(e.v for e in self._out_edges_by_node.get(node, [])))
 
     def predecessors(self, node: int) -> list[int]:
-        return list(dict.fromkeys(e.u for e in self.in_edges(node)))
+        return list(dict.fromkeys(e.u for e in self._in_edges_by_node.get(node, [])))
 
     def topological_order(self) -> list[int]:
-        indeg = {nid: 0 for nid in self.nodes}
-        succ = {nid: [] for nid in self.nodes}
-        for e in self.edges:
-            indeg[e.v] += 1
-            succ[e.u].append(e.v)
+        indeg = {nid: len(self._in_edges_by_node.get(nid, [])) for nid in self.nodes}
+        succ = {
+            nid: [edge.v for edge in self._out_edges_by_node.get(nid, [])]
+            for nid in self.nodes
+        }
 
-        order = []
-        queue = [nid for nid in self.nodes if indeg[nid] == 0]
+        order: list[int] = []
+        queue = deque(nid for nid in self.nodes if indeg[nid] == 0)
 
         while queue:
-            nid = queue.pop(0)
+            nid = queue.popleft()
             order.append(nid)
             for v in succ[nid]:
                 indeg[v] -= 1
@@ -89,21 +99,50 @@ class SteadyStateResult:
     diagnostics: dict[str, Any] = field(default_factory=dict)
 
 
+def _is_edge_attr_column(values: Any, n_edges: int) -> bool:
+    if isinstance(values, (str, bytes, dict)):
+        return False
+    if not hasattr(values, "__len__"):
+        return False
+    try:
+        return len(values) == n_edges
+    except TypeError:
+        return False
+
+
 def build_delta_graph(links: dict, nodes: dict) -> DeltaGraph:
+    edge_ids = list(links["id"])
+    edge_conns = list(links["conn"])
+    n_edges = len(edge_ids)
+
+    attr_columns = {
+        key: value
+        for key, value in links.items()
+        if _is_edge_attr_column(value, n_edges)
+    }
+
     edges = []
-    for edge_id, conn_idx in zip(links["id"], links["conn"]):
-        lidx = links["id"].index(edge_id)
-        attrs = {k: links[k][lidx] for k in links.keys() if isinstance(links[k], list) and len(links[k]) == len(links["id"])}
-        edges.append(EdgeRecord(edge_id=edge_id, u=conn_idx[0], v=conn_idx[1], attrs=attrs))
+    for edge_idx, (edge_id, conn_idx) in enumerate(zip(edge_ids, edge_conns)):
+        attrs = {key: values[edge_idx] for key, values in attr_columns.items()}
+        edges.append(
+            EdgeRecord(
+                edge_id=edge_id,
+                u=conn_idx[0],
+                v=conn_idx[1],
+                attrs=attrs,
+            )
+        )
 
     node_ids = list(nodes["id"])
     inlet_ids = list(nodes.get("inlets", []))
 
-    # outlets inferred structurally: no outgoing edges
-    outdeg = {nid: 0 for nid in node_ids}
-    for e in edges:
-        outdeg[e.u] += 1
-    outlet_ids = [nid for nid, deg in outdeg.items() if deg == 0]
+    if "outlets" in nodes:
+        outlet_ids = list(nodes["outlets"])
+    else:
+        outdeg = {nid: 0 for nid in node_ids}
+        for edge in edges:
+            outdeg[edge.u] += 1
+        outlet_ids = [nid for nid, deg in outdeg.items() if deg == 0]
 
     return DeltaGraph(
         nodes=node_ids,
@@ -131,17 +170,20 @@ def compute_edge_probabilities(
         if len(out_edges) == 0:
             continue
 
-        scores = np.array([routing.edge_score(graph, e) for e in out_edges], dtype=float)
+        scores = np.array([routing.edge_score(graph, edge) for edge in out_edges], dtype=float)
+        if np.any(~np.isfinite(scores)):
+            raise ValueError(f"Non-finite routing scores found for outgoing edges of node {nid}.")
         if np.any(scores < 0):
             raise ValueError(f"Negative routing scores found for outgoing edges of node {nid}.")
+
         total = float(np.sum(scores))
         if total <= 0:
             raise ValueError(
                 f"Outgoing routing scores for node {nid} sum to {total}; cannot normalize."
             )
 
-        for e, p in zip(out_edges, scores / total):
-            probs[e.edge_id] = float(p)
+        for edge, p in zip(out_edges, scores / total):
+            probs[edge.edge_id] = float(p)
 
     return probs
 
@@ -169,9 +211,9 @@ def propagate_node_fluxes(
         f = flux[nid]
         if f == 0:
             continue
-        for e in graph.out_edges(nid):
-            p = transition.edge_prob[e.edge_id]
-            flux[e.v] += f * p
+        for edge in graph.out_edges(nid):
+            p = transition.edge_prob[edge.edge_id]
+            flux[edge.v] += f * p
 
     return flux
 
@@ -182,8 +224,8 @@ def compute_edge_fluxes(
     edge_prob: dict[int, float],
 ) -> dict[int, float]:
     return {
-        e.edge_id: float(node_flux[e.u] * edge_prob[e.edge_id])
-        for e in graph.edges
+        edge.edge_id: float(node_flux[edge.u] * edge_prob[edge.edge_id])
+        for edge in graph.edges
     }
 
 
@@ -198,7 +240,7 @@ def propagate_subnetwork_membership(
     graph: DeltaGraph,
     transition: TransitionModel,
 ) -> tuple[np.ndarray, list[int]]:
-    node_order = graph.nodes
+    node_order = list(graph.nodes)
     outlet_order = list(graph.outlets)
     node_to_i = {nid: i for i, nid in enumerate(node_order)}
     out_to_j = {nid: j for j, nid in enumerate(outlet_order)}
@@ -215,9 +257,9 @@ def propagate_subnetwork_membership(
         if len(out_edges) == 0:
             continue
         i = node_to_i[nid]
-        for e in out_edges:
-            p = transition.edge_prob[e.edge_id]
-            subn[i, :] += p * subn[node_to_i[e.v], :]
+        for edge in out_edges:
+            p = transition.edge_prob[edge.edge_id]
+            subn[i, :] += p * subn[node_to_i[edge.v], :]
 
     return subn, outlet_order
 
@@ -246,8 +288,8 @@ def solve_steady_state(
     outlet_flux = compute_outlet_fluxes(graph, node_flux)
     subn, outlet_order = propagate_subnetwork_membership(graph, transition)
 
-    total_source = sum(source.values())
-    total_outlet = sum(outlet_flux.values())
+    total_source = float(sum(source.values()))
+    total_outlet = float(sum(outlet_flux.values()))
     mbe = abs(total_source - total_outlet)
 
     if mbe > atol:
@@ -275,6 +317,114 @@ def solve_steady_state(
         },
     )
 
+
+
+@dataclass
+class AdjacencySteadyStateResult:
+    node_flux: np.ndarray
+    subnetwork_membership: np.ndarray
+    apex: int
+    outlets: np.ndarray
+    transition_matrix: np.ndarray
+
+
+def _column_normalize_adjacency(A: np.ndarray) -> np.ndarray:
+    """Normalize adjacency so each non-outlet column sums to one."""
+    A = np.asarray(A, dtype=float)
+    if A.ndim != 2 or A.shape[0] != A.shape[1]:
+        raise ValueError('Adjacency matrix must be square.')
+    colsum = np.sum(A, axis=0, dtype=float)
+    P = np.zeros_like(A, dtype=float)
+    nz = colsum > 0
+    if np.any(nz):
+        P[:, nz] = A[:, nz] / colsum[nz]
+    return P
+
+
+def solve_adjacency_steady_state(A: np.ndarray, *, atol: float = 1e-12) -> AdjacencySteadyStateResult:
+    """Solve steady-state node fluxes and subnetwork membership on a DAG adjacency.
+
+    Parameters
+    ----------
+    A : np.ndarray
+        Square adjacency-like matrix using the historical delta-metrics convention
+        where ``A[v, u]`` is the edge score from upstream node ``u`` to downstream
+        node ``v``. Columns are normalized internally.
+    atol : float, optional
+        Tolerance used only for validation and zero-detection.
+    """
+    A = np.asarray(A, dtype=float)
+    if A.ndim != 2 or A.shape[0] != A.shape[1]:
+        raise ValueError('Adjacency matrix must be square.')
+    if np.any(~np.isfinite(A)):
+        raise ValueError('Adjacency matrix contains non-finite values.')
+    if np.any(A < -atol):
+        raise ValueError('Adjacency matrix contains negative values.')
+
+    # zero-out tiny numerical noise; metrics code often passes boolean or normalized matrices
+    A = A.copy()
+    A[np.abs(A) <= atol] = 0.0
+
+    # Historical convention: rows with no incoming define the unique apex, columns with
+    # no outgoing define outlets.
+    row_sum = np.sum(A, axis=1)
+    col_sum = np.sum(A, axis=0)
+    apexes = np.where(np.abs(row_sum) <= atol)[0]
+    if apexes.size != 1:
+        raise RuntimeError('The graph contains more than one apex.')
+    apex = int(apexes[0])
+    outlets = np.where(np.abs(col_sum) <= atol)[0]
+    if outlets.size == 0:
+        raise ValueError('Adjacency matrix has no outlet nodes.')
+
+    # Build DAG structure from the nonzero pattern of A[v, u].
+    out_neighbors = {u: list(np.where(np.abs(A[:, u]) > atol)[0]) for u in range(A.shape[0])}
+    indeg = {u: int(np.count_nonzero(np.abs(A[u, :]) > atol)) for u in range(A.shape[0])}
+
+    order: list[int] = []
+    queue = deque([u for u, deg in indeg.items() if deg == 0])
+    while queue:
+        u = queue.popleft()
+        order.append(u)
+        for v in out_neighbors[u]:
+            indeg[v] -= 1
+            if indeg[v] == 0:
+                queue.append(v)
+    if len(order) != A.shape[0]:
+        raise ValueError('Adjacency matrix is not acyclic.')
+
+    P = _column_normalize_adjacency(A)
+
+    F = np.zeros(A.shape[0], dtype=float)
+    F[apex] = 1.0
+    for u in order:
+        if F[u] == 0:
+            continue
+        for v in out_neighbors[u]:
+            F[v] += F[u] * P[v, u]
+
+    subn = np.zeros((A.shape[0], outlets.size), dtype=float)
+    for j, outlet in enumerate(outlets):
+        subn[outlet, j] = 1.0
+    outlet_set = set(int(o) for o in outlets.tolist())
+    for u in reversed(order):
+        if u in outlet_set:
+            continue
+        for v in out_neighbors[u]:
+            subn[u, :] += P[v, u] * subn[v, :]
+
+    # QA only; outlet flux should sum to one.
+    mbe = abs(float(np.sum(F[outlets])) - 1.0)
+    if mbe > max(atol, 1e-10):
+        raise ValueError(f'Adjacency steady-state mass balance failed; abs diff={mbe}.')
+
+    return AdjacencySteadyStateResult(
+        node_flux=F,
+        subnetwork_membership=subn,
+        apex=apex,
+        outlets=outlets.astype(int),
+        transition_matrix=P,
+    )
 
 def attach_edge_values(
     links: dict,

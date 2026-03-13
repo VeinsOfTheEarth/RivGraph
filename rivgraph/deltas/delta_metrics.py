@@ -14,6 +14,7 @@ import rivgraph.ln_utils as lnu
 from ._delta_metrics_core import (
     attach_edge_values,
     build_delta_graph,
+    solve_adjacency_steady_state,
     solve_steady_state,
 )
 
@@ -401,7 +402,7 @@ def delta_subN_F(A, epsilon=10**-10):
     Computes the steady state flux distribution in the delta nodes when the
     system is fed with a constant unity influx from the Apex. Also defines the
     subnetworks apex-to-outlet.
-    The SubN is an NxM matrix, where N is number of nodes and M is the number
+    The SubN is an NxM matrix, where N is number of nodes and M is number
     of outlets. For each mth outlet, its contributing subnetwork is given by
     the nonzero entries in SubN. The values in SubN are the degree of
     "belongingness" of each node to its subnetwork. If SubN(m,n) = 0, the m'th
@@ -410,48 +411,17 @@ def delta_subN_F(A, epsilon=10**-10):
     interpreted as the percentage of tracers that pass through node m that
     eventually make their way to the outlet of subnetwork n.
 
+    Notes
+    -----
+    Historically this function used an eigenvalue/nullspace formulation and an
+    epsilon cutoff to recover the steady-state solution. For DAGs, the same
+    quantities can be computed directly by topological propagation, which is
+    more stable and avoids brittle eigenvalue thresholding. The ``epsilon``
+    argument is retained for backward compatibility and is now used only as a
+    validation/zero-detection tolerance.
     """
-    ApexID, OutletsID = find_inlet_outlet_nodes(A)
-
-    """ Computing the steady-state flux, F """
-    # To avoid boundary conditions and with the purpose of computing F, we
-    # create a cycled version of the graph by connecting the outlet nodes
-    # to the apex
-    AC = A.copy()
-    AC[ApexID, OutletsID] = 1
-
-    # F is proportional to the eigenvector corresponding to the zero eigenvalue
-    # of L=I-AC
-    L = np.identity(AC.shape[0]) - np.matmul(AC,
-                                             np.linalg.pinv(
-                                                np.diag(np.sum(AC, axis=0))))
-    d, v = np.linalg.eig(L)
-    # Renormalize eigenvectors so that F at apex equals 1
-    I = np.where(np.abs(d) < epsilon)[0]
-    F = np.abs(v[:, I] / v[ApexID, I])
-
-    """ Computing subnetworks """
-    # R is null space of L(Gr)=Din(Gr-Ar(Gr)) - where Gr is the reverse graph,
-    # Din the in-degree matrix, and Ar the adjacency matrix of Gr
-    Ar = np.transpose(A)
-    Din = np.diag(np.sum(Ar, axis=1))
-    L = Din - Ar
-    d, v = np.linalg.eig(L)
-    # Renormalize eigenvectors to one
-    for i in range(v.shape[1]):
-        # set values below epsilon to 0
-        v[:, i][v[:, i] < epsilon] = 0
-        if np.max(v[:, i]) == 0:
-            continue
-        else:
-            v[:, i] = v[:, i] / np.max(v[:, i])
-
-    # Null space basis
-    SubN = v[:, np.where(np.abs(d) < epsilon)[0]]
-    I = np.where(SubN < epsilon)
-    SubN[I[0], I[1]] = 0
-
-    return np.squeeze(F), SubN
+    result = solve_adjacency_steady_state(A, atol=epsilon)
+    return np.squeeze(result.node_flux), result.subnetwork_membership
 
 
 def nl_entropy_rate(A):
