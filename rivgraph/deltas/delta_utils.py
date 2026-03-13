@@ -77,6 +77,9 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj,
     # Find parallel links
     links, nodes = lnu.find_parallel_links(links, nodes)
 
+    # Add link connectivity (for SWOT)
+    links = lnu.add_link_conn(links, nodes)
+
     return links, nodes
 
 
@@ -169,7 +172,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
 
     # Remove the links beyond the shoreline
     # Intersect links with shoreline
-    shore_int = gpd.sjoin(links_gdf, shore_gdf, op='intersects',
+    shore_int = gpd.sjoin(links_gdf, shore_gdf, predicate='intersects',
                           lsuffix='left')
 
     # Get ids of intersecting links

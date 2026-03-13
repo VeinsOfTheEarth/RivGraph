@@ -1325,7 +1325,7 @@ def dir_set_manually(links, nodes, manual_set_csv):
     if os.path.isfile(manual_set_csv) is False:
         logger.info('No file found for manually setting link directions.')
         io.create_manual_dir_csv(manual_set_csv)
-        logger.info('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
+        logger.info('A .csv file was created for manual fixes to link directions at {}.'.format(manual_set_csv))
 
         return links, nodes
     else:
@@ -1689,8 +1689,8 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
             # is the only unknown link; it is a candidate
             nknown = 0
             for nid in conn:
-                conn_links = nodes['conn'][nodes['id'].index(nid)]
-                nknown = nknown + sum([1 for c in conn_links if links['certain'][links['id'].index(c)] == 1])
+                conn_links_endpixels = nodes['conn'][nodes['id'].index(nid)]
+                nknown = nknown + sum([1 for c in conn_links_endpixels if links['certain'][links['id'].index(c)] == 1])
 
             if nknown > 0:
                 dolinks.append(lid)

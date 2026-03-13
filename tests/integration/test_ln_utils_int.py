@@ -8,14 +8,14 @@ except ImportError:
 from rivgraph import ln_utils
 
 
-def test_conn_links(test_net):
-    """Test out the conn_links() function."""
+def test_conn_links_endpixels(test_net):
+    """Test out the conn_links_endpixels() function."""
     test_net.skeletonize()
     test_net.compute_network()
     # test some and make assertions
-    link_pix_01 = ln_utils.conn_links(test_net.nodes, test_net.links, 139249)
-    link_pix_02 = ln_utils.conn_links(test_net.nodes, test_net.links, 614511)
-    link_pix_03 = ln_utils.conn_links(test_net.nodes, test_net.links, 762395)
+    link_pix_01 = ln_utils.conn_links_endpixels(test_net.nodes, test_net.links, 139249)
+    link_pix_02 = ln_utils.conn_links_endpixels(test_net.nodes, test_net.links, 614511)
+    link_pix_03 = ln_utils.conn_links_endpixels(test_net.nodes, test_net.links, 762395)
     assert link_pix_01 == [139249, 139259, 129862, 139249, 151567, 139249]
     assert link_pix_02 == [744008, 740931, 1320184, 1411025, 2003991, 2000915]
     assert link_pix_03 == [2304222, 2301073]

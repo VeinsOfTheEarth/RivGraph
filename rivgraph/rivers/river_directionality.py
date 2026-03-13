@@ -180,7 +180,7 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
     # if manual_fix == 1:
     #     if os.path.isfile(manual_set_csv) is False:
     #         io.create_manual_dir_csv(manual_set_csv)
-    #         print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
+    #         print('A .csv file for manual fixes to link directions was created at {}.'.format(manual_set_csv))
     #     else:
     #         print('Use the csv file at {} to manually fix link directions.'.format(manual_set_csv))
 
