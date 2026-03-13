@@ -8,8 +8,19 @@ Created on Mon May 21 09:00:01 2018
 """
 import numpy as np
 import networkx as nx
+import warnings
+from copy import deepcopy
 import rivgraph.directionality as dy
 import rivgraph.ln_utils as lnu
+
+from ._delta_metrics_core import (
+    attach_edge_values,
+    build_delta_graph,
+    build_intermediate_context_from_weighted_adjacency,
+    solve_adjacency_steady_state,
+    solve_steady_state,
+)
+from ._delta_metrics_policies import make_inlet_policy
 
 """
 This script contains algorithms that were ported from Matlab scripts provided
@@ -27,16 +38,146 @@ Use at your own risk.
 """
 
 
-def compute_delta_metrics(links, nodes):
-    """Compute delta metrics."""
-    # Delta metrics require a single apex node
-    # This is not the ideal way to force a single inlet; adding the super-apex
-    # is generally a much better approach. It has yet to be tested thoroughly,
-    # though.
-    links_m, nodes_m = ensure_single_inlet(links, nodes)
+def _normalize_mapping_values(mapping):
+    total = float(sum(mapping.values()))
+    if total <= 0:
+        raise ValueError('Inlet weights must sum to a positive value.')
+    return {key: float(val) / total for key, val in mapping.items()}
 
-    # Ensure we have a directed, acyclic graph; also include widths as weights
-    G = graphiphy(links_m, nodes_m, weight='wid_adj')
+
+def _add_super_apex_topologic(links, nodes, inletweights):
+    """Add a synthetic super-apex without needing image geometry.
+
+    Parameters
+    ----------
+    links, nodes : dict
+        RivGraph network dictionaries. These are deep-copied internally.
+    inletweights : sequence[float]
+        Normalized source weights in the same order as ``nodes['inlets']``.
+    """
+    links_edit = deepcopy(links)
+    nodes_edit = deepcopy(nodes)
+
+    ins = list(nodes_edit['inlets'])
+    if len(ins) <= 1:
+        return links_edit, nodes_edit
+
+    if 'idx' not in nodes_edit:
+        raise ValueError("nodes must include 'idx' to add a synthetic super-apex.")
+    if len(inletweights) != len(ins):
+        raise ValueError('One inlet weight is required for each inlet node.')
+
+    apex_idx = max(nodes_edit['idx']) + 1
+
+    for inlet, src_w in zip(ins, inletweights):
+        in_idx = nodes_edit['idx'][nodes_edit['id'].index(inlet)]
+        links_edit, nodes_edit = lnu.add_link(links_edit, nodes_edit, [apex_idx, in_idx])
+
+        if 'wid_adj' in links_edit:
+            links_edit['wid_adj'].append(float(src_w))
+        if 'wid' in links_edit:
+            links_edit['wid'].append(float(src_w))
+        if 'wid_med' in links_edit:
+            links_edit['wid_med'].append(float(src_w))
+        if 'sinuosity' in links_edit:
+            links_edit['sinuosity'].append(float(src_w))
+        if 'len' in links_edit:
+            links_edit['len'].append(0)
+        if 'len_adj' in links_edit:
+            links_edit['len_adj'].append(0)
+
+    nodes_edit['super_apex'] = nodes_edit['id'][-1]
+    return links_edit, nodes_edit
+
+
+def _prepare_metric_network(
+    links,
+    nodes,
+    *,
+    routing='width',
+    inlet=None,
+    inlet_weights=None,
+):
+    """Prepare a graph-ready network for delta metrics.
+
+    Multiple inlets are a boundary-condition problem. When an explicit inlet
+    policy is provided, this preserves all inlets by adding a synthetic
+    super-apex and routing one unit of source flux to the inlet set according
+    to the requested inlet policy. When no inlet policy is provided, the
+    historical single-inlet pruning path is used for backward compatibility.
+
+    Returns
+    -------
+    links_m, nodes_m, graph_weight, inletweights
+    """
+    if routing not in ('width', 'uniform'):
+        raise ValueError(f"Unsupported routing policy '{routing}'.")
+
+    graph_weight = 'wid_adj' if routing == 'width' else None
+    n_inlets = len(nodes.get('inlets', []))
+
+    # Preserve legacy behavior by default for multi-inlet networks, but warn so
+    # callers know a boundary condition is being assumed.
+    if n_inlets > 1 and inlet is None and inlet_weights is None:
+        warnings.warn(
+            'Multiple inlet nodes detected but no inlet partition policy was '
+            'provided. Falling back to legacy single-inlet pruning via '
+            "ensure_single_inlet(). Pass inlet='equal', inlet='width', or "
+            "inlet='user' with inlet_weights to preserve all inlets.",
+            UserWarning,
+            stacklevel=2,
+        )
+        links_m, nodes_m = ensure_single_inlet(links, nodes)
+        return links_m, nodes_m, graph_weight, None
+
+    # Single inlet is unambiguous; keep topology unchanged.
+    if n_inlets <= 1:
+        return deepcopy(links), deepcopy(nodes), graph_weight, None
+
+    graph = build_delta_graph(links, nodes)
+    inlet_policy = make_inlet_policy(inlet, inlet_weights=inlet_weights)
+    source_weights = _normalize_mapping_values(dict(inlet_policy.source_weights(graph)))
+    inletweights = [source_weights[nid] for nid in nodes['inlets']]
+    links_m, nodes_m = _add_super_apex_topologic(links, nodes, inletweights)
+    return links_m, nodes_m, graph_weight, inletweights
+
+
+def compute_delta_metrics(
+    links,
+    nodes,
+    *,
+    routing="width",
+    inlet=None,
+    inlet_weights=None,
+):
+    """Compute delta metrics.
+
+    Parameters
+    ----------
+    links, nodes : dict
+        RivGraph network dictionaries.
+    routing : {"width", "uniform"}, optional
+        Internal bifurcation routing policy used to build the weighted graph
+        consumed by the legacy metric formulas.
+    inlet : {None, "width", "equal", "user"}, optional
+        Boundary-condition policy for multiple-inlet networks. If ``None`` and
+        multiple inlets are present, the historical ``ensure_single_inlet()``
+        pruning path is used with a warning for backward compatibility.
+    inlet_weights : mapping, optional
+        Required when ``inlet='user'``. Maps inlet node ids to nonnegative
+        source weights.
+    """
+    links_m, nodes_m, graph_weight, graph_inletweights = _prepare_metric_network(
+        links,
+        nodes,
+        routing=routing,
+        inlet=inlet,
+        inlet_weights=inlet_weights,
+    )
+
+    # Ensure we have a directed, acyclic graph using the requested routing and
+    # inlet boundary condition.
+    G = graphiphy(links_m, nodes_m, weight=graph_weight, inletweights=graph_inletweights)
 
     if nx.is_directed_acyclic_graph(G) is not True:
         raise RuntimeError('Cannot proceed with metrics as graph is not acyclic.')
@@ -282,46 +423,28 @@ def normalize_adj_matrix(G):
     return A
 
 
-def intermediate_vars(G):
+def intermediate_vars(G, epsilon=10**-10):
     """
-    Compute interemediate variables and matrices.
+    Compute intermediate variables and matrices.
 
     Computes the intermediate variables and matrices required to compute
     delta metrics. This function prevents the re-computation of many matrices
     required in the metric functions.
 
+    Notes
+    -----
+    Historically this function built several adjacency variants and repeatedly
+    called the legacy eigen-based steady-state solver. The returned dictionary
+    shape is preserved, but the shared plumbing is now handled by the
+    propagation-based core in ``_delta_metrics_core``.
     """
-    deltavars = dict()
-
     # The weighted adjacency matrix (A) of a Directed Acyclic Graph (DAG) has
     # entries a_{uv} that correspond to the fraction of the flux
     # present at node v that flows through the channel (vu). Flux partitioning
     # is done via channel widths.
-
-    # Compute normalized weighted adjacency matrix
     A = normalize_adj_matrix(G)
-
-    deltavars['A_w'] = A.T
-
-    # Apex and outlet nodes
-    deltavars['apex'], deltavars['outlets'] = find_inlet_outlet_nodes(deltavars['A_w'])
-
-    """ Weighted Adj """
-    deltavars['F_w'], deltavars['SubN_w'] = delta_subN_F(deltavars['A_w'])
-
-    """ Weighted transitional"""
-    deltavars['A_w_trans'] = np.matmul(deltavars['A_w'], np.linalg.pinv(np.diag(np.sum(deltavars['A_w'], axis=0))))
-    deltavars['F_w_trans'], deltavars['SubN_w_trans'] = delta_subN_F(deltavars['A_w_trans'])
-
-    """ Unweighted Adj"""
-    deltavars['A_uw'] = np.array(deltavars['A_w'].copy(), dtype=bool)
-    deltavars['F_uw'], deltavars['SubN_uw'] = delta_subN_F(deltavars['A_uw'])
-
-    """ Unweighted transitional"""
-    deltavars['A_uw_trans'] = np.matmul(deltavars['A_uw'], np.linalg.pinv(np.diag(np.sum(deltavars['A_uw'], axis=0))))
-    deltavars['F_uw_trans'], deltavars['SubN_uw_trans'] = delta_subN_F(deltavars['A_uw_trans'])
-
-    return deltavars
+    ctx = build_intermediate_context_from_weighted_adjacency(A.T, atol=epsilon)
+    return ctx.to_legacy_dict()
 
 
 def find_inlet_outlet_nodes(A):
@@ -341,63 +464,44 @@ def find_inlet_outlet_nodes(A):
     return apex, outlets
 
 
-def compute_steady_state_link_fluxes(G, links, nodes, weight_name='flux_ss'):
-    """Compute steady state fluxes through the network graph.
-
-    Computes the steady state fluxes through links given a directed, weighted,
-    NetworkX graph. The network should have only a single inlet (use either
-    ensure_single_inlet() or add_super_apex() to do this). Additionally,
-    this method will fail if the network has parallel edges. You should first
-    run ln_utils artificial_nodes() function to break parallel edges, then
-    re-compute link widths and lengths. Method after Tejedor et al 2015 [1]_.
-
-    .. [1] Tejedor, Alejandro, et al. "Delta channel networks: 1. A
-       graph‐theoretic approach for studying connectivity and steady state
-       transport on deltaic surfaces."
-       Water Resources Research 51.6 (2015): 3998-4018.
+def compute_steady_state_link_fluxes(
+    G,
+    links,
+    nodes,
+    weight_name="flux_ss",
+    routing="width",
+    inlet=None,
+    inlet_weights=None,
+    validate=True,
+):
+    """
+    Compute steady-state link fluxes.
 
     Parameters
     ----------
-    G : networkx.DiGraph
-        NetworkX DiGraph object from graphiphy()
+    G : networkx graph
+        Kept for backward compatibility but ignored by the new implementation.
     links : dict
-        RivGraph links dictionary
     nodes : dict
-        RivGraph nodes dictionary
     weight_name : str, optional
-        Name to give the new attribute in the links dictionary, is optional,
-        if not provided will be 'flux_ss' (flux steady-state)
-
-    Returns
-    -------
-    links : dict
-        RivGraph links dictionary with new attribute
+    routing : str, optional
+        Routing policy. Currently supports 'width' and 'uniform'.
+    inlet : str, optional
+        Inlet partition policy. Currently supports 'width', 'equal', and 'user'.
+        If None, width-based inlet partitioning is used.
+    inlet_weights : dict, optional
+        Required when inlet='user'. Mapping of inlet node id to nonnegative weight.
+    validate : bool, optional
     """
-    # Normalize the adjacency matrix
-    An = normalize_adj_matrix(G)
-    # Transposed adjacency required for computing F
-    An_t = np.transpose(An)
-    # Compute steady-state flux distribution
-    fluxes, _ = delta_subN_F(An_t)
-
-    # Fluxes are at-a-node and need to be translated to links
-    fluxes = np.expand_dims(fluxes, 1)
-    # Expand node-fluxes back to full adjacency matrix
-    fw = fluxes * An
-    # All nonzero elements in fw represent links where there is flux
-    rows, cols = np.where(fw > 0)
-    Gnodes = list(G.nodes)
-    linkfluxes = np.zeros((len(links['id']), 1))  # Preallocate storage
-    for (r, c) in zip(rows, cols):
-        u = Gnodes[r]
-        v = Gnodes[c]
-        link_id = G.edges[u, v]['linkid']
-        linkfluxes[links['id'].index(link_id)] = fw[r, c]
-
-    # Store the fluxes in the links dict
-    links[weight_name] = np.array(linkfluxes).flatten().tolist()
-
-    return links
+    graph = build_delta_graph(links, nodes)
+    result = solve_steady_state(
+        graph,
+        routing=routing,
+        inlet=inlet,
+        inlet_weights=inlet_weights,
+        validate=validate,
+    )
+    return attach_edge_values(links, result.edge_flux, attr_name=weight_name)
 
 
 def delta_subN_F(A, epsilon=10**-10):
@@ -407,7 +511,7 @@ def delta_subN_F(A, epsilon=10**-10):
     Computes the steady state flux distribution in the delta nodes when the
     system is fed with a constant unity influx from the Apex. Also defines the
     subnetworks apex-to-outlet.
-    The SubN is an NxM matrix, where N is number of nodes and M is the number
+    The SubN is an NxM matrix, where N is number of nodes and M is number
     of outlets. For each mth outlet, its contributing subnetwork is given by
     the nonzero entries in SubN. The values in SubN are the degree of
     "belongingness" of each node to its subnetwork. If SubN(m,n) = 0, the m'th
@@ -416,48 +520,17 @@ def delta_subN_F(A, epsilon=10**-10):
     interpreted as the percentage of tracers that pass through node m that
     eventually make their way to the outlet of subnetwork n.
 
+    Notes
+    -----
+    Historically this function used an eigenvalue/nullspace formulation and an
+    epsilon cutoff to recover the steady-state solution. For DAGs, the same
+    quantities can be computed directly by topological propagation, which is
+    more stable and avoids brittle eigenvalue thresholding. The ``epsilon``
+    argument is retained for backward compatibility and is now used only as a
+    validation/zero-detection tolerance.
     """
-    ApexID, OutletsID = find_inlet_outlet_nodes(A)
-
-    """ Computing the steady-state flux, F """
-    # To avoid boundary conditions and with the purpose of computing F, we
-    # create a cycled version of the graph by connecting the outlet nodes
-    # to the apex
-    AC = A.copy()
-    AC[ApexID, OutletsID] = 1
-
-    # F is proportional to the eigenvector corresponding to the zero eigenvalue
-    # of L=I-AC
-    L = np.identity(AC.shape[0]) - np.matmul(AC,
-                                             np.linalg.pinv(
-                                                np.diag(np.sum(AC, axis=0))))
-    d, v = np.linalg.eig(L)
-    # Renormalize eigenvectors so that F at apex equals 1
-    I = np.where(np.abs(d) < epsilon)[0]
-    F = np.abs(v[:, I] / v[ApexID, I])
-
-    """ Computing subnetworks """
-    # R is null space of L(Gr)=Din(Gr-Ar(Gr)) - where Gr is the reverse graph,
-    # Din the in-degree matrix, and Ar the adjacency matrix of Gr
-    Ar = np.transpose(A)
-    Din = np.diag(np.sum(Ar, axis=1))
-    L = Din - Ar
-    d, v = np.linalg.eig(L)
-    # Renormalize eigenvectors to one
-    for i in range(v.shape[1]):
-        # set values below epsilon to 0
-        v[:, i][v[:, i] < epsilon] = 0
-        if np.max(v[:, i]) == 0:
-            continue
-        else:
-            v[:, i] = v[:, i] / np.max(v[:, i])
-
-    # Null space basis
-    SubN = v[:, np.where(np.abs(d) < epsilon)[0]]
-    I = np.where(SubN < epsilon)
-    SubN[I[0], I[1]] = 0
-
-    return np.squeeze(F), SubN
+    result = solve_adjacency_steady_state(A, atol=epsilon)
+    return np.squeeze(result.node_flux), result.subnetwork_membership
 
 
 def nl_entropy_rate(A):
