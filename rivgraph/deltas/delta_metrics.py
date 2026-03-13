@@ -8,6 +8,8 @@ Created on Mon May 21 09:00:01 2018
 """
 import numpy as np
 import networkx as nx
+import warnings
+from copy import deepcopy
 import rivgraph.directionality as dy
 import rivgraph.ln_utils as lnu
 
@@ -18,6 +20,7 @@ from ._delta_metrics_core import (
     solve_adjacency_steady_state,
     solve_steady_state,
 )
+from ._delta_metrics_policies import make_inlet_policy
 
 """
 This script contains algorithms that were ported from Matlab scripts provided
@@ -35,6 +38,110 @@ Use at your own risk.
 """
 
 
+def _normalize_mapping_values(mapping):
+    total = float(sum(mapping.values()))
+    if total <= 0:
+        raise ValueError('Inlet weights must sum to a positive value.')
+    return {key: float(val) / total for key, val in mapping.items()}
+
+
+def _add_super_apex_topologic(links, nodes, inletweights):
+    """Add a synthetic super-apex without needing image geometry.
+
+    Parameters
+    ----------
+    links, nodes : dict
+        RivGraph network dictionaries. These are deep-copied internally.
+    inletweights : sequence[float]
+        Normalized source weights in the same order as ``nodes['inlets']``.
+    """
+    links_edit = deepcopy(links)
+    nodes_edit = deepcopy(nodes)
+
+    ins = list(nodes_edit['inlets'])
+    if len(ins) <= 1:
+        return links_edit, nodes_edit
+
+    if 'idx' not in nodes_edit:
+        raise ValueError("nodes must include 'idx' to add a synthetic super-apex.")
+    if len(inletweights) != len(ins):
+        raise ValueError('One inlet weight is required for each inlet node.')
+
+    apex_idx = max(nodes_edit['idx']) + 1
+
+    for inlet, src_w in zip(ins, inletweights):
+        in_idx = nodes_edit['idx'][nodes_edit['id'].index(inlet)]
+        links_edit, nodes_edit = lnu.add_link(links_edit, nodes_edit, [apex_idx, in_idx])
+
+        if 'wid_adj' in links_edit:
+            links_edit['wid_adj'].append(float(src_w))
+        if 'wid' in links_edit:
+            links_edit['wid'].append(float(src_w))
+        if 'wid_med' in links_edit:
+            links_edit['wid_med'].append(float(src_w))
+        if 'sinuosity' in links_edit:
+            links_edit['sinuosity'].append(float(src_w))
+        if 'len' in links_edit:
+            links_edit['len'].append(0)
+        if 'len_adj' in links_edit:
+            links_edit['len_adj'].append(0)
+
+    nodes_edit['super_apex'] = nodes_edit['id'][-1]
+    return links_edit, nodes_edit
+
+
+def _prepare_metric_network(
+    links,
+    nodes,
+    *,
+    routing='width',
+    inlet=None,
+    inlet_weights=None,
+):
+    """Prepare a graph-ready network for delta metrics.
+
+    Multiple inlets are a boundary-condition problem. When an explicit inlet
+    policy is provided, this preserves all inlets by adding a synthetic
+    super-apex and routing one unit of source flux to the inlet set according
+    to the requested inlet policy. When no inlet policy is provided, the
+    historical single-inlet pruning path is used for backward compatibility.
+
+    Returns
+    -------
+    links_m, nodes_m, graph_weight, inletweights
+    """
+    if routing not in ('width', 'uniform'):
+        raise ValueError(f"Unsupported routing policy '{routing}'.")
+
+    graph_weight = 'wid_adj' if routing == 'width' else None
+    n_inlets = len(nodes.get('inlets', []))
+
+    # Preserve legacy behavior by default for multi-inlet networks, but warn so
+    # callers know a boundary condition is being assumed.
+    if n_inlets > 1 and inlet is None and inlet_weights is None:
+        warnings.warn(
+            'Multiple inlet nodes detected but no inlet partition policy was '
+            'provided. Falling back to legacy single-inlet pruning via '
+            "ensure_single_inlet(). Pass inlet='equal', inlet='width', or "
+            "inlet='user' with inlet_weights to preserve all inlets.",
+            UserWarning,
+            stacklevel=2,
+        )
+        links_m, nodes_m = ensure_single_inlet(links, nodes)
+        return links_m, nodes_m, graph_weight, None
+
+    # Single inlet is unambiguous; keep topology unchanged.
+    if n_inlets <= 1:
+        return deepcopy(links), deepcopy(nodes), graph_weight, None
+
+    graph = build_delta_graph(links, nodes)
+    inlet_policy = make_inlet_policy(inlet, inlet_weights=inlet_weights)
+    source_weights = _normalize_mapping_values(dict(inlet_policy.source_weights(graph)))
+    inletweights = [source_weights[nid] for nid in nodes['inlets']]
+    links_m, nodes_m = _add_super_apex_topologic(links, nodes, inletweights)
+    return links_m, nodes_m, graph_weight, inletweights
+
+
 def compute_delta_metrics(
     links,
     nodes,
@@ -42,16 +149,35 @@ def compute_delta_metrics(
     routing="width",
     inlet=None,
     inlet_weights=None,
-):    
-    """Compute delta metrics."""
-    # Delta metrics require a single apex node
-    # This is not the ideal way to force a single inlet; adding the super-apex
-    # is generally a much better approach. It has yet to be tested thoroughly,
-    # though.
-    links_m, nodes_m = ensure_single_inlet(links, nodes)
+):
+    """Compute delta metrics.
 
-    # Ensure we have a directed, acyclic graph; also include widths as weights
-    G = graphiphy(links_m, nodes_m, weight='wid_adj')
+    Parameters
+    ----------
+    links, nodes : dict
+        RivGraph network dictionaries.
+    routing : {"width", "uniform"}, optional
+        Internal bifurcation routing policy used to build the weighted graph
+        consumed by the legacy metric formulas.
+    inlet : {None, "width", "equal", "user"}, optional
+        Boundary-condition policy for multiple-inlet networks. If ``None`` and
+        multiple inlets are present, the historical ``ensure_single_inlet()``
+        pruning path is used with a warning for backward compatibility.
+    inlet_weights : mapping, optional
+        Required when ``inlet='user'``. Maps inlet node ids to nonnegative
+        source weights.
+    """
+    links_m, nodes_m, graph_weight, graph_inletweights = _prepare_metric_network(
+        links,
+        nodes,
+        routing=routing,
+        inlet=inlet,
+        inlet_weights=inlet_weights,
+    )
+
+    # Ensure we have a directed, acyclic graph using the requested routing and
+    # inlet boundary condition.
+    G = graphiphy(links_m, nodes_m, weight=graph_weight, inletweights=graph_inletweights)
 
     if nx.is_directed_acyclic_graph(G) is not True:
         raise RuntimeError('Cannot proceed with metrics as graph is not acyclic.')
