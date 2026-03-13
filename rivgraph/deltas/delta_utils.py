@@ -77,7 +77,7 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj,
     # Find parallel links
     links, nodes = lnu.find_parallel_links(links, nodes)
 
-    # Add link connectivity (for SWOT)
+    # Add link connectivity (for SWORD)
     links = lnu.add_link_conn(links, nodes)
 
     return links, nodes

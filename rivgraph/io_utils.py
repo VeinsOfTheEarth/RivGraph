@@ -140,7 +140,7 @@ def unpickle_links_and_nodes(path_pickle):
 def get_driver(path_file):
     """
     Finds the proper geopandas driver for saving a geodataframe. Keys off the
-    extension in the filename, and supports either shapefiles or geojsons.
+    extension in the filename.
 
     Parameters
     ----------
@@ -153,14 +153,15 @@ def get_driver(path_file):
         Driver string specifying file format when using geopandas' to_file().
 
     """
-    # Write geodataframe to file
-    ext = path_file.split('.')[-1]
+    ext = path_file.split('.')[-1].lower()
     if ext == 'json':
-        driver = 'GeoJSON'
-    elif ext == 'shp':
-        driver = 'ESRI Shapefile'
+        return 'GeoJSON'
+    if ext == 'shp':
+        return 'ESRI Shapefile'
+    if ext == 'gpkg':
+        return 'GPKG'
 
-    return driver
+    raise TypeError(f'Unsupported geovector extension: {ext}')
 
 
 def nodes_to_geofile(nodes, dims, gt, crs, path_export):
@@ -590,28 +591,44 @@ def coords_to_geovector(coords, epsg, path_export):
 
     return
 
-def export_for_sword(links, gdobj, crs, paths, unit, metadata={}):
+
+def _resolve_sword_flux_attr(links, flux_attr=None):
+    """Return the link attribute to use for SWORD-exported fluxes."""
+    if flux_attr is not None:
+        if flux_attr not in links:
+            raise KeyError(f"Requested flux attribute '{flux_attr}' was not found in links.")
+        if len(links[flux_attr]) != len(links['id']):
+            raise ValueError(f"Requested flux attribute '{flux_attr}' does not align with links['id'].")
+        return flux_attr
+
+    for candidate in ('flux_ss', 'flux'):
+        if candidate in links and len(links[candidate]) == len(links['id']):
+            return candidate
+
+    return None
+
+
+def build_sword_geodataframes(links, nodes, gdobj, crs, unit, metadata=None, flux_attr=None):
     """
-    Exports a reaches and nodes shapefiles that are formatted
-    consistently with the SWORD database to the best of RivGraph's ability.
+    Build SWORD-style reaches and nodes GeoDataFrames from a RivGraph network.
 
-    Currently the notion of directionality (upstream/downstream) is not
-    included. An additional flag called dfir_set indicates if the exported
-    data have considered flow directaionality. This will always be False
-    until directionality is implemented into this function.
-
-    Georeferenced fields are exported in WGS84 (EPSG:4326).
+    Directionality and fluxes are exported when available using RG-specific
+    fields so they do not conflict with canonical SWORD attributes.
     """
     if unit != 'meter':
         raise TypeError('Reproject your mask to a meters-based CRS for SWORD exports. Or raise an issue for RivGraph to handle more unit types.')
 
-    node_spacing = 200 # meters, a SWORD default
+    metadata = {} if metadata is None else dict(metadata)
+    node_spacing = 200  # meters, a SWORD default
 
     # Initialize dictionary to store all the segment nodes' properties, including their geometries
-    segprops = ['geometry', 'x', 'y', 'node_id_rg', 'node_len', 'reach_id_R', 'width', 'width_var', 'max_width', 'sinuosity']
+    segprops = ['geometry', 'x', 'y', 'node_id_rg', 'node_len', 'reach_id_R', 'width', 'width_var', 'max_width', 'sinuosity',
+                'fdir_set', 'rg_flux']
     segs = {prop: [] for prop in segprops}
-    reachprops = ['geometry', 'x', 'y', 'reach_id_R', 'reach_len', 'n_nodes', 'width', 'width_var', 'max_width', 'rch_id_up', 'rch_id_dn', 'n_rch_up', 'n_rch_down', 'fdir_set', 'conn_reach']
-    reaches = {prop:[] for prop in reachprops}
+    reachprops = ['geometry', 'x', 'y', 'reach_id_R', 'reach_len', 'n_nodes', 'width', 'width_var', 'max_width',
+                  'rch_id_up', 'rch_id_dn', 'n_rch_up', 'n_rch_down', 'fdir_set', 'conn_reach',
+                  'rg_us_nd', 'rg_ds_nd', 'rg_inlet', 'rg_outlet', 'rg_flux', 'rg_outflx']
+    reaches = {prop: [] for prop in reachprops}
 
     # Define attributes that RG will not compute (some of these are computable by RG) to ensure matching with existing SWORD structure.
     sword_empty_segprops = ['node_id', 'reach_id', 'wse', 'wse_var', 'facc', 'n_chan_max', 'n_chan_mod', 'obstr_type', 'grod_id', 'hfalls_id',
@@ -622,12 +639,30 @@ def export_for_sword(links, gdobj, crs, paths, unit, metadata={}):
                             'type', 'river_name', 'edit_flag', 'trib_flag', 'path_freq', 'path_order', 'path_segs',
                             'main_side', 'strm_order', 'end_reach', 'network']
 
+    node_id_to_index = {nid: i for i, nid in enumerate(nodes['id'])}
+    link_id_to_index = {lid: i for i, lid in enumerate(links['id'])}
+    flow_dirs_available = 'certain' in links and len(links['certain']) == len(links['id'])
+    flux_attr = _resolve_sword_flux_attr(links, flux_attr=flux_attr)
+
     # Make nodes for each link that are at least node_spacing apart
     # SWORD calls these nodes, but RG uses nodes for something different so here we call them segs/segments
     for i in range(len(links['idx'])):
         this_idx = links['idx'][i]
         this_x, this_y = gu.idx_to_coords(this_idx, gdobj)
         this_s, _ = cu.s_ds(this_x, this_y)
+
+        link_id = links['id'][i]
+        link_flux = None if flux_attr is None else float(links[flux_attr][i])
+        link_is_directed = bool(links['certain'][i]) if flow_dirs_available else False
+
+        if link_is_directed:
+            us_node, ds_node = links['conn'][i]
+            outlet_reach = ds_node in nodes.get('outlets', [])
+            inlet_reach = us_node in nodes.get('inlets', [])
+        else:
+            us_node, ds_node = None, None
+            outlet_reach = False
+            inlet_reach = False
 
         # Segment the link, storing the indices along it
         segments = []
@@ -636,8 +671,8 @@ def export_for_sword(links, gdobj, crs, paths, unit, metadata={}):
             if this_s[j] - this_s[start_idx] >= node_spacing:
                 segments.append((start_idx, j))
                 start_idx = j
-        if len(segments) == 0: # If the segment is too short, use the whole thing
-            segments = [[0, len(this_idx)-1]]
+        if len(segments) == 0:  # If the segment is too short, use the whole thing
+            segments = [(0, len(this_idx)-1)]
 
         # Find a central vertex to use as the representative SWORD node (this defines the coordinate of the SWORD node)
         for seg in segments:
@@ -648,22 +683,24 @@ def export_for_sword(links, gdobj, crs, paths, unit, metadata={}):
             segs['y'].append(lat)
             segs['node_id_rg'].append(this_idx[seg_idx])
             segs['node_len'].append(this_s[seg[1]] - this_s[seg[0]])
-            segs['reach_id_R'].append(links['id'][i])
+            segs['reach_id_R'].append(link_id)
             seg_widths = links['wid_pix'][i][seg[0]:seg[1]]
             segs['width'].append(np.mean(seg_widths))
             segs['width_var'].append(np.var(seg_widths))
             segs['max_width'].append(np.max(seg_widths))
             segs['sinuosity'].append(max(0, segs['node_len'][-1] / np.hypot(this_x[seg[1]] - this_x[seg[0]], this_y[seg[1]] - this_y[seg[0]])))
+            segs['fdir_set'].append(link_is_directed)
+            segs['rg_flux'].append(link_flux)
 
         # Handle the SWORD reaches
         reaches['geometry'].append(LineString(zip(this_x, this_y)))
-        reaches['reach_id_R'].append(links['id'][i])
+        reaches['reach_id_R'].append(link_id)
         reaches['reach_len'].append(links['len'][i])
         reaches['n_nodes'].append(len(segments))
         reaches['width'].append(links['wid_adj'][i])
         reaches['width_var'].append(np.var(links['wid_pix'][i]))
         reaches['max_width'].append(max(links['wid_pix'][i]))
-        
+
         # Need a representative x, y (lon, lat) for each reach; use midpoint along reach
         # Must be in WGS84 (EPSG:4326)
         line = reaches['geometry'][-1]
@@ -672,33 +709,51 @@ def export_for_sword(links, gdobj, crs, paths, unit, metadata={}):
         reaches['x'].append(lon)
         reaches['y'].append(lat)
 
-        # Handle directionality if set
-        if 'certain' not in links.keys():
-            reaches['n_rch_up'].append(links['conn'][i][0])
-            reaches['n_rch_down'].append('NA')
-            reaches['rch_id_up'].append(' ')
-            reaches['reach_id_down'].append(' ')
-            reaches['fdir_set'].append(False)
-        else:
-            # Get upstream/downstream reaches
-            conn_nodes = links['conn'][i]
-            us_node, ds_node = conn_nodes[0], conn_nodes[1]
-            conn_links = links['link_conn'][i]
+        # Always compute connected reaches.
+        conn_reach = []
+        for cn in links['conn'][i]:
+            for connected_link in nodes['conn'][node_id_to_index[cn]]:
+                if connected_link != link_id and connected_link not in conn_reach:
+                    conn_reach.append(connected_link)
+
+        if link_is_directed:
             us_links, ds_links = [], []
-            for cl in conn_links:
-                this_link_idx = links['id'].index(cl)
-                this_conn_nodes = links['conn'][this_link_idx]
-                if this_conn_nodes[-1] == conn_nodes[0]: # Upstream links
-                    us_links.append(links['id'][this_link_idx])
-                elif this_conn_nodes[0] == conn_nodes[-1]: # Downstream links
-                    ds_links.append(links['id'][this_link_idx])
+            for cl in nodes['conn'][node_id_to_index[us_node]]:
+                if cl == link_id:
+                    continue
+                this_link_idx = link_id_to_index[cl]
+                if bool(links['certain'][this_link_idx]) and links['conn'][this_link_idx][1] == us_node:
+                    us_links.append(cl)
+            for cl in nodes['conn'][node_id_to_index[ds_node]]:
+                if cl == link_id:
+                    continue
+                this_link_idx = link_id_to_index[cl]
+                if bool(links['certain'][this_link_idx]) and links['conn'][this_link_idx][0] == ds_node:
+                    ds_links.append(cl)
+
             reaches['n_rch_up'].append(len(us_links))
             reaches['n_rch_down'].append(len(ds_links))
             reaches['rch_id_up'].append(' '.join([str(s) for s in us_links]))
             reaches['rch_id_dn'].append(' '.join([str(s) for s in ds_links]))
             reaches['fdir_set'].append(True)
+            reaches['rg_us_nd'].append(us_node)
+            reaches['rg_ds_nd'].append(ds_node)
+            reaches['rg_inlet'].append(inlet_reach)
+            reaches['rg_outlet'].append(outlet_reach)
+        else:
+            reaches['n_rch_up'].append(0)
+            reaches['n_rch_down'].append(0)
+            reaches['rch_id_up'].append('')
+            reaches['rch_id_dn'].append('')
+            reaches['fdir_set'].append(False)
+            reaches['rg_us_nd'].append(None)
+            reaches['rg_ds_nd'].append(None)
+            reaches['rg_inlet'].append(False)
+            reaches['rg_outlet'].append(False)
 
-        reaches['conn_reach'].append(', '.join(str(x) for x in links['link_conn'][i]))
+        reaches['rg_flux'].append(link_flux)
+        reaches['rg_outflx'].append(link_flux if (link_flux is not None and outlet_reach) else None)
+        reaches['conn_reach'].append(', '.join(str(x) for x in conn_reach))
 
     # Convert to GeoDataFrames and write to disk
     sword_nodes = gpd.GeoDataFrame(segs, crs=crs)
@@ -708,18 +763,42 @@ def export_for_sword(links, gdobj, crs, paths, unit, metadata={}):
     sword_nodes = sword_nodes.to_crs(epsg=4326)
     sword_reaches = sword_reaches.to_crs(epsg=4326)
 
-    # Append metadata
-    if metadata:
-        for k in metadata.keys():
-            sword_reaches[k] = metadata[k]
-            sword_nodes[k] = metadata[k]
-
-    # Add all the empty (non-RG-computed but exist in SWORD properties
+    # Add all the empty (non-RG-computed but existing SWORD properties.
     for segempty in sword_empty_segprops:
         sword_nodes[segempty] = None
     for reachempty in sword_empty_reachprops:
         sword_reaches[reachempty] = None
 
-    sword_nodes.to_file(paths['nodes_sword'])
-    sword_reaches.to_file(paths['reaches_sword'])
+    # Append metadata last so user-provided values can intentionally override
+    # placeholder SWORD fields such as `network`.
+    if metadata:
+        for k in metadata.keys():
+            sword_reaches[k] = metadata[k]
+            sword_nodes[k] = metadata[k]
+
+    return sword_nodes, sword_reaches
+
+
+def export_for_sword(links, nodes, gdobj, crs, paths, unit, metadata=None, flux_attr=None):
+    """
+    Export SWORD-style reaches and nodes files from a RivGraph network.
+
+    The export always writes georeferenced fields in EPSG:4326. When flow
+    directions have been assigned, connectivity is written using the standard
+    SWORD upstream/downstream reach fields. When a link-level flux field is
+    available (or explicitly requested), it is exported via RG-specific
+    `rg_*` attributes so the core SWORD schema remains intact.
+    """
+    sword_nodes, sword_reaches = build_sword_geodataframes(
+        links,
+        nodes,
+        gdobj,
+        crs,
+        unit,
+        metadata=metadata,
+        flux_attr=flux_attr,
+    )
+
+    sword_nodes.to_file(paths['nodes_sword'], driver=get_driver(paths['nodes_sword']))
+    sword_reaches.to_file(paths['reaches_sword'], driver=get_driver(paths['reaches_sword']))
     return

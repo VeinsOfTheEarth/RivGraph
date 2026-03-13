@@ -441,7 +441,7 @@ class rivnetwork:
         return A
 
 
-    def to_geovectors(self, export='network', ftype='json', metadata={}):
+    def to_geovectors(self, export='network', ftype='json', metadata=None, flux_attr=None):
         """
         Writes the links and nodes of the network to geovectors.
 
@@ -464,6 +464,8 @@ class rivnetwork:
 
             - centerline_smooth (river classes only)
 
+            - sword (SWORD-style reaches and nodes)
+
         ftype : str
             Sets the output file format. Choose from:
 
@@ -471,14 +473,26 @@ class rivnetwork:
 
             - shp  (ESRI Shapefile)
 
+            - gpkg (GeoPackage)
+
+        metadata : dict, optional
+            Extra fields to append to exported tables.
+        flux_attr : str, optional
+            Link attribute to export as RG flux in SWORD-style outputs. If not
+            provided, RivGraph will use `flux_ss` when available, then `flux`.
+
         """
+        metadata = {} if metadata is None else dict(metadata)
+
         # Get extension for requested output type
         if ftype == 'json':
             ext = 'json'
         elif ftype == 'shp':
             ext = 'shp'
+        elif ftype == 'gpkg':
+            ext = 'gpkg'
         else:
-            raise TypeError('Only json and shp output types are supported.')
+            raise TypeError('Only json, shp, and gpkg output types are supported.')
 
         # Prepare list of desired exports
         if export == 'all':
@@ -525,13 +539,14 @@ class rivnetwork:
             if te == 'sword':
                 if self.unit == 'degree':
                     raise Warning('You are exporting to SWORD format, but this requires a projected CRS (i.e. one with consistent length units). Your units are degrees, so this export will be wrong. Project your mask into a CRS with meters and reanalyze for proper results.')
-                if hasattr(self, 'links') is True:
-                    ext = 'shp'
+                if hasattr(self, 'links') is True and hasattr(self, 'nodes') is True:
                     self.paths['reaches_sword'] = os.path.join(self.paths['basepath'], self.name + '_SWORD_reaches.' + ext)
                     self.paths['nodes_sword'] = os.path.join(self.paths['basepath'], self.name + '_SWORD_nodes.' + ext)
-                    io.export_for_sword(self.links, self.gdobj, self.crs, self.paths, self.unit, metadata=metadata)
+                    io.export_for_sword(self.links, self.nodes, self.gdobj, self.crs, self.paths, self.unit, metadata=metadata, flux_attr=flux_attr)
                     if self.verbose:
                         print(f'SWORD files exported to {self.paths["reaches_sword"]} and {self.paths["nodes_sword"]}.')
+                else:
+                    logger.info('Links/nodes have not been computed and thus cannot be exported to SWORD format.')
 
 
     def to_geotiff(self, export):
