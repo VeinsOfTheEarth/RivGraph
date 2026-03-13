@@ -1,0 +1,20 @@
+name: brahma_clipped
+kind: river
+
+inputs:
+  mask: inputs/mask.tif
+  fixlinks: inputs/fixlinks.csv
+
+params:
+  exit_sides: ns
+
+expectations:
+  max_runtime_seconds: 120
+  has_cycles: true
+  should_assign_directions: true
+
+checks:
+  strict_mask_adherence: true
+  export_formats:
+    - gpkg
+    - shp

@@ -1,0 +1,20 @@
+name: mossy
+kind: delta
+
+inputs:
+  mask: inputs/mask.tif
+  shoreline: inputs/shoreline.shp
+  inlet_nodes: inputs/inlet_nodes.shp
+  fixlinks: inputs/fixlinks.csv
+
+expectations:
+  max_runtime_seconds: 120
+  has_cycles: false
+  should_assign_directions: true
+  should_export_sword: true
+
+checks:
+  strict_mask_adherence: true
+  export_formats:
+    - gpkg
+    - shp
