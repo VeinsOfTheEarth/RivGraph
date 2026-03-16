@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,24 +9,7 @@ description = "Python package for extracting and analyzing river networks from r
 authors = [
   { name = "Jon Schwenk", email = "jonschwenk@gmail.com" }
 ]
-dependencies = [
-  "matplotlib",
-  "scikit-image",
-  "numpy<1.23.0",
-  "scipy<1.9.0",
-  "loguru",
-  "networkx<2.7",
-  "opencv-python",
-  "shapely==1.7.1",
-  "geopandas",
-  "fastdtw",
-  "pytest"
-]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["rivgraph"]
-
-readme = "README.md"
-license = { text = "BSD-3" }
-requires-python = ">=3.7"
+include = ["rivgraph", "rivgraph.*"]
