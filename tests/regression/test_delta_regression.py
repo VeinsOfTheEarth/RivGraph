@@ -3,13 +3,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import geopandas as gpd
 import numpy as np
 import pytest
 
 from tests._helpers import require_rivgraph_classes
 
 
-SUPPORTED_GENERIC_EXPORTS = {"json", "shp"}
+SUPPORTED_GENERIC_EXPORTS = {"json", "shp", "gpkg"}
 
 
 def _build_delta(case, tmp_path: Path, *, use_fixlinks: bool):
@@ -48,14 +49,26 @@ def _build_delta(case, tmp_path: Path, *, use_fixlinks: bool):
 
 
 def _read_sword_outputs(d):
-    import geopandas as gpd
-
     reaches = gpd.read_file(d.paths["reaches_sword"])
     nodes = gpd.read_file(d.paths["nodes_sword"])
     assert len(reaches) > 0
     assert len(nodes) > 0
     assert "fdir_set" in reaches.columns
     return reaches, nodes
+
+
+def _assert_network_export_roundtrip(obj):
+    links = gpd.read_file(obj.paths["links"])
+    nodes = gpd.read_file(obj.paths["nodes"])
+
+    assert len(links) == len(obj.links["id"])
+    assert len(nodes) == len(obj.nodes["id"])
+    assert links.crs is not None
+    assert nodes.crs is not None
+    assert (~links.geometry.is_empty).all()
+    assert (~nodes.geometry.is_empty).all()
+    assert set(links.geometry.geom_type) == {"LineString"}
+    assert set(nodes.geometry.geom_type) == {"Point"}
 
 
 def test_delta_mossy_end_to_end_without_fixlinks(delta_case_mossy, tmp_path):
@@ -76,6 +89,7 @@ def test_delta_mossy_end_to_end_without_fixlinks(delta_case_mossy, tmp_path):
         d.to_geovectors(export="network", ftype=fmt)
         assert d.paths["links"].endswith(f".{fmt}")
         assert d.paths["nodes"].endswith(f".{fmt}")
+        _assert_network_export_roundtrip(d)
 
 
 def test_delta_mossy_end_to_end_with_fixlinks_and_flux(delta_case_mossy, tmp_path):

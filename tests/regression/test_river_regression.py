@@ -1,10 +1,25 @@
 """End-to-end regression test for a real river workflow."""
 from __future__ import annotations
 
+import geopandas as gpd
 import numpy as np
 import pytest
 
 from tests._helpers import require_rivgraph_classes
+
+
+def _assert_network_export_roundtrip(obj):
+    links = gpd.read_file(obj.paths["links"])
+    nodes = gpd.read_file(obj.paths["nodes"])
+
+    assert len(links) == len(obj.links["id"])
+    assert len(nodes) == len(obj.nodes["id"])
+    assert links.crs is not None
+    assert nodes.crs is not None
+    assert (~links.geometry.is_empty).all()
+    assert (~nodes.geometry.is_empty).all()
+    assert set(links.geometry.geom_type) == {"LineString"}
+    assert set(nodes.geometry.geom_type) == {"Point"}
 
 
 def test_river_brahma_clipped_end_to_end(river_case_brahma_clipped, tmp_path):
@@ -43,8 +58,9 @@ def test_river_brahma_clipped_end_to_end(river_case_brahma_clipped, tmp_path):
     assert len(r.meshpolys) > 0
     assert len(r.meshlines) > 0
 
-    supported_formats = [fmt for fmt in export_formats if fmt in {"json", "shp"}] or ["shp"]
+    supported_formats = [fmt for fmt in export_formats if fmt in {"json", "shp", "gpkg"}] or ["shp"]
     for fmt in supported_formats:
         r.to_geovectors(export="network", ftype=fmt)
         assert r.paths["links"].endswith(f".{fmt}")
         assert r.paths["nodes"].endswith(f".{fmt}")
+        _assert_network_export_roundtrip(r)

@@ -1536,7 +1536,7 @@ def hand_clean(I, action='erase'):
         Imask = Image.new("1", [Ishape[1], Ishape[0]], 0)
         ImageDraw.Draw(Imask).polygon(coords, outline=1, fill=1)
 
-        return np.array(Imask, dtype=np.bool)
+        return np.array(Imask, dtype=bool)
 
 
     plt.close('all')

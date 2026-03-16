@@ -16,7 +16,7 @@ import rivgraph.im_utils as iu
 import rivgraph.geo_utils as gu
 from scipy.ndimage import distance_transform_edt
 from shapely.geometry import Polygon
-from shapely.ops import cascaded_union
+from shapely.ops import unary_union
 from scipy import stats
 import rivgraph.im_utils as im
 import networkx as nx
@@ -76,7 +76,7 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props, connectivity=2
         if len(cr[0]) <= 2:
             pixgon = [pixagon(cc, rc, pixlen) for cc, rc, in zip(cr[0], cr[1])]
             if len(pixgon) > 1:
-                pixgon = cascaded_union(pixgon)
+                pixgon = unary_union(pixgon)
             pgons.append(pixgon)
         else:
             pgons.append(Polygon(zip(cr[0], cr[1])))

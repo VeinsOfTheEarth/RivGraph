@@ -701,7 +701,7 @@ def isbp_parsimonious(Ic, Icr, Inar, Infr):
     # when walking from all possible branchpoints
     mode = stats.mode([p for b in bpsave for p in b])
     bp_init = np.ndarray.tolist(mode.mode)
-    bps = isbp_walk_for_bps(np.array(Ic, dtype=np.bool), bp_init)
+    bps = isbp_walk_for_bps(np.array(Ic, dtype=bool), bp_init)
 
     return bps
 
