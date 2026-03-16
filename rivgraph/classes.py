@@ -710,6 +710,30 @@ class delta(rivnetwork):
         self.links, self.nodes = dd.set_link_directions(self.links, self.nodes, self.imshape, manual_set_csv=self.paths['fixlinks_csv'])
 
 
+    def plot_fluxes(self, *args, **kwargs):
+        """
+        Plot flux-partition results for the delta network.
+
+        Parameters
+        ----------
+        *args, **kwargs
+            Forwarded to :func:`rivgraph.deltas._plot_fluxes.plot_flux_map`.
+
+        Notes
+        -----
+        This requires a computed network with outlet nodes. The default plotting
+        behavior uses ``flux_ss`` for line widths and OpenStreetMap as the
+        basemap. Pass ``show_mask=True`` to draw the input mask beneath the
+        vector layers, and ``outlet_style='color'`` to draw equal-size outlet
+        markers colored by outlet flux instead of scaling the marker sizes.
+        """
+        if hasattr(self, 'links') is False or hasattr(self, 'nodes') is False:
+            raise AttributeError('Network has not yet been computed.')
+        if 'outlets' not in self.nodes:
+            raise AttributeError('Outlet nodes are not available. Run prune_network() first.')
+        from rivgraph.deltas._plot_fluxes import plot_flux_map
+        return plot_flux_map(self.links, self.nodes, self.gdobj, *args, **kwargs)
+
     def compute_topologic_metrics(self):
         """
         Computes a suite of connectivity and network metrics for a delta channel network.
