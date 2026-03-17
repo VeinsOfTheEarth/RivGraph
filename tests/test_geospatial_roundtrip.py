@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from pyproj import CRS
 
-from tests._helpers import require_io_utils
+from tests._helpers import require_io_utils, require_rasters
 
 
 @pytest.fixture()
@@ -111,6 +111,7 @@ def test_links_to_geofile_roundtrip_preserves_crs_geometry_and_attrs(
 
 def test_write_geotiff_roundtrip_preserves_values_and_metadata(tmp_path, geo_context):
     io_utils = require_io_utils()
+    rasters = require_rasters()
     import rasterio
 
     _, gt, crs = geo_context
@@ -129,7 +130,7 @@ def test_write_geotiff_roundtrip_preserves_values_and_metadata(tmp_path, geo_con
     with rasterio.open(path) as ds:
         assert ds is not None
         assert ds.shape == raster.shape
-        assert ds.transform.to_gdal() == gt
+        assert rasters.affine_to_geotransform(ds.transform) == gt
         assert CRS(ds.crs).to_epsg() == crs.to_epsg()
         assert ds.nodata == 999
         assert np.array_equal(ds.read(1), raster)

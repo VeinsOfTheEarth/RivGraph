@@ -4,11 +4,11 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tests._helpers import REGRESSION_DATA_ROOT, require_gdal_bindings, require_rivgraph_classes
+from tests._helpers import REGRESSION_DATA_ROOT, require_raster_runtime, require_rivgraph_classes
 
 
 def _delta_metrics_module():
-    require_gdal_bindings()
+    require_raster_runtime()
     from rivgraph.deltas import delta_metrics
 
     return delta_metrics

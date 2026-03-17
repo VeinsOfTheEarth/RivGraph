@@ -46,7 +46,7 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
         Two-character string of cardinal directions denoting the upstream and
         downsteram sides of the image that the network intersects (e.g. 'SW').
     gt : tuple
-        gdal-type GeoTransform of the original binary mask.
+        Geotransform tuple of the original binary mask.
     meshlines : list
         List of shapely.geometry.LineStrings that define the valleyline mesh.
     meshpolys : list
@@ -210,7 +210,7 @@ def directional_info(links, nodes, Imask, pixlen, exit_sides, gt, meshlines,
         Two-character string of cardinal directions denoting the upstream and
         downsteram sides of the image that the network intersects (e.g. 'SW').
     gt : tuple
-        gdal-type GeoTransform of the original binary mask.
+        Geotransform tuple of the original binary mask.
     meshlines : list
         List of shapely.geometry.LineStrings that define the valleyline mesh.
     meshpolys : list
@@ -530,7 +530,7 @@ def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
     Imask : np.array
         Binary mask of the network.
     gt : tuple
-        gdal-type GeoTransform of the original binary mask.
+        Geotransform tuple of the original binary mask.
     pixlen : float
         Length resolution of each pixel.
 

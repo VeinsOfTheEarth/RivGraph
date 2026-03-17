@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import numpy as np
 
-from tests._helpers import require_gdal_bindings
+from tests._helpers import require_raster_runtime
 
 
 def _walk_module():
-    require_gdal_bindings()
+    require_raster_runtime()
     from rivgraph import walk
 
     return walk

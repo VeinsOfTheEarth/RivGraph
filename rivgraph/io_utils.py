@@ -239,7 +239,7 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
     dims : tuple
         (nrows, ncols) of the original mask from which nodes were derived.
     gt : tuple
-        GDAL geotransform of the original mask from which nodes were derived.
+        Geotransform tuple of the original mask from which nodes were derived.
     crs : pyrpoj.CRS
         CRS object specifying the coordinate reference system of the original
         mask from which nodes were derived.
@@ -288,7 +288,7 @@ def links_to_geofile(links, dims, gt, crs, path_export):
     dims : tuple
         (nrows, ncols) of the original mask from which links were derived.
     gt : tuple
-        GDAL geotransform of the original mask from which links were derived.
+        Geotransform tuple of the original mask from which links were derived.
     crs : pyrpoj.CRS
         CRS object specifying the coordinate reference system of the original
         mask from which links were derived.
@@ -427,7 +427,7 @@ def shapely_list_to_geovectors(shplist, crs, path_export):
     _write_gdf(gdf, path_export)
 
 
-def write_linkdirs_geotiff(links, gdobj, path_export):
+def write_linkdirs_geotiff(links, imshape, gt, wkt, path_export):
     """
     Creates a geotiff where links are colored according to their directionality.
     Pixels in each link are interpolated between 0 and 1 such that the upstream
@@ -439,9 +439,12 @@ def write_linkdirs_geotiff(links, gdobj, path_export):
     ----------
     links : dict
         Network links and associated properties.
-    gdobj :  osgeo.gdal.Dataset
-        GDAL object correspondng to the original mask from which links were
-        derived.
+    imshape : tuple
+        Shape of the source mask raster.
+    gt : tuple
+        Geotransform tuple of the source mask raster.
+    wkt : str
+        WKT representation of the source mask CRS.
     path_export : str
         Path, including .tif extension, where the directions geotiff is
         written.
@@ -452,8 +455,7 @@ def write_linkdirs_geotiff(links, gdobj, path_export):
 
     """
     # Initialize plotting raster
-    I = gdobj.ReadAsArray()
-    I = np.ones((gdobj.RasterYSize, gdobj.RasterXSize), dtype=np.float32)*-1
+    I = np.ones(imshape, dtype=np.float32) * -1
 
     # Loop through links and store each pixel's interpolated value
     for lidcs in links['idx']:
@@ -463,7 +465,7 @@ def write_linkdirs_geotiff(links, gdobj, path_export):
         I[rcidcs] = vals
 
     # Save the geotiff
-    write_geotiff(I, gdobj.GetGeoTransform(), gdobj.GetProjection(), path_export, dtype='float32', nodata=-1)
+    write_geotiff(I, gt, wkt, path_export, dtype='float32', nodata=-1)
 
     return
 
@@ -534,7 +536,7 @@ def _resolve_sword_flux_attr(links, flux_attr=None):
     return None
 
 
-def build_sword_geodataframes(links, nodes, gdobj, crs, unit, metadata=None, flux_attr=None):
+def build_sword_geodataframes(links, nodes, imshape, gt, crs, unit, metadata=None, flux_attr=None):
     """
     Build SWORD-style reaches and nodes GeoDataFrames from a RivGraph network.
 
@@ -574,7 +576,7 @@ def build_sword_geodataframes(links, nodes, gdobj, crs, unit, metadata=None, flu
     # SWORD calls these nodes, but RG uses nodes for something different so here we call them segs/segments
     for i in range(len(links['idx'])):
         this_idx = links['idx'][i]
-        this_x, this_y = gu.idx_to_coords(this_idx, gdobj)
+        this_x, this_y = gu.idx_to_coords(this_idx, imshape, gt)
         this_s, _ = cu.s_ds(this_x, this_y)
 
         link_id = links['id'][i]
@@ -705,7 +707,7 @@ def build_sword_geodataframes(links, nodes, gdobj, crs, unit, metadata=None, flu
     return sword_nodes, sword_reaches
 
 
-def export_for_sword(links, nodes, gdobj, crs, paths, unit, metadata=None, flux_attr=None):
+def export_for_sword(links, nodes, imshape, gt, crs, paths, unit, metadata=None, flux_attr=None):
     """
     Export SWORD-style reaches and nodes files from a RivGraph network.
 
@@ -718,7 +720,8 @@ def export_for_sword(links, nodes, gdobj, crs, paths, unit, metadata=None, flux_
     sword_nodes, sword_reaches = build_sword_geodataframes(
         links,
         nodes,
-        gdobj,
+        imshape,
+        gt,
         crs,
         unit,
         metadata=metadata,

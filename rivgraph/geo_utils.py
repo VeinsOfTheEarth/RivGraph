@@ -63,7 +63,7 @@ def get_unit(crs):
     return unit
 
 
-def geotiff_vals_from_coords(coords, gd_obj):
+def geotiff_vals_from_coords(coords, raster_array, gt):
     """
     Returns pixel values at specific coordinates from a geotiff object.
 
@@ -71,8 +71,10 @@ def geotiff_vals_from_coords(coords, gd_obj):
     ---------
     coords : np.array()
         An Nx2 numpy array, where each row is a (lon, lat) pair.
-    gd_obj : osgeo.gdal.Dataset
-        Geotiff object created with gdal.Open().
+    raster_array : np.ndarray
+        Raster values to sample.
+    gt : tuple
+        Geotransform tuple of the raster.
 
     Returns
     ----------
@@ -82,12 +84,12 @@ def geotiff_vals_from_coords(coords, gd_obj):
 
 
     # Lat/lon to row/col
-    rowcol = coords_to_xy(coords[:, 0], coords[:, 1], gd_obj.GetGeoTransform())
+    rowcol = coords_to_xy(coords[:, 0], coords[:, 1], gt)
 
     # Pull value from raster at row/col
     vals = []
     for rc in rowcol:
-        vals.append(gd_obj.ReadAsArray(int(rc[0]), int(rc[1]), int(1), int(1))[0, 0])
+        vals.append(raster_array[int(rc[1]), int(rc[0])])
 
     return vals
 
@@ -97,9 +99,9 @@ def coords_to_xy(xs, ys, gt):
     return rasters.coords_to_xy(xs, ys, gt)
 
 
-def idx_to_coords(idx, gd_obj):
+def idx_to_coords(idx, imshape, gt):
     """Transforms flat raster indices to projected coordinates."""
-    return rasters.idx_to_coords(idx, (gd_obj.RasterYSize, gd_obj.RasterXSize), gd_obj.GetGeoTransform())
+    return rasters.idx_to_coords(idx, imshape, gt)
 
 
 def xy_to_coords(xs, ys, gt):
@@ -137,11 +139,17 @@ def transform_coords(xs, ys, inputEPSG, outputEPSG):
     return xy
 
 
-def crop_geotif(tif, cropto='first_nonzero', npad=0, outpath=None):
-    """Backward-compatible wrapper around the raster backend crop helper."""
+def crop_geotiff(tif, cropto='first_nonzero', npad=0, outpath=None):
+    """Crop a GeoTIFF using RivGraph's raster backend."""
     return rasters.crop_geotiff(tif, cropto=cropto, npad=npad, outpath=outpath)
 
 
+# Historical misspelling retained as a thin alias.
+def crop_geotif(tif, cropto='first_nonzero', npad=0, outpath=None):
+    """Alias for :func:`crop_geotiff`."""
+    return crop_geotiff(tif, cropto=cropto, npad=npad, outpath=outpath)
+
+
 def downsample_binary_geotiff(input_file, ds_factor, output_name, thresh=None):
-    """Backward-compatible wrapper around the raster backend downsampler."""
+    """Downsample a binary GeoTIFF using RivGraph's raster backend."""
     return rasters.downsample_binary_geotiff(input_file, ds_factor, output_name, thresh=thresh)

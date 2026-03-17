@@ -1,15 +1,13 @@
+"""Raster helpers built on Rasterio.
 
-"""Raster helpers and a small GDAL-compatible compatibility layer.
-
-This module centralizes raster handling on top of Rasterio while exposing a
-light-weight dataset interface for the rest of RivGraph during the backend
-transition.
+This module centralizes raster opening, metadata access, coordinate
+conversions, and GeoTIFF writing. It exposes a small, RivGraph-specific API
+expressed in terms of affine transforms, geotransforms, and arrays.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-import math
 import warnings
 
 import numpy as np
@@ -22,7 +20,24 @@ from rasterio.transform import from_origin
 import rivgraph.im_utils as im
 
 
-_LEGACY_GDAL_DTYPES = {
+__all__ = [
+    "Raster",
+    "ColorTable",
+    "affine_to_geotransform",
+    "geotransform_to_affine",
+    "affine_to_gt",
+    "gt_to_affine",
+    "open_raster",
+    "xy_to_coords",
+    "coords_to_xy",
+    "idx_to_coords",
+    "write_geotiff",
+    "crop_geotiff",
+    "downsample_binary_geotiff",
+]
+
+
+_DTYPE_CODE_MAP = {
     1: 'uint8',
     2: 'uint16',
     3: 'int16',
@@ -37,23 +52,8 @@ _LEGACY_GDAL_DTYPES = {
 }
 
 
-@dataclass
-class RasterBand:
-    """Small stand-in for GDAL's raster band object."""
-
-    dataset: 'RasterDataset'
-    band_index: int = 1
-
-    @property
-    def DataType(self):
-        return np.dtype(self.dataset.dtype).name
-
-    def GetNoDataValue(self):
-        return self.dataset.nodata
-
-
 class ColorTable:
-    """Simple color table with the subset of GDAL-like methods RivGraph uses."""
+    """Simple RGBA color table for single-band raster exports."""
 
     def __init__(self):
         self._entries: dict[int, tuple[int, int, int, int]] = {}
@@ -68,68 +68,91 @@ class ColorTable:
         return dict(self._entries)
 
 
-class RasterDataset:
-    """In-memory raster dataset metadata used as a GDAL replacement."""
+@dataclass
+class Raster:
+    """In-memory raster plus the metadata RivGraph needs downstream."""
 
-    def __init__(self, array, transform, crs=None, nodata=None, path=None):
-        arr = np.asarray(array)
-        if arr.ndim == 3 and arr.shape[0] == 1:
-            arr = arr[0]
-        self.array = arr
-        self.transform = transform if isinstance(transform, Affine) else Affine.from_gdal(*transform)
-        self.crs = CRS.from_user_input(crs) if crs else None
-        self.nodata = nodata
-        self.path = str(path) if path is not None else None
-        self._update_cached_metadata()
+    array: np.ndarray
+    transform: Affine
+    crs: CRS | None = None
+    nodata: float | int | None = None
+    path: str | None = None
+    source_georeferenced: bool = True
 
-    def _update_cached_metadata(self):
-        if self.array.ndim == 2:
-            self.height, self.width = self.array.shape
-            self.count = 1
-        elif self.array.ndim == 3:
-            self.count = self.array.shape[0]
-            self.height, self.width = self.array.shape[1:]
-        else:
-            raise ValueError('Raster array must be 2-D or 3-D.')
-        self.shape = (self.height, self.width)
-        self.gt = self.transform.to_gdal()
-        self.wkt = self.crs.to_wkt() if self.crs is not None else ''
-        self.pixlen = abs(self.gt[1])
-        self.pixarea = abs(self.gt[1] * self.gt[5])
-        self.dtype = self.array.dtype
-        self.RasterYSize = self.height
-        self.RasterXSize = self.width
+    @property
+    def shape(self):
+        return tuple(np.asarray(self.array).shape[-2:])
 
-    def GetGeoTransform(self):
-        return self.gt
+    @property
+    def height(self):
+        return int(self.shape[0])
 
-    def SetGeoTransform(self, gt):
-        self.transform = Affine.from_gdal(*gt)
-        self._update_cached_metadata()
+    @property
+    def width(self):
+        return int(self.shape[1])
 
-    def GetProjection(self):
-        return self.wkt
+    @property
+    def count(self):
+        arr = np.asarray(self.array)
+        return 1 if arr.ndim == 2 else int(arr.shape[0])
 
-    def SetProjection(self, wkt):
-        self.crs = CRS.from_wkt(wkt) if wkt else None
-        self._update_cached_metadata()
+    @property
+    def geotransform(self):
+        return affine_to_geotransform(self.transform)
 
-    def ReadAsArray(self, xoff=0, yoff=0, xsize=None, ysize=None):
-        if xsize is None:
-            xsize = self.width - xoff
-        if ysize is None:
-            ysize = self.height - yoff
-        row_slice = slice(int(yoff), int(yoff) + int(ysize))
-        col_slice = slice(int(xoff), int(xoff) + int(xsize))
-        if self.array.ndim == 2:
-            return np.asarray(self.array[row_slice, col_slice])
-        return np.asarray(self.array[:, row_slice, col_slice])
+    @property
+    def gt(self):
+        return self.geotransform
 
-    def GetRasterBand(self, band_index):
-        return RasterBand(self, band_index)
+    @property
+    def crs_wkt(self):
+        return self.crs.to_wkt() if self.crs is not None else ''
+
+    @property
+    def wkt(self):
+        return self.crs_wkt
+
+    @property
+    def pixel_length(self):
+        return abs(self.geotransform[1])
+
+    @property
+    def pixlen(self):
+        return self.pixel_length
+
+    @property
+    def pixel_area(self):
+        return abs(self.geotransform[1] * self.geotransform[5])
+
+    @property
+    def pixarea(self):
+        return self.pixel_area
+
+    @property
+    def dtype(self):
+        return np.asarray(self.array).dtype
 
 
-def _dummy_transform(shape):
+def affine_to_geotransform(transform: Affine) -> tuple[float, float, float, float, float, float]:
+    """Convert an affine transform to RivGraph's 6-tuple geotransform."""
+    return (transform.c, transform.a, transform.b, transform.f, transform.d, transform.e)
+
+
+# Short alias retained for internal brevity.
+affine_to_gt = affine_to_geotransform
+
+
+def geotransform_to_affine(geotransform) -> Affine:
+    """Convert a RivGraph 6-tuple geotransform to an affine transform."""
+    return Affine(geotransform[1], geotransform[2], geotransform[0], geotransform[4], geotransform[5], geotransform[3])
+
+
+# Short alias retained for internal brevity.
+gt_to_affine = geotransform_to_affine
+
+
+def _default_transform(shape):
+    """Return RivGraph's default geotransform for ungeoreferenced rasters."""
     return from_origin(0.0, float(shape[1]), 1.0, 1.0)
 
 
@@ -141,15 +164,26 @@ def _normalize_dtype(dtype):
     if isinstance(dtype, type) and issubclass(dtype, np.generic):
         return np.dtype(dtype).name
     if isinstance(dtype, int):
-        return _LEGACY_GDAL_DTYPES.get(dtype, 'uint16')
+        return _DTYPE_CODE_MAP.get(dtype, 'uint16')
     try:
         return np.dtype(dtype).name
     except Exception:
         return str(dtype)
 
 
-def open_raster(path, allow_dummy_georef=True):
-    """Open a raster with Rasterio and return RivGraph's compatibility wrapper."""
+def open_raster(path, assign_default_georef=True, allow_dummy_georef=None):
+    """Open a raster with Rasterio and return RivGraph raster metadata.
+
+    Parameters
+    ----------
+    path : str or path-like
+        Raster path to open.
+    assign_default_georef : bool, optional
+        When True, rasters without georeferencing are assigned RivGraph's
+        default 1x1, origin-at-(0, nrows) georeferencing in memory.
+    allow_dummy_georef : bool, optional
+        Deprecated compatibility alias for ``assign_default_georef``.
+    """
     path = Path(path)
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', NotGeoreferencedWarning)
@@ -160,14 +194,27 @@ def open_raster(path, allow_dummy_georef=True):
                 data = data[0]
             crs = src.crs
             transform = src.transform
+            source_georeferenced = (
+                src.crs is not None and src.transform != Affine.identity()
+            )
 
-    if crs is None or transform is None:
-        if not allow_dummy_georef:
+    if allow_dummy_georef is not None:
+        assign_default_georef = allow_dummy_georef
+
+    if not source_georeferenced:
+        if not assign_default_georef:
             raise ValueError(f'Raster {path} has no georeferencing.')
-        transform = _dummy_transform(data.shape[-2:] if np.asarray(data).ndim == 3 else data.shape)
+        transform = _default_transform(data.shape[-2:] if np.asarray(data).ndim == 3 else data.shape)
         crs = CRS.from_epsg(4326)
 
-    return RasterDataset(data, transform, crs=crs, nodata=nodata, path=path)
+    return Raster(
+        np.asarray(data),
+        transform if isinstance(transform, Affine) else geotransform_to_affine(transform),
+        crs=CRS.from_user_input(crs) if crs is not None else None,
+        nodata=nodata,
+        path=str(path),
+        source_georeferenced=source_georeferenced,
+    )
 
 
 def xy_to_coords(xs, ys, gt):
@@ -230,7 +277,7 @@ def write_geotiff(raster, gt, wkt, path_export, dtype='uint16', options=None,
         raise ValueError('Raster must be 2-D or 3-D.')
 
     dtype_name = _normalize_dtype(dtype) or np.asarray(arr_to_write).dtype.name
-    transform = Affine.from_gdal(*gt)
+    transform = geotransform_to_affine(gt)
     crs = CRS.from_wkt(wkt) if wkt else None
 
     profile = {
@@ -255,13 +302,10 @@ def write_geotiff(raster, gt, wkt, path_export, dtype='uint16', options=None,
 
 def crop_geotiff(tif, cropto='first_nonzero', npad=0, outpath=None):
     tif = Path(tif)
-    if outpath is None:
-        output_file = tif.with_name(f'{tif.stem}_cropped.tif')
-    else:
-        output_file = Path(outpath)
+    output_file = tif.with_name(f'{tif.stem}_cropped.tif') if outpath is None else Path(outpath)
 
     src = open_raster(tif)
-    tiffull = src.ReadAsArray()
+    tiffull = src.array
     if cropto != 'first_nonzero':
         raise NotImplementedError('Only cropto="first_nonzero" is supported.')
 
@@ -274,17 +318,16 @@ def crop_geotiff(tif, cropto='first_nonzero', npad=0, outpath=None):
     if npad != 0:
         tifcropped = np.pad(tifcropped, npad, mode='constant', constant_values=False)
 
-    gt = src.GetGeoTransform()
+    gt = src.gt
     ulx = gt[0] + (l - npad) * gt[1]
     uly = gt[3] + (t - npad) * gt[5]
     crop_gt = (ulx, gt[1], gt[2], uly, gt[4], gt[5])
-    dtype_name = _normalize_dtype(src.GetRasterBand(1).DataType)
+    dtype_name = _normalize_dtype(src.array.dtype)
     options = ['BLOCKXSIZE=128', 'BLOCKYSIZE=128', 'TILED=YES']
     if np.issubdtype(np.dtype(dtype_name), np.integer):
         options.append('COMPRESS=LZW')
 
-    write_geotiff(tifcropped, crop_gt, src.GetProjection(), output_file,
-                 dtype=dtype_name, options=options)
+    write_geotiff(tifcropped, crop_gt, src.wkt, output_file, dtype=dtype_name, options=options)
     return str(output_file)
 
 
@@ -292,9 +335,9 @@ def downsample_binary_geotiff(input_file, ds_factor, output_name, thresh=None):
     if ds_factor >= 1.0:
         raise ValueError('ds_factor must be < 1.')
 
-    og = open_raster(input_file)
-    gm = og.GetGeoTransform()
-    img = og.ReadAsArray().astype(np.int32)
+    src = open_raster(input_file)
+    gt = src.gt
+    img = src.array.astype(np.int32)
     img_x, img_y = np.shape(img)
     modfactor = 1 / ds_factor
     if (img_x % modfactor > 0) or (img_y % modfactor > 0):
@@ -304,8 +347,7 @@ def downsample_binary_geotiff(input_file, ds_factor, output_name, thresh=None):
     npad = int(np.max([(img_x - old_x), (img_y - old_y)]))
 
     newimg = np.pad(img, npad, mode='constant')
-    newgm = (gm[0] - npad * gm[1], gm[1], gm[2],
-             gm[3] - npad * gm[5], gm[4], gm[5])
+    newgt = (gt[0] - npad * gt[1], gt[1], gt[2], gt[3] - npad * gt[5], gt[4], gt[5])
 
     rs_x = int(img_x * ds_factor)
     rs_y = int(img_y * ds_factor)
@@ -314,7 +356,6 @@ def downsample_binary_geotiff(input_file, ds_factor, output_name, thresh=None):
     else:
         img_rs = im.downsample_binary_image(newimg, (rs_x, rs_y), thresh)
 
-    dest_gm = (newgm[0], (newgm[1] * img_x) / rs_x, newgm[2],
-               newgm[3], newgm[4], (newgm[5] * img_y) / rs_y)
-    write_geotiff(img_rs, dest_gm, og.GetProjection(), output_name, dtype='uint8')
+    dest_gt = (newgt[0], (newgt[1] * img_x) / rs_x, newgt[2], newgt[3], newgt[4], (newgt[5] * img_y) / rs_y)
+    write_geotiff(img_rs, dest_gt, src.wkt, output_name, dtype='uint8')
     return str(output_name)

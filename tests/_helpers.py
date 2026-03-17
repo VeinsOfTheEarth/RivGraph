@@ -10,8 +10,8 @@ TESTS_ROOT = Path(__file__).resolve().parent
 REGRESSION_DATA_ROOT = TESTS_ROOT / "regression" / "data"
 
 
-def require_gdal_bindings() -> None:
-    """Legacy no-op retained for older tests during the Rasterio migration."""
+def require_raster_runtime() -> None:
+    """No-op hook for tests that require the current raster stack."""
     return
 
 
@@ -30,11 +30,11 @@ def require_io_utils():
 
 
 def require_rasters():
-    """Import the future raster backend module when available."""
+    """Import RivGraph's raster backend module."""
     import pytest
     return pytest.importorskip(
         'rivgraph.rasters',
-        reason='raster backend refactor not yet implemented',
+        reason='rivgraph.rasters is unavailable',
     )
 
 

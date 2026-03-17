@@ -80,7 +80,7 @@ def test_open_raster_reads_array_and_metadata(projected_raster_path: Path):
 def test_open_raster_assigns_dummy_georef_without_mutating_source(ungeoreferenced_raster_path: Path):
     rasters = require_rasters()
 
-    rst = rasters.open_raster(ungeoreferenced_raster_path, allow_dummy_georef=True)
+    rst = rasters.open_raster(ungeoreferenced_raster_path, assign_default_georef=True)
 
     assert rst.shape == (2, 3)
     assert tuple(rst.gt) == (0.0, 1.0, 0.0, 3.0, 0.0, -1.0)
@@ -89,8 +89,10 @@ def test_open_raster_assigns_dummy_georef_without_mutating_source(ungeoreference
     assert rst.pixlen == 1.0
     assert rst.pixarea == 1.0
 
-    with rasterio.open(ungeoreferenced_raster_path) as src:
-        assert src.crs is None
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', rasterio.errors.NotGeoreferencedWarning)
+        with rasterio.open(ungeoreferenced_raster_path) as src:
+            assert src.crs is None
 
 
 def test_coordinate_helpers_are_self_consistent(projected_raster_path: Path):
@@ -128,7 +130,7 @@ def test_write_geotiff_roundtrip_preserves_multiband_data_and_metadata(tmp_path:
     with rasterio.open(path) as src:
         assert src.count == 2
         assert src.shape == raster.shape[:2]
-        assert src.transform.to_gdal() == gt
+        assert rasters.affine_to_geotransform(src.transform) == gt
         assert CRS(src.crs).to_epsg() == 32615
         assert src.nodata == 255
         data = np.moveaxis(src.read(), 0, -1)
@@ -162,7 +164,7 @@ def test_crop_geotiff_updates_data_window_and_transform(tmp_path: Path):
         cropped = src.read(1)
         assert cropped.shape == (4, 5)
         assert np.array_equal(cropped, data[1:5, 2:7])
-        assert src.transform.to_gdal() == (1020.0, 10.0, 0.0, 1990.0, 0.0, -10.0)
+        assert rasters.affine_to_geotransform(src.transform) == (1020.0, 10.0, 0.0, 1990.0, 0.0, -10.0)
 
 
 def test_downsample_binary_geotiff_updates_resolution_and_values(tmp_path: Path):
@@ -199,5 +201,5 @@ def test_downsample_binary_geotiff_updates_resolution_and_values(tmp_path: Path)
         down = src.read(1)
         assert down.shape == (2, 2)
         assert np.array_equal(down, np.array([[1, 0], [0, 1]], dtype=down.dtype))
-        assert src.transform.to_gdal() == (500.0, 40.0, 0.0, 1000.0, 0.0, -40.0)
+        assert rasters.affine_to_geotransform(src.transform) == (500.0, 40.0, 0.0, 1000.0, 0.0, -40.0)
         assert set(np.unique(down)).issubset({0, 1})
