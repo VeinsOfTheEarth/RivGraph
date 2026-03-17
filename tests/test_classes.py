@@ -28,6 +28,7 @@ class TestRivnetwork:
         assert isinstance(network.pixarea, float)
         assert isinstance(network.pixlen, float)
         assert isinstance(network.Imask, np.ndarray)
+        assert hasattr(network, 'gdobj') is False
 
     def test_compute_network(self, tmp_path):
         _, _, rivnetwork = require_rivgraph_classes()

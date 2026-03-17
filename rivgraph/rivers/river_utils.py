@@ -25,7 +25,7 @@ import rivgraph.ln_utils as lnu
 import rivgraph.rivers.centerline_utils as cu
 
 
-def prune_river(links, nodes, exit_sides, Iskel, gdobj):
+def prune_river(links, nodes, exit_sides, Iskel):
     """Prune river network."""
     # Get inlet nodes
     nodes = find_inlet_outlet_nodes(links, nodes, exit_sides, Iskel)
@@ -37,7 +37,7 @@ def prune_river(links, nodes, exit_sides, Iskel, gdobj):
                                                         nodes['outlets']))
 
     # # Add artificial nodes where necessary
-    # links, nodes = lnu.add_artificial_nodes(links, nodes, gdobj)
+    # links, nodes = lnu.add_artificial_nodes(links, nodes, imshape, gt)
     links, nodes = lnu.find_parallel_links(links, nodes)
 
     # Remove sets of links that are disconnected from inlets/outlets except

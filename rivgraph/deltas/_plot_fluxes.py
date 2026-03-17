@@ -20,7 +20,7 @@ def _scale(values, vmin, vmax):
     return [vmin + (v - lo) * (vmax - vmin) / (hi - lo) for v in vals]
 
 
-def outlet_flux_gdf(links, nodes, gdobj):
+def outlet_flux_gdf(links, nodes, imshape, gt, wkt):
     flux_by_outlet = {nid: 0.0 for nid in nodes["outlets"]}
     node_ids = list(nodes["id"])
     for conn, flux in zip(links["conn"], links["flux_ss"]):
@@ -29,29 +29,29 @@ def outlet_flux_gdf(links, nodes, gdobj):
             flux_by_outlet[ds] += float(flux)
 
     outlet_idxs = [nodes["idx"][node_ids.index(nid)] for nid in nodes["outlets"]]
-    xs, ys = gu.idx_to_coords(outlet_idxs, gdobj)
+    xs, ys = gu.idx_to_coords(outlet_idxs, imshape, gt)
     gdf = gpd.GeoDataFrame(
         {
             "node_id": list(nodes["outlets"]),
             "outlet_flux": [flux_by_outlet[nid] for nid in nodes["outlets"]],
         },
         geometry=[Point(x, y) for x, y in zip(xs, ys)],
-        crs=links_to_gdf(links, gdobj).crs,
+        crs=links_to_gdf(links, imshape, gt, wkt).crs,
     )
     return gdf
 
 
-def links_to_gdf(links, gdobj):
-    gdf = lnu.links_to_gpd(links, gdobj).copy()
+def links_to_gdf(links, imshape, gt, wkt):
+    gdf = lnu.links_to_gpd(links, imshape, gt, wkt).copy()
     for key in ("id", "flux_ss", "wid_adj"):
         if key in links and len(links[key]) == len(links["id"]):
             gdf[key] = links[key]
     return gdf
 
 
-def plot_flux_map(links, nodes, gdobj, *, line_attr="flux_ss", basemap=True):
-    links_gdf = links_to_gdf(links, gdobj)
-    outlets_gdf = outlet_flux_gdf(links, nodes, gdobj)
+def plot_flux_map(links, nodes, imshape, gt, wkt, *, line_attr="flux_ss", basemap=True):
+    links_gdf = links_to_gdf(links, imshape, gt, wkt)
+    outlets_gdf = outlet_flux_gdf(links, nodes, imshape, gt, wkt)
 
     plot_crs = "EPSG:3857"
     links_plot = links_gdf.to_crs(plot_crs)

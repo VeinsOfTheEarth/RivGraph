@@ -15,7 +15,7 @@ import rivgraph.geo_utils as gu
 import rivgraph.ln_utils as lnu
 
 
-def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj,
+def prune_delta(links, nodes, shoreline_shp, inlets_shp, imshape, gt, wkt,
                 prune_less):
     """
     Prune a delta network.
@@ -33,9 +33,12 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj,
         path to the shoreline shapefile (polyline)
     inlets_shp : str
         path to the shapefile of inlet locations (point shapefile)
-    gdobj : osgeo.gdal.Dataset
-        gdal object corresponding to the georeferenced input binary channel
-        mask
+    imshape : tuple
+        Shape of the source mask raster.
+    gt : tuple
+        Geotransform tuple of the source mask raster.
+    wkt : str
+        WKT representation of the source mask CRS.
     prune_less : bool
         Boolean to prune the network less... the first spur removal can
         create problems, especially for very small/simple networks.
@@ -49,7 +52,7 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj,
 
     """
     # Get inlet nodes
-    nodes = find_inlet_nodes(nodes, inlets_shp, gdobj)
+    nodes = find_inlet_nodes(nodes, inlets_shp, imshape, gt, wkt)
 
     if prune_less is False:
         # Remove spurs from network (this includes valid inlets and outlets)
@@ -57,7 +60,7 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj,
                                             dontremove=list(nodes['inlets']))
 
     # Clip the network with a shoreline polyline, adding outlet nodes
-    links, nodes = clip_by_shoreline(links, nodes, shoreline_shp, gdobj)
+    links, nodes = clip_by_shoreline(links, nodes, shoreline_shp, imshape, gt, wkt)
 
     # Remove spurs from network (this includes valid inlets and outlets)
     links, nodes = lnu.remove_all_spurs(links, nodes,
@@ -69,7 +72,7 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj,
     links, nodes = lnu.remove_disconnected_bridge_links(links, nodes)
 
     # # Add artificial nodes where necessary
-    # links, nodes = lnu.add_artificial_nodes(links, nodes, gdobj)
+    # links, nodes = lnu.add_artificial_nodes(links, nodes, imshape, gt)
 
     # Remove one-node links
     links, nodes = lnu.remove_single_pixel_links(links, nodes)
@@ -83,7 +86,7 @@ def prune_delta(links, nodes, shoreline_shp, inlets_shp, gdobj,
     return links, nodes
 
 
-def find_inlet_nodes(nodes, inlets_shp, gdobj):
+def find_inlet_nodes(nodes, inlets_shp, imshape, gt, wkt):
     """
     Load inlets from a shapefile.
 
@@ -96,9 +99,12 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
         stores the network's links and their properties
     inlets_shp : str
         path to the shapefile of inlet locations (point shapefile)
-    gdobj : osgeo.gdal.Dataset
-        gdal object corresponding to the georeferenced input binary channel
-        mask
+    imshape : tuple
+        Shape of the source mask raster.
+    gt : tuple
+        Geotransform tuple of the source mask raster.
+    wkt : str
+        WKT representation of the source mask CRS.
 
     Returns
     -------
@@ -109,13 +115,13 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
 
     # Check that CRSs match; reproject inlet points if not
     inlets_gpd = gpd.read_file(inlets_shp)
-    mask_crs = CRS(gdobj.GetProjection())
+    mask_crs = CRS(wkt)
     if inlets_gpd.crs != mask_crs:
         inlets_gpd = inlets_gpd.to_crs(mask_crs)
         logger.info('Provided inlet points file does not have the same CRS as provided mask. Reprojecting.')
 
     # Convert all nodes to xy coordinates for distance search
-    nodes_xy = gu.idx_to_coords(nodes['idx'], gdobj)
+    nodes_xy = gu.idx_to_coords(nodes['idx'], imshape, gt)
 
     # Map provided inlet nodes to actual network nodes
     inlets = []
@@ -131,7 +137,7 @@ def find_inlet_nodes(nodes, inlets_shp, gdobj):
     return nodes
 
 
-def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
+def clip_by_shoreline(links, nodes, shoreline_shp, imshape, gt, wkt):
     """
     Clips links by a provided shoreline shapefile. The largest network is
     presumed to be the delta network and is thus retained. The network should
@@ -145,8 +151,12 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
         stores the network's nodes and their properties
     shoreline_shp : str
         path to the shapefile of shoreline polyline
-    gdobj : osgeo.gdal.Dataset
-        gdal object corresponding to the georeferenced input binary channel mask
+    imshape : tuple
+        Shape of the source mask raster.
+    gt : tuple
+        Geotransform tuple of the source mask raster.
+    wkt : str
+        WKT representation of the source mask CRS.
 
     Returns
     -------
@@ -159,7 +169,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
 
     """
     # Get links as geopandas dataframe
-    links_gdf = lnu.links_to_gpd(links, gdobj)
+    links_gdf = lnu.links_to_gpd(links, imshape, gt, wkt)
 
     # Load the coastline as a geopandas object
     shore_gdf = gpd.read_file(shoreline_shp)
@@ -188,7 +198,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
         # links and the shoreline. Gotta find it first.
         lidx = links['id'].index(clid)
         idcs = links['idx'][lidx][:]
-        coords = gu.idx_to_coords(idcs, gdobj)
+        coords = gu.idx_to_coords(idcs, imshape, gt)
 
         # Intersection coordinates
         int_points = links_gdf['geometry'][list(links_gdf['id'].values).index(clid)].intersection(shore_gdf['geometry'][0])

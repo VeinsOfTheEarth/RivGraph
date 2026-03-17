@@ -1065,7 +1065,7 @@ def remove_single_pixel_links(links, nodes):
     return links, nodes
 
 
-def append_link_lengths(links, gdobj):
+def append_link_lengths(links, imshape, gt):
     """
     Append link lengths to each link.
 
@@ -1081,8 +1081,10 @@ def append_link_lengths(links, gdobj):
     ----------
     links : dict
         Network links and associated properties.
-    gdobj : osgeo.gdal.Dataset
-        GDAL dataset of the original mask, created via gdal.Open().
+    imshape : tuple
+        Shape of the source mask raster.
+    gt : tuple
+        Geotransform tuple of the source mask raster.
 
     Returns
     -------
@@ -1092,7 +1094,7 @@ def append_link_lengths(links, gdobj):
     """
     links['len'] = []
     for idcs in links['idx']:
-        link_coords = gu.idx_to_coords(idcs, gdobj)
+        link_coords = gu.idx_to_coords(idcs, imshape, gt)
         dists = np.sqrt(np.diff(link_coords[0])**2 + np.diff(link_coords[1])**2)
         links['len'].append(np.sum(dists))
 
@@ -1144,7 +1146,7 @@ def find_parallel_links(links, nodes):
     return links, nodes
 
 
-def add_artificial_nodes(links, nodes, gd_obj):
+def add_artificial_nodes(links, nodes, imshape, gt):
     """
     Add artificial nodes.
 
@@ -1173,8 +1175,10 @@ def add_artificial_nodes(links, nodes, gd_obj):
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-    gdobj : osgeo.gdal.Dataset
-        GDAL dataset of the original mask, created via gdal.Open().
+    imshape : tuple
+        Shape of the source mask raster.
+    gt : tuple
+        Geotransform tuple of the source mask raster.
 
     Returns
     -------
@@ -1194,7 +1198,7 @@ def add_artificial_nodes(links, nodes, gd_obj):
 
     # Append lengths if not already
     if 'len' not in links.keys():
-        links = append_link_lengths(links, gd_obj)
+        links = append_link_lengths(links, imshape, gt)
 
     arts = []
     # Add the aritifical node to the proper links
@@ -1212,7 +1216,7 @@ def add_artificial_nodes(links, nodes, gd_obj):
             idx = links['idx'][lidx]
 
             # Break link halfway; must find halfway first
-            coords = gu.idx_to_coords(idx, gd_obj)
+            coords = gu.idx_to_coords(idx, imshape, gt)
             dists = np.cumsum(np.sqrt(np.diff(coords[0])**2 + np.diff(coords[1])**2))
             dists = np.insert(dists, 0, 0)
             halfdist = dists[-1]/2
@@ -1548,7 +1552,7 @@ def plot_network(links, nodes, Imask, name=None, label_links=True, label_nodes=T
     return
 
 
-def links_to_gpd(links, gdobj):
+def links_to_gpd(links, imshape, gt, wkt):
     """
     Convert the links dictionary to a GeoPandas GeoDataFrame.
 
@@ -1556,22 +1560,26 @@ def links_to_gpd(links, gdobj):
     ----------
     links : dict
         Network links and associated properties.
-    gdobj : osgeo.gdal.Dataset
-        DESCRIPTION.
+    imshape : tuple
+        Shape of the source mask raster.
+    gt : tuple
+        Geotransform tuple of the source mask raster.
+    wkt : str
+        WKT representation of the source mask CRS.
 
     Returns
     -------
     links_gpd : TYPE
-        GDAL dataset of the original mask, created via gdal.Open().
+        GeoDataFrame of the link geometries.
 
     """
     # Append geometries
     geoms = []
     for i, lidx in enumerate(links['idx']):
-        coords = gu.idx_to_coords(lidx, gdobj)
+        coords = gu.idx_to_coords(lidx, imshape, gt)
         geoms.append(shapely.geometry.LineString(zip(coords[0], coords[1])))
 
-    links_gpd = gpd.GeoDataFrame(geometry = geoms, crs=CRS(gdobj.GetProjection()))
+    links_gpd = gpd.GeoDataFrame(geometry=geoms, crs=CRS(wkt))
 
     # Append ids and connectivity
     links_gpd['id'] = links['id']

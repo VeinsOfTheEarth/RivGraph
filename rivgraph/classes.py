@@ -8,10 +8,6 @@ Classes for running rivgraph commands on your channel network or centerline.
 import os
 import sys
 from loguru import logger
-try:
-    from osgeo import gdal
-except ModuleNotFoundError:
-    import gdal
 import numpy as np
 import networkx as nx
 from pyproj.crs import CRS
@@ -22,6 +18,7 @@ from shapely.geometry import LineString
 from scipy import signal
 import rivgraph.io_utils as io
 import rivgraph.geo_utils as gu
+import rivgraph.rasters as rasters
 import rivgraph.mask_to_graph as m2g
 import rivgraph.ln_utils as lnu
 import rivgraph.mask_utils as mu
@@ -32,8 +29,6 @@ import rivgraph.rivers.river_directionality as rd
 import rivgraph.rivers.river_utils as ru
 import rivgraph.rivers.centerline_utils as cu
 
-if hasattr(gdal, "UseExceptions"):
-    gdal.UseExceptions()
 
 class rivnetwork:
     """
@@ -82,15 +77,14 @@ class rivnetwork:
             the name of the channel network, usually the river or delta's name
         verbose : bool, optional (False by default)
             True or False to specify if processing updates should be printed.
-        d : osgeo.gdal.Dataset
-            object created by gdal.Open() that provides access to geotiff
-            metadata
+        crs : pyproj.CRS
+            Coordinate reference system of the input mask.
         mask_path : str
             filepath to the input binary channel network mask
         imshape : tuple
             dimensions of the image (rows, cols)
         gt : tuple
-            gdal-type Geotransform of the input mask geotiff
+            Geotransform tuple of the input mask geotiff
         wkt : str
             well known text representation of coordinate reference system of
             input mask geotiff
@@ -112,7 +106,7 @@ class rivnetwork:
             first.
         Imask: numpy.ndarray
             binary mask found at mask_path loaded into a numpy array via
-            `gdal.Open().ReadAsArray()`, dtype=np.bool
+            Loaded binary mask array.
         links: dict
             Stores the links of the network and associated properties
         nodes: dict
@@ -139,25 +133,18 @@ class rivnetwork:
         # ALWAYS writes output to log file (doesn't print if verbose is False)
         self.init_logger()
 
-        # Handle georeferencing
-        # GA_Update required for setting dummy projection/geotransform
-        self.gdobj = gdal.Open(self.paths['input_mask'], gdal.GA_Update)
-        self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
+        # Handle georeferencing through the raster backend
+        raster = rasters.open_raster(self.paths['input_mask'], assign_default_georef=True)
+        self.imshape = raster.shape
 
-        # Create dummy georeferencing if none is supplied
-        if self.gdobj.GetProjection() == '':
-            logger.info('Input mask is unprojected; assigning a dummy projection.')
-            # Creates a dummy projection in EPSG:4326 with UL coordinates (0,0)
-            # and pixel resolution = 1.
-            self.wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]' # 4326
-            self.gdobj.SetProjection(self.wkt)
-            self.gdobj.SetGeoTransform((0, 1, 0, self.imshape[1], 0, -1))
-        else:
-            self.wkt = self.gdobj.GetProjection()
-        self.gt = self.gdobj.GetGeoTransform()
+        if raster.source_georeferenced is False:
+            logger.info('Input mask is unprojected; assigning default georeferencing.')
+
+        self.wkt = raster.wkt
+        self.gt = raster.gt
 
         # Store crs as pyproj CRS object for interacting with geopandas
-        self.crs = CRS(self.gdobj.GetProjection())
+        self.crs = CRS(self.wkt)
         self.unit = gu.get_unit(self.crs)
 
         self.pixarea = abs(self.gt[1] * self.gt[5])
@@ -168,7 +155,7 @@ class rivnetwork:
             self.exit_sides = exit_sides.lower()
 
         # Load mask into memory
-        self.Imask = self.gdobj.ReadAsArray()
+        self.Imask = raster.array
 
 
     def init_logger(self):
@@ -219,7 +206,7 @@ class rivnetwork:
         # Load the distance transform if it already exists
         if 'Idist' in self.paths.keys() and \
             os.path.isfile(self.paths['Idist']) is True:
-            self.Idist = gdal.Open(self.paths['Idist']).ReadAsArray()
+            self.Idist = rasters.open_raster(self.paths['Idist']).array
         else:
             logger.info('Computing distance transform...', end='')
 
@@ -545,7 +532,7 @@ class rivnetwork:
                 if hasattr(self, 'links') is True and hasattr(self, 'nodes') is True:
                     self.paths['reaches_sword'] = os.path.join(self.paths['basepath'], self.name + '_SWORD_reaches.' + ext)
                     self.paths['nodes_sword'] = os.path.join(self.paths['basepath'], self.name + '_SWORD_nodes.' + ext)
-                    io.export_for_sword(self.links, self.nodes, self.gdobj, self.crs, self.paths, self.unit, metadata=metadata, flux_attr=flux_attr)
+                    io.export_for_sword(self.links, self.nodes, self.imshape, self.gt, self.crs, self.paths, self.unit, metadata=metadata, flux_attr=flux_attr)
                     if self.verbose:
                         print(f'SWORD files exported to {self.paths["reaches_sword"]} and {self.paths["nodes_sword"]}.')
                 else:
@@ -572,19 +559,19 @@ class rivnetwork:
 
         if export == 'directions':
             outpath = self.paths['linkdirs']
-            io.write_linkdirs_geotiff(self.links, self.gdobj, outpath)
+            io.write_linkdirs_geotiff(self.links, self.imshape, self.gt, self.wkt, outpath)
         else:
             if export == 'distance':
                 raster = self.Idist
                 outpath = self.paths['Idist']
-                dtype = gdal.GDT_Float32
+                dtype = 'float32'
                 color_table = None
                 options = None
                 nbands = 1
             elif export == 'skeleton':
                 raster = self.Iskel
                 outpath = self.paths['Iskel']
-                dtype = gdal.GDT_Byte
+                dtype = 'uint8'
                 color_table = io.colortable('skel')
                 options=['COMPRESS=LZW']
                 nbands = 1
@@ -639,7 +626,7 @@ class delta(rivnetwork):
 
         # Load the skeleton if it already exists
         if 'Iskel' in self.paths.keys() and os.path.isfile(self.paths['Iskel']) is True:
-            self.Iskel = gdal.Open(self.paths['Iskel']).ReadAsArray()
+            self.Iskel = rasters.open_raster(self.paths['Iskel']).array
 
         else:
             logger.info('Skeletonizing mask...')
@@ -690,7 +677,7 @@ class delta(rivnetwork):
         except AttributeError:
             raise AttributeError('Could not inlet_nodes shapefile which should be at {}.'.format(self.paths['inlet_nodes']))
 
-        self.links, self.nodes = du.prune_delta(self.links, self.nodes, path_shoreline, path_inletnodes, self.gdobj, prune_less)
+        self.links, self.nodes = du.prune_delta(self.links, self.nodes, path_shoreline, path_inletnodes, self.imshape, self.gt, self.wkt, prune_less)
 
 
     def assign_flow_directions(self):
@@ -735,7 +722,7 @@ class delta(rivnetwork):
         if 'outlets' not in self.nodes:
             raise AttributeError('Outlet nodes are not available. Run prune_network() first.')
         from rivgraph.deltas._plot_fluxes import plot_flux_map
-        return plot_flux_map(self.links, self.nodes, self.gdobj, *args, **kwargs)
+        return plot_flux_map(self.links, self.nodes, self.imshape, self.gt, self.wkt, *args, **kwargs)
 
     def compute_topologic_metrics(self):
         """
@@ -815,7 +802,7 @@ class river(rivnetwork):
 
         # Load the skeleton if it already exists
         if 'Iskel' in self.paths.keys() and os.path.isfile(self.paths['Iskel']) is True:
-            self.Iskel = gdal.Open(self.paths['Iskel']).ReadAsArray()
+            self.Iskel = rasters.open_raster(self.paths['Iskel']).array
 
         else:
             logger.info('Skeletonizing mask...')
@@ -836,7 +823,7 @@ class river(rivnetwork):
         if hasattr(self, 'Iskel') is False:
             self.skeletonize()
 
-        self.links, self.nodes = ru.prune_river(self.links, self.nodes, self.exit_sides, self.Iskel, self.gdobj)
+        self.links, self.nodes = ru.prune_river(self.links, self.nodes, self.exit_sides, self.Iskel)
 
 
     def compute_centerline(self):

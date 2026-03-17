@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from pyproj import CRS
 
-from tests._helpers import require_gdal_bindings, require_io_utils
+from tests._helpers import require_io_utils, require_rasters
 
 
 @pytest.fixture()
@@ -111,8 +111,8 @@ def test_links_to_geofile_roundtrip_preserves_crs_geometry_and_attrs(
 
 def test_write_geotiff_roundtrip_preserves_values_and_metadata(tmp_path, geo_context):
     io_utils = require_io_utils()
-    require_gdal_bindings()
-    from osgeo import gdal
+    rasters = require_rasters()
+    import rasterio
 
     _, gt, crs = geo_context
     raster = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint16)
@@ -123,17 +123,17 @@ def test_write_geotiff_roundtrip_preserves_values_and_metadata(tmp_path, geo_con
         gt,
         crs.to_wkt(),
         str(path),
-        dtype=gdal.GDT_UInt16,
+        dtype='uint16',
         nodata=999,
     )
 
-    ds = gdal.Open(str(path))
-    assert ds is not None
-    assert (ds.RasterYSize, ds.RasterXSize) == raster.shape
-    assert ds.GetGeoTransform() == gt
-    assert CRS(ds.GetProjection()).to_epsg() == crs.to_epsg()
-    assert ds.GetRasterBand(1).GetNoDataValue() == 999
-    assert np.array_equal(ds.ReadAsArray(), raster)
+    with rasterio.open(path) as ds:
+        assert ds is not None
+        assert ds.shape == raster.shape
+        assert rasters.affine_to_geotransform(ds.transform) == gt
+        assert CRS(ds.crs).to_epsg() == crs.to_epsg()
+        assert ds.nodata == 999
+        assert np.array_equal(ds.read(1), raster)
 
 
 @pytest.mark.parametrize(

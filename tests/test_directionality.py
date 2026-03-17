@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import networkx as nx
 
-from tests._helpers import require_gdal_bindings
+from tests._helpers import require_raster_runtime
 
 
 def _directionality_module():
-    require_gdal_bindings()
+    require_raster_runtime()
     from rivgraph import directionality as di
 
     return di

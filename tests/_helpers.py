@@ -10,31 +10,32 @@ TESTS_ROOT = Path(__file__).resolve().parent
 REGRESSION_DATA_ROOT = TESTS_ROOT / "regression" / "data"
 
 
-def require_gdal_bindings() -> None:
-    """Skip the calling test if GDAL bindings are unavailable."""
-    for module_name in ("osgeo.gdal", "gdal"):
-        try:
-            importlib.import_module(module_name)
-            return
-        except ModuleNotFoundError:
-            continue
-    pytest.skip("GDAL bindings are required for this test.")
+def require_raster_runtime() -> None:
+    """No-op hook for tests that require the current raster stack."""
+    return
 
 
 def require_rivgraph_classes():
-    """Import RivGraph classes only when GDAL bindings are available."""
-    require_gdal_bindings()
+    """Import RivGraph classes."""
     from rivgraph.classes import delta, river, rivnetwork
 
     return delta, river, rivnetwork
 
 
 def require_io_utils():
-    """Import io_utils only when GDAL bindings are available."""
-    require_gdal_bindings()
+    """Import io_utils."""
     from rivgraph import io_utils
 
     return io_utils
+
+
+def require_rasters():
+    """Import RivGraph's raster backend module."""
+    import pytest
+    return pytest.importorskip(
+        'rivgraph.rasters',
+        reason='rivgraph.rasters is unavailable',
+    )
 
 
 def _coerce_scalar(value: str) -> Any:
