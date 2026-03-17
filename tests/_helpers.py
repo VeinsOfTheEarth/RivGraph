@@ -11,30 +11,31 @@ REGRESSION_DATA_ROOT = TESTS_ROOT / "regression" / "data"
 
 
 def require_gdal_bindings() -> None:
-    """Skip the calling test if GDAL bindings are unavailable."""
-    for module_name in ("osgeo.gdal", "gdal"):
-        try:
-            importlib.import_module(module_name)
-            return
-        except ModuleNotFoundError:
-            continue
-    pytest.skip("GDAL bindings are required for this test.")
+    """Legacy no-op retained for older tests during the Rasterio migration."""
+    return
 
 
 def require_rivgraph_classes():
-    """Import RivGraph classes only when GDAL bindings are available."""
-    require_gdal_bindings()
+    """Import RivGraph classes."""
     from rivgraph.classes import delta, river, rivnetwork
 
     return delta, river, rivnetwork
 
 
 def require_io_utils():
-    """Import io_utils only when GDAL bindings are available."""
-    require_gdal_bindings()
+    """Import io_utils."""
     from rivgraph import io_utils
 
     return io_utils
+
+
+def require_rasters():
+    """Import the future raster backend module when available."""
+    import pytest
+    return pytest.importorskip(
+        'rivgraph.rasters',
+        reason='raster backend refactor not yet implemented',
+    )
 
 
 def _coerce_scalar(value: str) -> Any:

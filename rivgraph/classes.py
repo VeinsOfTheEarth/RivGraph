@@ -8,10 +8,6 @@ Classes for running rivgraph commands on your channel network or centerline.
 import os
 import sys
 from loguru import logger
-try:
-    from osgeo import gdal
-except ModuleNotFoundError:
-    import gdal
 import numpy as np
 import networkx as nx
 from pyproj.crs import CRS
@@ -22,6 +18,7 @@ from shapely.geometry import LineString
 from scipy import signal
 import rivgraph.io_utils as io
 import rivgraph.geo_utils as gu
+import rivgraph.rasters as rasters
 import rivgraph.mask_to_graph as m2g
 import rivgraph.ln_utils as lnu
 import rivgraph.mask_utils as mu
@@ -32,8 +29,6 @@ import rivgraph.rivers.river_directionality as rd
 import rivgraph.rivers.river_utils as ru
 import rivgraph.rivers.centerline_utils as cu
 
-if hasattr(gdal, "UseExceptions"):
-    gdal.UseExceptions()
 
 class rivnetwork:
     """
@@ -139,21 +134,14 @@ class rivnetwork:
         # ALWAYS writes output to log file (doesn't print if verbose is False)
         self.init_logger()
 
-        # Handle georeferencing
-        # GA_Update required for setting dummy projection/geotransform
-        self.gdobj = gdal.Open(self.paths['input_mask'], gdal.GA_Update)
+        # Handle georeferencing through the raster backend
+        self.gdobj = rasters.open_raster(self.paths['input_mask'], allow_dummy_georef=True)
         self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
 
-        # Create dummy georeferencing if none is supplied
         if self.gdobj.GetProjection() == '':
             logger.info('Input mask is unprojected; assigning a dummy projection.')
-            # Creates a dummy projection in EPSG:4326 with UL coordinates (0,0)
-            # and pixel resolution = 1.
-            self.wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]' # 4326
-            self.gdobj.SetProjection(self.wkt)
-            self.gdobj.SetGeoTransform((0, 1, 0, self.imshape[1], 0, -1))
-        else:
-            self.wkt = self.gdobj.GetProjection()
+
+        self.wkt = self.gdobj.GetProjection()
         self.gt = self.gdobj.GetGeoTransform()
 
         # Store crs as pyproj CRS object for interacting with geopandas
@@ -219,7 +207,7 @@ class rivnetwork:
         # Load the distance transform if it already exists
         if 'Idist' in self.paths.keys() and \
             os.path.isfile(self.paths['Idist']) is True:
-            self.Idist = gdal.Open(self.paths['Idist']).ReadAsArray()
+            self.Idist = rasters.open_raster(self.paths['Idist']).ReadAsArray()
         else:
             logger.info('Computing distance transform...', end='')
 
@@ -577,14 +565,14 @@ class rivnetwork:
             if export == 'distance':
                 raster = self.Idist
                 outpath = self.paths['Idist']
-                dtype = gdal.GDT_Float32
+                dtype = 'float32'
                 color_table = None
                 options = None
                 nbands = 1
             elif export == 'skeleton':
                 raster = self.Iskel
                 outpath = self.paths['Iskel']
-                dtype = gdal.GDT_Byte
+                dtype = 'uint8'
                 color_table = io.colortable('skel')
                 options=['COMPRESS=LZW']
                 nbands = 1
@@ -639,7 +627,7 @@ class delta(rivnetwork):
 
         # Load the skeleton if it already exists
         if 'Iskel' in self.paths.keys() and os.path.isfile(self.paths['Iskel']) is True:
-            self.Iskel = gdal.Open(self.paths['Iskel']).ReadAsArray()
+            self.Iskel = rasters.open_raster(self.paths['Iskel']).ReadAsArray()
 
         else:
             logger.info('Skeletonizing mask...')
@@ -815,7 +803,7 @@ class river(rivnetwork):
 
         # Load the skeleton if it already exists
         if 'Iskel' in self.paths.keys() and os.path.isfile(self.paths['Iskel']) is True:
-            self.Iskel = gdal.Open(self.paths['Iskel']).ReadAsArray()
+            self.Iskel = rasters.open_raster(self.paths['Iskel']).ReadAsArray()
 
         else:
             logger.info('Skeletonizing mask...')

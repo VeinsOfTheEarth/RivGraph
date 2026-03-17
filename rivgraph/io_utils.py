@@ -12,24 +12,14 @@ Created on Sun Sep 16 15:15:18 2018
 import os
 import pickle
 import warnings
-try:
-    from osgeo import gdal
-    from osgeo import ogr
-    from osgeo import osr
-except ImportError:
-    import gdal
-    import ogr
-    import osr
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point, LineString
 
 import rivgraph.geo_utils as gu
+import rivgraph.rasters as rasters
 from rivgraph.rivers import centerline_utils as cu
-
-if hasattr(gdal, "UseExceptions"):
-    gdal.UseExceptions()
 
 
 def _shapefile_export_warnings(gdf):
@@ -371,112 +361,28 @@ def centerline_to_geovector(cl, crs, path_export):
     _write_gdf(cl_df, path_export)
 
 
-def write_geotiff(raster, gt, wkt, path_export, dtype=gdal.GDT_UInt16,
+def write_geotiff(raster, gt, wkt, path_export, dtype='uint16',
                   options=['COMPRESS=LZW'], nbands=1, nodata=None,
                   color_table=None):
-    """
-    Writes a georeferenced raster to disk.
-
-    Parameters
-    ----------
-    raster : np.array
-        Image to be written. Shape is (nrows, ncols, nbands), although if only
-        one band is present the shape can be just (nrows, ncols).
-    gt : tuple
-        GDAL geotransform for the raster. Often this can simply be copied from
-        another geotiff via gdal.Open(path_to_geotiff).GetGeoTransform(). Can
-        also be constructed following the gdal convention of
-        (leftmost coordinate, pixel width, xskew, uppermost coordinate, pixel height, yskew).
-        For non-rotated images, the skews will be zero.
-    wkt : str
-        Well-known text describing the coordinate reference system of the raster.
-        Can be copied from another geotiff with gdal.Open(path_to_geotiff).GetProjection().
-    path_export : str
-        Path with extension of the geotiff to export.
-    dtype : gdal.GDT_XXX, optional
-        Gdal data type. Options for XXX include Byte, UInt16, UInt32, Int32,
-        Float32, Float64 and complex types CInt16, Cint32, CFloat32 and CFloat64.
-        If storing decimal data, use a Float type, binary data use Byte type.
-        The default is gdal.GDT_UInt16 (non-float).
-    options : list of strings, optional
-        Options that can be fed to gdal dataset creator. See YYY for what
-        can be specified by options.
-        The default is ['COMPRESS=LZW'].
-    nbands : int, optional
-        Number of bands of the raster. The default is 1.
-    nodata : numeric, optional
-        Pixels with this value will be written as nodata. If None, no nodata
-        value will be considered. The default is None.
-    color_table : gdal.ColorTable, optional
-        Color table to append to the geotiff. Can use colortable() function
-        to create, or create a custom type with gdal.ColorTable().
-        Note that color_tables can only be specified for Byte and UInt16 datatypes.
-        The default is None.
-
-    Returns
-    -------
-    None.
-
-    """
-    height = np.shape(raster)[0]
-    width = np.shape(raster)[1]
-
-    # Add empty dimension for single-band images
-    if len(raster.shape) == 2:
-        raster = np.expand_dims(raster, -1)
-
-    # Prepare destination file
-    driver = gdal.GetDriverByName("GTiff")
-    if options != None:
-        dest = driver.Create(path_export, width, height, nbands, dtype,
-                             options)
-    else:
-        dest = driver.Create(path_export, width, height, nbands, dtype)
-
-    # Write output raster
-    for b in range(nbands):
-        dest.GetRasterBand(b+1).WriteArray(raster[:, :, b])
-
-        if nodata is not None:
-            dest.GetRasterBand(b+1).SetNoDataValue(nodata)
-
-        if color_table != None:
-            dest.GetRasterBand(1).SetRasterColorTable(color_table)
-
-    # Set transform and projection
-    dest.SetGeoTransform(gt)
-    srs = osr.SpatialReference()
-    srs.ImportFromWkt(wkt)
-    dest.SetProjection(srs.ExportToWkt())
-
-    # Close and save output raster dataset
-    dest = None
+    """Writes a georeferenced raster to disk using Rasterio."""
+    rasters.write_geotiff(
+        raster,
+        gt,
+        wkt,
+        path_export,
+        dtype=dtype,
+        options=options,
+        nbands=nbands,
+        nodata=nodata,
+        color_table=color_table,
+    )
 
 
 def colortable(ctype):
-    """
-    Generates a gdal-ingestible color table for a set of pre-defined options.
-    Can add your own colortable options. See https://gdal.org/doxygen/structGDALColorEntry.html
-    and https://gis.stackexchange.com/questions/158195/python-gdal-create-geotiff-from-array-with-colormapping
-    for guidance.
-
-    Parameters
-    ----------
-    ctype : str
-        Specifies the type of colortable to return. Choose from
-        {'binary', 'skel', 'mask', 'tile', or 'GSW'}.
-
-    Returns
-    -------
-    color_table : gdal.ColorTable()
-        Color table that can be supplied to gdal when creating a raster.
-
-    """
-
-    color_table = gdal.ColorTable()
+    """Generates a color table for a set of pre-defined options."""
+    color_table = rasters.ColorTable()
 
     if ctype == 'binary':
-        # Some examples / last value is alpha (transparency).
         color_table.SetColorEntry(0, (0, 0, 0, 0))
         color_table.SetColorEntry(1, (255, 255, 255, 100))
     elif ctype == 'skel':
@@ -518,7 +424,7 @@ def shapely_list_to_geovectors(shplist, crs, path_export):
     """
     gdf = gpd.GeoDataFrame(geometry=shplist)
     gdf.crs = crs
-    gdf.to_file(path_export, driver=get_driver(path_export))
+    _write_gdf(gdf, path_export)
 
 
 def write_linkdirs_geotiff(links, gdobj, path_export):
@@ -557,7 +463,7 @@ def write_linkdirs_geotiff(links, gdobj, path_export):
         I[rcidcs] = vals
 
     # Save the geotiff
-    write_geotiff(I, gdobj.GetGeoTransform(), gdobj.GetProjection(), path_export, dtype=gdal.GDT_Float32, nodata=-1)
+    write_geotiff(I, gdobj.GetGeoTransform(), gdobj.GetProjection(), path_export, dtype='float32', nodata=-1)
 
     return
 
@@ -605,62 +511,10 @@ def coords_from_geovector(path_geovector):
 
 
 def coords_to_geovector(coords, epsg, path_export):
-    """
-    Exports coordinates to a Point shapefile.
-
-    Parameters
-    ----------
-    coords : list-like of list-likes
-        List or tuple of (x, y) coordinates to export.
-    epsg : int
-        EPSG code of the coordinate reference system of the coordinates.
-    path_export : str
-        Path with .shp extension where the shapefile should be saved.
-
-    Returns
-    -------
-    None.
-
-    """
-    # TODO: This should be replaced by a geodataframe creation, but no use cases
-    # yet...
-
-
-    all_coords = []
-    for c in coords:
-        pt = ogr.Geometry(type=ogr.wkbPoint)
-        pt.AddPoint_2D(c[1], c[0])
-        all_coords.append(pt)
-
-    # Write the shapefile
-    driver = ogr.GetDriverByName('ESRI Shapefile')
-    datasource = driver.CreateDataSource(path_export)
-
-    srs = osr.SpatialReference()
-    srs.ImportFromEPSG(epsg)
-
-    layer = datasource.CreateLayer("Coords", srs, ogr.wkbPoint)
-    defn = layer.GetLayerDefn()
-
-    idField = ogr.FieldDefn('id', ogr.OFTInteger)
-    layer.CreateField(idField)
-
-    for i, p in enumerate(all_coords):
-
-        # Create a new feature (attribute and geometry)
-        feat = ogr.Feature(defn)
-        feat.SetField('id', int(i))
-
-        # Make a geometry
-        geom = ogr.CreateGeometryFromWkb(p.ExportToWkb())
-        feat.SetGeometry(geom)
-
-        layer.CreateFeature(feat)
-        feat = geom = None  # destroy these
-
-    # Save and close everything
-    datasource = layer = feat = geom = None
-
+    """Exports coordinates to a Point geovector file."""
+    geometry = [Point(c[0], c[1]) for c in coords]
+    gdf = gpd.GeoDataFrame({'id': list(range(len(geometry)))}, geometry=geometry, crs=f'EPSG:{epsg}')
+    _write_gdf(gdf, path_export)
     return
 
 
