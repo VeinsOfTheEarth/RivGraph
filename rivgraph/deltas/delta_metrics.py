@@ -464,6 +464,80 @@ def find_inlet_outlet_nodes(A):
     return apex, outlets
 
 
+
+def _build_cycle_check_graph(links, nodes):
+    """Build a directed graph preserving RivGraph link ids for diagnostics."""
+    G = nx.MultiDiGraph()
+    G.add_nodes_from(nodes['id'])
+    for lid, conn in zip(links['id'], links['conn']):
+        G.add_edge(conn[0], conn[1], key=lid, link_id=lid)
+    return G
+
+
+def get_dag_diagnostics(links, nodes):
+    """Summarize whether a RivGraph network is a directed acyclic graph.
+
+    Parameters
+    ----------
+    links, nodes : dict
+        RivGraph network dictionaries.
+
+    Returns
+    -------
+    dict
+        Diagnostic summary with boolean ``is_dag`` and, when cyclic, a
+        ``cyclic_regions`` list describing strongly connected components that
+        contain one or more directed cycles.
+    """
+    G = _build_cycle_check_graph(links, nodes)
+    diagnostics = {
+        'is_dag': nx.is_directed_acyclic_graph(G),
+        'n_nodes': len(nodes['id']),
+        'n_links': len(links['id']),
+    }
+
+    if diagnostics['is_dag'] is True:
+        diagnostics['cyclic_regions'] = []
+        return diagnostics
+
+    cyclic_regions = []
+    for comp in nx.strongly_connected_components(G):
+        comp = set(comp)
+        has_self_loop = any(G.has_edge(nid, nid) for nid in comp)
+        if len(comp) == 1 and has_self_loop is False:
+            continue
+
+        comp_links = sorted({
+            data['link_id']
+            for u, v, _k, data in G.edges(keys=True, data=True)
+            if u in comp and v in comp
+        })
+
+        cyclic_regions.append({
+            'nodes': sorted(comp),
+            'links': comp_links,
+        })
+
+    cyclic_regions.sort(key=lambda item: (-len(item['nodes']), -len(item['links']), item['nodes']))
+    diagnostics['cyclic_regions'] = cyclic_regions
+    return diagnostics
+
+
+def assert_dag_for_steady_state(links, nodes):
+    """Raise an informative error if the supplied network is not a DAG."""
+    diagnostics = get_dag_diagnostics(links, nodes)
+    if diagnostics['is_dag'] is True:
+        return
+
+    regions = diagnostics['cyclic_regions']
+    example = regions[0] if len(regions) > 0 else {'nodes': [], 'links': []}
+    raise ValueError(
+        'Cannot compute steady-state fluxes because the directed graph is not acyclic. '
+        f"Detected {len(regions)} cyclic region(s); example nodes={example['nodes']} "
+        f"links={example['links']}. Resolve directed cycles before computing steady-state fluxes."
+    )
+
+
 def compute_steady_state_link_fluxes(
     G,
     links,
@@ -492,7 +566,12 @@ def compute_steady_state_link_fluxes(
     inlet_weights : dict, optional
         Required when inlet='user'. Mapping of inlet node id to nonnegative weight.
     validate : bool, optional
+        When True, require the directed network to be a DAG before propagating
+        steady-state fluxes.
     """
+    if validate is True:
+        assert_dag_for_steady_state(links, nodes)
+
     graph = build_delta_graph(links, nodes)
     result = solve_steady_state(
         graph,
