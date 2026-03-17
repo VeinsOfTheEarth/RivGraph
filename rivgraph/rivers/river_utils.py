@@ -575,29 +575,35 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
             tsect = LineString(eps)
             int_pt = tsect.intersection(cl)
 
-            if int_pt.coords == []:  # There is no intersection
-                # int_pts.append(None)
-                dist_to_int.append(None)
+            # In modern Shapely / GEOS, an empty intersection is represented by
+            # an empty geometry and projecting it onto the centerline returns
+            # ``nan`` rather than the historical ``-1`` sentinel. Treat any
+            # empty or non-finite projection the same way: as no valid
+            # intersection for this transect.
+            if int_pt.is_empty:
+                dist_to_int.append(np.nan)
                 continue
 
             # Project the intersection point to the centerline and return
-            # the along-centerline distance of this point
+            # the along-centerline distance of this point.
             projpt = float(cl.project(int_pt))
-            if projpt == -1: # This catches GEOS Runtime errors (return -1s)
-                dist_to_int.append(None)
+            if not np.isfinite(projpt) or projpt == -1:
+                dist_to_int.append(np.nan)
             else:
-                dist_to_int.append(float(cl.project(int_pt)))
+                dist_to_int.append(projpt)
 
-            # int_pts.append(int_pt)
+        dist_to_int = np.asarray(dist_to_int, dtype=float)
 
-        dist_to_int = np.array(dist_to_int)
+        # Now clip the distances, centerline, and endpoints where there were no intersections.
+        valid_ints = np.isfinite(dist_to_int)
+        dist_to_int = dist_to_int[valid_ints]
+        if dist_to_int.size == 0:
+            raise ValueError('No valid transect-centerline intersections were found while generating the valley mesh.')
 
-        # Now clip the distances, centerline, and endpoints where there were no intersections
-        no_ints = dist_to_int == None
-        dist_to_int = dist_to_int[~no_ints]
-        # int_pts = [ip for i, ip in enumerate(int_pts) if no_ints[i] == False]
-        cl_clip = LineString(zip(np.array(cl.coords.xy[0])[~no_ints], np.array(cl.coords.xy[1])[~no_ints]))
-        ep_clip = [ep for iep, ep in enumerate(endpts) if no_ints[iep] == False]
+        cl_clip = LineString(
+            zip(np.asarray(cl.coords.xy[0])[valid_ints], np.asarray(cl.coords.xy[1])[valid_ints])
+        )
+        ep_clip = [ep for iep, ep in enumerate(endpts) if valid_ints[iep]]
 
         # Reset the origin
         dist_to_int = dist_to_int - dist_to_int[0]
@@ -619,6 +625,16 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
 
             Ao = np.insert(Ao, 0, 0)
             An = np.insert(An, 0, 0)
+
+            # SciPy's euclidean distance expects 1-D vectors, but fastdtw
+            # iterates over the sequence elements and passes individual items
+            # to the distance function. Older dependency combinations were more
+            # permissive here; with modern SciPy, scalar items raise
+            # ``ValueError: Input vector should be 1-D.`` Reshape the 1-D
+            # curvature sequences to column vectors so each time step is a
+            # length-1 vector and euclidean distance remains valid.
+            Ao = np.asarray(Ao).reshape(-1, 1)
+            An = np.asarray(An).reshape(-1, 1)
 
             distance, path = fastdtw(Ao, An, dist=euclidean)
             path = np.array(path)
@@ -799,7 +815,10 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
     dists = np.array([float(d) for d in dists])  # avoid dtype('O') error in numpy.interp
 
     # Now build the interpolating functions
-    dists_to_interpolate = np.arange(0, np.max(dists), grid_spacing)
+    max_dist = float(np.nanmax(dists))
+    if not np.isfinite(max_dist) or max_dist <= 0:
+        raise ValueError('Could not compute a valid set of along-centerline distances for valley mesh interpolation.')
+    dists_to_interpolate = np.arange(0, max_dist, grid_spacing)
     xp_l = np.array([ep[0][0] for ep in ep_clip])
     yp_l = np.array([ep[0][1] for ep in ep_clip])
     xp_r = np.array([ep[1][0] for ep in ep_clip])

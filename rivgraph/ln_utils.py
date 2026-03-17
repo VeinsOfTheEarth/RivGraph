@@ -910,9 +910,10 @@ def remove_all_spurs(links, nodes, dontremove=[]):
         # Remove self-looping links (a link that starts and ends at the same node)
         for nid, con in zip(nodes['id'], nodes['conn']):
             m = mode(con)
-            if m.count[0] > 1:
+            m_count = np.atleast_1d(m.count)[0]
+            if m_count > 1:
                 # Get link
-                looplink = m.mode[0]
+                looplink = np.atleast_1d(m.mode)[0]
                 # Delete link
                 links, nodes = delete_link(links, nodes, looplink)
                 ct = ct + 1

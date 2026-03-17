@@ -9,6 +9,7 @@ Created on Tue Nov  6 14:31:01 2018
 """
 
 import os
+import math
 import numpy as np
 import networkx as nx
 import geopandas as gpd
@@ -551,7 +552,7 @@ def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
     node_gdf = gpd.GeoDataFrame(geometry=[Point(x, y) for x, y in zip(nodecoords[0], nodecoords[1])], index=nodes['id'])
 
     # Determine which meshpoly each node lies within
-    intersect = gpd.sjoin(node_gdf, mp_gdf, op='intersects', rsuffix='right')
+    intersect = gpd.sjoin(node_gdf, mp_gdf, predicate='intersects', rsuffix='right')
 
     # Compute guess and certainty, where certainty is how many transects apart
     # the link endpoints are (longer=more certain)
@@ -591,8 +592,10 @@ def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
             second = intersect.loc[lconn[1]].index_right
             if first > second:
                 first, second = second, first
-            first_mp = np.mean(np.array(meshlines[first]), axis=0)  # midpoint
-            second_mp = np.mean(np.array(meshlines[second+1]), axis=0)  # midpoint
+            first_coords = np.asarray(meshlines[first].coords)
+            second_coords = np.asarray(meshlines[second+1].coords)
+            first_mp = np.mean(first_coords, axis=0)  # midpoint
+            second_mp = np.mean(second_coords, axis=0)  # midpoint
         except KeyError:
             continue
 
@@ -607,9 +610,9 @@ def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
 
         # Compute interior radians between centerline vector and link vector
         # (then again with link vector flipped)
-        lva = np.math.atan2(np.linalg.det([cl_vec, link_vec]),
+        lva = math.atan2(np.linalg.det([cl_vec, link_vec]),
                             np.dot(cl_vec, link_vec))
-        lvar = np.math.atan2(np.linalg.det([cl_vec, link_vec_rev]),
+        lvar = math.atan2(np.linalg.det([cl_vec, link_vec_rev]),
                              np.dot(cl_vec, link_vec_rev))
 
         # Save the maximum angle

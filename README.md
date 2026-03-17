@@ -30,20 +30,29 @@ You can see some description of RivGraph's functionality via this [AGU poster](h
 Installing
 -----
 
-RivGraph is hosted at conda-forge. We recommend installing into a fresh conda environment to minimize the risk of dependency clashes. The easiest way to do this is to open Terminal (Mac/Unix) or Anaconda Prompt (Windows) and type:
+RivGraph is hosted at conda-forge. If you just want to use RivGraph, the simplest path is to install the conda-forge package into a fresh environment:
 
 <pre><code>conda create -n rivgraph_env rivgraph -c conda-forge
 conda activate rivgraph_env
 </code></pre>
 
-You may then want to install Spyder or your preferred IDE. Conda should fetch all the required dependencies and handle versioning.
+If you want to install RivGraph from source for development or testing, use the repository environment file first and then perform an editable install:
 
-If you want to install RivGraph into an already-existing environment, you can run <pre><code>conda activate myenv
-conda install rivgraph -c conda-forge</code></pre>
+<pre><code>conda env create -f environment.yml
+conda activate rivgraph-modern
+pip install -e . --no-deps
+</code></pre>
 
-You may also [install RivGraph from this Github repo](https://VeinsOfTheEarth.github.io/RivGraph/install/index.html#installation-from-source).
+`environment.yml` is the canonical source/development environment. `environment-modern.yml` is kept as a transition alias and should match it.
 
-Instructions for testing your installation are available [here](https://VeinsOfTheEarth.github.io/RivGraph/install/index.html#installation-from-source).
+Using `--no-deps` is intentional here: the geospatial stack is managed by the conda environment file, which avoids pip trying to re-resolve compiled dependencies such as GDAL, Rasterio, and Pyogrio.
+
+To verify a source install, run:
+
+<pre><code>pytest -ra tests/test_geospatial_roundtrip.py tests/regression
+</code></pre>
+
+You may also [install RivGraph from this GitHub repo](https://VeinsOfTheEarth.github.io/RivGraph/install/index.html#installation-from-source). Additional installation notes are available [in the documentation](https://VeinsOfTheEarth.github.io/RivGraph/install/index.html#installation-from-source).
 
 How to use?
 -----

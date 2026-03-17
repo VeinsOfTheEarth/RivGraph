@@ -11,6 +11,7 @@ Created on Sun Sep 16 15:15:18 2018
 """
 import os
 import pickle
+import warnings
 try:
     from osgeo import gdal
     from osgeo import ogr
@@ -27,6 +28,77 @@ from shapely.geometry import Point, LineString
 import rivgraph.geo_utils as gu
 from rivgraph.rivers import centerline_utils as cu
 
+if hasattr(gdal, "UseExceptions"):
+    gdal.UseExceptions()
+
+
+def _shapefile_export_warnings(gdf):
+    """Return a concise warning message about likely lossy shapefile exports."""
+    long_name_cols = [str(c) for c in gdf.columns if c != gdf.geometry.name and len(str(c)) > 10]
+
+    long_value_cols = []
+    for col in gdf.columns:
+        if col == gdf.geometry.name:
+            continue
+        series = gdf[col]
+        try:
+            needs_truncation = series.astype(str).map(len).gt(254).any()
+        except Exception:
+            needs_truncation = False
+        if needs_truncation:
+            long_value_cols.append(str(col))
+
+    parts = []
+    if long_name_cols:
+        parts.append(
+            'field names longer than 10 characters will be shortened by the shapefile driver: ' +
+            ', '.join(long_name_cols)
+        )
+    if long_value_cols:
+        parts.append(
+            'stringified attribute values longer than 254 characters may be truncated: ' +
+            ', '.join(long_value_cols)
+        )
+
+    if not parts:
+        return None
+
+    return (
+        'Exporting to ESRI Shapefile may be lossy due to format constraints; ' +
+        '; '.join(parts) +
+        '. Prefer GPKG when you need full attribute fidelity.'
+    )
+
+
+def _write_gdf(gdf, path_export):
+    """Write a GeoDataFrame while surfacing concise, format-aware warnings."""
+    driver = get_driver(path_export)
+
+    if driver != 'ESRI Shapefile':
+        gdf.to_file(path_export, driver=driver)
+        return
+
+    message = _shapefile_export_warnings(gdf)
+    if message is not None:
+        warnings.warn(message, UserWarning, stacklevel=2)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            'ignore',
+            message=r'Column names longer than 10 characters will be truncated when saved to ESRI Shapefile\.',
+            category=UserWarning,
+        )
+        warnings.filterwarnings(
+            'ignore',
+            message='Normalized/laundered field name: .*',
+            category=RuntimeWarning,
+        )
+        warnings.filterwarnings(
+            'ignore',
+            message=r"Value '.*' of field .* has been truncated to 254 characters\..*",
+            category=RuntimeWarning,
+        )
+        gdf.to_file(path_export, driver=driver)
 
 
 def prepare_paths(path_results, name, path_mask):
@@ -208,7 +280,7 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
             gdf[k] = [str(c).replace('[', '').replace(']', '') for c in nodes[k]]
 
     # Write geodataframe to file
-    gdf.to_file(path_export, driver=get_driver(path_export))
+    _write_gdf(gdf, path_export)
 
 
 def links_to_geofile(links, dims, gt, crs, path_export):
@@ -263,7 +335,7 @@ def links_to_geofile(links, dims, gt, crs, path_export):
             gdf[k] = [str(c).replace('[', '').replace(']', '') for c in links[k]]
 
     # Write geodataframe to file
-    gdf.to_file(path_export, driver=get_driver(path_export))
+    _write_gdf(gdf, path_export)
 
 
 def centerline_to_geovector(cl, crs, path_export):
@@ -296,7 +368,7 @@ def centerline_to_geovector(cl, crs, path_export):
     cl_df.set_crs(crs, inplace=True)
 
     # Save
-    cl_df.to_file(path_export, driver=get_driver(path_export))
+    _write_gdf(cl_df, path_export)
 
 
 def write_geotiff(raster, gt, wkt, path_export, dtype=gdal.GDT_UInt16,

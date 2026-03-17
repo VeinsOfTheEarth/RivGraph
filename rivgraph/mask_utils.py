@@ -220,7 +220,8 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
 
         # Identify the region associated with the island
         i_id = islands.id.values[idx]
-        r_id = stats.mode(Ireg[Iislands == i_id])[0][0]
+        m = stats.mode(Ireg[Iislands == i_id])
+        r_id = np.atleast_1d(m.mode)[0]
 
         # It is possible that the corresponding region is a 0 pixel, or one
         # that comprises the network. This usually happens only when the island

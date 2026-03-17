@@ -192,11 +192,11 @@ def clip_by_shoreline(links, nodes, shoreline_shp, gdobj):
 
         # Intersection coordinates
         int_points = links_gdf['geometry'][list(links_gdf['id'].values).index(clid)].intersection(shore_gdf['geometry'][0])
-        if int_points.type == 'Point':
+        if int_points.geom_type == 'Point':
             dists = np.sqrt((coords[0] - int_points.xy[0][0])**2 + (coords[1] - int_points.xy[1][0])**2)
             min_idx = np.argmin(dists)
             max_idx = min_idx
-        elif int_points.type == 'MultiPoint':  # Handle multiple intersections by finding the first and last one so we can remove that section of the link
+        elif int_points.geom_type == 'MultiPoint':  # Handle multiple intersections by finding the first and last one so we can remove that section of the link
             cutidcs = []
             for pt in int_points:
                 # Find index of closest pixel

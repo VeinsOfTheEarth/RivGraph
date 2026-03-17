@@ -8,6 +8,7 @@ Created on Wed Nov  7 11:38:16 2018
 """
 from loguru import logger
 import os
+import math
 import numpy as np
 import networkx as nx
 import itertools
@@ -1461,15 +1462,17 @@ def set_continuity(links, nodes, checknodes='all'):
             unknown_link_id = conn[np.where(linkdir == 0)[0][0]]
             unknown_link_idx = links['id'].index(unknown_link_id)
             m = mode(linkdir[linkdir > 0])
+            m_count = np.atleast_1d(m.count)[0]
+            m_mode = np.atleast_1d(m.mode)[0]
 
             lconn = links['conn'][unknown_link_idx][:]
 
-            if m.count[0] == linkdir.shape[0]-1:  # if the non-zero elements are all the same (either all 1s or 2s)
+            if m_count == linkdir.shape[0]-1:  # if the non-zero elements are all the same (either all 1s or 2s)
 
-                if m.mode[0] == 1:  # The unknown link must be out of the node
+                if m_mode == 1:  # The unknown link must be out of the node
                     links, nodes = set_link(links, nodes, unknown_link_idx, nid, alg=alg)
 
-                elif m.mode[0] == 2:  # The unknown link must be into the node
+                elif m_mode == 2:  # The unknown link must be into the node
                     usnode = [n for n in lconn if n != nid][0]
                     links, nodes = set_link(links, nodes, unknown_link_idx, usnode, alg=alg)
 
@@ -1791,9 +1794,9 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
             for m in [1, -1]:  # 1 is into node, -1 is out of node
                 ul_vec = m * ul_vec
                 if len(in_dvec) > 0:
-                    in_angs.append(np.abs(np.math.atan2(np.linalg.det([in_dvec,ul_vec]),np.dot(in_dvec,ul_vec))))
+                    in_angs.append(np.abs(math.atan2(np.linalg.det([in_dvec,ul_vec]),np.dot(in_dvec,ul_vec))))
                 if len(out_dvec) > 0:
-                    out_angs.append(np.abs(np.math.atan2(np.linalg.det([out_dvec,ul_vec]),np.dot(out_dvec,ul_vec))))
+                    out_angs.append(np.abs(math.atan2(np.linalg.det([out_dvec,ul_vec]),np.dot(out_dvec,ul_vec))))
 
             # "Most parallel" known link is that with the smallest interior angle
             # Smallest interior angle is determined as min of both orientations of unknown link
