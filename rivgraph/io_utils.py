@@ -27,6 +27,9 @@ from shapely.geometry import Point, LineString
 import rivgraph.geo_utils as gu
 from rivgraph.rivers import centerline_utils as cu
 
+if hasattr(gdal, "UseExceptions"):
+    gdal.UseExceptions()
+
 
 
 def prepare_paths(path_results, name, path_mask):

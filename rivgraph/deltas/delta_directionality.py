@@ -245,8 +245,9 @@ def set_initial_directionality(links, nodes, imshape):
         linkidx = links['id'].index(lid)
         # Set all the links with 3 or more guesses that agree
         m = mode(lg)
-        if m.count[0] > 2:
-            links, nodes = dy.set_link(links, nodes, linkidx, m.mode[0], alg)
+        m_count = np.atleast_1d(m.count)[0]
+        if m_count > 2:
+            links, nodes = dy.set_link(links, nodes, linkidx, np.atleast_1d(m.mode)[0], alg)
 
     # Set again by angles, but reduce the lenthresh
     # (shorter links will be set that were not previously)

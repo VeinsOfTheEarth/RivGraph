@@ -32,6 +32,9 @@ import rivgraph.rivers.river_directionality as rd
 import rivgraph.rivers.river_utils as ru
 import rivgraph.rivers.centerline_utils as cu
 
+if hasattr(gdal, "UseExceptions"):
+    gdal.UseExceptions()
+
 class rivnetwork:
     """
     Base rivnetwork class.

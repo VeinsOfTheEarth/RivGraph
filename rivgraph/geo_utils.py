@@ -20,6 +20,9 @@ import rivgraph.io_utils as io
 import rivgraph.im_utils as im
 
 
+if hasattr(gdal, "UseExceptions"):
+    gdal.UseExceptions()
+
 def get_unit(crs):
     """
     Returns the units for a projection defined by an EPSG code.
