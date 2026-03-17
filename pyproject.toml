@@ -1,15 +1,49 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "rivgraph"
-version = "0.5.0"
-description = "Python package for extracting and analyzing river networks from remote sensing imagery."
+dynamic = ["version"]
+description = "Python package for extracting and analyzing river and delta channel networks from remote sensing imagery."
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.10"
+license = "BSD-3-Clause"
 authors = [
   { name = "Jon Schwenk", email = "jonschwenk@gmail.com" }
 ]
+keywords = [
+  "river networks",
+  "delta networks",
+  "remote sensing",
+  "geospatial",
+  "hydrology",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: BSD License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: GIS",
+  "Topic :: Scientific/Engineering :: Image Processing",
+]
+
+[project.urls]
+Homepage = "https://veinsoftheearth.github.io/RivGraph/"
+Documentation = "https://veinsoftheearth.github.io/RivGraph/"
+Repository = "https://github.com/VeinsOfTheEarth/RivGraph"
+Issues = "https://github.com/VeinsOfTheEarth/RivGraph/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = { attr = "rivgraph.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["rivgraph", "rivgraph.*"]
+exclude = ["tests", "tests.*", "docs", "docs.*", "examples", "examples.*"]
