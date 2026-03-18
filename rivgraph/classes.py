@@ -497,7 +497,7 @@ class rivnetwork:
             if te == 'links':
                 if hasattr(self, 'links') is True:
                     self.paths['links'] = os.path.join(self.paths['basepath'], self.name + '_links.' + ext)
-                    io.links_to_geofile(self.links, self.imshape, self.gt, self.crs, self.paths['links'])
+                    io.links_to_geofile(self.links, self.imshape, self.gt, self.crs, self.paths['links'], nodes=getattr(self, 'nodes', None))
                 else:
                     logger.info('Links have not been computed and thus cannot be exported.')
             if te == 'nodes':

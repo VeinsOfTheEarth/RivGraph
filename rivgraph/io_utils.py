@@ -226,6 +226,18 @@ def get_driver(path_file):
     raise TypeError(f'Unsupported geovector extension: {ext}')
 
 
+def _rg_io_type_from_flags(is_inlet, is_outlet):
+    """Return a compact inlet/outlet classification label for exports."""
+    if is_inlet and is_outlet:
+        return 'both'
+    if is_inlet:
+        return 'inlet'
+    if is_outlet:
+        return 'outlet'
+    return 'neither'
+
+
+
 def nodes_to_geofile(nodes, dims, gt, crs, path_export):
     """
     Saves the nodes of the network to a georeferencedshapefile or geojson.
@@ -269,11 +281,18 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
         else:
             gdf[k] = [str(c).replace('[', '').replace(']', '') for c in nodes[k]]
 
+    inlet_nodes = set(nodes.get('inlets', []))
+    outlet_nodes = set(nodes.get('outlets', []))
+    gdf['rg_io_type'] = [
+        _rg_io_type_from_flags(node_id in inlet_nodes, node_id in outlet_nodes)
+        for node_id in nodes['id']
+    ]
+
     # Write geodataframe to file
     _write_gdf(gdf, path_export)
 
 
-def links_to_geofile(links, dims, gt, crs, path_export):
+def links_to_geofile(links, dims, gt, crs, path_export, nodes=None):
     """
     Saves the links of the network to a georeferencedshapefile or geojson.
     Computed link properties are saved as attributes when available. Note that
@@ -294,6 +313,11 @@ def links_to_geofile(links, dims, gt, crs, path_export):
         mask from which links were derived.
     path_export : str
         Path, including extension, specifying where to save the links export.
+    nodes : dict, optional
+        Network nodes and associated properties. When provided, a derived
+        `rg_io_type` field is exported for each link based on whether either
+        endpoint touches an inlet node, an outlet node, both, or neither.
+        This classification is intentionally direction-agnostic.
 
     Returns
     -------
@@ -323,6 +347,17 @@ def links_to_geofile(links, dims, gt, crs, path_export):
             gdf[k] = [str(c.tolist()).replace('[', '').replace(']', '') for c in links[k]]
         else:
             gdf[k] = [str(c).replace('[', '').replace(']', '') for c in links[k]]
+
+    if nodes is not None:
+        inlet_nodes = set(nodes.get('inlets', []))
+        outlet_nodes = set(nodes.get('outlets', []))
+        gdf['rg_io_type'] = [
+            _rg_io_type_from_flags(
+                any(node_id in inlet_nodes for node_id in conn),
+                any(node_id in outlet_nodes for node_id in conn),
+            )
+            for conn in links['conn']
+        ]
 
     # Write geodataframe to file
     _write_gdf(gdf, path_export)

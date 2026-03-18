@@ -27,6 +27,8 @@ def synthetic_nodes():
         "flux": [1.25, 2.5],
         "state": ["inlet", "outlet"],
         "conn": [[100], [101, 102]],
+        "inlets": [10],
+        "outlets": [11],
     }
 
 
@@ -37,6 +39,7 @@ def synthetic_links():
         "idx": [np.array([0, 1, 2]), np.array([6, 11, 16])],
         "flux": [3.5, 4.5],
         "certain": [True, False],
+        "conn": [[10, 12], [11, 13]],
         "wid_pix": [np.array([1, 2, 3]), np.array([2, 2, 2])],
         "wid_adj": [5.0, 6.0],
     }
@@ -71,6 +74,7 @@ def test_nodes_to_geofile_roundtrip_preserves_crs_geometry_and_attrs(
     assert np.allclose(gdf["flux"].astype(float), synthetic_nodes["flux"])
     assert gdf["state"].astype(str).tolist() == synthetic_nodes["state"]
     assert gdf["conn"].astype(str).str.contains("100|101").all()
+    assert gdf["rg_io_type"].astype(str).tolist() == ["inlet", "outlet"]
 
     expected_xy = [
         (500045.0, 4099985.0),
@@ -85,13 +89,14 @@ def test_links_to_geofile_roundtrip_preserves_crs_geometry_and_attrs(
     tmp_path,
     geo_context,
     synthetic_links,
+    synthetic_nodes,
     ext,
 ):
     io_utils = require_io_utils()
     dims, gt, crs = geo_context
     path = tmp_path / f"links_roundtrip.{ext}"
 
-    io_utils.links_to_geofile(synthetic_links, dims, gt, crs, str(path))
+    io_utils.links_to_geofile(synthetic_links, dims, gt, crs, str(path), nodes=synthetic_nodes)
     gdf = _read_geofile(path)
 
     assert gdf.crs.to_epsg() == crs.to_epsg()
@@ -100,6 +105,7 @@ def test_links_to_geofile_roundtrip_preserves_crs_geometry_and_attrs(
     assert np.allclose(gdf["flux"].astype(float), synthetic_links["flux"])
     assert gdf["certain"].astype(str).tolist() == ["True", "False"]
     assert gdf["wid_pix"].astype(str).str.contains("1|2|3").all()
+    assert gdf["rg_io_type"].astype(str).tolist() == ["inlet", "outlet"]
 
     start_coords = [tuple(geom.coords[0]) for geom in gdf.geometry]
     expected_starts = [
