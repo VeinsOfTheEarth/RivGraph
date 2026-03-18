@@ -721,10 +721,21 @@ class delta(rivnetwork):
         from rivgraph.deltas._plot_fluxes import plot_flux_map
         return plot_flux_map(self.links, self.nodes, self.imshape, self.gt, self.wkt, *args, **kwargs)
 
-    def compute_topologic_metrics(self):
+    def compute_topologic_metrics(self, **kwargs):
         """
-        Computes a suite of connectivity and network metrics for a delta channel network.
+        Compute connectivity and network metrics for a delta channel network.
 
+        Parameters
+        ----------
+        **kwargs
+            Forwarded to :func:`rivgraph.deltas.delta_metrics.compute_delta_metrics`.
+            Useful options include ``metrics=``, ``routing=``, ``inlet=``,
+            ``n_random=``, and ``return_intermediates=True``.
+
+        Returns
+        -------
+        dict or tuple[dict, dict]
+            Mirrors :func:`rivgraph.deltas.delta_metrics.compute_delta_metrics`.
         """
         if hasattr(self, 'links') is False:
             raise AttributeError('Network has not yet been computed.')
@@ -732,7 +743,12 @@ class delta(rivnetwork):
         if 'certain' not in self.links.keys():
             raise AttributeError('Link directionality has not been computed.')
 
-        self.topo_metrics = dm.compute_delta_metrics(self.links, self.nodes)
+        result = dm.compute_delta_metrics(self.links, self.nodes, **kwargs)
+        if kwargs.get('return_intermediates', False):
+            self.topo_metrics, self.topo_metric_intermediates = result
+        else:
+            self.topo_metrics = result
+        return result
 
 
 class river(rivnetwork):
