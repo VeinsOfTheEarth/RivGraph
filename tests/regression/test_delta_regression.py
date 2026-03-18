@@ -7,6 +7,7 @@ import geopandas as gpd
 import numpy as np
 import pytest
 
+from rivgraph.export_schema import RG_LINK_SCHEMA_COLUMNS, RG_NODE_SCHEMA_COLUMNS
 from tests._helpers import require_rivgraph_classes
 
 
@@ -69,6 +70,10 @@ def _assert_network_export_roundtrip(obj):
     assert (~nodes.geometry.is_empty).all()
     assert set(links.geometry.geom_type) == {"LineString"}
     assert set(nodes.geometry.geom_type) == {"Point"}
+    assert links.columns.tolist()[: len(RG_LINK_SCHEMA_COLUMNS)] == list(RG_LINK_SCHEMA_COLUMNS)
+    assert nodes.columns.tolist()[: len(RG_NODE_SCHEMA_COLUMNS)] == list(RG_NODE_SCHEMA_COLUMNS)
+    assert 'schema_rg' in links.columns
+    assert 'schema_rg' in nodes.columns
 
 
 def test_delta_mossy_end_to_end_without_fixlinks(delta_case_mossy, tmp_path):

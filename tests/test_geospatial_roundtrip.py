@@ -70,11 +70,15 @@ def test_nodes_to_geofile_roundtrip_preserves_crs_geometry_and_attrs(
 
     assert gdf.crs.to_epsg() == crs.to_epsg()
     assert set(gdf.geometry.geom_type) == {"Point"}
-    assert gdf["id"].tolist() == synthetic_nodes["id"]
+    assert gdf["id_node"].tolist() == synthetic_nodes["id"]
+    assert gdf["idx_node"].tolist() == synthetic_nodes["idx"]
     assert np.allclose(gdf["flux"].astype(float), synthetic_nodes["flux"])
     assert gdf["state"].astype(str).tolist() == synthetic_nodes["state"]
-    assert gdf["conn"].astype(str).str.contains("100|101").all()
-    assert gdf["rg_io_type"].astype(str).tolist() == ["inlet", "outlet"]
+    assert gdf["id_links"].astype(str).str.contains("100|101").all()
+    assert gdf["n_links"].tolist() == [1, 2]
+    assert gdf["is_inlet"].astype(bool).tolist() == [True, False]
+    assert gdf["is_outlet"].astype(bool).tolist() == [False, True]
+    assert gdf["type_io"].astype(str).tolist() == ["inlet", "outlet"]
 
     expected_xy = [
         (500045.0, 4099985.0),
@@ -101,11 +105,19 @@ def test_links_to_geofile_roundtrip_preserves_crs_geometry_and_attrs(
 
     assert gdf.crs.to_epsg() == crs.to_epsg()
     assert set(gdf.geometry.geom_type) == {"LineString"}
-    assert gdf["id"].tolist() == synthetic_links["id"]
+    assert gdf["id_link"].tolist() == synthetic_links["id"]
     assert np.allclose(gdf["flux"].astype(float), synthetic_links["flux"])
     assert gdf["certain"].astype(str).tolist() == ["True", "False"]
+    assert gdf["id_nodes"].astype(str).str.contains("10|11|12|13").all()
+    assert gdf["n_nodes"].tolist() == [2, 2]
+    assert gdf["id_us_node"].tolist()[0] == 10
+    assert np.isnan(gdf["id_us_node"].tolist()[1])
+    assert gdf["id_ds_node"].tolist()[0] == 12
+    assert np.isnan(gdf["id_ds_node"].tolist()[1])
     assert gdf["wid_pix"].astype(str).str.contains("1|2|3").all()
-    assert gdf["rg_io_type"].astype(str).tolist() == ["inlet", "outlet"]
+    assert gdf["is_inlet"].astype(bool).tolist() == [True, False]
+    assert gdf["is_outlet"].astype(bool).tolist() == [False, True]
+    assert gdf["type_io"].astype(str).tolist() == ["inlet", "outlet"]
 
     start_coords = [tuple(geom.coords[0]) for geom in gdf.geometry]
     expected_starts = [
@@ -140,6 +152,27 @@ def test_write_geotiff_roundtrip_preserves_values_and_metadata(tmp_path, geo_con
         assert CRS(ds.crs).to_epsg() == crs.to_epsg()
         assert ds.nodata == 999
         assert np.array_equal(ds.read(1), raster)
+
+
+def test_geojson_export_requires_explicit_reproject_flag(tmp_path, geo_context, synthetic_nodes):
+    io_utils = require_io_utils()
+    dims, gt, crs = geo_context
+    path = tmp_path / "nodes_roundtrip.json"
+
+    with pytest.raises(ValueError, match="pass reproject=True"):
+        io_utils.nodes_to_geofile(synthetic_nodes, dims, gt, crs, str(path))
+
+
+def test_geojson_export_reprojects_when_requested(tmp_path, geo_context, synthetic_nodes):
+    io_utils = require_io_utils()
+    dims, gt, crs = geo_context
+    path = tmp_path / "nodes_roundtrip.json"
+
+    io_utils.nodes_to_geofile(synthetic_nodes, dims, gt, crs, str(path), reproject=True)
+    gdf = _read_geofile(path)
+
+    assert gdf.crs.to_epsg() == 4326
+    assert gdf["id_node"].tolist() == synthetic_nodes["id"]
 
 
 @pytest.mark.parametrize(

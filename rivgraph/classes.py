@@ -17,6 +17,7 @@ import geopandas as gpd
 from shapely.geometry import LineString
 from scipy import signal
 import rivgraph.io_utils as io
+from rivgraph.export_schema import get_extension_for_format
 import rivgraph.geo_utils as gu
 import rivgraph.rasters as rasters
 import rivgraph.mask_to_graph as m2g
@@ -431,7 +432,7 @@ class rivnetwork:
         return A
 
 
-    def to_geovectors(self, export='network', ftype='json', metadata=None, flux_attr=None):
+    def to_geovectors(self, export='network', ftype='gpkg', metadata=None, flux_attr=None, reproject=False):
         """
         Writes the links and nodes of the network to geovectors.
 
@@ -459,30 +460,26 @@ class rivnetwork:
         ftype : str
             Sets the output file format. Choose from:
 
+            - gpkg (GeoPackage)
+
             - json (GeoJSON)
 
             - shp  (ESRI Shapefile)
-
-            - gpkg (GeoPackage)
 
         metadata : dict, optional
             Extra fields to append to exported tables.
         flux_attr : str, optional
             Link attribute to export as RG flux in SWORD-style outputs. If not
             provided, RivGraph will use `flux_ss` when available, then `flux`.
+        reproject : bool, optional
+            When exporting GeoJSON, reproject the exported vectors to EPSG:4326
+            if True. If False, GeoJSON export will fail unless the current CRS
+            is already EPSG:4326.
 
         """
         metadata = {} if metadata is None else dict(metadata)
 
-        # Get extension for requested output type
-        if ftype == 'json':
-            ext = 'json'
-        elif ftype == 'shp':
-            ext = 'shp'
-        elif ftype == 'gpkg':
-            ext = 'gpkg'
-        else:
-            raise TypeError('Only json, shp, and gpkg output types are supported.')
+        ext = get_extension_for_format(ftype)
 
         # Prepare list of desired exports
         if export == 'all':
@@ -497,33 +494,33 @@ class rivnetwork:
             if te == 'links':
                 if hasattr(self, 'links') is True:
                     self.paths['links'] = os.path.join(self.paths['basepath'], self.name + '_links.' + ext)
-                    io.links_to_geofile(self.links, self.imshape, self.gt, self.crs, self.paths['links'], nodes=getattr(self, 'nodes', None))
+                    io.links_to_geofile(self.links, self.imshape, self.gt, self.crs, self.paths['links'], nodes=getattr(self, 'nodes', None), reproject=reproject)
                 else:
                     logger.info('Links have not been computed and thus cannot be exported.')
             if te == 'nodes':
                 if hasattr(self, 'nodes') is True:
                     self.paths['nodes'] = os.path.join(self.paths['basepath'], self.name + '_nodes.' + ext)
-                    io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.crs, self.paths['nodes'])
+                    io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.crs, self.paths['nodes'], reproject=reproject)
                 else:
                     logger.info('Nodes have not been computed and thus cannot be exported.')
             if te == 'mesh':
                 if hasattr(self, 'meshlines') is True and type(self) is river:
                     self.paths['meshlines'] = os.path.join(self.paths['basepath'], self.name + '_meshlines.' + ext)
                     self.paths['meshpolys'] = os.path.join(self.paths['basepath'], self.name + '_meshpolys.' + ext)
-                    io.shapely_list_to_geovectors(self.meshlines, self.crs, self.paths['meshlines'])
-                    io.shapely_list_to_geovectors(self.meshpolys, self.crs, self.paths['meshpolys'])
+                    io.shapely_list_to_geovectors(self.meshlines, self.crs, self.paths['meshlines'], reproject=reproject)
+                    io.shapely_list_to_geovectors(self.meshpolys, self.crs, self.paths['meshpolys'], reproject=reproject)
                 else:
                     logger.info('Mesh has not been computed and thus cannot be exported.')
             if te == 'centerline':
                 if hasattr(self, 'centerline') is True and type(self) is river:
                     self.paths['centerline'] = os.path.join(self.paths['basepath'], self.name + '_centerline.' + ext)
-                    io.centerline_to_geovector(self.centerline, self.crs, self.paths['centerline'])
+                    io.centerline_to_geovector(self.centerline, self.crs, self.paths['centerline'], reproject=reproject)
                 else:
                     logger.info('Centerlines has not been computed and thus cannot be exported.')
             if te == 'centerline_smooth':
                 if hasattr(self, 'centerline_smooth') is True and type(self) is river:
                     self.paths['centerline_smooth'] = os.path.join(self.paths['basepath'], self.name + '_centerline_smooth.' + ext)
-                    io.centerline_to_geovector(self.centerline_smooth, self.crs, self.paths['centerline_smooth'])
+                    io.centerline_to_geovector(self.centerline_smooth, self.crs, self.paths['centerline_smooth'], reproject=reproject)
                 else:
                     logger.info('Smoothed centerline has not been computed and thus cannot be exported.')
             if te == 'sword':

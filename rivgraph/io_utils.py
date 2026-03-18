@@ -19,6 +19,15 @@ from shapely.geometry import Point, LineString
 
 import rivgraph.geo_utils as gu
 import rivgraph.rasters as rasters
+from rivgraph.export_schema import (
+    EXPORT_SCHEMA_VERSION,
+    RG_LINK_RESERVED_INPUT_KEYS,
+    RG_LINK_SCHEMA_COLUMNS,
+    RG_NODE_RESERVED_INPUT_KEYS,
+    RG_NODE_SCHEMA_COLUMNS,
+    get_driver_for_path,
+    ordered_export_columns,
+)
 from rivgraph.rivers import centerline_utils as cu
 
 
@@ -60,8 +69,9 @@ def _shapefile_export_warnings(gdf):
     )
 
 
-def _write_gdf(gdf, path_export):
+def _write_gdf(gdf, path_export, reproject=False):
     """Write a GeoDataFrame while surfacing concise, format-aware warnings."""
+    gdf = _prepare_gdf_for_export(gdf, path_export, reproject=reproject)
     driver = get_driver(path_export)
 
     if driver != 'ESRI Shapefile':
@@ -200,30 +210,8 @@ def unpickle_links_and_nodes(path_pickle):
 
 
 def get_driver(path_file):
-    """
-    Finds the proper geopandas driver for saving a geodataframe. Keys off the
-    extension in the filename.
-
-    Parameters
-    ----------
-    path_file : str
-        Where the file will be saved.
-
-    Returns
-    -------
-    driver : str
-        Driver string specifying file format when using geopandas' to_file().
-
-    """
-    ext = path_file.split('.')[-1].lower()
-    if ext == 'json':
-        return 'GeoJSON'
-    if ext == 'shp':
-        return 'ESRI Shapefile'
-    if ext == 'gpkg':
-        return 'GPKG'
-
-    raise TypeError(f'Unsupported geovector extension: {ext}')
+    """Return the geopandas/OGR driver implied by *path_file*."""
+    return get_driver_for_path(path_file)
 
 
 def _rg_io_type_from_flags(is_inlet, is_outlet):
@@ -237,12 +225,122 @@ def _rg_io_type_from_flags(is_inlet, is_outlet):
     return 'neither'
 
 
+def _crs_is_epsg_4326(crs):
+    """Return True when *crs* resolves to EPSG:4326 / OGC:CRS84-style lon/lat coordinates."""
+    if crs is None:
+        return False
 
-def nodes_to_geofile(nodes, dims, gt, crs, path_export):
+    try:
+        epsg = crs.to_epsg()
+    except AttributeError:
+        epsg = None
+    if epsg == 4326:
+        return True
+
+    try:
+        axis_info = getattr(crs, 'axis_info', None) or []
+        axis_dirs = [getattr(axis, 'direction', '').lower() for axis in axis_info]
+        if axis_dirs[:2] == ['east', 'north'] and getattr(crs, 'is_geographic', False):
+            return True
+    except Exception:
+        pass
+
+    return False
+
+
+def _prepare_gdf_for_export(gdf, path_export, reproject=False):
+    """Validate and optionally reproject a GeoDataFrame before writing."""
+    driver = get_driver(path_export)
+
+    if driver != 'GeoJSON':
+        return gdf
+
+    if gdf.crs is None:
+        raise ValueError(
+            'GeoJSON export requires a defined CRS. Supply data with an attached CRS '
+            'or choose a format that preserves native projection metadata, such as GPKG.'
+        )
+
+    if _crs_is_epsg_4326(gdf.crs):
+        return gdf
+
+    if reproject is not True:
+        raise ValueError(
+            'GeoJSON export requires EPSG:4326 coordinates. The native CRS is not EPSG:4326; '
+            'pass reproject=True to export this dataset as GeoJSON.'
+        )
+
+    return gdf.to_crs(epsg=4326)
+
+
+def _scalarize_export_value(value):
+    """Convert numpy scalars to native Python scalars for Fiona/pyogrio compatibility."""
+    if isinstance(value, np.generic):
+        return value.item()
+    return value
+
+
+def _stringify_export_sequence(value):
+    """Flatten a list-like export value to a stable comma-separated string."""
+    if value is None:
+        return None
+
+    if isinstance(value, np.ndarray):
+        value = value.tolist()
+    elif isinstance(value, pd.Series):
+        value = value.tolist()
+
+    if isinstance(value, set):
+        value = sorted(value)
+
+    if isinstance(value, (list, tuple)):
+        return ', '.join(str(_scalarize_export_value(v)) for v in value)
+
+    return str(_scalarize_export_value(value))
+
+
+def _coerce_export_value(value):
+    """Prepare an attribute value for vector export without destroying scalar types."""
+    value = _scalarize_export_value(value)
+
+    if isinstance(value, (list, tuple, set, np.ndarray, pd.Series)):
+        return _stringify_export_sequence(value)
+
+    if value is None or isinstance(value, (bool, int, float, str)):
+        return value
+
+    return str(value)
+
+
+def _aligned_export_keys(data, *, exclude=None, id_key='id'):
+    """Return data keys whose values align one-to-one with the exported features."""
+    exclude = set() if exclude is None else set(exclude)
+    if id_key not in data:
+        return []
+
+    n_items = len(data[id_key])
+    keys = []
+    for key in data.keys():
+        if key in exclude:
+            continue
+        try:
+            if len(data[key]) == n_items:
+                keys.append(key)
+        except TypeError:
+            continue
+    return keys
+
+
+def _finalize_export_gdf(records, *, crs, canonical_columns, extra_columns):
+    """Build a GeoDataFrame with stable RG export column ordering."""
+    columns = ordered_export_columns(canonical_columns, extra_columns)
+    gdf = gpd.GeoDataFrame(records, geometry='geometry', crs=crs)
+    return gdf.loc[:, columns]
+
+
+def nodes_to_geofile(nodes, dims, gt, crs, path_export, reproject=False):
     """
-    Saves the nodes of the network to a georeferencedshapefile or geojson.
-    Computed node properties are appended as attributes when available.
-    The filetype is specified by the export path.
+    Save network nodes to a georeferenced vector file using the canonical RG schema.
 
     Parameters
     ----------
@@ -252,11 +350,14 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
         (nrows, ncols) of the original mask from which nodes were derived.
     gt : tuple
         Geotransform tuple of the original mask from which nodes were derived.
-    crs : pyrpoj.CRS
+    crs : pyproj.CRS
         CRS object specifying the coordinate reference system of the original
         mask from which nodes were derived.
     path_export : str
         Path, including extension, where to save the nodes export.
+    reproject : bool, optional
+        When exporting GeoJSON, reproject to EPSG:4326 if True. If False, GeoJSON
+        export will fail unless the native CRS is already EPSG:4326.
 
     Returns
     -------
@@ -265,40 +366,43 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export):
     """
     nodexy = np.unravel_index(nodes['idx'], dims)
     x, y = gu.xy_to_coords(nodexy[1], nodexy[0], gt)
-    all_nodes = [Point(x, y) for x, y in zip(x, y)]
-
-    # Create GeoDataFrame for storing geometries and attributes
-    gdf = gpd.GeoDataFrame(geometry=all_nodes)
-    gdf.crs = crs
-
-    # Store attributes as strings (numpy types give fiona trouble)
-    dontstore = ['idx']
-    storekeys = [k for k in nodes.keys() if len(nodes[k]) == len(nodes['id']) and k not in dontstore]
-    store_as_num = ['id', 'idx', 'logflux', 'flux', 'outletflux']
-    for k in storekeys:
-        if k in store_as_num:
-            gdf[k] = [c for c in nodes[k]]
-        else:
-            gdf[k] = [str(c).replace('[', '').replace(']', '') for c in nodes[k]]
-
     inlet_nodes = set(nodes.get('inlets', []))
     outlet_nodes = set(nodes.get('outlets', []))
-    gdf['rg_io_type'] = [
-        _rg_io_type_from_flags(node_id in inlet_nodes, node_id in outlet_nodes)
-        for node_id in nodes['id']
-    ]
 
-    # Write geodataframe to file
-    _write_gdf(gdf, path_export)
+    records = []
+    extra_keys = _aligned_export_keys(nodes, exclude=RG_NODE_RESERVED_INPUT_KEYS)
+    for i, node_id in enumerate(nodes['id']):
+        conn_links = nodes['conn'][i] if 'conn' in nodes else []
+        is_inlet = node_id in inlet_nodes
+        is_outlet = node_id in outlet_nodes
+
+        row = {
+            'id_node': _coerce_export_value(node_id),
+            'idx_node': _coerce_export_value(nodes['idx'][i]),
+            'id_links': _stringify_export_sequence(conn_links),
+            'n_links': len(conn_links),
+            'is_inlet': is_inlet,
+            'is_outlet': is_outlet,
+            'type_io': _rg_io_type_from_flags(is_inlet, is_outlet),
+            'geometry': Point(x[i], y[i]),
+        }
+        for key in extra_keys:
+            row[key] = _coerce_export_value(nodes[key][i])
+        records.append(row)
+
+    records = [dict(rec, schema_rg=EXPORT_SCHEMA_VERSION) for rec in records]
+    gdf = _finalize_export_gdf(
+        records,
+        crs=crs,
+        canonical_columns=(*RG_NODE_SCHEMA_COLUMNS, 'schema_rg'),
+        extra_columns=extra_keys,
+    )
+    _write_gdf(gdf, path_export, reproject=reproject)
 
 
-def links_to_geofile(links, dims, gt, crs, path_export, nodes=None):
+def links_to_geofile(links, dims, gt, crs, path_export, nodes=None, reproject=False):
     """
-    Saves the links of the network to a georeferencedshapefile or geojson.
-    Computed link properties are saved as attributes when available. Note that
-    the 'wid_pix' property, which stores the width at each pixel along the
-    link, may be truncated depending on its length and the filetype.
-    The filetype is specified by the export path.
+    Save network links to a georeferenced vector file using the canonical RG schema.
 
     Parameters
     ----------
@@ -308,62 +412,75 @@ def links_to_geofile(links, dims, gt, crs, path_export, nodes=None):
         (nrows, ncols) of the original mask from which links were derived.
     gt : tuple
         Geotransform tuple of the original mask from which links were derived.
-    crs : pyrpoj.CRS
+    crs : pyproj.CRS
         CRS object specifying the coordinate reference system of the original
         mask from which links were derived.
     path_export : str
         Path, including extension, specifying where to save the links export.
     nodes : dict, optional
-        Network nodes and associated properties. When provided, a derived
-        `rg_io_type` field is exported for each link based on whether either
-        endpoint touches an inlet node, an outlet node, both, or neither.
-        This classification is intentionally direction-agnostic.
+        Network nodes and associated properties. When provided, inlet/outlet
+        flags are derived for each link in a direction-agnostic way.
+    reproject : bool, optional
+        When exporting GeoJSON, reproject to EPSG:4326 if True. If False, GeoJSON
+        export will fail unless the native CRS is already EPSG:4326.
 
     Returns
     -------
     None.
 
     """
-    # Create line objects to write to shapefile
     all_links = []
     for link in links['idx']:
         xy = np.unravel_index(link, dims)
         x, y = gu.xy_to_coords(xy[1], xy[0], gt)
         all_links.append(LineString(zip(x, y)))
 
-    # Create GeoDataFrame for storing geometries and attributes
-    gdf = gpd.GeoDataFrame(geometry=all_links)
-    gdf.crs = crs
-
-    # Store attributes as strings (numpy types give fiona trouble)
-    dontstore = ['idx', 'n_networks']
-    storekeys = [k for k in links.keys() if k not in dontstore]
-    storekeys = [k for k in storekeys if len(links[k]) == len(links['id'])]
-    store_as_num = ['id', 'flux', 'logflux']
-    for k in storekeys:
-        if k in store_as_num:
-            gdf[k] = [c for c in links[k]]
-        elif k == 'wid_pix':
-            gdf[k] = [str(c.tolist()).replace('[', '').replace(']', '') for c in links[k]]
-        else:
-            gdf[k] = [str(c).replace('[', '').replace(']', '') for c in links[k]]
-
+    inlet_nodes = set()
+    outlet_nodes = set()
     if nodes is not None:
         inlet_nodes = set(nodes.get('inlets', []))
         outlet_nodes = set(nodes.get('outlets', []))
-        gdf['rg_io_type'] = [
-            _rg_io_type_from_flags(
-                any(node_id in inlet_nodes for node_id in conn),
-                any(node_id in outlet_nodes for node_id in conn),
-            )
-            for conn in links['conn']
-        ]
 
-    # Write geodataframe to file
-    _write_gdf(gdf, path_export)
+    flow_dirs_available = 'certain' in links and len(links['certain']) == len(links['id'])
+    extra_keys = _aligned_export_keys(links, exclude=RG_LINK_RESERVED_INPUT_KEYS)
+    records = []
+    for i, link_id in enumerate(links['id']):
+        conn_nodes = links['conn'][i] if 'conn' in links else []
+        is_inlet = any(node_id in inlet_nodes for node_id in conn_nodes)
+        is_outlet = any(node_id in outlet_nodes for node_id in conn_nodes)
+
+        if flow_dirs_available and bool(links['certain'][i]) and len(conn_nodes) >= 2:
+            id_us_node, id_ds_node = conn_nodes[0], conn_nodes[1]
+        else:
+            id_us_node, id_ds_node = None, None
+
+        row = {
+            'id_link': _coerce_export_value(link_id),
+            'idx_link': _coerce_export_value(links['idx'][i]),
+            'id_nodes': _stringify_export_sequence(conn_nodes),
+            'n_nodes': len(conn_nodes),
+            'id_us_node': _coerce_export_value(id_us_node),
+            'id_ds_node': _coerce_export_value(id_ds_node),
+            'is_inlet': is_inlet,
+            'is_outlet': is_outlet,
+            'type_io': _rg_io_type_from_flags(is_inlet, is_outlet),
+            'geometry': all_links[i],
+        }
+        for key in extra_keys:
+            row[key] = _coerce_export_value(links[key][i])
+        records.append(row)
+
+    records = [dict(rec, schema_rg=EXPORT_SCHEMA_VERSION) for rec in records]
+    gdf = _finalize_export_gdf(
+        records,
+        crs=crs,
+        canonical_columns=(*RG_LINK_SCHEMA_COLUMNS, 'schema_rg'),
+        extra_columns=extra_keys,
+    )
+    _write_gdf(gdf, path_export, reproject=reproject)
 
 
-def centerline_to_geovector(cl, crs, path_export):
+def centerline_to_geovector(cl, crs, path_export, reproject=False):
     """
     Exports centerline coordinates as a georeferenced linestring. Can be used
     with any set of coordinates.
@@ -393,7 +510,7 @@ def centerline_to_geovector(cl, crs, path_export):
     cl_df.set_crs(crs, inplace=True)
 
     # Save
-    _write_gdf(cl_df, path_export)
+    _write_gdf(cl_df, path_export, reproject=reproject)
 
 
 def write_geotiff(raster, gt, wkt, path_export, dtype='uint16',
@@ -437,7 +554,7 @@ def colortable(ctype):
     return color_table
 
 
-def shapely_list_to_geovectors(shplist, crs, path_export):
+def shapely_list_to_geovectors(shplist, crs, path_export, reproject=False):
     """
     Exports a list of shapely geometries to a GIS-ingestible format.
 
@@ -459,7 +576,7 @@ def shapely_list_to_geovectors(shplist, crs, path_export):
     """
     gdf = gpd.GeoDataFrame(geometry=shplist)
     gdf.crs = crs
-    _write_gdf(gdf, path_export)
+    _write_gdf(gdf, path_export, reproject=reproject)
 
 
 def write_linkdirs_geotiff(links, imshape, gt, wkt, path_export):
@@ -547,11 +664,11 @@ def coords_from_geovector(path_geovector):
     return coords
 
 
-def coords_to_geovector(coords, epsg, path_export):
+def coords_to_geovector(coords, epsg, path_export, reproject=False):
     """Exports coordinates to a Point geovector file."""
     geometry = [Point(c[0], c[1]) for c in coords]
     gdf = gpd.GeoDataFrame({'id': list(range(len(geometry)))}, geometry=geometry, crs=f'EPSG:{epsg}')
-    _write_gdf(gdf, path_export)
+    _write_gdf(gdf, path_export, reproject=reproject)
     return
 
 
@@ -763,6 +880,6 @@ def export_for_sword(links, nodes, imshape, gt, crs, paths, unit, metadata=None,
         flux_attr=flux_attr,
     )
 
-    sword_nodes.to_file(paths['nodes_sword'], driver=get_driver(paths['nodes_sword']))
-    sword_reaches.to_file(paths['reaches_sword'], driver=get_driver(paths['reaches_sword']))
+    _write_gdf(sword_nodes, paths['nodes_sword'])
+    _write_gdf(sword_reaches, paths['reaches_sword'])
     return
