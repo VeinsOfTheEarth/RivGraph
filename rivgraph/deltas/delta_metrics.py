@@ -21,6 +21,7 @@ from ._delta_metrics_core import (
     solve_steady_state,
 )
 from ._delta_metrics_policies import make_inlet_policy
+from ._network_validation import dag_diagnostics_from_network, raise_if_invalid_network
 
 """
 This script contains algorithms that were ported from Matlab scripts provided
@@ -280,6 +281,17 @@ def compute_delta_metrics(
     """
     if warn_experimental is True:
         _emit_experimental_metrics_warning_once()
+
+    required_weight = 'wid_adj' if routing == 'width' else None
+    raise_if_invalid_network(
+        links,
+        nodes,
+        context='delta metric computation',
+        require_inlets=True,
+        require_outlets=True,
+        require_dag=True,
+        required_link_weight=required_weight,
+    )
 
     links_m, nodes_m, graph_weight, graph_inletweights, metric_metadata = _prepare_metric_network(
         links,
@@ -562,14 +574,6 @@ def find_inlet_outlet_nodes(A):
 
 
 
-def _build_cycle_check_graph(links, nodes):
-    """Build a directed graph preserving RivGraph link ids for diagnostics."""
-    G = nx.MultiDiGraph()
-    G.add_nodes_from(nodes['id'])
-    for lid, conn in zip(links['id'], links['conn']):
-        G.add_edge(conn[0], conn[1], key=lid, link_id=lid)
-    return G
-
 
 def get_dag_diagnostics(links, nodes):
     """Summarize whether a RivGraph network is a directed acyclic graph.
@@ -586,52 +590,20 @@ def get_dag_diagnostics(links, nodes):
         ``cyclic_regions`` list describing strongly connected components that
         contain one or more directed cycles.
     """
-    G = _build_cycle_check_graph(links, nodes)
-    diagnostics = {
-        'is_dag': nx.is_directed_acyclic_graph(G),
-        'n_nodes': len(nodes['id']),
-        'n_links': len(links['id']),
-    }
+    raise_if_invalid_network(links, nodes, context='DAG diagnostics')
+    return dag_diagnostics_from_network(links, nodes)
 
-    if diagnostics['is_dag'] is True:
-        diagnostics['cyclic_regions'] = []
-        return diagnostics
-
-    cyclic_regions = []
-    for comp in nx.strongly_connected_components(G):
-        comp = set(comp)
-        has_self_loop = any(G.has_edge(nid, nid) for nid in comp)
-        if len(comp) == 1 and has_self_loop is False:
-            continue
-
-        comp_links = sorted({
-            data['link_id']
-            for u, v, _k, data in G.edges(keys=True, data=True)
-            if u in comp and v in comp
-        })
-
-        cyclic_regions.append({
-            'nodes': sorted(comp),
-            'links': comp_links,
-        })
-
-    cyclic_regions.sort(key=lambda item: (-len(item['nodes']), -len(item['links']), item['nodes']))
-    diagnostics['cyclic_regions'] = cyclic_regions
-    return diagnostics
 
 
 def assert_dag_for_steady_state(links, nodes):
     """Raise an informative error if the supplied network is not a DAG."""
-    diagnostics = get_dag_diagnostics(links, nodes)
-    if diagnostics['is_dag'] is True:
-        return
-
-    regions = diagnostics['cyclic_regions']
-    example = regions[0] if len(regions) > 0 else {'nodes': [], 'links': []}
-    raise ValueError(
-        'Cannot compute steady-state fluxes because the directed graph is not acyclic. '
-        f"Detected {len(regions)} cyclic region(s); example nodes={example['nodes']} "
-        f"links={example['links']}. Resolve directed cycles before computing steady-state fluxes."
+    raise_if_invalid_network(
+        links,
+        nodes,
+        context='steady-state flux computation',
+        require_inlets=True,
+        require_outlets=True,
+        require_dag=True,
     )
 
 
@@ -666,8 +638,17 @@ def compute_steady_state_link_fluxes(
         When True, require the directed network to be a DAG before propagating
         steady-state fluxes.
     """
+    required_weight = 'wid_adj' if routing == 'width' else None
     if validate is True:
-        assert_dag_for_steady_state(links, nodes)
+        raise_if_invalid_network(
+            links,
+            nodes,
+            context='steady-state flux computation',
+            require_inlets=True,
+            require_outlets=True,
+            require_dag=True,
+            required_link_weight=required_weight,
+        )
 
     graph = build_delta_graph(links, nodes)
     result = solve_steady_state(

@@ -168,3 +168,36 @@ def test_multi_inlet_metrics_report_internal_super_apex_metadata():
     assert links == links_before
     assert nodes == nodes_before
     assert 'super_apex' not in nodes
+
+
+
+def test_metric_preflight_catches_inconsistent_node_link_references():
+    links, nodes = _line_network()
+    nodes['conn'] = [[10], [10], [11]]
+
+    with pytest.raises(ValueError, match='Invalid network for delta metric computation'):
+        dm.compute_delta_metrics(links, nodes, warn_experimental=False)
+
+
+
+def test_metric_preflight_catches_unknown_inlet_node():
+    links, nodes = _line_network()
+    nodes['inlets'] = [999]
+
+    with pytest.raises(ValueError, match=r"nodes\['inlets'\] contains unknown node ids"):
+        dm.compute_delta_metrics(links, nodes, warn_experimental=False)
+
+
+
+def test_steady_state_preflight_requires_positive_width_weights():
+    links, nodes = _line_network()
+    links['wid_adj'] = [1.0, 0.0]
+
+    with pytest.raises(ValueError, match=r"links\['wid_adj'\] must be strictly positive"):
+        dm.compute_steady_state_link_fluxes(
+            None,
+            links,
+            nodes,
+            routing='width',
+            validate=True,
+        )
