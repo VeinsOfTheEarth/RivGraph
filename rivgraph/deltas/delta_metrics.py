@@ -38,6 +38,90 @@ Use at your own risk.
 """
 
 
+class ExperimentalDeltaMetricWarning(UserWarning):
+    """Warning raised when computing legacy delta metrics."""
+
+
+_EXPERIMENTAL_METRICS_WARNING_EMITTED = False
+
+
+def _emit_experimental_metrics_warning_once():
+    global _EXPERIMENTAL_METRICS_WARNING_EMITTED
+    if _EXPERIMENTAL_METRICS_WARNING_EMITTED is True:
+        return
+    warnings.warn(
+        'Delta metrics are experimental convenience metrics. Review the '
+        'definitions, assumptions, and outputs before relying on them for '
+        'analysis or publication.',
+        ExperimentalDeltaMetricWarning,
+        stacklevel=3,
+    )
+    _EXPERIMENTAL_METRICS_WARNING_EMITTED = True
+
+
+def list_metric_names():
+    """Return the stable output names produced by :func:`compute_delta_metrics`."""
+    names = []
+    for output_names, _func, _kwargs in _metric_specs():
+        names.extend(output_names)
+    return tuple(names)
+
+
+def _normalize_requested_metric_names(metrics):
+    available = set(list_metric_names())
+    if metrics is None:
+        return None
+    if isinstance(metrics, str):
+        requested = [metrics]
+    else:
+        requested = list(metrics)
+
+    unknown = [name for name in requested if name not in available]
+    if unknown:
+        raise ValueError(
+            f"Unknown delta metric(s): {unknown}. Available metrics are {sorted(available)}."
+        )
+
+    ordered = []
+    seen = set()
+    for name in requested:
+        if name not in seen:
+            ordered.append(name)
+            seen.add(name)
+    return set(ordered)
+
+
+def _metric_specs(n_random=200):
+    return (
+        (("nonlin_entropy_rate", "nER_prob_exceedence", "nER_randomized"), delta_nER, {"N": n_random}),
+        (("top_mutual_info", "top_conditional_entropy"), top_entropy_based_topo, {}),
+        (("top_link_sharing_idx",), top_link_sharing_index, {}),
+        (("n_alt_paths",), top_number_alternative_paths, {}),
+        (("resistance_distance",), top_resistance_distance, {}),
+        (("top_pairwise_dependence",), top_s2s_topo_pairwise_dep, {}),
+        (("flux_sharing_idx",), dyn_flux_sharing_index, {}),
+        (("leakage_idx",), dyn_leakage_index, {}),
+        (("dyn_pairwise_dependence",), dyn_pairwise_dep, {}),
+        (("dyn_mutual_info", "dyn_conditional_entropy"), dyn_entropy_based_dyn, {}),
+    )
+
+
+def _compute_selected_metrics(deltavars, *, metrics=None, n_random=200):
+    selected_names = _normalize_requested_metric_names(metrics)
+    outputs = {}
+    for output_names, func, kwargs in _metric_specs(n_random=n_random):
+        if selected_names is not None and all(name not in selected_names for name in output_names):
+            continue
+        result = func(deltavars, **kwargs)
+        if len(output_names) == 1:
+            outputs[output_names[0]] = result
+        else:
+            for name, value in zip(output_names, result):
+                if selected_names is None or name in selected_names:
+                    outputs[name] = value
+    return outputs
+
+
 def _normalize_mapping_values(mapping):
     total = float(sum(mapping.values()))
     if total <= 0:
@@ -45,7 +129,7 @@ def _normalize_mapping_values(mapping):
     return {key: float(val) / total for key, val in mapping.items()}
 
 
-def _add_super_apex_topologic(links, nodes, inletweights):
+def _add_virtual_source_super_apex(links, nodes, inletweights):
     """Add a synthetic super-apex without needing image geometry.
 
     Parameters
@@ -100,15 +184,15 @@ def _prepare_metric_network(
 ):
     """Prepare a graph-ready network for delta metrics.
 
-    Multiple inlets are a boundary-condition problem. When an explicit inlet
-    policy is provided, this preserves all inlets by adding a synthetic
-    super-apex and routing one unit of source flux to the inlet set according
-    to the requested inlet policy. When no inlet policy is provided, the
-    historical single-inlet pruning path is used for backward compatibility.
+    Multiple inlets are a boundary-condition problem. Metrics will only be
+    computed for multi-inlet networks when an explicit inlet policy is
+    provided. In that case, all inlets are preserved by adding a synthetic
+    virtual-source super-apex and routing one unit of source flux to the inlet
+    set according to the requested inlet policy.
 
     Returns
     -------
-    links_m, nodes_m, graph_weight, inletweights
+    links_m, nodes_m, graph_weight, inletweights, metadata
     """
     if routing not in ('width', 'uniform'):
         raise ValueError(f"Unsupported routing policy '{routing}'.")
@@ -116,30 +200,35 @@ def _prepare_metric_network(
     graph_weight = 'wid_adj' if routing == 'width' else None
     n_inlets = len(nodes.get('inlets', []))
 
-    # Preserve legacy behavior by default for multi-inlet networks, but warn so
-    # callers know a boundary condition is being assumed.
     if n_inlets > 1 and inlet is None and inlet_weights is None:
-        warnings.warn(
-            'Multiple inlet nodes detected but no inlet partition policy was '
-            'provided. Falling back to legacy single-inlet pruning via '
-            "ensure_single_inlet(). Pass inlet='equal', inlet='width', or "
-            "inlet='user' with inlet_weights to preserve all inlets.",
-            UserWarning,
-            stacklevel=2,
+        raise ValueError(
+            "Multiple inlet nodes detected. Pass inlet='equal', "
+            "inlet='width', or inlet='user' with inlet_weights to compute "
+            "delta metrics without silently pruning inlets."
         )
-        links_m, nodes_m = ensure_single_inlet(links, nodes)
-        return links_m, nodes_m, graph_weight, None
 
     # Single inlet is unambiguous; keep topology unchanged.
     if n_inlets <= 1:
-        return deepcopy(links), deepcopy(nodes), graph_weight, None
+        metadata = {
+            'n_inlets_original': n_inlets,
+            'multi_inlet_strategy': 'native_single_inlet',
+            'used_super_apex': False,
+            'inlet_weights_normalized': None,
+        }
+        return deepcopy(links), deepcopy(nodes), graph_weight, None, metadata
 
     graph = build_delta_graph(links, nodes)
     inlet_policy = make_inlet_policy(inlet, inlet_weights=inlet_weights)
     source_weights = _normalize_mapping_values(dict(inlet_policy.source_weights(graph)))
     inletweights = [source_weights[nid] for nid in nodes['inlets']]
-    links_m, nodes_m = _add_super_apex_topologic(links, nodes, inletweights)
-    return links_m, nodes_m, graph_weight, inletweights
+    links_m, nodes_m = _add_virtual_source_super_apex(links, nodes, inletweights)
+    metadata = {
+        'n_inlets_original': n_inlets,
+        'multi_inlet_strategy': 'virtual_source_super_apex',
+        'used_super_apex': True,
+        'inlet_weights_normalized': {nid: source_weights[nid] for nid in nodes['inlets']},
+    }
+    return links_m, nodes_m, graph_weight, inletweights, metadata
 
 
 def compute_delta_metrics(
@@ -149,6 +238,10 @@ def compute_delta_metrics(
     routing="width",
     inlet=None,
     inlet_weights=None,
+    metrics=None,
+    n_random=200,
+    warn_experimental=True,
+    return_intermediates=False,
 ):
     """Compute delta metrics.
 
@@ -160,14 +253,35 @@ def compute_delta_metrics(
         Internal bifurcation routing policy used to build the weighted graph
         consumed by the legacy metric formulas.
     inlet : {None, "width", "equal", "user"}, optional
-        Boundary-condition policy for multiple-inlet networks. If ``None`` and
-        multiple inlets are present, the historical ``ensure_single_inlet()``
-        pruning path is used with a warning for backward compatibility.
+        Boundary-condition policy for multiple-inlet networks. When multiple
+        inlets are present, an explicit policy is required so inlet handling is
+        never implicit. Explicit multi-inlet handling uses a virtual-source
+        super-apex rather than pruning to a single real inlet.
     inlet_weights : mapping, optional
         Required when ``inlet='user'``. Maps inlet node ids to nonnegative
         source weights.
+    metrics : str or sequence[str], optional
+        Restrict computation to a subset of metric outputs. Names must match
+        those returned by :func:`list_metric_names`. By default all metrics are
+        computed.
+    n_random : int, optional
+        Number of random trials used when computing ``nER_randomized``.
+    warn_experimental : bool, optional
+        Emit a one-time warning that the delta metrics are experimental.
+    return_intermediates : bool, optional
+        When True, also return the intermediate adjacency/steady-state context
+        used by the metric functions.
+
+    Returns
+    -------
+    dict or tuple[dict, dict]
+        Metric outputs, or ``(metrics, deltavars)`` when
+        ``return_intermediates=True``.
     """
-    links_m, nodes_m, graph_weight, graph_inletweights = _prepare_metric_network(
+    if warn_experimental is True:
+        _emit_experimental_metrics_warning_once()
+
+    links_m, nodes_m, graph_weight, graph_inletweights, metric_metadata = _prepare_metric_network(
         links,
         nodes,
         routing=routing,
@@ -175,55 +289,36 @@ def compute_delta_metrics(
         inlet_weights=inlet_weights,
     )
 
-    # Ensure we have a directed, acyclic graph using the requested routing and
-    # inlet boundary condition.
     G = graphiphy(links_m, nodes_m, weight=graph_weight, inletweights=graph_inletweights)
 
     if nx.is_directed_acyclic_graph(G) is not True:
         raise RuntimeError('Cannot proceed with metrics as graph is not acyclic.')
 
-    # Compute the intermediate variables required to compute delta metrics
     deltavars = intermediate_vars(G)
+    deltavars['metric_metadata'] = metric_metadata
+    metric_outputs = _compute_selected_metrics(deltavars, metrics=metrics, n_random=n_random)
 
-    # Compute metrics
-    metrics = dict()
-    ner, pexc, ner_randomized = delta_nER(deltavars, N=200)
-    metrics['nonlin_entropy_rate'] = ner
-    metrics['nER_prob_exceedence'] = pexc
-    metrics['nER_randomized'] = ner_randomized
-    metrics['top_mutual_info'], metrics['top_conditional_entropy'] = top_entropy_based_topo(deltavars)
-    metrics['top_link_sharing_idx'] = top_link_sharing_index(deltavars)
-    metrics['n_alt_paths'] = top_number_alternative_paths(deltavars)
-    metrics['resistance_distance'] = top_resistance_distance(deltavars)
-    metrics['top_pairwise_dependence'] = top_s2s_topo_pairwise_dep(deltavars)
-    metrics['flux_sharing_idx'] = dyn_flux_sharing_index(deltavars)
-    metrics['leakage_idx'] = dyn_leakage_index(deltavars)
-    metrics['dyn_pairwise_dependence'] = dyn_pairwise_dep(deltavars)
-    metrics['dyn_mutual_info'], metrics['dyn_conditional_entropy'] = dyn_entropy_based_dyn(deltavars)
-
-    return metrics
+    if return_intermediates is True:
+        return metric_outputs, deltavars
+    return metric_outputs
 
 
-def ensure_single_inlet(links, nodes):
+def _prune_to_single_inlet(links, nodes):
     """
-    Ensure only a single apex node exists. This dumbly just prunes all inlet
-    nodes+links except the widest one. Recommended to use the super_apex()
-    approach instead if you want to preserve all inlets.
+    Internal helper that prunes a network down to one inlet by keeping the
+    widest inlet and deleting the others.
 
-    All the delta metrics here require a single apex node, and that that node
-    be connected to at least two downstream links. This function ensures these
-    conditions are met; where there are multiple inlets, the widest is chosen.
-    This function also ensures that the inlet node is attached to at least two
-    links--this is important for computing un-biased delta metrics.
-    The links and nodes dicts are copied so they remain unaltered; the altered
-    copies are returned.
+    This is retained only for internal debugging/sanity checks; metric
+    computation no longer uses implicit inlet pruning. This strategy keeps one
+    real inlet and removes the others, which is distinct from the virtual-
+    source super-apex strategy used for explicit multi-inlet metrics. The links
+    and nodes
+    dicts are deep-copied so the caller's network remains unaltered.
 
     """
     # Copy links and nodes so we preserve the originals
-    links_edit = dict()
-    links_edit.update(links)
-    nodes_edit = dict()
-    nodes_edit.update(nodes)
+    links_edit = deepcopy(links)
+    nodes_edit = deepcopy(nodes)
 
     # Find the widest inlet
     in_wids = []
@@ -272,10 +367,10 @@ def ensure_single_inlet(links, nodes):
     return links_edit, nodes_edit
 
 
-def add_super_apex(links, nodes, imshape):
+def add_super_apex_to_network(links, nodes, imshape):
     """
-    If multiple inlets are present, this creates a "super apex" that is
-    directly upstream of all the inlet nodes. The synthetic links created
+    If multiple inlets are present, this adds a virtual-source "super apex"
+    directly upstream of all inlet nodes. The synthetic links created
     have zero length and widths equal to the sum of the widths of the links
     connected to their respective inlet node.
     """
@@ -321,9 +416,9 @@ def add_super_apex(links, nodes, imshape):
     return links, nodes
 
 
-def delete_super_apex(links, nodes):
+def remove_super_apex_from_network(links, nodes):
     """
-    If you have a super apex, this function deletes it and connecting links.
+    If a virtual-source super-apex is present, this function deletes it and its connecting links.
     """
 
     # Get super apex node
@@ -331,7 +426,9 @@ def delete_super_apex(links, nodes):
         raise ValueError('no super apex detected.')
 
     # identify super apex
-    super_apex = nodes['super_apex'][0]
+    super_apex = nodes['super_apex']
+    if isinstance(super_apex, (list, tuple, np.ndarray)):
+        super_apex = super_apex[0]
 
     # identify connecting links
     super_links = nodes['conn'][nodes['id'].index(super_apex)]
@@ -362,8 +459,9 @@ def graphiphy(links, nodes, weight=None, inletweights=None):
         Link attribute to use to weight the NetworkX graph. If not provided or
         None, the graph will be unweighted (links of 1 and 0)
     inletweights : list, optional
-        Optional manual weights for the inlets when using the super-apex
-        functionality. Overrides the weight set by the inlet link attribute
+        Optional manual weights for the inlet links when using the
+        virtual-source super-apex functionality. Overrides the weight set by
+        the inlet link attribute
         in favor of values from the provided list. List must be in the same
         order and have the same length as nodes['inlets'].
 
@@ -387,7 +485,7 @@ def graphiphy(links, nodes, weight=None, inletweights=None):
 
     if inletweights is not None:
         if 'super_apex' not in nodes.keys():
-            raise RuntimeError('Can only specify weights if super-apex has been added.')
+            raise RuntimeError('Can only specify weights if a virtual-source super-apex has been added.')
         if len(inletweights) != len(nodes['inlets']):
             raise RuntimeError('graphiphy requires {} weights but {} were provided.'.format(len(nodes['inlets']), len(inletweights)))
         # Set weights of inlet links
@@ -452,8 +550,7 @@ def find_inlet_outlet_nodes(A):
     Find inlet and outlet nodes.
 
     Given an input adjacency matrix (A), returns the inlet and outlet nodes.
-    The graph should contain a single apex
-    (i.e. run ensure_single_inlet first).
+    The graph should contain a single apex.
 
     """
     apex = np.where(np.sum(A, axis=1) == 0)[0]
@@ -774,7 +871,10 @@ def top_link_sharing_index(deltavars, epsilon=10**-10):
     LSI = np.empty((NS, 2))
     for k in range(NS):
         I = np.where(SubN[outlets, k] > epsilon)[0]
-        LSI[k, 0] = outlets[I]
+        if len(I) == 0:
+            LSI[k, :] = np.nan
+            continue
+        LSI[k, 0] = int(outlets[I[0]])
         LSI[k, 1] = 1 - np.nanmean(1 / LinkBelong[SubN_Links[k]])
 
     return LSI
@@ -788,8 +888,8 @@ def top_number_alternative_paths(deltavars, epsilon=10**-15):
     from the Apex to each of the shoreline outlets.
 
     """
-    apexid = deltavars['apex']
-    outlets = deltavars['outlets']
+    apexid = int(np.atleast_1d(deltavars['apex'])[0])
+    outlets = np.asarray(deltavars['outlets'], dtype=int)
 
     # Don't need weights
     A = deltavars['A_uw'].copy()
@@ -809,9 +909,13 @@ def top_number_alternative_paths(deltavars, epsilon=10**-15):
     paths = np.empty((null_space_v.shape[0], 2))
     for i in range(null_space_v.shape[0]):
         I = np.where(vN[outlets, i] > epsilon)[0]
-        vN[:, i] = vN[:, i] / vN[outlets[I], i]
-        paths[i, 0] = outlets[I]
-        paths[i, 1] = vN[apexid, i]
+        if len(I) == 0:
+            paths[i, :] = np.nan
+            continue
+        outlet = int(outlets[I[0]])
+        vN[:, i] = vN[:, i] / vN[outlet, i]
+        paths[i, 0] = outlet
+        paths[i, 1] = float(vN[apexid, i])
 
     return paths
 
@@ -820,49 +924,55 @@ def top_resistance_distance(deltavars, epsilon=10**-15):
     """
     Compute the topologic resistance distance.
 
-    NOTE! TopoDist was not supplied with this function--can use networkX to
-    compute shortest path but need to know what "shortest" means
-    This function will not work until TopoDist is resolved.
-    Computes the resistance distance (RD) from the Apex to each of the
-    shoreline outlets. The value of RD between two nodes is the effective
-    resistance between the two nodes when each link in the network is replaced
-    by a 1 ohm resistor.
+    The resistance distance between the apex and each outlet is computed on the
+    undirected, unweighted graph induced by that outlet's topologic
+    subnetwork. The result is normalized by the unweighted shortest-path
+    distance so values remain comparable across subnetworks of different size.
     """
-    print("Warning: resistance distances are incorrect. See https://github.com/VeinsOfTheEarth/RivGraph/issues/103.")
+    apexid = int(np.atleast_1d(deltavars['apex'])[0])
+    outlets = np.asarray(deltavars['outlets'], dtype=int)
 
-    apexid = deltavars['apex']
-    outlets = deltavars['outlets']
+    # Work on the undirected, unweighted support of the graph. The historical
+    # implementation used a directed Laplacian, which can yield invalid results
+    # for effective resistance.
+    A_dir = np.asarray(deltavars['A_uw'], dtype=float)
+    A_und = ((A_dir > epsilon) | (A_dir.T > epsilon)).astype(float)
 
-    # Don't need weights
-    As = deltavars['A_uw'].copy()
+    SubN = np.asarray(deltavars['SubN_w'], dtype=float)
+    RD = np.empty((SubN.shape[1], 2), dtype=float)
 
-    # Compute the RD within each subnetwork
-    SubN = deltavars['SubN_w'].copy()
-
-    RD = np.empty((SubN.shape[1], 2))
     for i in range(SubN.shape[1]):
-        # Nodes that don't belong to subnetwork
-        I = np.where(np.abs(SubN[:, i]) < epsilon)[0]
-        # Zero columns and rows of nodes that are not present in subnetwork i
-        As_i = As.copy()
-        As_i[I, :] = 0
-        As_i[:, I] = 0
-        # Laplacian L and its pseudoinverse
+        present = np.abs(SubN[:, i]) > epsilon
+        As_i = A_und.copy()
+        As_i[~present, :] = 0.0
+        As_i[:, ~present] = 0.0
+
+        outlet_mask = SubN[outlets, i] > epsilon
+        outlet_ids = outlets[outlet_mask]
+        if outlet_ids.size != 1:
+            RD[i, :] = np.nan
+            continue
+        outlet = int(outlet_ids[0])
+
+        if present[apexid] is False or present[outlet] is False:
+            RD[i, :] = np.nan
+            continue
+
         L = np.diag(np.sum(As_i, axis=0)) - As_i
         invL = np.linalg.pinv(L)
+        topo_dist = graphshortestpath(As_i, apexid, outlet)
+        if topo_dist <= 0:
+            RD[i, :] = np.nan
+            continue
 
-        # Compute RD
-        I = np.where(SubN[outlets, i] > epsilon)[0]
-        o = outlets[I]
-        a = apexid
-        RD[i, 0] = o
-
-        # Distance between the apex and the ith outlet
-        TopoDist = graphshortestpath(As_i, a[0], o[0])
-
-        # RD is normalized by TopoDist to be able to compare networks of different size
-        RD[i, 1] = (invL[a, a] + invL[o, o] - invL[a, o] - \
-                   invL[o, a]) / TopoDist
+        eff_res = (
+            invL[apexid, apexid]
+            + invL[outlet, outlet]
+            - invL[apexid, outlet]
+            - invL[outlet, apexid]
+        )
+        RD[i, 0] = outlet
+        RD[i, 1] = float(eff_res / topo_dist)
 
     return RD
 
@@ -876,7 +986,7 @@ def graphshortestpath(A, start, finish):
     considered. Number of links in the shortest path is returned.
 
     """
-    G = nx.from_numpy_array(A)
+    G = nx.from_numpy_array(np.asarray(A), create_using=nx.Graph)
     sp = nx.shortest_path_length(G, start, finish)
 
     return sp
@@ -953,7 +1063,7 @@ def dyn_flux_sharing_index(deltavars, epsilon=10**-10):
     for k in range(NS):
         I = np.where(SubN[outlets, k] > epsilon)[0]
         if len(I) != 0:
-            FSI[k, 0] = outlets[I]
+            FSI[k, 0] = int(outlets[I[0]])
             # Downstream nodes of all the links in the subnetwork
             NodesD = r[SubN_Links[k]]
             FSI[k, 1] = 1 - np.nanmean(SubN[NodesD, k])
@@ -972,8 +1082,8 @@ def dyn_leakage_index(deltavars, epsilon=10**-10):
     leaked to other subnetworks.
 
     """
-    apexid = deltavars['apex']
-    outlets = deltavars['outlets']
+    apexid = int(np.atleast_1d(deltavars['apex'])[0])
+    outlets = np.asarray(deltavars['outlets'], dtype=int)
 
     A = deltavars['A_w'].copy()
 
@@ -981,7 +1091,13 @@ def dyn_leakage_index(deltavars, epsilon=10**-10):
     a = apexid
     I = np.where(A[:, a] > 0)[0]
     if len(I) < 2:
-        print('Warning: the apex of the delta has only one node downstream. It is recommended that there be at least two downstream links from the apex to avoid biases.')
+        warnings.warn(
+            'The apex of the delta has only one downstream node. It is '
+            'recommended that there be at least two downstream links from the '
+            'apex to avoid biases in leakage metrics.',
+            UserWarning,
+            stacklevel=2,
+        )
 
     # Fluxes at each node F and subnetworks subN
     F = deltavars['F_w'].copy()
