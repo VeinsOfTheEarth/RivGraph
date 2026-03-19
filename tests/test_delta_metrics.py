@@ -124,15 +124,47 @@ def test_synthetic_graph_metrics_make_sense():
     assert np.allclose(diamond_metrics['resistance_distance'][:, 1], [0.5])
 
 
-def test_ensure_single_inlet_does_not_mutate_inputs():
+def test_prune_to_single_inlet_does_not_mutate_inputs():
     links, nodes = _two_inlet_network()
     links_before = deepcopy(links)
     nodes_before = deepcopy(nodes)
 
-    links_after, nodes_after = dm.ensure_single_inlet(links, nodes)
+    links_after, nodes_after = dm._prune_to_single_inlet(links, nodes)
 
     assert links == links_before
     assert nodes == nodes_before
     assert links_after != links_before
     assert nodes_after != nodes_before
     assert nodes_after['inlets'] == [0]
+
+
+def test_multi_inlet_metrics_require_explicit_policy():
+    links, nodes = _two_inlet_network()
+
+    with pytest.raises(ValueError, match='Multiple inlet nodes detected'):
+        dm.compute_delta_metrics(links, nodes, warn_experimental=False)
+
+
+def test_multi_inlet_metrics_report_internal_super_apex_metadata():
+    links, nodes = _two_inlet_network()
+    links_before = deepcopy(links)
+    nodes_before = deepcopy(nodes)
+
+    metrics, deltavars = dm.compute_delta_metrics(
+        links,
+        nodes,
+        inlet='equal',
+        metrics='n_alt_paths',
+        warn_experimental=False,
+        return_intermediates=True,
+    )
+
+    meta = deltavars['metric_metadata']
+    assert set(metrics.keys()) == {'n_alt_paths'}
+    assert meta['n_inlets_original'] == 2
+    assert meta['multi_inlet_strategy'] == 'virtual_source_super_apex'
+    assert meta['used_super_apex'] is True
+    assert np.allclose(list(meta['inlet_weights_normalized'].values()), [0.5, 0.5])
+    assert links == links_before
+    assert nodes == nodes_before
+    assert 'super_apex' not in nodes

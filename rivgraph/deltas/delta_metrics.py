@@ -129,7 +129,7 @@ def _normalize_mapping_values(mapping):
     return {key: float(val) / total for key, val in mapping.items()}
 
 
-def _add_super_apex_topologic(links, nodes, inletweights):
+def _add_virtual_source_super_apex(links, nodes, inletweights):
     """Add a synthetic super-apex without needing image geometry.
 
     Parameters
@@ -184,15 +184,15 @@ def _prepare_metric_network(
 ):
     """Prepare a graph-ready network for delta metrics.
 
-    Multiple inlets are a boundary-condition problem. When an explicit inlet
-    policy is provided, this preserves all inlets by adding a synthetic
-    super-apex and routing one unit of source flux to the inlet set according
-    to the requested inlet policy. When no inlet policy is provided, the
-    historical single-inlet pruning path is used for backward compatibility.
+    Multiple inlets are a boundary-condition problem. Metrics will only be
+    computed for multi-inlet networks when an explicit inlet policy is
+    provided. In that case, all inlets are preserved by adding a synthetic
+    virtual-source super-apex and routing one unit of source flux to the inlet
+    set according to the requested inlet policy.
 
     Returns
     -------
-    links_m, nodes_m, graph_weight, inletweights
+    links_m, nodes_m, graph_weight, inletweights, metadata
     """
     if routing not in ('width', 'uniform'):
         raise ValueError(f"Unsupported routing policy '{routing}'.")
@@ -200,30 +200,35 @@ def _prepare_metric_network(
     graph_weight = 'wid_adj' if routing == 'width' else None
     n_inlets = len(nodes.get('inlets', []))
 
-    # Preserve legacy behavior by default for multi-inlet networks, but warn so
-    # callers know a boundary condition is being assumed.
     if n_inlets > 1 and inlet is None and inlet_weights is None:
-        warnings.warn(
-            'Multiple inlet nodes detected but no inlet partition policy was '
-            'provided. Falling back to legacy single-inlet pruning via '
-            "ensure_single_inlet(). Pass inlet='equal', inlet='width', or "
-            "inlet='user' with inlet_weights to preserve all inlets.",
-            UserWarning,
-            stacklevel=2,
+        raise ValueError(
+            "Multiple inlet nodes detected. Pass inlet='equal', "
+            "inlet='width', or inlet='user' with inlet_weights to compute "
+            "delta metrics without silently pruning inlets."
         )
-        links_m, nodes_m = ensure_single_inlet(links, nodes)
-        return links_m, nodes_m, graph_weight, None
 
     # Single inlet is unambiguous; keep topology unchanged.
     if n_inlets <= 1:
-        return deepcopy(links), deepcopy(nodes), graph_weight, None
+        metadata = {
+            'n_inlets_original': n_inlets,
+            'multi_inlet_strategy': 'native_single_inlet',
+            'used_super_apex': False,
+            'inlet_weights_normalized': None,
+        }
+        return deepcopy(links), deepcopy(nodes), graph_weight, None, metadata
 
     graph = build_delta_graph(links, nodes)
     inlet_policy = make_inlet_policy(inlet, inlet_weights=inlet_weights)
     source_weights = _normalize_mapping_values(dict(inlet_policy.source_weights(graph)))
     inletweights = [source_weights[nid] for nid in nodes['inlets']]
-    links_m, nodes_m = _add_super_apex_topologic(links, nodes, inletweights)
-    return links_m, nodes_m, graph_weight, inletweights
+    links_m, nodes_m = _add_virtual_source_super_apex(links, nodes, inletweights)
+    metadata = {
+        'n_inlets_original': n_inlets,
+        'multi_inlet_strategy': 'virtual_source_super_apex',
+        'used_super_apex': True,
+        'inlet_weights_normalized': {nid: source_weights[nid] for nid in nodes['inlets']},
+    }
+    return links_m, nodes_m, graph_weight, inletweights, metadata
 
 
 def compute_delta_metrics(
@@ -248,9 +253,10 @@ def compute_delta_metrics(
         Internal bifurcation routing policy used to build the weighted graph
         consumed by the legacy metric formulas.
     inlet : {None, "width", "equal", "user"}, optional
-        Boundary-condition policy for multiple-inlet networks. If ``None`` and
-        multiple inlets are present, the historical ``ensure_single_inlet()``
-        pruning path is used with a warning for backward compatibility.
+        Boundary-condition policy for multiple-inlet networks. When multiple
+        inlets are present, an explicit policy is required so inlet handling is
+        never implicit. Explicit multi-inlet handling uses a virtual-source
+        super-apex rather than pruning to a single real inlet.
     inlet_weights : mapping, optional
         Required when ``inlet='user'``. Maps inlet node ids to nonnegative
         source weights.
@@ -275,7 +281,7 @@ def compute_delta_metrics(
     if warn_experimental is True:
         _emit_experimental_metrics_warning_once()
 
-    links_m, nodes_m, graph_weight, graph_inletweights = _prepare_metric_network(
+    links_m, nodes_m, graph_weight, graph_inletweights, metric_metadata = _prepare_metric_network(
         links,
         nodes,
         routing=routing,
@@ -289,6 +295,7 @@ def compute_delta_metrics(
         raise RuntimeError('Cannot proceed with metrics as graph is not acyclic.')
 
     deltavars = intermediate_vars(G)
+    deltavars['metric_metadata'] = metric_metadata
     metric_outputs = _compute_selected_metrics(deltavars, metrics=metrics, n_random=n_random)
 
     if return_intermediates is True:
@@ -296,19 +303,17 @@ def compute_delta_metrics(
     return metric_outputs
 
 
-def ensure_single_inlet(links, nodes):
+def _prune_to_single_inlet(links, nodes):
     """
-    Ensure only a single apex node exists. This dumbly just prunes all inlet
-    nodes+links except the widest one. Recommended to use the super_apex()
-    approach instead if you want to preserve all inlets.
+    Internal helper that prunes a network down to one inlet by keeping the
+    widest inlet and deleting the others.
 
-    All the delta metrics here require a single apex node, and that that node
-    be connected to at least two downstream links. This function ensures these
-    conditions are met; where there are multiple inlets, the widest is chosen.
-    This function also ensures that the inlet node is attached to at least two
-    links--this is important for computing un-biased delta metrics.
-    The links and nodes dicts are copied so they remain unaltered; the altered
-    copies are returned.
+    This is retained only for internal debugging/sanity checks; metric
+    computation no longer uses implicit inlet pruning. This strategy keeps one
+    real inlet and removes the others, which is distinct from the virtual-
+    source super-apex strategy used for explicit multi-inlet metrics. The links
+    and nodes
+    dicts are deep-copied so the caller's network remains unaltered.
 
     """
     # Copy links and nodes so we preserve the originals
@@ -362,10 +367,10 @@ def ensure_single_inlet(links, nodes):
     return links_edit, nodes_edit
 
 
-def add_super_apex(links, nodes, imshape):
+def add_super_apex_to_network(links, nodes, imshape):
     """
-    If multiple inlets are present, this creates a "super apex" that is
-    directly upstream of all the inlet nodes. The synthetic links created
+    If multiple inlets are present, this adds a virtual-source "super apex"
+    directly upstream of all inlet nodes. The synthetic links created
     have zero length and widths equal to the sum of the widths of the links
     connected to their respective inlet node.
     """
@@ -411,9 +416,9 @@ def add_super_apex(links, nodes, imshape):
     return links, nodes
 
 
-def delete_super_apex(links, nodes):
+def remove_super_apex_from_network(links, nodes):
     """
-    If you have a super apex, this function deletes it and connecting links.
+    If a virtual-source super-apex is present, this function deletes it and its connecting links.
     """
 
     # Get super apex node
@@ -454,8 +459,9 @@ def graphiphy(links, nodes, weight=None, inletweights=None):
         Link attribute to use to weight the NetworkX graph. If not provided or
         None, the graph will be unweighted (links of 1 and 0)
     inletweights : list, optional
-        Optional manual weights for the inlets when using the super-apex
-        functionality. Overrides the weight set by the inlet link attribute
+        Optional manual weights for the inlet links when using the
+        virtual-source super-apex functionality. Overrides the weight set by
+        the inlet link attribute
         in favor of values from the provided list. List must be in the same
         order and have the same length as nodes['inlets'].
 
@@ -479,7 +485,7 @@ def graphiphy(links, nodes, weight=None, inletweights=None):
 
     if inletweights is not None:
         if 'super_apex' not in nodes.keys():
-            raise RuntimeError('Can only specify weights if super-apex has been added.')
+            raise RuntimeError('Can only specify weights if a virtual-source super-apex has been added.')
         if len(inletweights) != len(nodes['inlets']):
             raise RuntimeError('graphiphy requires {} weights but {} were provided.'.format(len(nodes['inlets']), len(inletweights)))
         # Set weights of inlet links
@@ -544,8 +550,7 @@ def find_inlet_outlet_nodes(A):
     Find inlet and outlet nodes.
 
     Given an input adjacency matrix (A), returns the inlet and outlet nodes.
-    The graph should contain a single apex
-    (i.e. run ensure_single_inlet first).
+    The graph should contain a single apex.
 
     """
     apex = np.where(np.sum(A, axis=1) == 0)[0]
