@@ -13,33 +13,41 @@ Created on Mon Jul 6 18:29:23 2020
 import numpy as np
 import geopandas as gpd
 import rivgraph.im_utils as iu
-import rivgraph.geo_utils as gu
 from scipy.ndimage import distance_transform_edt
-from shapely.geometry import Polygon
-from shapely.ops import unary_union
+from shapely.geometry import shape
 from scipy import stats
+from rasterio.features import shapes as rio_shapes
+from affine import Affine
 import rivgraph.im_utils as im
 import networkx as nx
 
 
-def pixagon(c_cent, r_cent, pixlen):
-    """
-    Returns a shapely polygon
-    of a provided center coordinate given the pixel resolution (pixlen).
-    """
-    halflen = pixlen/2
-    c_corner = np.array([c_cent-halflen, c_cent+halflen, c_cent+halflen,
-                         c_cent-halflen, c_cent-halflen])
-    r_corner = np.array([r_cent+halflen, r_cent+halflen, r_cent-halflen,
-                         r_cent-halflen, r_cent+halflen])
 
-    pixgon = Polygon(zip(c_corner, r_corner))
 
-    return pixgon
+def _build_island_polygons_rasterio(Ilabeled, gt, connectivity=2):
+    """Build island polygons by polygonizing the labeled raster."""
+    affine = Affine.from_gdal(*gt) * Affine.translation(-1, -1)
+    rio_connectivity = 8 if connectivity == 2 else 4
+
+    poly_by_id = {}
+    for geom, value in rio_shapes(
+        Ilabeled.astype(np.int32),
+        mask=Ilabeled > 0,
+        connectivity=rio_connectivity,
+        transform=affine,
+    ):
+        label = int(value)
+        if label == 0:
+            continue
+        poly_by_id[label] = shape(geom)
+
+    return poly_by_id
 
 
 def get_island_properties(Imask, pixlen, pixarea, crs, gt, props, connectivity=2):
-    """Get island properties."""
+    """Get island properties using raster polygonization for island geometries."""
+
+    props = list(props)
 
     # maxwidth is an additional property
     if 'maxwidth' in props:
@@ -48,9 +56,11 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props, connectivity=2
     else:
         do_maxwidth = False
 
-    # Need perimeter to make island polygons
-    if 'perimeter' not in props:
-        props.append('perimeter')
+    user_requested_label = 'label' in props
+
+    # Need labels to map polygonized geometries back to island IDs.
+    if 'label' not in props:
+        props.append('label')
 
     # Pad by one pixel to help identify and remove the outer portion of
     # the channel netowrk
@@ -59,27 +69,9 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props, connectivity=2
 
     rp_islands, Ilabeled = iu.regionprops(Imp_invert, props=props, connectivity=connectivity)
 
-    # Make polygons of the island perimeters
-    # Also get ids to match the labeled image
-    pgons = []
-    ids = []
-    for ip, p in enumerate(rp_islands['perimeter']):
-        ids.append(Ilabeled[p[0][0], p[0][1]])  # Store the index
-
-        p = np.vstack((p, p[0]))  # Close the polygon
-        # Adjust for the single-pixel padding we added to the image
-        cr = gu.xy_to_coords(p[:, 1] - 1, p[:, 0] - 1, gt)
-
-        # Special cases: where the island is two pixels or less, we use the
-        # corner coordinates rather than the center coordinates to define
-        # the polygon.
-        if len(cr[0]) <= 2:
-            pixgon = [pixagon(cc, rc, pixlen) for cc, rc, in zip(cr[0], cr[1])]
-            if len(pixgon) > 1:
-                pixgon = unary_union(pixgon)
-            pgons.append(pixgon)
-        else:
-            pgons.append(Polygon(zip(cr[0], cr[1])))
+    poly_by_id = _build_island_polygons_rasterio(Ilabeled, gt, connectivity=connectivity)
+    ids = [int(i) for i in rp_islands['label']]
+    pgons = [poly_by_id[i] for i in ids]
 
     # Do maximum width if requested
     if do_maxwidth:
@@ -105,7 +97,9 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props, connectivity=2
         rp_islands['Area'] = rp_islands.pop('area')
 
     # Create islands geodataframe
-    gdf_dict = {k:rp_islands[k] for k in rp_islands if k not in ['coords', 'perimeter', 'centroid']}
+    gdf_dict = {k: rp_islands[k] for k in rp_islands if k not in ['coords', 'perimeter', 'centroid']}
+    if not user_requested_label:
+        gdf_dict.pop('label', None)
     gdf_dict['geometry'] = pgons
     gdf_dict['id'] = ids
     if do_maxwidth:

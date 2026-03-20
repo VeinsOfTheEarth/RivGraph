@@ -299,7 +299,15 @@ class rivnetwork:
 
         logger.info('Getting island properties...')
 
-        islands, Iislands = mu.get_island_properties(self.Imask, self.pixlen, self.pixarea, self.crs, self.gt, props, connectivity=connectivity)
+        islands, Iislands = mu.get_island_properties(
+            self.Imask,
+            self.pixlen,
+            self.pixarea,
+            self.crs,
+            self.gt,
+            props,
+            connectivity=connectivity,
+        )
 
         logger.info('got island properties.')
 
