@@ -22,6 +22,103 @@ import rivgraph.geo_utils as gu
 from rivgraph.ordered_set import OrderedSet
 
 
+
+
+ID_FINALIZED_FLAG = '_ids_finalized'
+ID_FINALIZATION_METHOD = '_ids_finalization_method'
+
+
+def mark_network_ids_provisional(links, nodes, reason='topology not finalized'):
+    """Mark network IDs as provisional after a topology-changing operation."""
+    if links is not None:
+        links[ID_FINALIZED_FLAG] = False
+        links[ID_FINALIZATION_METHOD] = reason
+    if nodes is not None:
+        nodes[ID_FINALIZED_FLAG] = False
+        nodes[ID_FINALIZATION_METHOD] = reason
+    return links, nodes
+
+
+def mark_network_ids_finalized(links, nodes, method='deterministic_postextract_pixelsort_v1'):
+    """Mark network IDs as finalized after deterministic relabeling."""
+    if links is not None:
+        links[ID_FINALIZED_FLAG] = True
+        links[ID_FINALIZATION_METHOD] = method
+    if nodes is not None:
+        nodes[ID_FINALIZED_FLAG] = True
+        nodes[ID_FINALIZATION_METHOD] = method
+    return links, nodes
+
+
+def network_ids_are_finalized(links=None, nodes=None):
+    """Return True only when both links and nodes are explicitly marked finalized."""
+    statuses = []
+    if links is not None:
+        statuses.append(bool(links.get(ID_FINALIZED_FLAG, False)))
+    if nodes is not None:
+        statuses.append(bool(nodes.get(ID_FINALIZED_FLAG, False)))
+    if len(statuses) == 0:
+        return False
+    return all(statuses)
+
+
+def _canonical_node_sort_key(node_idx):
+    return int(node_idx)
+
+
+def _canonical_link_sort_key(link_pixels):
+    return tuple(sorted(int(px) for px in link_pixels))
+
+
+def finalize_network_ids(links, nodes):
+    """
+    Deterministically relabel node and link IDs after topology is finalized.
+
+    IDs are reassigned based on stable, geometry-derived keys rather than the
+    order in which links/nodes were discovered during extraction.
+    """
+    if 'id' not in links or 'id' not in nodes or 'idx' not in links or 'idx' not in nodes:
+        raise KeyError("links/nodes must contain 'id' and 'idx' before IDs can be finalized.")
+
+    old_node_ids = list(nodes['id'])
+    old_link_ids = list(links['id'])
+
+    node_order = sorted(range(len(old_node_ids)), key=lambda i: (_canonical_node_sort_key(nodes['idx'][i]), int(old_node_ids[i])))
+    link_order = sorted(range(len(old_link_ids)), key=lambda i: (_canonical_link_sort_key(links['idx'][i]), int(old_link_ids[i])))
+
+    node_id_map = {old_node_ids[i]: new_id for new_id, i in enumerate(node_order)}
+    link_id_map = {old_link_ids[i]: new_id for new_id, i in enumerate(link_order)}
+
+    nodes['id'] = [node_id_map[old_id] for old_id in old_node_ids]
+    links['id'] = [link_id_map[old_id] for old_id in old_link_ids]
+
+    if 'conn' in nodes:
+        nodes['conn'] = [[link_id_map[lid] for lid in conn] for conn in nodes['conn']]
+    if 'conn' in links:
+        links['conn'] = [[node_id_map[nid] for nid in conn] for conn in links['conn']]
+
+    for key in ('inlets', 'outlets', 'arts'):
+        if key in nodes:
+            nodes[key] = [node_id_map[nid] for nid in nodes[key]]
+    if 'super_apex' in nodes:
+        nodes['super_apex'] = node_id_map[nodes['super_apex']]
+
+    if 'parallels' in links:
+        links['parallels'] = [[link_id_map[lid] for lid in pair] for pair in links['parallels']]
+    if 'arts' in links:
+        links['arts'] = [[link_id_map[lid] for lid in triad] for triad in links['arts']]
+    if 'link_conn' in links:
+        links['link_conn'] = [[link_id_map[lid] for lid in conn] for conn in links['link_conn']]
+    if 'guess' in links:
+        remapped_guess = []
+        for guesses in links['guess']:
+            remapped_guess.append([node_id_map[g] if g in node_id_map else g for g in guesses])
+        links['guess'] = remapped_guess
+
+    links, nodes = mark_network_ids_finalized(links, nodes)
+    return links, nodes
+
+
 def add_node(nodes, idx, linkconn):
     """
     Add a new node to the network.
@@ -59,6 +156,7 @@ def add_node(nodes, idx, linkconn):
     nodes['idx'].append(idx)
     nodes['conn'].append(linkconn)
 
+    _, nodes = mark_network_ids_provisional(None, nodes)
     return nodes
 
 
@@ -114,6 +212,7 @@ def add_link(links, nodes, idcs):
     links['id'].append(new_id)
     links['idx'].append(idcs)
 
+    links, nodes = mark_network_ids_provisional(links, nodes)
     return links, nodes
 
 
@@ -295,6 +394,7 @@ def delete_link(links, nodes, linkid):
     if 'link_conn' in links.keys():
         links['link_conn'] = [[item for item in sublist if item != linkid] for sublist in links['link_conn']]
 
+    links, nodes = mark_network_ids_provisional(links, nodes)
     return links, nodes
 
 

@@ -1,6 +1,8 @@
 """Contract tests for canonical RivGraph vector exports."""
 from __future__ import annotations
 
+import copy
+
 import geopandas as gpd
 import numpy as np
 import pytest
@@ -13,6 +15,7 @@ from rivgraph.export_schema import (
     get_extension_for_format,
     normalize_geovector_format,
 )
+import rivgraph.ln_utils as lnu
 from tests._helpers import require_io_utils
 
 
@@ -26,7 +29,7 @@ def geo_context():
 
 @pytest.fixture()
 def synthetic_nodes():
-    return {
+    nodes = {
         "id": [10, 11],
         "idx": [1, 13],
         "flux": [1.25, 2.5],
@@ -35,11 +38,13 @@ def synthetic_nodes():
         "inlets": [10],
         "outlets": [11],
     }
+    _, nodes = lnu.mark_network_ids_finalized(None, nodes)
+    return nodes
 
 
 @pytest.fixture()
 def synthetic_links():
-    return {
+    links = {
         "id": [100, 101],
         "idx": [np.array([0, 1, 2]), np.array([6, 11, 16])],
         "flux": [3.5, 4.5],
@@ -48,6 +53,8 @@ def synthetic_links():
         "wid_pix": [np.array([1, 2, 3]), np.array([2, 2, 2])],
         "wid_adj": [5.0, 6.0],
     }
+    links, _ = lnu.mark_network_ids_finalized(links, None)
+    return links
 
 
 @pytest.fixture()
@@ -110,3 +117,18 @@ def test_format_normalization_accepts_common_aliases(token, ext, driver):
 def test_format_normalization_rejects_unknown_formats():
     with pytest.raises(TypeError, match="Only json, shp, and gpkg"):
         normalize_geovector_format("kml")
+
+
+def test_export_warns_when_ids_are_not_finalized(tmp_path, geo_context):
+    io_utils = require_io_utils()
+    dims, gt, crs = geo_context
+    nodes = {
+        "id": [10, 11],
+        "idx": [1, 13],
+        "conn": [[100], [101]],
+        "inlets": [10],
+        "outlets": [11],
+    }
+    path = tmp_path / "nodes_warn.gpkg"
+    with pytest.warns(UserWarning, match="provisional IDs"):
+        io_utils.nodes_to_geofile(nodes, dims, gt, crs, str(path))

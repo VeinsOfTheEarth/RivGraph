@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 from pyproj import CRS
 
+import rivgraph.ln_utils as lnu
 from tests._helpers import require_io_utils, require_rasters
 
 
@@ -21,7 +22,7 @@ def geo_context():
 
 @pytest.fixture()
 def synthetic_nodes():
-    return {
+    nodes = {
         "id": [10, 11],
         "idx": [1, 13],
         "flux": [1.25, 2.5],
@@ -30,11 +31,13 @@ def synthetic_nodes():
         "inlets": [10],
         "outlets": [11],
     }
+    _, nodes = lnu.mark_network_ids_finalized(None, nodes)
+    return nodes
 
 
 @pytest.fixture()
 def synthetic_links():
-    return {
+    links = {
         "id": [100, 101],
         "idx": [np.array([0, 1, 2]), np.array([6, 11, 16])],
         "flux": [3.5, 4.5],
@@ -43,6 +46,8 @@ def synthetic_links():
         "wid_pix": [np.array([1, 2, 3]), np.array([2, 2, 2])],
         "wid_adj": [5.0, 6.0],
     }
+    links, _ = lnu.mark_network_ids_finalized(links, None)
+    return links
 
 
 def _read_geofile(path: Path) -> gpd.GeoDataFrame:

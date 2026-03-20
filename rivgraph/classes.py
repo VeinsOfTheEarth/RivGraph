@@ -195,6 +195,9 @@ class rivnetwork:
         logger.info('Resolving links and nodes...', end='')
 
         self.links, self.nodes = m2g.skel_to_graph(self.Iskel)
+        self.links, self.nodes = lnu.mark_network_ids_provisional(
+            self.links, self.nodes, reason='raw_extraction_not_finalized'
+        )
 
         logger.info('links and nodes have been resolved.')
 
@@ -376,6 +379,15 @@ class rivnetwork:
                 logger.info('Links and nodes saved to pickle file: {}.'.format(self.paths['network_pickle']))
             except AttributeError:
                 logger.info('Network has not been computed yet. Use the compute_network() method first.')
+
+
+    def finalize_ids(self):
+        """Deterministically relabel node and link IDs once topology is finalized."""
+        if hasattr(self, 'links') is False or hasattr(self, 'nodes') is False:
+            raise AttributeError('Network has not yet been computed.')
+
+        self.links, self.nodes = lnu.finalize_network_ids(self.links, self.nodes)
+        return self.links, self.nodes
 
 
     def load_network(self, path=None):
@@ -675,6 +687,7 @@ class delta(rivnetwork):
             raise AttributeError('Could not inlet_nodes shapefile which should be at {}.'.format(self.paths['inlet_nodes']))
 
         self.links, self.nodes = du.prune_delta(self.links, self.nodes, path_shoreline, path_inletnodes, self.imshape, self.gt, self.wkt, prune_less)
+        self.finalize_ids()
 
 
     def assign_flow_directions(self):
@@ -837,6 +850,7 @@ class river(rivnetwork):
             self.skeletonize()
 
         self.links, self.nodes = ru.prune_river(self.links, self.nodes, self.exit_sides, self.Iskel)
+        self.finalize_ids()
 
 
     def compute_centerline(self):

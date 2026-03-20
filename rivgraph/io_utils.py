@@ -29,6 +29,21 @@ from rivgraph.export_schema import (
     ordered_export_columns,
 )
 from rivgraph.rivers import centerline_utils as cu
+import rivgraph.ln_utils as lnu
+
+
+
+
+def _warn_if_network_ids_not_finalized(links=None, nodes=None):
+    """Warn once when exporting provisional network IDs."""
+    if lnu.network_ids_are_finalized(links=links, nodes=nodes):
+        return
+
+    warnings.warn(
+        'Exporting a network with provisional IDs. Call finalize_ids() after topology-changing operations and before exporting if you need deterministic, final IDs.',
+        UserWarning,
+        stacklevel=3,
+    )
 
 
 def _shapefile_export_warnings(gdf):
@@ -364,6 +379,7 @@ def nodes_to_geofile(nodes, dims, gt, crs, path_export, reproject=False):
     None.
 
     """
+    _warn_if_network_ids_not_finalized(nodes=nodes)
     nodexy = np.unravel_index(nodes['idx'], dims)
     x, y = gu.xy_to_coords(nodexy[1], nodexy[0], gt)
     inlet_nodes = set(nodes.get('inlets', []))
@@ -429,6 +445,7 @@ def links_to_geofile(links, dims, gt, crs, path_export, nodes=None, reproject=Fa
     None.
 
     """
+    _warn_if_network_ids_not_finalized(links=links, nodes=nodes)
     all_links = []
     for link in links['idx']:
         xy = np.unravel_index(link, dims)
@@ -695,6 +712,7 @@ def build_sword_geodataframes(links, nodes, imshape, gt, crs, unit, metadata=Non
     Directionality and fluxes are exported when available using RG-specific
     fields so they do not conflict with canonical SWORD attributes.
     """
+    _warn_if_network_ids_not_finalized(links=links, nodes=nodes)
     if unit != 'meter':
         raise TypeError('Reproject your mask to a meters-based CRS for SWORD exports. Or raise an issue for RivGraph to handle more unit types.')
 
