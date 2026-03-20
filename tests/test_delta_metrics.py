@@ -38,6 +38,23 @@ def _diamond_network():
     return links, nodes
 
 
+
+
+def _parallel_link_network():
+    links = {
+        'id': [10, 11, 12],
+        'conn': [[0, 1], [0, 1], [1, 2]],
+        'wid_adj': [1.0, 2.0, 3.0],
+        'idx': [[0, 1], [0, 5, 1], [1, 2]],
+    }
+    nodes = {
+        'id': [0, 1, 2],
+        'conn': [[10, 11], [10, 11, 12], [12]],
+        'inlets': [0],
+        'outlets': [2],
+    }
+    return links, nodes
+
 def _two_inlet_network():
     links = {
         'id': [10, 11, 12],
@@ -201,3 +218,28 @@ def test_steady_state_preflight_requires_positive_width_weights():
             routing='width',
             validate=True,
         )
+
+
+def test_parallel_links_are_split_internally_for_metrics_with_warning():
+    links, nodes = _parallel_link_network()
+    links_before = deepcopy(links)
+    nodes_before = deepcopy(nodes)
+
+    with pytest.warns(UserWarning, match='Parallel links detected'):
+        metrics, deltavars = dm.compute_delta_metrics(
+            links,
+            nodes,
+            metrics='n_alt_paths',
+            warn_experimental=False,
+            return_intermediates=True,
+        )
+
+    meta = deltavars['metric_metadata']
+    assert set(metrics.keys()) == {'n_alt_paths'}
+    assert meta['used_parallel_link_split'] is True
+    assert meta['n_parallel_link_sets'] == 1
+    assert meta['n_artificial_parallel_nodes'] == 1
+    assert deltavars['A_w'].shape[0] == 4
+    assert links == links_before
+    assert nodes == nodes_before
+    assert 'arts' not in nodes

@@ -232,6 +232,26 @@ def _prepare_metric_network(
     return links_m, nodes_m, graph_weight, inletweights, metadata
 
 
+def _find_surviving_parallel_link_sets(links):
+    """Return directed parallel-link sets that would collapse in a DiGraph."""
+    grouped = {}
+    for i, lid in enumerate(links.get('id', [])):
+        conn = tuple(links['conn'][i])
+        grouped.setdefault(conn, []).append(lid)
+    return [lids for lids in grouped.values() if len(lids) > 1]
+
+
+def _parallel_metric_keep_link_id(links, link_ids):
+    """Choose the direct edge to keep when splitting a parallel-link set."""
+    if 'len' in links:
+        scores = [float(links['len'][links['id'].index(lid)]) for lid in link_ids]
+    elif 'idx' in links:
+        scores = [len(links['idx'][links['id'].index(lid)]) for lid in link_ids]
+    else:
+        scores = list(range(len(link_ids)))
+    return link_ids[int(np.argmin(scores))]
+
+
 def compute_delta_metrics(
     links,
     nodes,
@@ -301,7 +321,24 @@ def compute_delta_metrics(
         inlet_weights=inlet_weights,
     )
 
-    G = graphiphy(links_m, nodes_m, weight=graph_weight, inletweights=graph_inletweights)
+    parallel_sets = _find_surviving_parallel_link_sets(links_m)
+    if parallel_sets:
+        warnings.warn(
+            'Parallel links detected; delta metrics are being computed on an '
+            'internal transformed graph with artificial nodes inserted to break '
+            'parallel links. The original network is unchanged.',
+            UserWarning,
+            stacklevel=2,
+        )
+    G, parallel_meta = graphiphy(
+        links_m,
+        nodes_m,
+        weight=graph_weight,
+        inletweights=graph_inletweights,
+        split_parallel_links=bool(parallel_sets),
+        return_parallel_metadata=True,
+    )
+    metric_metadata.update(parallel_meta)
 
     if nx.is_directed_acyclic_graph(G) is not True:
         raise RuntimeError('Cannot proceed with metrics as graph is not acyclic.')
@@ -455,11 +492,8 @@ def remove_super_apex_from_network(links, nodes):
     return links, nodes
 
 
-def graphiphy(links, nodes, weight=None, inletweights=None):
+def graphiphy(links, nodes, weight=None, inletweights=None, *, split_parallel_links=False, return_parallel_metadata=False):
     """Converts RivGraph links and nodes into a NetworkX graph object.
-
-    Converts the RivGraph links and nodes dictionaries into a NetworkX graph
-    object.
 
     Parameters
     ----------
@@ -473,15 +507,24 @@ def graphiphy(links, nodes, weight=None, inletweights=None):
     inletweights : list, optional
         Optional manual weights for the inlet links when using the
         virtual-source super-apex functionality. Overrides the weight set by
-        the inlet link attribute
-        in favor of values from the provided list. List must be in the same
-        order and have the same length as nodes['inlets'].
+        the inlet link attribute in favor of values from the provided list.
+        List must be in the same order and have the same length as
+        ``nodes['inlets']``.
+    split_parallel_links : bool, optional
+        When True, surviving directed parallel links are preserved by inserting
+        synthetic intermediate nodes into all but one link per parallel set so
+        the resulting DiGraph does not collapse them.
+    return_parallel_metadata : bool, optional
+        When True, also return a small metadata dictionary describing whether
+        internal parallel-link splitting was used.
 
     Returns
     -------
     G : networkx.DiGraph
         Returns a NetworkX DiGraph object weighted by the link attribute
-        specified in the optional parameter `weight`
+        specified in the optional parameter ``weight``.
+    metadata : dict, optional
+        Returned only when ``return_parallel_metadata=True``.
     """
     if weight is not None and weight not in links.keys():
         raise RuntimeError('Provided weight key not in links dictionary.')
@@ -489,7 +532,7 @@ def graphiphy(links, nodes, weight=None, inletweights=None):
     if weight is None:
         weights = np.ones((len(links['conn']), 1))
     else:
-        weights = np.array(links[weight])
+        weights = np.array(links[weight], dtype=float)
 
     # Check weights
     if np.sum(weights <= 0) > 0:
@@ -500,7 +543,6 @@ def graphiphy(links, nodes, weight=None, inletweights=None):
             raise RuntimeError('Can only specify weights if a virtual-source super-apex has been added.')
         if len(inletweights) != len(nodes['inlets']):
             raise RuntimeError('graphiphy requires {} weights but {} were provided.'.format(len(nodes['inlets']), len(inletweights)))
-        # Set weights of inlet links
         for inw, inl in zip(inletweights, nodes['inlets']):
             lconn = nodes['conn'][nodes['id'].index(inl)][:]
             lconn = [lc for lc in lconn if lc in nodes['conn'][nodes['id'].index(nodes['super_apex'])]]
@@ -509,8 +551,52 @@ def graphiphy(links, nodes, weight=None, inletweights=None):
 
     G = nx.DiGraph()
     G.add_nodes_from(nodes['id'])
-    for lc, wt, lid in zip(links['conn'], weights, links['id']):
-        G.add_edge(lc[0], lc[1], weight=wt, linkid=lid)
+
+    parallel_metadata = {
+        'used_parallel_link_split': False,
+        'n_parallel_link_sets': 0,
+        'n_artificial_parallel_nodes': 0,
+    }
+
+    if split_parallel_links is not True:
+        for lc, wt, lid in zip(links['conn'], weights, links['id']):
+            G.add_edge(lc[0], lc[1], weight=float(np.asarray(wt).squeeze()), linkid=lid)
+        if return_parallel_metadata:
+            return G, parallel_metadata
+        return G
+
+    groups = {}
+    for idx, (lc, wt, lid) in enumerate(zip(links['conn'], weights, links['id'])):
+        groups.setdefault(tuple(lc), []).append((idx, float(np.asarray(wt).squeeze()), lid))
+
+    next_synth_node = (max(nodes['id']) + 1) if nodes['id'] else 0
+    for conn, items in groups.items():
+        u, v = conn
+        if len(items) == 1:
+            _idx, wt, lid = items[0]
+            G.add_edge(u, v, weight=wt, linkid=lid)
+            continue
+
+        parallel_metadata['used_parallel_link_split'] = True
+        parallel_metadata['n_parallel_link_sets'] += 1
+        keep_lid = _parallel_metric_keep_link_id(links, [lid for _idx, _wt, lid in items])
+
+        kept_direct = False
+        for _idx, wt, lid in items:
+            if lid == keep_lid and kept_direct is False:
+                G.add_edge(u, v, weight=wt, linkid=lid)
+                kept_direct = True
+                continue
+
+            synth = next_synth_node
+            next_synth_node += 1
+            parallel_metadata['n_artificial_parallel_nodes'] += 1
+            G.add_node(synth)
+            G.add_edge(u, synth, weight=wt, linkid=lid, synthetic_parallel_split=True)
+            G.add_edge(synth, v, weight=wt, linkid=lid, synthetic_parallel_split=True)
+
+    if return_parallel_metadata:
+        return G, parallel_metadata
     return G
 
 
