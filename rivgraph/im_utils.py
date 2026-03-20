@@ -605,19 +605,30 @@ def regionprops(I, props, connectivity=2):
     Finds blobs within a binary image and returns requested properties of
     each blob.
 
-    This function was modeled after matlab's regionprops and is essentially
-    a wrapper for skimage's regionprops. Not all of skimage's available blob
-    properties are available here, but they can easily be added.
+    This is a thin wrapper around :func:`skimage.measure.regionprops` that
+    exposes native scikit-image region properties directly, while preserving a
+    few RivGraph-specific conveniences and legacy aliases.
 
     Parameters
     ----------
     I : np.array
         Binary image containing blobs.
     props : list
-        Properties to compute for each blob. Can include 'area', 'coords',
-        'perimeter', 'centroid', 'mean', 'perim_len', 'convex_area',
-        'eccentricity', 'major_axis_length', 'minor_axis_length',
-        'label'.
+        Properties to compute for each blob. Any native scikit-image
+        ``RegionProperties`` attribute may be requested directly (for example,
+        ``'area'``, ``'coords'``, ``'centroid'``, ``'solidity'``,
+        ``'perimeter'``, ``'axis_major_length'``, etc.).
+
+        RivGraph also provides a custom ``'boundary_coords'`` property that
+        returns ordered contour coordinates for each blob.
+
+        Legacy aliases are still accepted:
+        ``'mean'`` -> ``'intensity_mean'``
+        ``'perim_len'`` -> ``'perimeter'``
+        ``'convex_area'`` -> ``'area_convex'``
+        ``'major_axis_length'`` -> ``'axis_major_length'``
+        ``'minor_axis_length'`` -> ``'axis_minor_length'``
+        ``'equivalent_diameter'`` -> ``'equivalent_diameter_area'``
     connectivity : int, optional
         If 1, 4-connectivity will be used to determine connected blobs. If
         2, 8-connectivity will be used. The default is 2.
@@ -626,42 +637,34 @@ def regionprops(I, props, connectivity=2):
     -------
     out : dict
         Keys of the dictionary correspond to the requested properties. Values
-        for each key are lists of that property, in order such that, e.g., the
-        first entry of each property's list corresponds to the same blob.
+        for each key are lists or arrays of that property, in order such that,
+        e.g., the first entry of each property's list corresponds to the same
+        blob.
     Ilabeled : np.array
         Image where each pixel's value corresponds to its blob label. Labels
-        can be returned by specifying 'label' as a property.
+        can be returned by specifying ``'label'`` as a property.
 
     """
-    # Check that appropriate props are requested
-    available_props = ['area', 'coords', 'perimeter', 'centroid', 'mean', 'perim_len',
-              'convex_area', 'eccentricity', 'major_axis_length',
-              'minor_axis_length', 'equivalent_diameter', 'label']
-    props_do = [p for p in props if p in available_props]
-    cant_do = set(props) - set(props_do)
-    if len(cant_do) > 0:
-        print('Cannot compute the following properties: {}'.format(cant_do))
+    alias_map = {
+        'mean': 'intensity_mean',
+        'perim_len': 'perimeter',
+        'convex_area': 'area_convex',
+        'major_axis_length': 'axis_major_length',
+        'minor_axis_length': 'axis_minor_length',
+        'equivalent_diameter': 'equivalent_diameter_area',
+    }
+    custom_props = {'boundary_coords'}
 
     Ilabeled = measure.label(I, background=0, connectivity=connectivity)
     properties = measure.regionprops(Ilabeled, intensity_image=I)
 
     out = {}
-    # Get the coordinates of each blob in case we need them later
-    if 'coords' in props_do or 'perimeter' in props_do:
-        coords = [p.coords for p in properties]
+    need_coords = any(p in {'coords', 'boundary_coords'} for p in props)
+    coords = [p.coords for p in properties] if need_coords else None
 
-    for prop in props_do:
-        if prop == 'area':
-            out[prop] = np.array([p.area for p in properties])
-        elif prop == 'coords':
-            out[prop] = list(coords)
-        elif prop == 'centroid':
-            out[prop] = np.array([p.centroid for p in properties])
-        elif prop == 'mean':
-            out[prop] = np.array([p.mean_intensity for p in properties])
-        elif prop == 'perim_len':
-            out[prop] = np.array([p.perimeter for p in properties])
-        elif prop == 'perimeter':
+    invalid = []
+    for prop in props:
+        if prop == 'boundary_coords':
             perim = []
             for blob in coords:
                 # Crop to blob to reduce cv2 computation time and save memory
@@ -674,30 +677,41 @@ def regionprops(I, props, connectivity=2):
                 Ip = np.array(Ip, dtype='uint8')
                 contours, _ = cv2.findContours(Ip, cv2.RETR_TREE,
                                                cv2.CHAIN_APPROX_NONE)
-                # IMPORTANT: findContours returns points as (x,y) rather than (row, col)
+                # IMPORTANT: findContours returns points as (x,y) rather than
+                # (row, col)
                 contours = contours[0]
                 crows = []
                 ccols = []
                 for c in contours:
-                    crows.append(c[0][1] + cropped[1] - 1)  # must add back the cropped rows and columns, as well as the single-pixel pad
+                    crows.append(c[0][1] + cropped[1] - 1)
                     ccols.append(c[0][0] + cropped[0] - 1)
-                cont_np = np.transpose(np.array((crows, ccols)))  # format the output
+                cont_np = np.transpose(np.array((crows, ccols)))
                 perim.append(cont_np)
             out[prop] = perim
-        elif prop == 'convex_area':
-            out[prop] = np.array([p.convex_area for p in properties])
-        elif prop == 'eccentricity':
-            out[prop] = np.array([p.eccentricity for p in properties])
-        elif prop == 'equivalent_diameter':
-            out[prop] = np.array([p.equivalent_diameter for p in properties])
-        elif prop == 'major_axis_length':
-            out[prop] = np.array([p.major_axis_length for p in properties])
-        elif prop == 'minor_axis_length':
-            out[prop] = np.array([p.minor_axis_length for p in properties])
-        elif prop == 'label':
-            out[prop] = np.array([p.label for p in properties])
-        else:
-            print('{} is not a valid property.'.format(prop))
+            continue
+
+        resolved_prop = alias_map.get(prop, prop)
+
+        try:
+            values = [getattr(p, resolved_prop) for p in properties]
+        except AttributeError:
+            invalid.append(prop)
+            continue
+
+        if resolved_prop == 'coords':
+            out[prop] = list(values)
+            continue
+
+        try:
+            arr = np.asarray(values)
+        except ValueError:
+            out[prop] = list(values)
+            continue
+
+        out[prop] = list(values) if arr.dtype == object else arr
+
+    if invalid:
+        raise ValueError('Cannot compute the following properties: {}'.format(sorted(set(invalid))))
 
     return out, Ilabeled
 

@@ -83,13 +83,21 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props, connectivity=2
     # Convert requested properties to proper units
     if 'area' in props:
         rp_islands['area'] = rp_islands['area'] * pixarea
-    if 'major_axis_length' in props:
+    if 'axis_major_length' in rp_islands:
+        rp_islands['axis_major_length'] = rp_islands['axis_major_length'] * pixlen
+    if 'axis_minor_length' in rp_islands:
+        rp_islands['axis_minor_length'] = rp_islands['axis_minor_length'] * pixlen
+    if 'major_axis_length' in rp_islands:
         rp_islands['major_axis_length'] = rp_islands['major_axis_length'] * pixlen
-    if 'minor_axis_length' in props:
+    if 'minor_axis_length' in rp_islands:
         rp_islands['minor_axis_length'] = rp_islands['minor_axis_length'] * pixlen
-    if 'perim_len' in props:
+    if 'perimeter' in rp_islands:
+        rp_islands['perimeter'] = rp_islands['perimeter'] * pixlen
+    if 'perim_len' in rp_islands:
         rp_islands['perim_len'] = rp_islands['perim_len'] * pixlen
-    if 'convex_area' in props:
+    if 'area_convex' in rp_islands:
+        rp_islands['area_convex'] = rp_islands['area_convex'] * pixarea
+    if 'convex_area' in rp_islands:
         rp_islands['convex_area'] = rp_islands['convex_area'] * pixarea
 
     # Need to change 'area' key as it's a function in geopandas
@@ -97,7 +105,7 @@ def get_island_properties(Imask, pixlen, pixarea, crs, gt, props, connectivity=2
         rp_islands['Area'] = rp_islands.pop('area')
 
     # Create islands geodataframe
-    gdf_dict = {k: rp_islands[k] for k in rp_islands if k not in ['coords', 'perimeter', 'centroid']}
+    gdf_dict = {k: rp_islands[k] for k in rp_islands if k not in ['coords', 'boundary_coords', 'centroid']}
     if not user_requested_label:
         gdf_dict.pop('label', None)
     gdf_dict['geometry'] = pgons
@@ -363,9 +371,12 @@ def thresholding_set1(islands, apex_width):
     area_thresh = (1/10 * apex_width)**2
     remove.update(np.where(islands.Area.values < area_thresh)[0].tolist())
 
-    # Threshold islands whose major axis length is less than 1/3 of the apex width
+    # Threshold islands whose major axis length is less than 1/4 of the apex width
     maj_axis_thresh = apex_width/4
-    remove.update(np.where((islands.major_axis_length.values < maj_axis_thresh))[0].tolist())
+    major_axis = (islands.axis_major_length.values
+                  if 'axis_major_length' in islands
+                  else islands.major_axis_length.values)
+    remove.update(np.where((major_axis < maj_axis_thresh))[0].tolist())
 
     # Threshold island area/surrounding area
     area_rat_thresh = 0.01
@@ -373,14 +384,14 @@ def thresholding_set1(islands, apex_width):
 
     # # Threshold average island width as a fraction of surrounding channel widths
     avgwid_ratio_thresh = 0.1
-    imal = islands.major_axis_length.values
+    imal = major_axis.copy()
     imal[imal == 0] = np.nan
     avg_island_wid = islands.Area.values / imal
     remove.update(np.where(avg_island_wid/islands.sur_avg_wid.values < avgwid_ratio_thresh)[0].tolist())
 
     # Keep islands with a major axis length greater than the apex width
     keep = set()
-    keep.update(np.where(islands.major_axis_length.values > apex_width)[0].tolist())
+    keep.update(np.where(major_axis > apex_width)[0].tolist())
 
     # Do the thresholding
     remove = remove - keep

@@ -263,8 +263,8 @@ class rivnetwork:
                                              weight=weight)
 
 
-    def get_islands(self, props=['area', 'maxwidth', 'major_axis_length',
-                                 'minor_axis_length', 'surrounding_links'],
+    def get_islands(self, props=['area', 'maxwidth', 'axis_major_length',
+                                 'axis_minor_length', 'surrounding_links'],
                           connectivity=2):
         """
         Finds all the islands in the binary mask and computes their morphological
@@ -276,7 +276,7 @@ class rivnetwork:
         props : list, optional
             Properties to compute for each island. Properties can be any of those
             provided by rivgraph.im_utils.regionprops.
-            The default is ['area', 'maxwidth', 'major_axis_length', 'minor_axis_length'].
+            The default is ['area', 'maxwidth', 'axis_major_length', 'axis_minor_length'].
         connectivity : int, optional
             If 1, 4-connectivity will be used to determine connected blobs. If
             2, 8-connectivity will be used. The default is 2.
