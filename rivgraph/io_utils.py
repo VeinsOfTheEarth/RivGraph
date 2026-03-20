@@ -25,6 +25,10 @@ from rivgraph.export_schema import (
     RG_LINK_SCHEMA_COLUMNS,
     RG_NODE_RESERVED_INPUT_KEYS,
     RG_NODE_SCHEMA_COLUMNS,
+    SWORD_NODE_PLACEHOLDER_COLUMNS,
+    SWORD_NODE_SCHEMA_COLUMNS,
+    SWORD_REACH_PLACEHOLDER_COLUMNS,
+    SWORD_REACH_SCHEMA_COLUMNS,
     get_driver_for_path,
     ordered_export_columns,
 )
@@ -729,13 +733,8 @@ def build_sword_geodataframes(links, nodes, imshape, gt, crs, unit, metadata=Non
     reaches = {prop: [] for prop in reachprops}
 
     # Define attributes that RG will not compute (some of these are computable by RG) to ensure matching with existing SWORD structure.
-    sword_empty_segprops = ['node_id', 'reach_id', 'wse', 'wse_var', 'facc', 'n_chan_max', 'n_chan_mod', 'obstr_type', 'grod_id', 'hfalls_id',
-                    'dist_out', 'lakeflag', 'manual_add', 'meand_len', 'type', 'river_name', 'edit_flag', 'trib_flag',
-                    'path_freq', 'path_order', 'path_segs', 'main_side', 'strm_order', 'end_reach', 'network']
-    sword_empty_reachprops = ['wse', 'wse_var', 'facc', 'n_chan_max', 'n_chan_mod', 'obstr_type', 'grod_id', 'hfalls_id',
-                            'dist_out', 'lakeflag', 'swot_orbit', 'swot_obs',
-                            'type', 'river_name', 'edit_flag', 'trib_flag', 'path_freq', 'path_order', 'path_segs',
-                            'main_side', 'strm_order', 'end_reach', 'network']
+    sword_empty_segprops = list(SWORD_NODE_PLACEHOLDER_COLUMNS)
+    sword_empty_reachprops = list(SWORD_REACH_PLACEHOLDER_COLUMNS)
 
     node_id_to_index = {nid: i for i, nid in enumerate(nodes['id'])}
     link_id_to_index = {lid: i for i, lid in enumerate(links['id'])}
@@ -873,6 +872,19 @@ def build_sword_geodataframes(links, nodes, imshape, gt, crs, unit, metadata=Non
         for k in metadata.keys():
             sword_reaches[k] = metadata[k]
             sword_nodes[k] = metadata[k]
+
+    sword_nodes = sword_nodes[
+        ordered_export_columns(
+            tuple(SWORD_NODE_SCHEMA_COLUMNS) + tuple(SWORD_NODE_PLACEHOLDER_COLUMNS),
+            sword_nodes.columns,
+        )
+    ]
+    sword_reaches = sword_reaches[
+        ordered_export_columns(
+            tuple(SWORD_REACH_SCHEMA_COLUMNS) + tuple(SWORD_REACH_PLACEHOLDER_COLUMNS),
+            sword_reaches.columns,
+        )
+    ]
 
     return sword_nodes, sword_reaches
 
