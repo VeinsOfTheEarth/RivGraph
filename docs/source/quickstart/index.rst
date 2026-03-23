@@ -4,22 +4,28 @@
 Quickstart
 ==========
 
-1. Install RivGraph using the steps in :doc:`../install/index`.
-2. Open one of the canonical example notebooks in ``examples/``:
+The fastest way to get oriented is:
 
-   - ``examples/delta_example.ipynb``
-   - ``examples/braided_river_example.ipynb``
-   - ``examples/mouse_brain.ipynb``
+1. install RivGraph using :doc:`../install/index`
+2. open one of the canonical notebooks in ``examples/``
+3. run it from the repository root so the example-data paths resolve cleanly
 
-3. Run the notebook from the repository root so that the relative example data paths resolve cleanly.
+Canonical notebooks
+-------------------
+
+- ``examples/delta_example.ipynb``
+- ``examples/braided_river_example.ipynb``
+- ``examples/mouse_brain.ipynb``
 
 Minimal usage patterns
 ----------------------
 
+These snippets show the first few steps only. For full workflows, use the notebooks.
+
 Delta
 ~~~~~
 
-::
+.. code-block:: python
 
    from rivgraph.classes import delta
 
@@ -35,7 +41,7 @@ Delta
 River
 ~~~~~
 
-::
+.. code-block:: python
 
    from rivgraph.classes import river
 
@@ -49,4 +55,16 @@ River
    r.skeletonize()
    r.compute_network()
 
-For a full workflow, use the notebooks rather than this minimal snippet. They show the required pruning, direction-setting, plotting, and export steps.
+What happens next
+-----------------
+
+- Delta workflows then need shoreline and inlet-node vectors before pruning and direction setting.
+- River workflows typically proceed to pruning, centerline/mesh generation, and direction setting.
+- Geovector export defaults to GeoPackage in the refactored v1 codebase.
+
+Next places to go:
+
+- :doc:`../examples/index`
+- :doc:`../shoreline/index`
+- :doc:`../maskmaking/index`
+- :doc:`../apiref/index`
