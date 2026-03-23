@@ -196,7 +196,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, imshape, gt, wkt):
 
         # Remove the pixel that represents the intersection between the outlet
         # links and the shoreline. Gotta find it first.
-        lidx = links['id'].index(clid)
+        lidx = lnu.link_index(links, clid)
         idcs = links['idx'][lidx][:]
         coords = gu.idx_to_coords(idcs, imshape, gt)
 
@@ -220,7 +220,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, imshape, gt, wkt):
         # First add the two new links
         conn = links['conn'][lidx]
         for c in conn:
-            nidx = nodes['id'].index(c)
+            nidx = lnu.node_index(nodes, c)
             nflatidx = nodes['idx'][nidx]
             if nflatidx == idcs[0]:  # Link corresponds to beginning of idcs -> break (minus one to ensure the break is true)
                 if min_idx == 0:

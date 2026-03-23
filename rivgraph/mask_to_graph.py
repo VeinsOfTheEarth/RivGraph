@@ -65,7 +65,7 @@ def skel_to_graph(Iskel):
 
     """
 
-    def check_startpoint(spidx, Iskel):
+    def check_startpoint(spidx, Iskel, walk_ctx=None):
         """
         Returns True if a skeleton pixel's first neighbor is not a branchpoint
         (i.e. the start pixel is valid for a walk), else returns False.
@@ -84,8 +84,8 @@ def skel_to_graph(Iskel):
             True if the startpoint is valid; else False.
 
         """
-        neighs = walk.walkable_neighbors([spidx], Iskel)
-        isbp = walk.is_bp(neighs.pop(), Iskel)
+        neighs = walk.walkable_neighbors([spidx], Iskel, walk_ctx=walk_ctx)
+        isbp = walk.is_bp(neighs.pop(), Iskel, walk_ctx=walk_ctx)
 
         if isbp == 0:
             chk_sp = True
@@ -95,7 +95,7 @@ def skel_to_graph(Iskel):
         return chk_sp
 
 
-    def find_starting_pixels(Iskel):
+    def find_starting_pixels(Iskel, walk_ctx=None):
         """
         Finds an endpoint pixel to begin walking to resolve network.
 
@@ -123,7 +123,7 @@ def skel_to_graph(Iskel):
             poss_id = idcs.intersection(eps)
             if len(poss_id) > 0:
                 for pid in poss_id:
-                    if check_startpoint(pid, Iskel) is True:
+                    if check_startpoint(pid, Iskel, walk_ctx=walk_ctx) is True:
                         startpoints.append(pid)
                         break
 
@@ -135,8 +135,10 @@ def skel_to_graph(Iskel):
     Iskel = np.pad(Iskel, npad, mode='constant', constant_values=0)
     dims = Iskel.shape
 
+    walk_ctx = walk.make_walk_context(Iskel)
+
     # Find starting points of all the networks in Iskel
-    startpoints = find_starting_pixels(Iskel)
+    startpoints = find_starting_pixels(Iskel, walk_ctx=walk_ctx)
 
     # Initialize topology storage vars
     nodes = dict()
@@ -152,7 +154,7 @@ def skel_to_graph(Iskel):
     for i, sp in enumerate(startpoints):
         links = lnu.link_updater(links, len(links['id']), sp, i)
         nodes = lnu.node_updater(nodes, sp, i)
-        first_step = walk.walkable_neighbors(links['idx'][i], Iskel)
+        first_step = walk.walkable_neighbors(links['idx'][i], Iskel, walk_ctx=walk_ctx)
         links = lnu.link_updater(links, i, first_step.pop())
 
     links['n_networks'] = i+1
@@ -166,12 +168,12 @@ def skel_to_graph(Iskel):
         linkidx = links['id'].index(linkid)
 
         walking = 1
-        cantwalk = walk.cant_walk(links, linkidx, nodes, Iskel)
+        cantwalk = walk.cant_walk(links, linkidx, nodes, Iskel, walk_ctx=walk_ctx)
 
         while walking:
 
             # Get next possible steps
-            poss_steps = walk.walkable_neighbors(links['idx'][linkidx], Iskel)
+            poss_steps = walk.walkable_neighbors(links['idx'][linkidx], Iskel, walk_ctx=walk_ctx)
 
             # Now we have a few possible cases:
             # 1) endpoint reached,
@@ -180,7 +182,7 @@ def skel_to_graph(Iskel):
 
             if len(poss_steps) == 0: # endpoint reached, update node, link connectivity
                 nodes = lnu.node_updater(nodes, links['idx'][linkidx][-1], linkid)
-                links = lnu.link_updater(links, linkid, conn=nodes['idx'].index(links['idx'][linkidx][-1]))
+                links = lnu.link_updater(links, linkid, conn=lnu.node_idx_index(nodes, links['idx'][linkidx][-1]))
                 links2do.remove(linkid)
                 break # must break rather than set walking to 0 as we don't want to execute the rest of the code
 
@@ -198,15 +200,15 @@ def skel_to_graph(Iskel):
                 links = lnu.link_updater(links, linkid, poss_steps)
 
                 # But check if it's a branchpoint, and if so, stop marching along this link and resolve all the branchpoint links
-                if walk.is_bp(poss_steps[0], Iskel) == 1:
-                    links, nodes, links2do = walk.handle_bp(linkid, poss_steps[0], nodes, links, links2do, Iskel)
+                if walk.is_bp(poss_steps[0], Iskel, walk_ctx=walk_ctx) == 1:
+                    links, nodes, links2do = walk.handle_bp(linkid, poss_steps[0], nodes, links, links2do, Iskel, walk_ctx=walk_ctx)
                     links, nodes, links2do = walk.check_dup_links(linkid, links, nodes, links2do)
                     walking = 0 # on to next link
 
             elif len(poss_steps) > 1: # Check to see if either/both/none are branchpoints
                 isbp = []
                 for n in poss_steps:
-                    isbp.append(walk.is_bp(n, Iskel))
+                    isbp.append(walk.is_bp(n, Iskel, walk_ctx=walk_ctx))
 
                 if sum(isbp) == 0:
 
@@ -237,7 +239,7 @@ def skel_to_graph(Iskel):
                 elif sum(isbp) == 1:
                     # If we've already accounted for this branchpoint, delete the link and halt
                     links = lnu.link_updater(links, linkid, poss_steps[isbp.index(1)])
-                    links, nodes, links2do = walk.handle_bp(linkid, poss_steps[isbp.index(1)], nodes, links, links2do, Iskel)
+                    links, nodes, links2do = walk.handle_bp(linkid, poss_steps[isbp.index(1)], nodes, links, links2do, Iskel, walk_ctx=walk_ctx)
                     links, nodes, links2do = walk.check_dup_links(linkid, links, nodes, links2do)
                     walking = 0
 
@@ -262,7 +264,7 @@ def skel_to_graph(Iskel):
                             raise RuntimeError('There is not a unique branchpoint to step to.')
                         else:
                             links = lnu.link_updater(links, linkid, poss_steps[isbp_and_fourconn_idx[0]])
-                            links, nodes, links2do = walk.handle_bp(linkid, poss_steps[isbp_and_fourconn_idx[0]], nodes, links, links2do, Iskel)
+                            links, nodes, links2do = walk.handle_bp(linkid, poss_steps[isbp_and_fourconn_idx[0]], nodes, links, links2do, Iskel, walk_ctx=walk_ctx)
                             links, nodes, links2do = walk.check_dup_links(linkid, links, nodes, links2do)
                             walking = 0
 
@@ -308,9 +310,12 @@ def skeletonize_mask(Imask):
     Iskel = simplify_skel(Iskel)
 
     # Fill small skeleton holes, re-skeletonize, and re-simplify
-    Iskel = imu.fill_holes(Iskel, maxholesize=4)
-    Iskel = morphology.skeletonize(Iskel)
-    Iskel = simplify_skel(Iskel)
+    Iskel_filled = imu.fill_holes(Iskel, maxholesize=4)
+    if np.array_equal(Iskel_filled, Iskel) is False:
+        Iskel = morphology.skeletonize(Iskel_filled)
+        Iskel = simplify_skel(Iskel)
+    else:
+        Iskel = Iskel_filled
 
     # Fill single pixel holes
     Iskel = imu.fill_holes(Iskel, maxholesize=1)
@@ -365,9 +370,12 @@ def skeletonize_river_mask(I, es, padscale=2):
     Iskel = simplify_skel(Iskel)
 
     # Fill small skeleton holes, re-skeletonize, and re-simplify
-    Iskel = imu.fill_holes(Iskel, maxholesize=4)
-    Iskel = morphology.skeletonize(Iskel)
-    Iskel = simplify_skel(Iskel)
+    Iskel_filled = imu.fill_holes(Iskel, maxholesize=4)
+    if np.array_equal(Iskel_filled, Iskel) is False:
+        Iskel = morphology.skeletonize(Iskel_filled)
+        Iskel = simplify_skel(Iskel)
+    else:
+        Iskel = Iskel_filled
 
     # Fill single pixel holes
     Iskel = imu.fill_holes(Iskel, maxholesize=1)
