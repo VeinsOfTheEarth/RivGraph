@@ -19,7 +19,6 @@ from scipy import stats
 from rasterio.features import shapes as rio_shapes
 from affine import Affine
 import rivgraph.im_utils as im
-import rivgraph.ln_utils as lnu
 import networkx as nx
 
 
@@ -280,12 +279,12 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
 
         # Get the links connected to the overlap nodes so we can construct the
         # mini-graph
-        overlap_links = [li for l in [nodes['conn'][lnu.node_index(nodes, nid)] for nid in overlap_nodes] for li in l]
+        overlap_links = [li for l in [nodes['conn'][nodes['id'].index(nid)] for nid in overlap_nodes] for li in l]
 
         # Try to find a loop using the identified link ids
         G = nx.Graph()
         G.add_nodes_from(overlap_nodes)
-        lconn = [links['conn'][lnu.link_index(links, lid)] for lid in overlap_links]
+        lconn = [links['conn'][links['id'].index(lid)] for lid in overlap_links]
         for lc in lconn:
             G.add_edge(lc[0], lc[1])
         surrounding_nodes = nx.cycle_basis(G)
@@ -293,23 +292,23 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
         # Check if we're dealing with a parallel loop
         if len(surrounding_nodes) == 0:
             if len(overlap_nodes) == 2:
-                if sum([l in nodes['conn'][lnu.node_index(nodes, overlap_nodes[1])] for l in nodes['conn'][lnu.node_index(nodes, overlap_nodes[0])]]) > 1:
+                if sum([l in nodes['conn'][nodes['id'].index(overlap_nodes[1])] for l in nodes['conn'][nodes['id'].index(overlap_nodes[0])]]) > 1:
                     surrounding_nodes = [[o for o in overlap_nodes]]
             else:  # We assume that if no loops were found, this must be a parallel loop
                 for on in overlap_nodes:
-                    conn = nodes['conn'][lnu.node_index(nodes, on)]
+                    conn = nodes['conn'][nodes['id'].index(on)]
                     for on2 in overlap_nodes:
                         if on2 == on:
                             continue
                         else:
-                            conn2 = nodes['conn'][lnu.node_index(nodes, on2)]
+                            conn2 = nodes['conn'][nodes['id'].index(on2)]
                             if sum([c in conn2 for c in conn]) == 2:
                                 surrounding_nodes = [[on, on2]]
                                 break
 
         # # Check if links are at outlet or inlet
         # if len(surrounding_nodes) == 0:
-        #     poss_nodes = np.array([links['conn'][lnu.link_index(links, lid)] for lid in lids]).flatten()
+        #     poss_nodes = np.array([links['conn'][links['id'].index(lid)] for lid in lids]).flatten()
         #     if any(np.in1d(poss_nodes, nodes['inlets'])) or any(np.in1d(poss_nodes, nodes['outlets'])):
         #         # Only keep link ids that have 3 or more occurrences
         #         surrounding_nodes = [[lid for lid, ct in zip(cts[0], cts[1]) if ct > 2]]
@@ -342,7 +341,7 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
             n1 = surrounding_nodes[i]
             n2 = surrounding_nodes[i+1]
             for lid in overlap_links:
-                lconn = links['conn'][lnu.link_index(links, lid)]
+                lconn = links['conn'][links['id'].index(lid)]
                 if n1 in lconn and n2 in lconn:
                     surrounding_links.append(lid)
         surrounding_links = list(set(surrounding_links))
@@ -352,8 +351,8 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
         # of their morphologic metrics.
         # Use a length-weighted width. Could alternatively use the 'wid_pix' but
         # that includes the misleading connector pixels
-        wids = np.array([links['wid_adj'][lnu.link_index(links, lid)] for lid in surrounding_links])
-        lens = np.array([links['len_adj'][lnu.link_index(links, lid)] for lid in surrounding_links])
+        wids = np.array([links['wid_adj'][links['id'].index(lid)] for lid in surrounding_links])
+        lens = np.array([links['len_adj'][links['id'].index(lid)] for lid in surrounding_links])
         avg_wid = np.sum(wids * lens) / np.sum(lens)
         islands.sur_avg_wid.values[idx] = avg_wid
         islands.sur_max_wid.values[idx] = np.max(wids)

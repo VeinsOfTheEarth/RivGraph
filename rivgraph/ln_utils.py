@@ -26,64 +26,6 @@ from rivgraph.ordered_set import OrderedSet
 
 ID_FINALIZED_FLAG = '_ids_finalized'
 ID_FINALIZATION_METHOD = '_ids_finalization_method'
-_LINK_ID_LOOKUP_KEY = '_lookup_link_id_to_pos'
-_NODE_ID_LOOKUP_KEY = '_lookup_node_id_to_pos'
-_NODE_IDX_LOOKUP_KEY = '_lookup_node_idx_to_pos'
-
-
-def invalidate_network_index_lookups(links=None, nodes=None):
-    """Clear transient ID/index lookup caches."""
-    transient_keys = (
-        _LINK_ID_LOOKUP_KEY,
-        _LINK_ID_LOOKUP_KEY + '_sig',
-        _NODE_ID_LOOKUP_KEY,
-        _NODE_ID_LOOKUP_KEY + '_sig',
-        _NODE_IDX_LOOKUP_KEY,
-        _NODE_IDX_LOOKUP_KEY + '_sig',
-    )
-    if links is not None:
-        for key in transient_keys[:2]:
-            links.pop(key, None)
-    if nodes is not None:
-        for key in transient_keys[2:]:
-            nodes.pop(key, None)
-    return links, nodes
-
-
-def _lookup_signature(seq):
-    return (id(seq), len(seq))
-
-
-def _get_lookup_map(container, seq_key, cache_key):
-    seq = container[seq_key]
-
-    if isinstance(seq, OrderedSet):
-        return seq.map
-
-    sig = _lookup_signature(seq)
-    cached = container.get(cache_key)
-    cached_sig = container.get(cache_key + '_sig')
-    if cached is None or cached_sig != sig:
-        cached = {value: i for i, value in enumerate(seq)}
-        container[cache_key] = cached
-        container[cache_key + '_sig'] = sig
-
-    return cached
-
-
-def link_index(links, linkid):
-    """Return the position of ``linkid`` within ``links['id']``."""
-    return _get_lookup_map(links, 'id', _LINK_ID_LOOKUP_KEY)[linkid]
-
-
-def node_index(nodes, nodeid):
-    """Return the position of ``nodeid`` within ``nodes['id']``."""
-    return _get_lookup_map(nodes, 'id', _NODE_ID_LOOKUP_KEY)[nodeid]
-
-
-def node_idx_index(nodes, idx):
-    """Return the position of ``idx`` within ``nodes['idx']``."""
-    return _get_lookup_map(nodes, 'idx', _NODE_IDX_LOOKUP_KEY)[idx]
 
 
 def mark_network_ids_provisional(links, nodes, reason='topology not finalized'):
@@ -94,7 +36,6 @@ def mark_network_ids_provisional(links, nodes, reason='topology not finalized'):
     if nodes is not None:
         nodes[ID_FINALIZED_FLAG] = False
         nodes[ID_FINALIZATION_METHOD] = reason
-    invalidate_network_index_lookups(links, nodes)
     return links, nodes
 
 
@@ -106,7 +47,6 @@ def mark_network_ids_finalized(links, nodes, method='deterministic_postextract_p
     if nodes is not None:
         nodes[ID_FINALIZED_FLAG] = True
         nodes[ID_FINALIZATION_METHOD] = method
-    invalidate_network_index_lookups(links, nodes)
     return links, nodes
 
 
@@ -257,12 +197,12 @@ def add_link(links, nodes, idcs):
     lconn = []
     for lep in [idcs[0], idcs[-1]]:
         try:
-            lconn.append(nodes['id'][node_idx_index(nodes, lep)])
-            nodes['conn'][node_idx_index(nodes, lep)].append(new_id)
+            lconn.append(nodes['id'][nodes['idx'].index(lep)])
+            nodes['conn'][nodes['idx'].index(lep)].append(new_id)
         except Exception:
             # Add a new node if it's not found in the current ones
             nodes = add_node(nodes, lep, new_id)
-            lconn.append(nodes['id'][node_idx_index(nodes, lep)])
+            lconn.append(nodes['id'][nodes['idx'].index(lep)])
 
     if len(lconn) < 2:
         raise RuntimeError('Link is not connected to enough (2) nodes.')
@@ -305,7 +245,7 @@ def node_updater(nodes, idx, conn):
     if len(nodes['conn']) < len(nodes['idx']):
         nodes['conn'].append([])
 
-    nodeid = node_idx_index(nodes, idx)
+    nodeid = nodes['idx'].index(idx)
     nodes['conn'][nodeid] = nodes['conn'][nodeid] + [conn]
 
     return nodes
@@ -341,7 +281,7 @@ def link_updater(links, linkid, idx=-1, conn=-1):
     if linkid not in links['id']:
         links['id'].append(linkid)
 
-    linkidx = link_index(links, linkid)
+    linkidx = links['id'].index(linkid)
 
     if idx != -1:
         if type(idx) is not list:
@@ -370,8 +310,6 @@ def _network_record_keys(container, id_key='id'):
     n = len(container[id_key])
     keys = []
     for key, value in container.items():
-        if key.startswith('_lookup_'):
-            continue
         if isinstance(value, (str, bytes)) or np.isscalar(value):
             continue
         try:
@@ -409,7 +347,7 @@ def delete_node(nodes, nodeid, warn=True):
     nodekeys = _network_record_keys(nodes, 'id')
 
     # Check that the node has no connectivity
-    nodeidx = node_index(nodes, nodeid)
+    nodeidx = nodes['id'].index(nodeid)
     if len(nodes['conn'][nodeidx]) != 0 and warn == True:
         logger.info('You are deleting node {} which still has connections to links.'.format(nodeid))
 
@@ -447,7 +385,7 @@ def delete_link(links, nodes, linkid):
 
     """
     linkkeys = _network_record_keys(links, 'id')
-    lidx = link_index(links, linkid)
+    lidx = links['id'].index(linkid)
 
     # Save the connecting nodes so we can update their connectivity ([:] makes a copy, not a view)
     connected_node_ids = links['conn'][lidx][:]
@@ -464,7 +402,7 @@ def delete_link(links, nodes, linkid):
 
     # Remove the link from node connectivity; delete nodes if there are no longer links connected
     for cni in connected_node_ids:
-        cnodeidx = node_index(nodes, cni)
+        cnodeidx = nodes['id'].index(cni)
         nodes['conn'][cnodeidx].remove(linkid)
         if len(nodes['conn'][cnodeidx]) == 0:  # If there are no connections to the node, remove it
             nodes = delete_node(nodes, cni)
@@ -498,7 +436,7 @@ def flip_link(links, linkid):
 
     """
     # Get index of link
-    lidx = link_index(links, linkid)
+    lidx = links['id'].index(linkid)
 
     # Flip link and update connecitivity
     links['conn'][lidx] = links['conn'][lidx][::-1]

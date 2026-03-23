@@ -36,7 +36,7 @@ RivGraph is hosted at conda-forge. If you just want to use RivGraph, the simples
 conda activate rivgraph_env
 </code></pre>
 
-If you want to install RivGraph from source for development or testing, use the repository environment file first and then perform an editable install:
+If you want to install RivGraph from source for development, testing, or documentation work, use the repository environment file first and then perform an editable install:
 
 <pre><code>conda env create -f environment.yml
 conda activate rivgraph-modern
@@ -45,14 +45,41 @@ pip install -e . --no-deps
 
 `environment.yml` is the canonical source/development environment. `environment-modern.yml` is kept as a transition alias and should match it.
 
-Using `--no-deps` is intentional here: the geospatial stack is managed by the conda environment file, which avoids pip trying to re-resolve compiled dependencies such as GDAL, Rasterio, and Pyogrio.
+Using `--no-deps` is intentional here: the geospatial stack is managed by the conda environment file, which avoids pip trying to re-resolve compiled dependencies that are already pinned in conda.
 
 To verify a source install, run:
+
+<pre><code>pytest -ra
+</code></pre>
+
+For a quicker smoke test, run:
 
 <pre><code>pytest -ra tests/test_geospatial_roundtrip.py tests/regression
 </code></pre>
 
-You may also [install RivGraph from this GitHub repo](https://VeinsOfTheEarth.github.io/RivGraph/install/index.html#installation-from-source). Additional installation notes are available [in the documentation](https://VeinsOfTheEarth.github.io/RivGraph/install/index.html#installation-from-source).
+Building the docs
+-----
+
+Install the documentation extras into the same activated environment:
+
+<pre><code>pip install -e ".[docs]"
+</code></pre>
+
+Then build the HTML docs:
+
+<pre><code>python -m sphinx -b html docs/source docs/build/html
+</code></pre>
+
+Open `docs/build/html/index.html` in a browser. Convenience commands are also available from the `docs/` directory:
+
+<pre><code># macOS / Linux
+cd docs && make html
+
+# Windows
+cd docs && make.bat html
+</code></pre>
+
+Additional installation notes are available in the [documentation](https://VeinsOfTheEarth.github.io/RivGraph/install/index.html).
 
 How to use?
 -----

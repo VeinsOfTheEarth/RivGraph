@@ -1,9 +1,11 @@
 Welcome to RivGraph's documentation!
 ====================================
 
-RivGraph provides two classes that you can instantiate with your binary channel mask: *delta* and (braided) *river*. These classes contain methods that may be applied to execute network extractions, perform analyses, and write (georeferenced) results. While most of RivGraph's processing is automated, deltaic channel networks require the user to also create and provide a shoreline and inlet nodes shapefiles. Take a look at the `FAQ  <todo>`_for quick answers.
+RivGraph provides two primary classes for working with binary channel masks: ``delta`` and ``river``. These classes expose the main workflows for extracting channel networks, computing metrics, assigning directions, and exporting georeferenced outputs.
 
-If the documentation you seek is not herein, please open a request via the `Issue Tracker <https://github.com/VeinsOfTheEarth/RivGraph/issues>`_. `Detailed examples <https://github.com/VeinsOfTheEarth/RivGraph/tree/master/examples>`_ for use are available, and most functions have been documented following a modified `numpy docstring format <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
+If you are new to RivGraph, start with :doc:`installation instructions <install/index>` and then open one of the example notebooks in ``examples/``. Delta workflows additionally require a shoreline and inlet definition, while river workflows require image exit sides.
+
+If you cannot find what you need here, please open a request in the `issue tracker <https://github.com/VeinsOfTheEarth/RivGraph/issues>`_. The canonical example notebooks are stored in the repository's ``examples/`` directory, and API pages are generated from in-code docstrings.
 
 Documentation
 -------------

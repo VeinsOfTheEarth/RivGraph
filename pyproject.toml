@@ -9,6 +9,7 @@ description = "Python package for extracting and analyzing river and delta chann
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 license = "BSD-3-Clause"
+license-files = ["LICENSE.txt"]
 authors = [
   { name = "Jon Schwenk", email = "jonschwenk@gmail.com" }
 ]
@@ -22,13 +23,19 @@ keywords = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: BSD License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Topic :: Scientific/Engineering :: GIS",
   "Topic :: Scientific/Engineering :: Image Processing",
+]
+
+[project.optional-dependencies]
+docs = [
+  "sphinx>=7,<9",
+  "sphinx-rtd-theme>=2,<4",
+  "sphinx-gallery>=0.16,<0.20",
 ]
 
 [project.urls]

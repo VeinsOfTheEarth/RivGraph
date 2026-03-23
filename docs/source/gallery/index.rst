@@ -1,9 +1,5 @@
 :orphan:
 
-
-
-.. _sphx_glr_gallery:
-
 RivGraph in the wild
 ====================
 
@@ -16,14 +12,113 @@ Some selected publications that have used RivGraph to answer some cool science q
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://pubs.geoscienceworld.org/gsa/geology/article/doi/10.1130/G49935.1/61...">
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication used RivGraph to find channel centerlines, widths, and number of channels en route to finding new relationships between river planforms and their channel belts.">
 
 .. only:: html
 
- .. figure:: /gallery/images/thumb/sphx_glr_dong2022_thumb.png
-     :alt: Quantitative relationships between river and channel-belt planform patterns
+  .. image:: /gallery/images/thumb/sphx_glr_dong2022_thumb.png
+    :alt:
 
-     :ref:`sphx_glr_gallery_dong2022.py`
+  :ref:`sphx_glr_gallery_dong2022.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Quantitative relationships between river and channel-belt planform patterns</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication used RivGraph to extract channel counts and widths in order to present and test a new index of river multithreadedness">
+
+.. only:: html
+
+  .. image:: /gallery/images/thumb/sphx_glr_tejedor2022_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gallery_tejedor2022.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">The Entropic Braiding Index (eBI): a robust metric to account for the diversity of channel scales in multi-thread rivers</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication used RivGraph to test optimal discharge partitioning schemes at channel bifurcations. ">
+
+.. only:: html
+
+  .. image:: /gallery/images/thumb/sphx_glr_hariharan2022_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gallery_hariharan2022.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Width-Based Discharge Partitioning in Distributary Networks: How Right We Are</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication used RivGraph to determine the &quot;loopiness&quot; of 21 natural delta channel networks.">
+
+.. only:: html
+
+  .. image:: /gallery/images/thumb/sphx_glr_konkol2022_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gallery_konkol2022.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Interplay of river and tidal forcings promotes loops in coastal channel networks</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication made use of RivGraph&#x27;s flux modeling to estimate nitrate uptake rates in channels on the Wax Lake Delta. ">
+
+.. only:: html
+
+  .. image:: /gallery/images/thumb/sphx_glr_knights2020_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gallery_knights2020.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Nitrate Removal Across Ecogeomorphic Zones in Wax Lake Delta, Louisiana (USA)</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This publication made use of RivGraph&#x27;s flux modeling to estimate nitrate retention in Arctic river deltas.">
+
+.. only:: html
+
+  .. image:: /gallery/images/thumb/sphx_glr_knights2023_thumb.jpg
+    :alt:
+
+  :ref:`sphx_glr_gallery_knights2023.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Seasonal and Morphological Controls on Nitrate Retention in Arctic Deltas</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -34,114 +129,11 @@ Some selected publications that have used RivGraph to answer some cool science q
    :hidden:
 
    /gallery/dong2022
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2022GL099681&gt;`_ used...">
-
-.. only:: html
-
- .. figure:: /gallery/images/thumb/sphx_glr_tejedor2022_thumb.png
-     :alt: The Entropic Braiding Index (eBI): a robust metric to account for the diversity of channel scales in multi-thread rivers
-
-     :ref:`sphx_glr_gallery_tejedor2022.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
    /gallery/tejedor2022
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2022GL097897&gt;`_ use...">
-
-.. only:: html
-
- .. figure:: /gallery/images/thumb/sphx_glr_hariharan2022_thumb.png
-     :alt: Width-Based Discharge Partitioning in Distributary Networks: How Right We Are
-
-     :ref:`sphx_glr_gallery_hariharan2022.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
    /gallery/hariharan2022
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2022GL098284&gt;`_ used...">
-
-.. only:: html
-
- .. figure:: /gallery/images/thumb/sphx_glr_konkol2022_thumb.png
-     :alt: Interplay of river and tidal forcings promotes loops in coastal channel networks
-
-     :ref:`sphx_glr_gallery_konkol2022.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
    /gallery/konkol2022
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019WR026867&gt;`_ made...">
-
-.. only:: html
-
- .. figure:: /gallery/images/thumb/sphx_glr_knights2020_thumb.png
-     :alt: Nitrate Removal Across Ecogeomorphic Zones in Wax Lake Delta, Louisiana (USA)
-
-     :ref:`sphx_glr_gallery_knights2020.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
    /gallery/knights2020
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="`This publication &lt;https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2022GL102201&gt;`_ made use...">
-
-.. only:: html
-
- .. figure:: /gallery/images/thumb/sphx_glr_knights2023_thumb.jpg
-     :alt: Seasonal and Morphological Controls on Nitrate Retention in Arctic Deltas
-
-     :ref:`sphx_glr_gallery_knights2023.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
    /gallery/knights2023
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
 
 
 

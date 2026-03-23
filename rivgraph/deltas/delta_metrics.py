@@ -244,9 +244,9 @@ def _find_surviving_parallel_link_sets(links):
 def _parallel_metric_keep_link_id(links, link_ids):
     """Choose the direct edge to keep when splitting a parallel-link set."""
     if 'len' in links:
-        scores = [float(links['len'][lnu.link_index(links, lid)]) for lid in link_ids]
+        scores = [float(links['len'][links['id'].index(lid)]) for lid in link_ids]
     elif 'idx' in links:
-        scores = [len(links['idx'][lnu.link_index(links, lid)]) for lid in link_ids]
+        scores = [len(links['idx'][links['id'].index(lid)]) for lid in link_ids]
     else:
         scores = list(range(len(link_ids)))
     return link_ids[int(np.argmin(scores))]
@@ -431,7 +431,7 @@ def add_super_apex_to_network(links, nodes, imshape):
         return links, nodes
 
     # Find the location of the super-apex by averaging the inlets' locations
-    ins_idx = [nodes['idx'][lnu.node_index(nodes, i)] for i in ins]
+    ins_idx = [nodes['idx'][nodes['id'].index(i)] for i in ins]
     rs, cs = np.unravel_index(ins_idx, imshape)
     apex_r, apex_c = np.mean(rs, dtype=int), np.mean(cs, dtype=int)
     apex_idx = np.ravel_multi_index((apex_r, apex_c), imshape)
@@ -440,14 +440,14 @@ def add_super_apex_to_network(links, nodes, imshape):
     # widths of all the links connected to each inlet node
     sa_widths = []
     for i in ins:
-        lconn = nodes['conn'][lnu.node_index(nodes, i)]
-        sa_widths.append(sum([links['wid_adj'][lnu.link_index(links, lid)] for lid in lconn]))
+        lconn = nodes['conn'][nodes['id'].index(i)]
+        sa_widths.append(sum([links['wid_adj'][links['id'].index(lid)] for lid in lconn]))
 
     # Add links from the super-apex to the inlet nodes
     # Widths are computed above
     # lengths are set to zero for these synthetic links
     for i, wid in zip(ins, sa_widths):
-        in_idx = nodes['idx'][lnu.node_index(nodes, i)]
+        in_idx = nodes['idx'][nodes['id'].index(i)]
         idcs = [apex_idx, in_idx]
         links, nodes = lnu.add_link(links, nodes, idcs)
         links['wid_adj'].append(wid)
@@ -480,7 +480,7 @@ def remove_super_apex_from_network(links, nodes):
         super_apex = super_apex[0]
 
     # identify connecting links
-    super_links = nodes['conn'][lnu.node_index(nodes, super_apex)]
+    super_links = nodes['conn'][nodes['id'].index(super_apex)]
 
     # delete links first
     for i in super_links:
@@ -544,9 +544,9 @@ def graphiphy(links, nodes, weight=None, inletweights=None, *, split_parallel_li
         if len(inletweights) != len(nodes['inlets']):
             raise RuntimeError('graphiphy requires {} weights but {} were provided.'.format(len(nodes['inlets']), len(inletweights)))
         for inw, inl in zip(inletweights, nodes['inlets']):
-            lconn = nodes['conn'][lnu.node_index(nodes, inl)][:]
-            lconn = [lc for lc in lconn if lc in nodes['conn'][lnu.node_index(nodes, nodes['super_apex'])]]
-            lidx = lnu.link_index(links, lconn[0])
+            lconn = nodes['conn'][nodes['id'].index(inl)][:]
+            lconn = [lc for lc in lconn if lc in nodes['conn'][nodes['id'].index(nodes['super_apex'])]]
+            lidx = links['id'].index(lconn[0])
             weights[lidx] = inw
 
     G = nx.DiGraph()
@@ -1337,11 +1337,11 @@ def dist_from_apex(nodes, imshape):
         raise ValueError('No inlets')
     elif len(apex_id) > 1:
         # average inlet locations to a single point
-        ins_idx = [nodes['idx'][lnu.node_index(nodes, i)] for i in apex_id]
+        ins_idx = [nodes['idx'][nodes['id'].index(i)] for i in apex_id]
         rs, cs = np.unravel_index(ins_idx, imshape)
         apex_xy = np.mean(rs, dtype=int), np.mean(cs, dtype=int)
     else:
-        apex_idx = nodes['idx'][lnu.node_index(nodes, apex_id)]
+        apex_idx = nodes['idx'][nodes['id'].index(apex_id)]
         apex_xy = np.unravel_index(apex_idx, imshape)
 
     # calculate distances to all nodes from apex location
@@ -1413,30 +1413,30 @@ def calc_QR(links, nodes, wt='wid_adj', new_at='graphQR'):
             # get the 3 connected link ids
             link_ids = nodes['conn'][i]
             # get upstream node for each link, its "start" point
-            link_starts = [links['conn'][lnu.link_index(links, link_ids[0])][0],
-                           links['conn'][lnu.link_index(links, link_ids[1])][0],
-                           links['conn'][lnu.link_index(links, link_ids[2])][0]]
+            link_starts = [links['conn'][links['id'].index(link_ids[0])][0],
+                           links['conn'][links['id'].index(link_ids[1])][0],
+                           links['conn'][links['id'].index(link_ids[2])][0]]
             # figure out which two links are the ones leaving this node
             # and get the width of each
             # (which controls the local flux partitioning anyway)
             if link_starts[0] == link_starts[1]:
                 # check if 1st and 2nd match
-                wid_1 = links[wt][lnu.link_index(links, link_ids[0])]
-                wid_2 = links[wt][lnu.link_index(links, link_ids[1])]
+                wid_1 = links[wt][links['id'].index(link_ids[0])]
+                wid_2 = links[wt][links['id'].index(link_ids[1])]
             elif link_starts[0] == link_starts[2]:
                 # check if 1st and 3rd match
-                wid_1 = links[wt][lnu.link_index(links, link_ids[0])]
-                wid_2 = links[wt][lnu.link_index(links, link_ids[2])]
+                wid_1 = links[wt][links['id'].index(link_ids[0])]
+                wid_2 = links[wt][links['id'].index(link_ids[2])]
             else:
                 # then 2nd and 3rd must match
-                wid_1 = links[wt][lnu.link_index(links, link_ids[1])]
-                wid_2 = links[wt][lnu.link_index(links, link_ids[2])]
+                wid_1 = links[wt][links['id'].index(link_ids[1])]
+                wid_2 = links[wt][links['id'].index(link_ids[2])]
 
         # for inlets w/ only 2 connecting links
         elif nodes['id'][i] in nodes['inlets'] and len(nodes['conn'][i]) == 2:
             link_ids = nodes['conn'][i]
-            wid_1 = links[wt][lnu.link_index(links, link_ids[0])]
-            wid_2 = links[wt][lnu.link_index(links, link_ids[1])]
+            wid_1 = links[wt][links['id'].index(link_ids[0])]
+            wid_2 = links[wt][links['id'].index(link_ids[1])]
 
         # catch-all for other scenarios: QR will be -1
         else:
