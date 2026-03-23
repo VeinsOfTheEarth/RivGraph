@@ -35,7 +35,6 @@ classifiers = [
 docs = [
   "sphinx>=7,<9",
   "sphinx-rtd-theme>=2,<4",
-  "sphinx-gallery>=0.16,<0.20",
 ]
 
 [project.urls]

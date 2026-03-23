@@ -25,16 +25,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
-              'sphinx.ext.napoleon',
-              'sphinx_gallery.gen_gallery']
-
-# gallery configuration
-sphinx_gallery_conf = {
-	'examples_dirs': 'gallery_source',  # path to gallery scripts
-	'gallery_dirs': 'gallery',  # pvath to where to save gallery output
-	'remove_config_comments': True,
-	'download_all_examples': False,
-}
+              'sphinx.ext.napoleon']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -68,7 +59,7 @@ language = 'en'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'buildtest', 'test', 'gallery/.ipynb_checkpoints']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'buildtest', 'test', 'gallery/.ipynb_checkpoints', 'gallery_source']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'default'
