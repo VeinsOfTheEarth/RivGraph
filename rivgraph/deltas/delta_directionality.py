@@ -18,6 +18,7 @@ from scipy.spatial import ConvexHull
 from scipy.ndimage import distance_transform_edt
 import rivgraph.io_utils as io
 import rivgraph.directionality as dy
+import rivgraph.ln_utils as lnu
 
 # Todo: create the manual fix csv no matter what; allow user to input values
 # before running directionality.
@@ -145,7 +146,7 @@ def set_initial_directionality(links, nodes, imshape):
         # Only need to set links that haven't been set
         if cert == 1:
             continue
-        linkidx = links['id'].index(lid)
+        linkidx = lnu.link_index(links, lid)
         # Set all the links that are known from bridge links
         if alg in lga:
             links, nodes = dy.set_link(links, nodes, linkidx,
@@ -160,7 +161,7 @@ def set_initial_directionality(links, nodes, imshape):
         # Only need to set links that haven't been set
         if cert == 1:
             continue
-        linkidx = links['id'].index(lid)
+        linkidx = lnu.link_index(links, lid)
         # Set all the links that are known from main_channel
         if alg in lga:
             links, nodes = dy.set_link(links, nodes, linkidx,
@@ -180,7 +181,7 @@ def set_initial_directionality(links, nodes, imshape):
         if cert == 1:
             continue
         if llen > len75 and abs(lslope) > slope50:
-            linkidx = links['id'].index(lid)
+            linkidx = lnu.link_index(links, lid)
             if dy.algmap('syn_dem') in lga:
                 usnode = lg[lga.index(dy.algmap('syn_dem'))]
                 links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
@@ -221,7 +222,7 @@ def set_initial_directionality(links, nodes, imshape):
         if cert == 1:
             continue
         if llen > medlinklen and dy.algmap('syn_dem') in lga:
-            linkidx = links['id'].index(lid)
+            linkidx = lnu.link_index(links, lid)
             usnode = lg[lga.index(dy.algmap('syn_dem'))]
             links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
 
@@ -242,7 +243,7 @@ def set_initial_directionality(links, nodes, imshape):
         # Only need to set links that haven't been set
         if cert == 1:
             continue
-        linkidx = links['id'].index(lid)
+        linkidx = lnu.link_index(links, lid)
         # Set all the links with 3 or more guesses that agree
         m = mode(lg)
         m_count = np.atleast_1d(m.count)[0]
@@ -267,7 +268,7 @@ def set_initial_directionality(links, nodes, imshape):
         # Only need to set links that haven't been set
         if cert == 1:
             continue
-        linkidx = links['id'].index(lid)
+        linkidx = lnu.link_index(links, lid)
         # Set all the links with 2 or more same guesses that are not
         # shortest path (one may be shortest path)
         if dy.algmap('syn_dem') in lga and dy.algmap('sp_links') in lga:
@@ -288,7 +289,7 @@ def set_initial_directionality(links, nodes, imshape):
     # alg = 10 # change this one!
     alg = dy.algmap('syn_dem')
     for lid in uncertain:
-        linkidx = links['id'].index(lid)
+        linkidx = lnu.link_index(links, lid)
         if alg in links['guess_alg'][linkidx]:
             usnode = links['guess'][linkidx][links['guess_alg'][linkidx].index(alg)]
             links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
@@ -426,23 +427,23 @@ def fix_delta_cycle(links, nodes, cyc_links, imshape):
 
     # Simplest method: unset the cycle links and reset them according to angles
     # Get resettale links
-    toreset = [l for l in cyc_links if links['certain_alg'][links['id'].index(l)] not in dont_reset_algs]
+    toreset = [l for l in cyc_links if links['certain_alg'][lnu.link_index(links, l)] not in dont_reset_algs]
 
     # Get original link orientations in case fix does not work
     orig = dy.cycle_get_original_orientation(links, toreset)
 
     # Set certainty of cycle links to zero
     for tr in toreset:
-        links['certain'][links['id'].index(tr)] = 0
+        links['certain'][lnu.link_index(links, tr)] = 0
 
     links, nodes = re_set_linkdirs(links, nodes, imshape)
 
     # Check that all links were reset
-    if sum([links['certain'][links['id'].index(l)] for l in toreset]) != len(toreset):
+    if sum([links['certain'][lnu.link_index(links, l)] for l in toreset]) != len(toreset):
         fixed = 0
 
     # Check that cycle was resolved
-    cyclenode = links['conn'][links['id'].index(toreset[0])][0]
+    cyclenode = links['conn'][lnu.link_index(links, toreset[0])][0]
     cyc_n, cyc_l = dy.get_cycles(links, nodes, checknode=cyclenode)
 
     # If the cycle was not fixed, try again, but set the cycle links AND the
@@ -454,7 +455,7 @@ def fix_delta_cycle(links, nodes, cyc_links, imshape):
         # Get all cycle links and those connected to cycle
         toreset = set()
         for cn in cyc_n[0]:
-            conn = nodes['conn'][nodes['id'].index(cn)]
+            conn = nodes['conn'][lnu.node_index(nodes, cn)]
             toreset.update(conn)
         toreset = list(toreset)
 
@@ -463,7 +464,7 @@ def fix_delta_cycle(links, nodes, cyc_links, imshape):
 
         # Un-set the cycle+connected links
         for tr in toreset:
-            lidx = links['id'].index(tr)
+            lidx = lnu.link_index(links, tr)
             if links['certain_alg'][lidx] not in dont_reset_algs:
                 links['certain'][lidx] = 0
 
@@ -554,7 +555,7 @@ def dir_synthetic_DEM(links, nodes, imshape):
 
     # Get row,col coordinates of outlet nodes, arrange them in a
     # clockwise order
-    outs = [nodes['idx'][nodes['id'].index(o)] for o in nodes['outlets']]
+    outs = [nodes['idx'][lnu.node_index(nodes, o)] for o in nodes['outlets']]
     outsxy = np.unravel_index(outs, I.shape)
     if len(outsxy[0]) < 3:
         hco = np.transpose(np.vstack((outsxy[0], outsxy[1])))
@@ -574,11 +575,11 @@ def dir_synthetic_DEM(links, nodes, imshape):
 
     # Get coordinates of inlet nodes; use only the widest inlet and any#
     # inlets within 25% of its width
-    ins = [nodes['idx'][nodes['id'].index(i)] for i in nodes['inlets']]
+    ins = [nodes['idx'][lnu.node_index(nodes, i)] for i in nodes['inlets']]
     in_wids = []
     for i in nodes['inlets']:
-        linkid = nodes['conn'][nodes['id'].index(i)][0]
-        linkidx = links['id'].index(linkid)
+        linkid = nodes['conn'][lnu.node_index(nodes, i)][0]
+        linkidx = lnu.link_index(links, linkid)
         in_wids.append(links['wid_adj'][linkidx])
     maxwid = max(in_wids)
     keep = [ii for ii, iw in enumerate(in_wids) if
@@ -614,7 +615,7 @@ def dir_synthetic_DEM(links, nodes, imshape):
     slopes = []
     for lid in links['id']:
 
-        linkidx = links['id'].index(lid)
+        linkidx = lnu.link_index(links, lid)
         lidcs = links['idx'][linkidx][:]
         rc = np.unravel_index(lidcs, imshape)
 
@@ -627,9 +628,9 @@ def dir_synthetic_DEM(links, nodes, imshape):
 
         # Make sure slope is negative, else flip direction
         if linreg.slope > 0:
-            usnode = nodes['id'][nodes['idx'].index(lidcs[-1])]
+            usnode = nodes['id'][lnu.node_idx_index(nodes, lidcs[-1])]
         else:
-            usnode = nodes['id'][nodes['idx'].index(lidcs[0])]
+            usnode = nodes['id'][lnu.node_idx_index(nodes, lidcs[0])]
 
         # Store guess
         links['guess'][linkidx].append(usnode)
