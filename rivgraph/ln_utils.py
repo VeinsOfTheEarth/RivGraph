@@ -303,6 +303,23 @@ def link_updater(links, linkid, idx=-1, conn=-1):
     return links
 
 
+
+
+def _network_record_keys(container, id_key='id'):
+    """Return keys whose values are per-record sequences aligned with ``container[id_key]``."""
+    n = len(container[id_key])
+    keys = []
+    for key, value in container.items():
+        if isinstance(value, (str, bytes)) or np.isscalar(value):
+            continue
+        try:
+            if len(value) == n:
+                keys.append(key)
+        except TypeError:
+            continue
+    return keys
+
+
 def delete_node(nodes, nodeid, warn=True):
     """
     Delete a node from the network.
@@ -327,7 +344,7 @@ def delete_node(nodes, nodeid, warn=True):
 
     """
     # Get keys that have removable elements
-    nodekeys = [nk for nk in nodes.keys() if type(nodes[nk]) is not int and len(nodes[nk]) == len(nodes['id'])]
+    nodekeys = _network_record_keys(nodes, 'id')
 
     # Check that the node has no connectivity
     nodeidx = nodes['id'].index(nodeid)
@@ -367,7 +384,7 @@ def delete_link(links, nodes, linkid):
         Network nodes with node updated.
 
     """
-    linkkeys = [lk for lk in links.keys() if type(links[lk]) is not int and len(links[lk]) == len(links['id'])]
+    linkkeys = _network_record_keys(links, 'id')
     lidx = links['id'].index(linkid)
 
     # Save the connecting nodes so we can update their connectivity ([:] makes a copy, not a view)
@@ -1052,7 +1069,7 @@ def remove_two_link_nodes(links, nodes, dontremove):
         Network nodes with superfluous nodes removed.
 
     """
-    linkkeys = [lk for lk in links.keys() if type(links[lk]) is not int and len(links[lk]) == len(links['id'])]
+    linkkeys = _network_record_keys(links, 'id')
 
     ct = 1
     while ct > 0:
@@ -1116,7 +1133,7 @@ def remove_two_link_nodes(links, nodes, dontremove):
                     if lk == 'id':  # have to treat orderedset differently
                         links[lk].remove(lid_go)
                     elif type(links[lk]) is np.ndarray:  # have to treat numpy arrays differently
-                        links[lk] = np.delete(links[lk], lid_go)
+                        links[lk] = np.delete(links[lk], lidx_go)
                     else:
                         links[lk].pop(lidx_go)
 

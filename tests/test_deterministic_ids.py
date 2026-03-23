@@ -39,3 +39,28 @@ def test_finalize_network_ids_relabels_consistently_and_marks_finalized():
     assert links["arts"] == [[1, 0]]
     assert links["link_conn"] == [[0], [1]]
     assert links["guess"] == [[1], [0]]
+
+
+
+def test_delete_link_ignores_scalar_provisional_metadata():
+    links = {
+        "id": [0],
+        "idx": [[1, 2]],
+        "conn": [[0, 1]],
+        lnu.ID_FINALIZED_FLAG: False,
+        lnu.ID_FINALIZATION_METHOD: "topology not finalized",
+    }
+    nodes = {
+        "id": [0, 1],
+        "idx": [1, 2],
+        "conn": [[0], [0]],
+        lnu.ID_FINALIZED_FLAG: False,
+        lnu.ID_FINALIZATION_METHOD: "topology not finalized",
+    }
+
+    links, nodes = lnu.delete_link(links, nodes, 0)
+
+    assert list(links["id"]) == []
+    assert nodes["id"] == []
+    assert links[lnu.ID_FINALIZED_FLAG] is False
+    assert nodes[lnu.ID_FINALIZED_FLAG] is False
