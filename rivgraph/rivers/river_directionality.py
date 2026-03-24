@@ -94,7 +94,7 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
         if cert == 1:
             continue
         if cld >= cl_distthresh:
-            linkidx = lnu.link_index(links, lid)
+            linkidx = links['id'].index(lid)
             if dy.algmap('cl_dist_guess') in lga:
                 usnode = lg[lga.index(dy.algmap('cl_dist_guess'))]
                 links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
@@ -112,7 +112,7 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
         if np.isnan(cla) == True:
             continue
         if cla <= cl_angthresh:
-            linkidx = lnu.link_index(links, lid)
+            linkidx = links['id'].index(lid)
             if dy.algmap('cl_ang_guess') in lga:
                 usnode = lg[lga.index(dy.algmap('cl_ang_guess'))]
                 links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
@@ -131,7 +131,7 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
         if cert == 1:
             continue
         if cld >= cl_distthresh and cla < ang_thresh:
-            linkidx = lnu.link_index(links, lid)
+            linkidx = links['id'].index(lid)
             if dy.algmap('cl_dist_guess') in lga and dy.algmap('cl_ang_guess') in lga:
                 if lg[lga.index(dy.algmap('cl_dist_guess'))] == lg[lga.index(dy.algmap('cl_ang_guess'))]:
                     usnode = lg[lga.index(dy.algmap('cl_dist_guess'))]
@@ -377,7 +377,7 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
         certzero = list(set(all_pars[0] + cyclelinks))
         orig_links = dy.cycle_get_original_orientation(links, certzero)  # Save the original orientations in case the cycle can't be fixed
         for cz in certzero:
-            links['certain'][lnu.link_index(links, cz)] = 0
+            links['certain'][links['id'].index(cz)] = 0
 
         # Flip the links of the triad
         for l in all_pars[0]:
@@ -391,7 +391,7 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
         certzero = cyclelinks
         orig_links = dy.cycle_get_original_orientation(links, certzero)
         for cz in certzero:
-            lidx = lnu.link_index(links, cz)
+            lidx = links['id'].index(cz)
             if links['certain_alg'][lidx] not in dont_reset_algs:
                 links['certain'][lidx] = 0
 
@@ -418,7 +418,7 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
         # cycle AND the links connected to those links
         set_to_zero = set()
         for cn in cyclenodes:
-            conn = nodes['conn'][lnu.node_index(nodes, cn)]
+            conn = nodes['conn'][nodes['id'].index(cn)]
             set_to_zero.update(conn)
         set_to_zero = list(set_to_zero)
 
@@ -426,7 +426,7 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
         orig_links = dy.cycle_get_original_orientation(links, set_to_zero)
 
         for s in set_to_zero:
-            lidx = lnu.link_index(links, s)
+            lidx = links['id'].index(s)
             if links['certain_alg'][lidx] not in dont_reset_algs:
                 links['certain'][lidx] = 0
 
@@ -487,7 +487,7 @@ def re_set_linkdirs(links, nodes, imshape):
         if np.isnan(cla) == True:
             continue
         if cla <= cl_angthresh:
-            linkidx = lnu.link_index(links, lid)
+            linkidx = links['id'].index(lid)
             if dy.algmap('cl_ang_guess') in lga:
                 usnode = lg[lga.index(dy.algmap('cl_ang_guess'))]
                 links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg)
@@ -725,9 +725,9 @@ def set_unknown_cluster_by_widthpct(links, nodes):
 
     # Loop through all the unknown clusters, setting the most-certain-by-width
     for lclust in cc_edges:
-        widpcts = [links['wid_pctdiff'][lnu.link_index(links, l)][0] for l in lclust]
+        widpcts = [links['wid_pctdiff'][links['id'].index(l)][0] for l in lclust]
         link_toset = lclust[widpcts.index(max(widpcts))]
-        linkidx = lnu.link_index(links, link_toset)
+        linkidx = links['id'].index(link_toset)
         usnode = links['guess'][linkidx][links['guess_alg'][linkidx].index(26)]
 
         links, nodes = dy.set_link(links, nodes, linkidx, usnode, alg=alg)

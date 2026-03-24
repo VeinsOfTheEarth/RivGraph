@@ -909,25 +909,25 @@ def fill_holes(I, maxholesize=0):
         I = nd.binary_fill_holes(I)
         return I
     else:
-        # Fill only holes less than or equal to maxholesize.
+        # Fill only holes less than maxholesize
         Icomp = util.invert(I)
 
-        # Remove boundary pixels so holes created by image boundary are not considered blobs.
+        # Remove boundary pixels so holes created by image boundary are not considered blobs
         Icomp[:, 0] = 0
         Icomp[:, -1] = 0
         Icomp[0, :] = 0
-        Icomp[-1, :] = 0
+        Icomp[-1, :]= 0
 
-        labels, _ = nd.label(Icomp, structure=nd.generate_binary_structure(2, 1))
-        if labels.max() == 0:
-            return I
+        # Get blob properties of complement image
+        props = ['coords', 'area']
+        rp, _ = regionprops(Icomp, props, connectivity=1)
 
-        counts = np.bincount(labels.ravel())
-        keep_labels = np.where((counts <= maxholesize) & (counts > 0))[0]
-        if keep_labels.size == 0:
-            return I
+        # Blob indices less than specified threshold
+        keepidcs = [i for i, x in enumerate(rp['area']) if x <= maxholesize]
 
-        I[np.isin(labels, keep_labels)] = 1
+        # Fill 'dem holes!
+        for k in keepidcs:
+            I[rp['coords'][k][:, 0], rp['coords'][k][:, 1]] = 1
 
         return I
 

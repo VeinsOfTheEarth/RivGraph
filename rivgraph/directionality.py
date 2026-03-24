@@ -173,7 +173,7 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
                 belongs_to[i].append(j)
 
     # Get node coordinates of all path nodes
-    pathnode_set_idcs = [nodes['idx'][lnu.node_index(nodes, n)] for n in pathnode_set]
+    pathnode_set_idcs = [nodes['idx'][nodes['id'].index(n)] for n in pathnode_set]
     rc_pathnodes = np.unravel_index(pathnode_set_idcs, imshape)
 
     # Find the nearest path to all uncertain links
@@ -188,7 +188,7 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
 
         # Find nearest path to each centerline endpoint
         nconn = links['conn'][u]
-        nidxs = [nodes['idx'][lnu.node_index(nodes, n)] for n in nconn]
+        nidxs = [nodes['idx'][nodes['id'].index(n)] for n in nconn]
         lrc = np.unravel_index(nidxs, imshape)
 
         nearest_paths = []
@@ -205,7 +205,7 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
 
         # Now that path to compare against is known, determine the flow direction
         path = all_pathnodes[use_path]
-        path_rc = np.unravel_index([nodes['idx'][lnu.node_index(nodes, n)] for n in path], imshape)
+        path_rc = np.unravel_index([nodes['idx'][nodes['id'].index(n)] for n in path], imshape)
 
         # Closest index of each end node of link:
         nearest_nodes = []
@@ -244,8 +244,8 @@ def nodepath_to_links(path, links, nodes):
 
     linkpath = []
     for u, v in zip(path[0:-1], path[1:]):
-        ulinks = nodes['conn'][lnu.node_index(nodes, u)]
-        vlinks = nodes['conn'][lnu.node_index(nodes, v)]
+        ulinks = nodes['conn'][nodes['id'].index(u)]
+        vlinks = nodes['conn'][nodes['id'].index(v)]
         linkpath.append([ul for ul in ulinks if ul in vlinks][0])
 
     return linkpath
@@ -272,9 +272,9 @@ def widest_inlet_index(links, nodes):
     # Find apex node, assuming it's connected to the widest channel(s)
     inletW = []
     for nid in nodes['inlets']:
-        nidx = lnu.node_index(nodes, nid)
+        nidx = nodes['id'].index(nid)
         lids = nodes['conn'][nidx]
-        inletW.append(np.sum([links['wid_adj'][lnu.link_index(links, li)] for li in lids]))
+        inletW.append(np.sum([links['wid_adj'][links['id'].index(li)] for li in lids]))
 
     W = max(inletW)
     inlet_idx = inletW.index(W)
@@ -327,7 +327,7 @@ def dir_main_channel(links, nodes):
         # Set the directionality of each of the links
         for usnode, pl in zip(pathnodes, pathlinks):
 
-            linkidx = lnu.link_index(links, pl)
+            linkidx = links['id'].index(pl)
 
             # Don't set if already set
             if alg in links['guess_alg'][linkidx]:
@@ -377,7 +377,7 @@ def dir_shortest_paths_nodes(links, nodes):
     # Get all "pre-outlet", i.e. nodes one link upstream of outlets. Use these so that decision of where to chop off outlet links doesn't play a role in shortest path.
     preoutlets = []
     for o in nodes['outlets']:
-        linkconn = links['conn'][lnu.link_index(links, nodes['conn'][lnu.node_index(nodes, o)][0])]
+        linkconn = links['conn'][links['id'].index(nodes['conn'][nodes['id'].index(o)][0])]
         othernode = linkconn[:]
         othernode.remove(o)
         preoutlets.append(othernode[0])
@@ -398,10 +398,10 @@ def dir_shortest_paths_nodes(links, nodes):
         # Set first link of the shortest path
         # Find the link first
         for ip, posslink in enumerate(nconn):
-            if set(links['conn'][lnu.link_index(links, posslink)]) == set(shortpath[:2]):
+            if set(links['conn'][links['id'].index(posslink)]) == set(shortpath[:2]):
                 linkid = nconn[ip]
 
-        linkidx = lnu.link_index(links, linkid)
+        linkidx = links['id'].index(linkid)
 
         if alg in links['guess_alg'][linkidx]:
             # If the guess agrees with previously guessed for this algorithm, move on
@@ -457,7 +457,7 @@ def dir_shortest_paths_links(links, nodes, difthresh=0):
     # Get all "pre-outlet", i.e. nodes one link upstream of outlets. Use these so that decision of where to chop off outlet links doesn't play a role in shortest path.
     preoutlets = []
     for o in nodes['outlets']:
-        linkconn = links['conn'][lnu.link_index(links, nodes['conn'][lnu.node_index(nodes, o)][0])]
+        linkconn = links['conn'][links['id'].index(nodes['conn'][nodes['id'].index(o)][0])]
         othernode = linkconn[:]
         othernode.remove(o)
         preoutlets.append(othernode[0])
@@ -469,7 +469,7 @@ def dir_shortest_paths_links(links, nodes, difthresh=0):
     # to the nearest outlet [closer is downstream]
     for il,lid in enumerate(links['id']):
 
-        linkidx = lnu.link_index(links, lid)
+        linkidx = links['id'].index(lid)
         lconn = links['conn'][linkidx][:]
 
         # Compute shortest distance from each end node to nearest pre-outlet
@@ -540,20 +540,20 @@ def dir_known_link_angles(links, nodes, dims, checklinks='all'):
 
     linkangs = np.ones((len(links['id']), 1)) * np.nan
     for lid in checklinks:
-        linkidx = lnu.link_index(links, lid)
+        linkidx = links['id'].index(lid)
         conn = links['conn'][linkidx]
         lidcs = links['idx'][linkidx]
 
         # Ensure that all the directionalities of links connected to this one are known
         connlinks = set()
         for c in conn:
-            linkconn = nodes['conn'][lnu.node_index(nodes, c)][:]
+            linkconn = nodes['conn'][nodes['id'].index(c)][:]
             linkconn.remove(lid)
             connlinks.update(linkconn)
 
         certs = []
         for cl in connlinks:
-            certs.append(links['certain'][lnu.link_index(links, cl)])
+            certs.append(links['certain'][links['id'].index(cl)])
 
         if sum(certs) != len(certs):
             continue
@@ -565,7 +565,7 @@ def dir_known_link_angles(links, nodes, dims, checklinks='all'):
         angs = []
         horiz_vec = (1, 0)
         for l in connlinks:
-            linkidxt = lnu.link_index(links, l)
+            linkidxt = links['id'].index(l)
             lidcst = links['idx'][linkidxt]
             rc = np.unravel_index(lidcst, dims)
             # Vector is downstream node minus upstream node
@@ -630,7 +630,7 @@ def dir_bridges(links, nodes):
     # Find bridge links; we don't want to count inlet and outlet links
     preoutlets = []
     for o in nodes['outlets']:
-        linkconn = links['conn'][lnu.link_index(links, nodes['conn'][lnu.node_index(nodes, o)][0])]
+        linkconn = links['conn'][links['id'].index(nodes['conn'][nodes['id'].index(o)][0])]
         othernode = linkconn[:]
         othernode.remove(o)
         preoutlets.append(othernode[0])
@@ -645,9 +645,9 @@ def dir_bridges(links, nodes):
 
     bridgelinks = []
     for bn in bridgenodes:
-        conn = nodes['conn'][lnu.node_index(nodes, bn[0])]
+        conn = nodes['conn'][nodes['id'].index(bn[0])]
         for c in conn:
-            if bn[1] in links['conn'][lnu.link_index(links, c)]:
+            if bn[1] in links['conn'][links['id'].index(c)]:
                 bridgelinks.append(c)
                 break
 
@@ -682,7 +682,7 @@ def dir_bridges(links, nodes):
         elif bn0_up is False or bn1_down is False:
             usnode = bn[1]
 
-        blidx = lnu.link_index(links, bl)
+        blidx = links['id'].index(bl)
         links['guess_alg'][blidx].append(alg)
         links['guess'][blidx].append(usnode)
 
@@ -712,7 +712,7 @@ def cycle_get_original_orientation(links, lids):
         link in lids.
     """
 
-    lidx = [lnu.link_index(links, l) for l in lids]
+    lidx = [links['id'].index(l) for l in lids]
     orig = dict()
     orig['id'] = lids
     orig['conn'] = [links['conn'][l][:] for l in lidx]
@@ -743,7 +743,7 @@ def cycle_return_to_original_orientation(links, orig):
     """
 
     for i, oid in enumerate(orig['id']):
-        lidx = lnu.link_index(links, oid)
+        lidx = links['id'].index(oid)
         links['conn'][lidx] = orig['conn'][i][:]
         links['idx'][lidx] = orig['idx'][i][:]
         links['wid_pix'][lidx] = orig['wid_pix'][i][:]
@@ -794,7 +794,7 @@ def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True):
         Network nodes and associated properties.
     linkidx : int
         Index of link within links['id'] to set. This index can be found from
-        the link id via lnu.link_index(links, linkid).
+        the link id via links['id'].index(linkid).
     usnode : int
         Node id of the upstream node.
     alg : int, optional
@@ -814,7 +814,7 @@ def set_link(links, nodes, linkidx, usnode, alg=9999, checkcontinuity=True):
     """
     links['conn'][linkidx].remove(usnode)
     links['conn'][linkidx].insert(0, usnode)
-    if links['idx'][linkidx][0] != nodes['idx'][lnu.node_index(nodes, usnode)]:
+    if links['idx'][linkidx][0] != nodes['idx'][nodes['id'].index(usnode)]:
         links['idx'][linkidx] = links['idx'][linkidx][::-1]
         if 'wid_pix' in links.keys():
             links['wid_pix'][linkidx] = links['wid_pix'][linkidx][::-1]
@@ -867,13 +867,13 @@ def fix_sources_and_sinks(links, nodes):
         n_bn = len(check_continuity(links, nodes))
 
         # Get all the connected links
-        lconn = nodes['conn'][lnu.node_index(nodes, bn)]
+        lconn = nodes['conn'][nodes['id'].index(bn)]
 
         # Reverse their order and see if we've violated continuity or created a cycle
         bn_linkflip = []  # number of bad nodes after flipping link
         cycle_linkflip = []
         for l in lconn:
-            lidx = lnu.link_index(links, l)
+            lidx = links['id'].index(l)
             links = lnu.flip_link(links, l)
 
             # See if we've violated continuity after flipping the link
@@ -902,10 +902,10 @@ def fix_sources_and_sinks(links, nodes):
         if len(poss_links) == 0:  # No possible links to flip, move on
             continue
         elif len(poss_links) == 1:  # Only one possible link we can flip, so do it
-            linkidx = lnu.link_index(links, poss_links[0])
+            linkidx = links['id'].index(poss_links[0])
         else:  # More than one link meets the criteria; choose the shortest
-            linklens = [links['len'][lnu.link_index(links, l)] for l in poss_links]
-            linkidx = lnu.link_index(links, poss_links[linklens.index(min(linklens))])
+            linklens = [links['len'][links['id'].index(l)] for l in poss_links]
+            linkidx = links['id'].index(poss_links[linklens.index(min(linklens))])
 
         if linkidx:
             set_link(links, nodes, linkidx, links['conn'][linkidx][1], alg=algmap('sourcesinkfix'))
@@ -938,14 +938,14 @@ def check_continuity(links, nodes):
         if nid in nodes['outlets'] or nid in nodes['inlets']:
             continue
 
-        certains = [links['certain'][lnu.link_index(links, lid)] for lid in nconn]
+        certains = [links['certain'][links['id'].index(lid)] for lid in nconn]
         if np.sum(certains) != len(nconn):
             continue
 
         firstidx = []
         lastidx = []
         for linkid in nconn:
-            linkidx = lnu.link_index(links, linkid)
+            linkidx = links['id'].index(linkid)
             firstidx.append(links['idx'][linkidx][0])
             lastidx.append(links['idx'][linkidx][-1])
 
@@ -988,8 +988,8 @@ def find_a_cycle(links, nodes):
     vs = [c[1] for c in cycle_nodes]
     cycle_links = []
     for u, v in zip(us, vs):
-            ulinks = nodes['conn'][lnu.node_index(nodes, u)]
-            vlinks = nodes['conn'][lnu.node_index(nodes, v)]
+            ulinks = nodes['conn'][nodes['id'].index(u)]
+            vlinks = nodes['conn'][nodes['id'].index(v)]
             cycle_links.append([ul for ul in ulinks if ul in vlinks][0])
 
     cycle_nodes = [c[0] for c in cycle_nodes]
@@ -1048,8 +1048,8 @@ def get_cycles(links, nodes, checknode='all'):
         for c in cycle_nodes:
             pathlinks = []
             for us, vs in zip(c, c[1:] + [c[0]]):
-                ulinks = nodes['conn'][lnu.node_index(nodes, us)]
-                vlinks = nodes['conn'][lnu.node_index(nodes, vs)]
+                ulinks = nodes['conn'][nodes['id'].index(us)]
+                vlinks = nodes['conn'][nodes['id'].index(vs)]
                 pathlinks.append([ul for ul in ulinks if ul in vlinks][0])
             cycles_links.append(pathlinks)
     else:
@@ -1150,29 +1150,29 @@ def fix_cycles(links, nodes):
             # into networkX graph
             acl = []
             for nid in cycle_n:
-                acl.extend(nodes['conn'][lnu.node_index(nodes, nid)])
+                acl.extend(nodes['conn'][nodes['id'].index(nid)])
             all_cycle_links = set(acl)
             acn = []
             for lid in all_cycle_links:
-                acn.extend(links['conn'][lnu.link_index(links, lid)])
+                acn.extend(links['conn'][links['id'].index(lid)])
             all_cycle_nodes = set(acn)
             G = nx.DiGraph()
             G.add_nodes_from(all_cycle_nodes)
             for lid in all_cycle_links:
-                lidx = lnu.link_index(links, lid)
+                lidx = links['id'].index(lid)
                 lc = links['conn'][lidx]
                 G.add_edge(lc[0], lc[1])
 
             # Determine our "inlet" and "outlet" links/nodes - these we will not flip
             dangle_nodes = all_cycle_nodes - set(cycle_n)
-            dangle_links = [l for l in all_cycle_links if len(set(links['conn'][lnu.link_index(links, l)]) - dangle_nodes) == 1]
+            dangle_links = [l for l in all_cycle_links if len(set(links['conn'][links['id'].index(l)]) - dangle_nodes) == 1]
             ins_l = []
             outs_l = []
             ins_n = []
             outs_n = []
             dns = []
             for dl in dangle_links:
-                lidx = lnu.link_index(links, dl)
+                lidx = links['id'].index(dl)
                 lconn = links['conn'][lidx]
                 dn = list(set(lconn).intersection(dangle_nodes))[0]
                 dns.append(dn)
@@ -1213,7 +1213,7 @@ def fix_cycles(links, nodes):
                 # Flip all the links in flink
                 links2flip = []
                 for fl in flink:
-                    links2flip.append(links['conn'][lnu.link_index(links, fl)][:])
+                    links2flip.append(links['conn'][links['id'].index(fl)][:])
                 G = flip_links_in_G(G, links2flip)
 
                 # Check if a cycle exists
@@ -1255,7 +1255,7 @@ def fix_cycles(links, nodes):
                 # Check that we're not flipping any links that have been set manually
                 set_by_alg = []
                 for fl in flink:
-                    set_by_alg.append(links['certain_alg'][lnu.link_index(links, fl)])
+                    set_by_alg.append(links['certain_alg'][links['id'].index(fl)])
                 if algmap('manual_set') in set_by_alg:
                     manually_set.append(1)
                 else:
@@ -1264,7 +1264,7 @@ def fix_cycles(links, nodes):
                 # Flip links back to original
                 links2flipback = []
                 for fl in flink:
-                    c = links['conn'][lnu.link_index(links, fl)][:]
+                    c = links['conn'][links['id'].index(fl)][:]
                     links2flipback.append([c[1], c[0]])
                 G = flip_links_in_G(G, links2flipback)
 
@@ -1340,7 +1340,7 @@ def dir_set_manually(links, nodes, manual_set_csv):
         links_to_set = df['link_id'].values
 
         for lid, usn in zip(links_to_set, usnodes):
-            links, nodes = set_link(links, nodes, lnu.link_index(links, lid), usn,
+            links, nodes = set_link(links, nodes, links['id'].index(lid), usn,
                                     alg=alg)
 
     return links, nodes
@@ -1374,10 +1374,10 @@ def set_inletoutlet(links, nodes):
     for i in nodes['inlets']:
 
         # Get links attached to inlets
-        conn = nodes['conn'][lnu.node_index(nodes, i)]
+        conn = nodes['conn'][nodes['id'].index(i)]
 
         for c in conn:
-            linkidx = lnu.link_index(links, c)
+            linkidx = links['id'].index(c)
 
             # Set link directionality
             links, nodes = set_link(links, nodes, linkidx, i, alg=alg,
@@ -1387,10 +1387,10 @@ def set_inletoutlet(links, nodes):
     for o in nodes['outlets']:
 
         # Get links attached to outlets
-        conn = nodes['conn'][lnu.node_index(nodes, o)]
+        conn = nodes['conn'][nodes['id'].index(o)]
 
         for c in conn:
-            linkidx = lnu.link_index(links, c)
+            linkidx = links['id'].index(c)
 
             # Set link directionality
             usnode = links['conn'][linkidx][:]
@@ -1434,7 +1434,7 @@ def set_continuity(links, nodes, checknodes='all'):
         checknodes = nodes['id'][:]
 
     for nid in checknodes:
-        nindex = lnu.node_index(nodes, nid)
+        nindex = nodes['id'].index(nid)
         nidx = nodes['idx'][nindex]
         conn = nodes['conn'][nindex]
 
@@ -1446,7 +1446,7 @@ def set_continuity(links, nodes, checknodes='all'):
 
         # Populate linkdir
         for il, lid in enumerate(conn):
-            lidx = lnu.link_index(links, lid)
+            lidx = links['id'].index(lid)
 
             # Determine if link is flowing into node or out of node
             # Skip if we're uncertain about the link's direction
@@ -1460,7 +1460,7 @@ def set_continuity(links, nodes, checknodes='all'):
 
         if np.sum(linkdir == 0) == 1: # If there is only a single unknown link
             unknown_link_id = conn[np.where(linkdir == 0)[0][0]]
-            unknown_link_idx = lnu.link_index(links, unknown_link_id)
+            unknown_link_idx = links['id'].index(unknown_link_id)
             m = mode(linkdir[linkdir > 0])
             m_count = np.atleast_1d(m.count)[0]
             m_mode = np.atleast_1d(m.mode)[0]
@@ -1512,7 +1512,7 @@ def set_parallel_links(links, nodes, knownlink):
 
     if 'parallels' not in links.keys():
         return links, nodes
-    lidx = lnu.link_index(links, knownlink)
+    lidx = links['id'].index(knownlink)
     docheck = False
     for parpairs in links['parallels']:
         docheck = False
@@ -1526,15 +1526,15 @@ def set_parallel_links(links, nodes, knownlink):
             usnode = links['conn'][lidx][1]
 
         # Check if any parallel sets are connected to the known link
-        ppnodes = links['conn'][lnu.link_index(links, parpairs[0])][:]
+        ppnodes = links['conn'][links['id'].index(parpairs[0])][:]
         for parlink in parpairs:
-            if links['certain'][lnu.link_index(links, parlink)] == 0:
+            if links['certain'][links['id'].index(parlink)] == 0:
                 if dsnode in ppnodes:
                     usnode_set = [n for n in ppnodes if n != dsnode][0]
-                    links, nodes = set_link(links, nodes, lnu.link_index(links, parlink), usnode_set, alg=alg, checkcontinuity=False)
+                    links, nodes = set_link(links, nodes, links['id'].index(parlink), usnode_set, alg=alg, checkcontinuity=False)
                     docheck = True
                 if usnode in ppnodes:
-                    links, nodes = set_link(links, nodes, lnu.link_index(links, parlink), usnode, alg=alg, checkcontinuity=False)
+                    links, nodes = set_link(links, nodes, links['id'].index(parlink), usnode, alg=alg, checkcontinuity=False)
                     docheck = True
         if docheck is True:
             links, nodes = set_continuity(links, nodes, checknodes=ppnodes)
@@ -1581,7 +1581,7 @@ def get_link_vector(links, nodes, linkid, imshape, pixlen=1, normalized=True,
     min_len_for_trim = 3  # number of pixels remaining after trim to use trimmed version; else defaults to using endpoints
 
     # Get pixel coordinates of link
-    lidx = lnu.link_index(links, linkid)
+    lidx = links['id'].index(linkid)
     rc = np.unravel_index(links['idx'][lidx], imshape)
 
     # Try to trim the link if desired and possible
@@ -1685,15 +1685,15 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
         n_known = []
         for lid in unknown_links:
 
-            lidx = lnu.link_index(links, lid)
+            lidx = links['id'].index(lid)
             conn = links['conn'][lidx]
 
             # Check both endos of the link; if for either the link in question
             # is the only unknown link; it is a candidate
             nknown = 0
             for nid in conn:
-                conn_links_endpixels = nodes['conn'][lnu.node_index(nodes, nid)]
-                nknown = nknown + sum([1 for c in conn_links_endpixels if links['certain'][lnu.link_index(links, c)] == 1])
+                conn_links_endpixels = nodes['conn'][nodes['id'].index(nid)]
+                nknown = nknown + sum([1 for c in conn_links_endpixels if links['certain'][links['id'].index(c)] == 1])
 
             if nknown > 0:
                 dolinks.append(lid)
@@ -1704,9 +1704,9 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
             return []
 
         # Get link lengths
-        lengths = [links['len'][lnu.link_index(links, dl)] for dl in dolinks]
+        lengths = [links['len'][links['id'].index(dl)] for dl in dolinks]
         # Get link lengths in pixels
-        lengths_pix = [len(links['wid_pix'][lnu.link_index(links, dl)]) for dl in dolinks]
+        lengths_pix = [len(links['wid_pix'][links['id'].index(dl)]) for dl in dolinks]
 
         # Sort all dolinks by number of known connected links (max to min)
         forsort = np.transpose(np.array([dolinks, n_known, lengths, lengths_pix]))
@@ -1739,7 +1739,7 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
 
         # Get the first unknown link to set
         dolink = dolinks.pop(0)
-        lidx = lnu.link_index(links, dolink)
+        lidx = links['id'].index(dolink)
 
         # In case the link was set by continuity
         if links['certain'][lidx] == 1:
@@ -1752,21 +1752,21 @@ def set_by_known_flow_directions(links, nodes, imshape, angthresh=2,
         for n in nconn:
 
             # Ensure unknown link flows from node
-            if links['idx'][lidx][0] != nodes['idx'][lnu.node_index(nodes, n)]:
+            if links['idx'][lidx][0] != nodes['idx'][nodes['id'].index(n)]:
                 lnu.flip_link(links, dolink)
 
             ul_vec = get_link_vector(links, nodes, dolink, imshape)
 
-            lconn = nodes['conn'][lnu.node_index(nodes, n)]
+            lconn = nodes['conn'][nodes['id'].index(n)]
 
             # Find the connected links that are known
-            known_links = [l for l in lconn if links['certain'][lnu.link_index(links, l)]==1]
+            known_links = [l for l in lconn if links['certain'][links['id'].index(l)]==1]
 
             # Determine which set links are into/out of the node
             in_links = []
             out_links = []
             for sl in known_links:
-                lidxt = lnu.link_index(links, sl)
+                lidxt = links['id'].index(sl)
                 if links['conn'][lidxt][0] == n:
                     out_links.append(sl)
                 else:
@@ -1855,13 +1855,13 @@ def set_no_backtrack(links, nodes):
         if nconn[0] in nodes['inlets'] or nconn[1] in nodes['outlets']:
             continue
 
-        uslinks = nodes['conn'][lnu.node_index(nodes, nconn[0])][:]
+        uslinks = nodes['conn'][nodes['id'].index(nconn[0])][:]
         uslinks.remove(lid)
-        dslinks = nodes['conn'][lnu.node_index(nodes, nconn[1])][:]
+        dslinks = nodes['conn'][nodes['id'].index(nconn[1])][:]
         dslinks.remove(lid)
 
-        us_certains = [l for l in uslinks if links['certain'][lnu.link_index(links, l)] == 1]
-        ds_certains = [l for l in dslinks if links['certain'][lnu.link_index(links, l)] == 1]
+        us_certains = [l for l in uslinks if links['certain'][links['id'].index(l)] == 1]
+        ds_certains = [l for l in dslinks if links['certain'][links['id'].index(l)] == 1]
 
         if len(us_certains) == len(uslinks) and len(ds_certains) != len(dslinks):
             startnode = nconn[-1]
@@ -1888,7 +1888,7 @@ def set_shortest_no_backtrack(links, nodes, startnode, removelink, usds):
 
     # Remove the immediately upstream (or downstream) known link so flow cannot
     # travel the wrong direction
-    rem_edge = links['conn'][lnu.link_index(links, removelink)]
+    rem_edge = links['conn'][links['id'].index(removelink)]
     G.remove_edge(rem_edge[0], rem_edge[1])
 
     # Find the endnode to travel to
@@ -1911,8 +1911,8 @@ def set_shortest_no_backtrack(links, nodes, startnode, removelink, usds):
     # Convert to link-to-link path
     pathlinks = []
     for u,v in zip(pathnodes[0:-1], pathnodes[1:]):
-        ulinks = nodes['conn'][lnu.node_index(nodes, u)]
-        vlinks = nodes['conn'][lnu.node_index(nodes, v)]
+        ulinks = nodes['conn'][nodes['id'].index(u)]
+        vlinks = nodes['conn'][nodes['id'].index(v)]
         pathlinks.append([ul for ul in ulinks if ul in vlinks][0])
 
     # Set the directionality of each of the links
@@ -1922,7 +1922,7 @@ def set_shortest_no_backtrack(links, nodes, startnode, removelink, usds):
         pathnodes = pathnodes[1:]
 
     for usnode, pl in zip(pathnodes, pathlinks):
-        linkidx = lnu.link_index(links, pl)
+        linkidx = links['id'].index(pl)
         if links['certain'][linkidx] == 1:
             break
         else:
@@ -1970,10 +1970,10 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
             continue
 
         # Determine if we're at a head node of an artificial loop
-        nidx = lnu.node_index(nodes, n)
+        nidx = nodes['id'].index(n)
         linkconn = nodes['conn'][nidx][:]
         for lc in linkconn:
-            nodecheck = links['conn'][lnu.link_index(links, lc)][:]
+            nodecheck = links['conn'][links['id'].index(lc)][:]
             nodecheck.remove(n)
             # If a neighboring node is an aritifical one, we're at a head node
             if nodecheck[0] in nodes['arts']:
@@ -1991,13 +1991,13 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
         nonartlinks = [l for l in linkconn if l not in artlinks]
 
         # Ensure nonartificial links are known
-        certs = [links['certain'][lnu.link_index(links, nal)] for nal in nonartlinks]
+        certs = [links['certain'][links['id'].index(nal)] for nal in nonartlinks]
         if sum(certs) != len(certs):
             continue
 
         # Check that non-artificial links are same directionality wrt head node
-        firstidcs = set([links['idx'][lnu.link_index(links, nal)][0] for nal in nonartlinks])
-        lastidcs = set([links['idx'][lnu.link_index(links, nal)][-1] for nal in nonartlinks])
+        firstidcs = set([links['idx'][links['id'].index(nal)][0] for nal in nonartlinks])
+        lastidcs = set([links['idx'][links['id'].index(nal)][-1] for nal in nonartlinks])
         if len(firstidcs) == 1 and list(firstidcs)[0] == nodes['idx'][nidx]:# Links are leaving head node
             inout = 'out'
         elif len(lastidcs) == 1 and list(lastidcs)[0] == nodes['idx'][nidx]:
@@ -2006,22 +2006,22 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
             continue
 
         # Determine the short links of the artificial link triad
-        shortlinks = nodes['conn'][lnu.node_index(nodes, a_node)][:]
+        shortlinks = nodes['conn'][nodes['id'].index(a_node)][:]
         endnodes = []
         for sl in shortlinks:
-            forappend = links['conn'][lnu.link_index(links, sl)][:]
+            forappend = links['conn'][links['id'].index(sl)][:]
             forappend.remove(a_node)
             endnodes.append(forappend[0])
 
         # Find corresponding long link of the triad
-        posslinks = nodes['conn'][lnu.node_index(nodes, endnodes[0])]
+        posslinks = nodes['conn'][nodes['id'].index(endnodes[0])]
         for p in posslinks:
-            linkidx = lnu.link_index(links, p)
+            linkidx = links['id'].index(p)
             if set(links['conn'][linkidx]) == set(endnodes):
                 longlink = p
 
         # Set the longlink
-        ll_idx = lnu.link_index(links, longlink)
+        ll_idx = links['id'].index(longlink)
         ll_conn = links['conn'][ll_idx][:]
         if inout == 'out':
             ll_conn.remove(n)
@@ -2033,8 +2033,8 @@ def set_artificial_nodes(links, nodes, checknodes='all'):
 
         # Set short link that shares a node with longlink and link_into
         # The final shortlink of the triad will be set by continuity
-        shortlink = [l for l in shortlinks if n in links['conn'][lnu.link_index(links, l)]][0]
-        slidx = lnu.link_index(links, shortlink)
+        shortlink = [l for l in shortlinks if n in links['conn'][links['id'].index(l)]][0]
+        slidx = links['id'].index(shortlink)
         sl_conn = links['conn'][slidx][:]
         if inout == 'out':
             sl_conn.remove(n)

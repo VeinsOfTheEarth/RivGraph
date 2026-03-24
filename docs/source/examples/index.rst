@@ -4,18 +4,15 @@
 Examples
 ========
 
-Delta Examples
---------------
+RivGraph's canonical examples are the three notebooks in the repository's ``examples/`` directory.
+This documentation section is intentionally minimal: use the links below to open or download the notebooks,
+and run them from the repository root so the relative paths resolve correctly.
 
-.. toctree::
-   :maxdepth: 1
+Example notebooks
+-----------------
 
-   delta_example/delta_example
+- :download:`Delta example notebook <../../../examples/delta_example.ipynb>`
+- :download:`Braided river example notebook <../../../examples/braided_river_example.ipynb>`
+- :download:`Mouse brain example notebook <../../../examples/mouse_brain.ipynb>`
 
-River Examples
---------------
-
-.. toctree::
-   :maxdepth: 1
-
-   braided_river_example/braided_river_example
+Each notebook lives in the repository-level ``examples/`` directory alongside its example data and supporting images.

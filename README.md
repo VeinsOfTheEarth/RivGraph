@@ -1,92 +1,109 @@
-[![build](https://github.com/VeinsOfTheEarth/RivGraph/actions/workflows/build.yml/badge.svg)](https://github.com/VeinsOfTheEarth/RivGraph/actions/workflows/build.yml)
-[![Coverage Status](https://coveralls.io/repos/github/jonschwenk/RivGraph/badge.svg)](https://coveralls.io/github/jonschwenk/RivGraph)
-![docs](https://github.com/VeinsOfTheEarth/RivGraph/workflows/docs/badge.svg)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.02952/status.svg)](https://doi.org/10.21105/joss.02952)
-<br />
 
-[![RivGraph logo](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/docs/logos/rg_logo_full.png)](https://VeinsOfTheEarth.github.io/RivGraph/ "Go to documentation.")
+[![RivGraph logo](docs/logos/rg_logo_full.png)](https://VeinsOfTheEarth.github.io/RivGraph/ "Go to documentation.")
 
 About
 -----
 
-RivGraph is a Python package that provides tools for converting a binary mask of a channel network into a directed, weighted graph (i.e. a set of connected links and nodes).
+RivGraph is a Python package for converting a binary mask of a channel network into a directed, weighted graph of connected links and nodes.
 
-![Core functionality of RivGraph.\label{fig:corefunctions}](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/images/rivgraph_overview_white.PNG)
+![Core functionality of RivGraph](examples/images/rivgraph_overview_white.PNG)
 
-The figure above demonstrates the core components of RivGraph, but many other features are provided, including:
+Core capabilities include:
 
-- Morphologic metrics (lengths, widths, branching angles, braiding indices)
-- Algebraic representations of the channel network graph
-- Topologic metrics (both topologic and dynamic such as alternative paths, flux sharing, entropies, mutual information, etc.)
-- Tools for cleaning and preparing your binary channel network mask
-- Island detection, metrics, and filtering
-- Mesh generation for characterizing along-river characteristics
-- (beta) Tools for centerline migration analysis
+- morphologic metrics such as widths, lengths, and branching characteristics
+- algebraic and graph-based representations of channel networks
+- topologic and dynamic metrics such as alternative paths, flux sharing, and entropy-based measures
+- tools for cleaning and preparing binary channel masks
+- island detection, metrics, and filtering
+- mesh generation for along-river analysis
 
-All of RivGraph's functionality maintains and respects georeferencing information. If you start with a georeferenced mask (e.g. a GeoTIFF), RivGraph exports your results in the CRS (coordinate reference system) of your mask for convenient mapping, analysis, and fusion with other datasets in a GIS.
+RivGraph preserves georeferencing information throughout the workflow. If you start with a georeferenced mask, exported rasters and vectors remain aligned with the original data and can be used directly in GIS workflows.
 
-You can see some description of RivGraph's functionality via this [AGU poster](https://www.researchgate.net/publication/329845073_Automatic_Extraction_of_Channel_Network_Topology_RivGraph), and the flow directionality logic and validation is described in our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html). Examples demonstrating the basic RivGraph features are available for a [delta channel network](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/delta_example.ipynb) and a [braided river](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/braided_river_example.ipynb).
+The flow-directionality logic and validation are described in our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html). General package usage is described in our [JOSS paper](https://joss.theoj.org/papers/10.21105/joss.02952). Canonical runnable examples live in:
+
+- `examples/delta_example.ipynb`
+- `examples/braided_river_example.ipynb`
+- `examples/mouse_brain.ipynb`
 
 Installing
------
+----------
 
-RivGraph is hosted at conda-forge. If you just want to use RivGraph, the simplest path is to install the conda-forge package into a fresh environment:
+If you just want to use RivGraph, install the conda-forge package into a fresh environment:
 
-<pre><code>conda create -n rivgraph_env rivgraph -c conda-forge
+```bash
+conda create -n rivgraph_env rivgraph -c conda-forge
 conda activate rivgraph_env
-</code></pre>
+```
 
-If you want to install RivGraph from source for development or testing, use the repository environment file first and then perform an editable install:
+If you want to develop, test, or build documentation from source, use the repository environment file first and then perform an editable install:
 
-<pre><code>conda env create -f environment.yml
+```bash
+conda env create -f environment.yml
 conda activate rivgraph-modern
 pip install -e . --no-deps
-</code></pre>
+```
 
 `environment.yml` is the canonical source/development environment. `environment-modern.yml` is kept as a transition alias and should match it.
 
-Using `--no-deps` is intentional here: the geospatial stack is managed by the conda environment file, which avoids pip trying to re-resolve compiled dependencies such as GDAL, Rasterio, and Pyogrio.
+Using `--no-deps` is intentional here: the geospatial stack is managed by the conda environment file, which avoids pip trying to re-resolve compiled dependencies that are already pinned in conda.
 
 To verify a source install, run:
 
-<pre><code>pytest -ra tests/test_geospatial_roundtrip.py tests/regression
-</code></pre>
+```bash
+pytest -ra
+```
 
-You may also [install RivGraph from this GitHub repo](https://VeinsOfTheEarth.github.io/RivGraph/install/index.html#installation-from-source). Additional installation notes are available [in the documentation](https://VeinsOfTheEarth.github.io/RivGraph/install/index.html#installation-from-source).
+For a quicker smoke test, run:
 
-How to use?
------
+```bash
+pytest -ra tests/test_geospatial_roundtrip.py tests/regression
+```
 
-Please see the [documentation](https://VeinsOfTheEarth.github.io/RivGraph/) for more detailed instructions.
+Building the docs
+-----------------
 
-RivGraph requires that you provide a binary mask of your network. [This page](https://VeinsOfTheEarth.github.io/RivGraph/maskmaking/index.html) provides some help, hints, and tools for finding or creating your mask.
+Install the documentation extras into the same activated environment:
 
-To see what RivGraph does and how to operate it, you can work through the [Colville Delta example](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/delta_example.ipynb) or the [Brahmaputra River example](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/braided_river_example.ipynb). Both examples include sample masks.
+```bash
+pip install -e ".[docs]"
+```
 
-RivGraph contains two primary classes (`delta` and `river`) that provide convenient methods for creating a processing workflow for a channel network. As the examples demonstrate, you can instantiate a delta or river class, then apply associated methods for each. After looking at the examples, take a look at [classes.py](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/rivgraph/classes.py) to understand what methods are available.
+Then build the HTML docs:
 
-**Note**: there are many functions under the hood that may be useful to you. Check out the [im_utils script](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/rivgraph/im_utils.py) (image utilities) in particular for functions to help whip your mask into shape!
+```bash
+python -m sphinx -b html docs/source docs/build/html
+```
+
+Open `docs/build/html/index.html` in a browser.
+
+How to use RivGraph
+-------------------
+
+Start with the [documentation](https://VeinsOfTheEarth.github.io/RivGraph/) and the notebooks in `examples/`.
+
+RivGraph requires a binary mask of the channel network. The [maskmaking guide](https://VeinsOfTheEarth.github.io/RivGraph/maskmaking/index.html) provides practical guidance on obtaining, cleaning, and georeferencing masks.
+
+RivGraph contains two primary classes, `delta` and `river`, that organize the main processing workflows. The notebooks show the end-to-end usage patterns, while the API docs are generated from the source docstrings.
 
 Contributing
 ------------
 
-If you think you're not skilled or experienced enough to contribute, think again! We agree wholeheartedly with the sentiments expressed by this [Imposter syndrome disclaimer](https://github.com/Unidata/MetPy#contributing). We welcome all forms of user contributions including feature requests, bug reports, code, documentation requests, and code. Simply open an issue in the [tracker](https://github.com/VeinsOfTheEarth/RivGraph/issues). For code development contributions, please contact us via email to be added to our slack channel where we can hash out a plan for your contribution.
+We welcome feature requests, bug reports, documentation improvements, and code contributions. The simplest way to start is to open an issue in the [tracker](https://github.com/VeinsOfTheEarth/RivGraph/issues).
 
 Citing RivGraph
-------------
+---------------
 
-Citations help us justify the effort that goes into building and maintaining this project. If you used RivGraph for your research, please consider citing us.
+Citations help justify the effort that goes into building and maintaining this project. If you used RivGraph in your research, please consider citing it.
 
-If you use RivGraph's flow directionality algorithms, please cite our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html). Additionally, if you publish work wherein RivGraph was used to process your data, please cite our [JOSS Paper](https://joss.theoj.org/papers/10.21105/joss.02952).
+If you use RivGraph's flow-directionality algorithms, please cite our [ESurf Dynamics paper](https://www.earth-surf-dynam.net/8/87/2020/esurf-8-87-2020.html). If you publish work that uses RivGraph more generally, please also cite our [JOSS paper](https://joss.theoj.org/papers/10.21105/joss.02952).
 
-Contacting us
--------------
+Contact
+-------
 
-The best way to get in touch is to [open an issue](https://github.com/VeinsOfTheEarth/rivgraph/issues/new) or comment on any open issue or pull request. Otherwise, send an email to j.........k@gmail.com
+The best way to get in touch is to [open an issue](https://github.com/VeinsOfTheEarth/RivGraph/issues/new) or comment on an open issue or pull request.
 
 License
-------------
+-------
 
-This is free software: you can redistribute it and/or modify it under the terms of the **BSD 3-clause License**. A copy of this license is provided in [LICENSE.txt](https://github.com/VeinsOfTheEarth/RivGraph/blob/master/LICENSE.txt).
-
-RivGraph has been assigned number C19049 by the Feynman Center for Innovation.
+RivGraph is distributed under the BSD 3-clause license. A copy is provided in [LICENSE.txt](LICENSE.txt).

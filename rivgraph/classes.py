@@ -799,20 +799,13 @@ class river(rivnetwork):
     meshpolys : list of shapely.geometry.Polygon
         Polygons comprising the along-channel mesh
 
-    Methods
-    -------
-    skeletonize()
-        Skeletonizes the river binary mask; uses a different method than for deltas.
-    prune_network()
-        Prunes the river channel network by removing spurs.
-    compute_centerline()
-        Computes the centerline of the holes-filled river channel network mask.
-    compute_mesh(grid_spacing=None, smoothing=0.1, bufferdist=None)
-        Computes a mesh that follows the channel centerline; grid_spacing sets the length of each grid cell; bufferdist sets the width of each grid cell.
-    assign_flow_direcions()
-        Computes flow directions for each link in the delta channel network.
-    set_flow_dirs_manually()
-        Reads a user-created .csv file found at `paths['fixlinks_csv']` to set flow directions of specified links.
+    Typical workflow
+    ----------------
+    The most common river workflow is to call ``skeletonize()``,
+    ``compute_network()``, ``prune_network()``, ``compute_centerline()``,
+    ``compute_mesh()``, and then the flow-direction tools as needed. Those
+    methods are documented individually below and do not need to be repeated
+    here.
 
     """
 
