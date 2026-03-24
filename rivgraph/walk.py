@@ -700,8 +700,8 @@ def isbp_parsimonious(Ic, Icr, Inar, Infr):
     # Finally, choose branchpoints based on the most common branchpoints created
     # when walking from all possible branchpoints
     mode = stats.mode([p for b in bpsave for p in b])
-    bp_init = np.ndarray.tolist(mode.mode)
-    bps = isbp_walk_for_bps(np.array(Ic, dtype=np.bool), bp_init)
+    bp_init = np.atleast_1d(mode.mode).tolist()
+    bps = isbp_walk_for_bps(np.array(Ic, dtype=bool), bp_init)
 
     return bps
 

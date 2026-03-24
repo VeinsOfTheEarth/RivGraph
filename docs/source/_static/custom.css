@@ -1,0 +1,77 @@
+
+.rg-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.rg-card {
+  border: 1px solid #d9dee3;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.rg-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.rg-card a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rg-card a:hover {
+  text-decoration: none;
+}
+
+.rg-card-imgwrap {
+  height: 165px;
+  background: #f3f5f7;
+  border-bottom: 1px solid #d9dee3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.rg-card-imgwrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.rg-card-body {
+  padding: 1rem 1rem 1.1rem 1rem;
+}
+
+.rg-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.28;
+  margin: 0 0 0.45rem 0;
+}
+
+.rg-card-meta {
+  color: #5a6872;
+  margin-bottom: 0.7rem;
+}
+
+.rg-card-summary {
+  margin: 0;
+  color: #25313b;
+}
+
+.rg-paper-hero {
+  margin: 1rem 0 1.25rem 0;
+}
+
+.rg-paper-meta {
+  color: #5a6872;
+  margin-bottom: 1rem;
+}

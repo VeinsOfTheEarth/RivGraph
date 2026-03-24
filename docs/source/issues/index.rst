@@ -13,7 +13,7 @@ See :doc:`/shoreline/index` further information on methods to generate a shoreli
 Left id failure
 ---------------
 
-Shoreline features should not contain any attributes named left_fid, LEFT_ID, etc. which popular GIS software such as ArcGIS & QGIS can add. It is recommended to enter a shoreline with a single attribute, id, with a null value inside to avoid an `error <https://github.com/VeinsOfTheEarth/RivGraph/issues/9>`_.
+Shoreline features should not contain any attributes named left_fid, LEFT_ID, etc. which popular GIS software such as ArcGIS & QGIS can add. It is recommended to enter a shoreline with a single attribute, id, with a null value inside to avoid `issue #9 <https://github.com/VeinsOfTheEarth/RivGraph/issues/9>`_.
 
 Non-point intersection
 ----------------------
@@ -35,7 +35,7 @@ As noted in the maskmaking documentation (:doc:`/maskmaking/index`), there shoul
 Multiple inlet nodes after assigning directionality
 ---------------------------------------------------
 
-After successfully extracting the channel network and assigning flow directionality, an `error <https://github.com/VeinsOfTheEarth/RivGraph/issues/52>`_ that may arise when computing the delta metrics is an error that there are multiple inlet nodes found. This arises from an assumption built into RivGraph as of v0.4: the skeletonization of the mask will fill any islands 4 pixels or less, in a 4-neighbor sense, in the network. If these islands exist in the mask the skeleton can intersect one of these islands, which may in some instances cause an error. Here is an example of where this occurs and an issue arises. In the image below the link intersecting the island will have an `wid_adj` of zero, as the adjusted vector `wid_pix` will have a value of essentially zero. 
+After successfully extracting the channel network and assigning flow directionality, `issue #52 <https://github.com/VeinsOfTheEarth/RivGraph/issues/52>`_ may arise when computing the delta metrics; specifically, the error that there are multiple inlet nodes found. This arises from an assumption built into RivGraph as of v0.4: the skeletonization of the mask will fill any islands 4 pixels or less, in a 4-neighbor sense, in the network. If these islands exist in the mask the skeleton can intersect one of these islands, which may in some instances cause an error. Here is an example of where this occurs and an issue arises. In the image below the link intersecting the island will have an `wid_adj` of zero, as the adjusted vector `wid_pix` will have a value of essentially zero. 
 
 .. image:: https://user-images.githubusercontent.com/14874485/118341935-709cdd80-b4de-11eb-87a6-bbbc24fc8aec.png
 

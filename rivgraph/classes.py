@@ -8,10 +8,6 @@ Classes for running rivgraph commands on your channel network or centerline.
 import os
 import sys
 from loguru import logger
-try:
-    from osgeo import gdal
-except ModuleNotFoundError:
-    import gdal
 import numpy as np
 import networkx as nx
 from pyproj.crs import CRS
@@ -21,7 +17,9 @@ import geopandas as gpd
 from shapely.geometry import LineString
 from scipy import signal
 import rivgraph.io_utils as io
+from rivgraph.export_schema import get_extension_for_format
 import rivgraph.geo_utils as gu
+import rivgraph.rasters as rasters
 import rivgraph.mask_to_graph as m2g
 import rivgraph.ln_utils as lnu
 import rivgraph.mask_utils as mu
@@ -31,6 +29,7 @@ import rivgraph.deltas.delta_metrics as dm
 import rivgraph.rivers.river_directionality as rd
 import rivgraph.rivers.river_utils as ru
 import rivgraph.rivers.centerline_utils as cu
+
 
 class rivnetwork:
     """
@@ -79,15 +78,14 @@ class rivnetwork:
             the name of the channel network, usually the river or delta's name
         verbose : bool, optional (False by default)
             True or False to specify if processing updates should be printed.
-        d : osgeo.gdal.Dataset
-            object created by gdal.Open() that provides access to geotiff
-            metadata
+        crs : pyproj.CRS
+            Coordinate reference system of the input mask.
         mask_path : str
             filepath to the input binary channel network mask
         imshape : tuple
             dimensions of the image (rows, cols)
         gt : tuple
-            gdal-type Geotransform of the input mask geotiff
+            Geotransform tuple of the input mask geotiff
         wkt : str
             well known text representation of coordinate reference system of
             input mask geotiff
@@ -109,7 +107,7 @@ class rivnetwork:
             first.
         Imask: numpy.ndarray
             binary mask found at mask_path loaded into a numpy array via
-            `gdal.Open().ReadAsArray()`, dtype=np.bool
+            Loaded binary mask array.
         links: dict
             Stores the links of the network and associated properties
         nodes: dict
@@ -136,25 +134,18 @@ class rivnetwork:
         # ALWAYS writes output to log file (doesn't print if verbose is False)
         self.init_logger()
 
-        # Handle georeferencing
-        # GA_Update required for setting dummy projection/geotransform
-        self.gdobj = gdal.Open(self.paths['input_mask'], gdal.GA_Update)
-        self.imshape = (self.gdobj.RasterYSize, self.gdobj.RasterXSize)
+        # Handle georeferencing through the raster backend
+        raster = rasters.open_raster(self.paths['input_mask'], assign_default_georef=True)
+        self.imshape = raster.shape
 
-        # Create dummy georeferencing if none is supplied
-        if self.gdobj.GetProjection() == '':
-            logger.info('Input mask is unprojected; assigning a dummy projection.')
-            # Creates a dummy projection in EPSG:4326 with UL coordinates (0,0)
-            # and pixel resolution = 1.
-            self.wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]' # 4326
-            self.gdobj.SetProjection(self.wkt)
-            self.gdobj.SetGeoTransform((0, 1, 0, self.imshape[1], 0, -1))
-        else:
-            self.wkt = self.gdobj.GetProjection()
-        self.gt = self.gdobj.GetGeoTransform()
+        if raster.source_georeferenced is False:
+            logger.info('Input mask is unprojected; assigning default georeferencing.')
+
+        self.wkt = raster.wkt
+        self.gt = raster.gt
 
         # Store crs as pyproj CRS object for interacting with geopandas
-        self.crs = CRS(self.gdobj.GetProjection())
+        self.crs = CRS(self.wkt)
         self.unit = gu.get_unit(self.crs)
 
         self.pixarea = abs(self.gt[1] * self.gt[5])
@@ -165,7 +156,7 @@ class rivnetwork:
             self.exit_sides = exit_sides.lower()
 
         # Load mask into memory
-        self.Imask = self.gdobj.ReadAsArray()
+        self.Imask = raster.array
 
 
     def init_logger(self):
@@ -204,6 +195,9 @@ class rivnetwork:
         logger.info('Resolving links and nodes...', end='')
 
         self.links, self.nodes = m2g.skel_to_graph(self.Iskel)
+        self.links, self.nodes = lnu.mark_network_ids_provisional(
+            self.links, self.nodes, reason='raw_extraction_not_finalized'
+        )
 
         logger.info('links and nodes have been resolved.')
 
@@ -216,7 +210,7 @@ class rivnetwork:
         # Load the distance transform if it already exists
         if 'Idist' in self.paths.keys() and \
             os.path.isfile(self.paths['Idist']) is True:
-            self.Idist = gdal.Open(self.paths['Idist']).ReadAsArray()
+            self.Idist = rasters.open_raster(self.paths['Idist']).array
         else:
             logger.info('Computing distance transform...', end='')
 
@@ -269,8 +263,8 @@ class rivnetwork:
                                              weight=weight)
 
 
-    def get_islands(self, props=['area', 'maxwidth', 'major_axis_length',
-                                 'minor_axis_length', 'surrounding_links'],
+    def get_islands(self, props=['area', 'maxwidth', 'axis_major_length',
+                                 'axis_minor_length', 'surrounding_links'],
                           connectivity=2):
         """
         Finds all the islands in the binary mask and computes their morphological
@@ -282,7 +276,7 @@ class rivnetwork:
         props : list, optional
             Properties to compute for each island. Properties can be any of those
             provided by rivgraph.im_utils.regionprops.
-            The default is ['area', 'maxwidth', 'major_axis_length', 'minor_axis_length'].
+            The default is ['area', 'maxwidth', 'axis_major_length', 'axis_minor_length'].
         connectivity : int, optional
             If 1, 4-connectivity will be used to determine connected blobs. If
             2, 8-connectivity will be used. The default is 2.
@@ -305,7 +299,15 @@ class rivnetwork:
 
         logger.info('Getting island properties...')
 
-        islands, Iislands = mu.get_island_properties(self.Imask, self.pixlen, self.pixarea, self.crs, self.gt, props, connectivity=connectivity)
+        islands, Iislands = mu.get_island_properties(
+            self.Imask,
+            self.pixlen,
+            self.pixarea,
+            self.crs,
+            self.gt,
+            props,
+            connectivity=connectivity,
+        )
 
         logger.info('got island properties.')
 
@@ -387,6 +389,15 @@ class rivnetwork:
                 logger.info('Network has not been computed yet. Use the compute_network() method first.')
 
 
+    def finalize_ids(self):
+        """Deterministically relabel node and link IDs once topology is finalized."""
+        if hasattr(self, 'links') is False or hasattr(self, 'nodes') is False:
+            raise AttributeError('Network has not yet been computed.')
+
+        self.links, self.nodes = lnu.finalize_network_ids(self.links, self.nodes)
+        return self.links, self.nodes
+
+
     def load_network(self, path=None):
         """
         Loads the link and nodes dictionaries from a .pkl file.
@@ -441,7 +452,7 @@ class rivnetwork:
         return A
 
 
-    def to_geovectors(self, export='network', ftype='json'):
+    def to_geovectors(self, export='network', ftype='gpkg', metadata=None, flux_attr=None, reproject=False):
         """
         Writes the links and nodes of the network to geovectors.
 
@@ -464,21 +475,31 @@ class rivnetwork:
 
             - centerline_smooth (river classes only)
 
+            - sword (SWORD-style reaches and nodes)
+
         ftype : str
             Sets the output file format. Choose from:
+
+            - gpkg (GeoPackage)
 
             - json (GeoJSON)
 
             - shp  (ESRI Shapefile)
 
+        metadata : dict, optional
+            Extra fields to append to exported tables.
+        flux_attr : str, optional
+            Link attribute to export as RG flux in SWORD-style outputs. If not
+            provided, RivGraph will use `flux_ss` when available, then `flux`.
+        reproject : bool, optional
+            When exporting GeoJSON, reproject the exported vectors to EPSG:4326
+            if True. If False, GeoJSON export will fail unless the current CRS
+            is already EPSG:4326.
+
         """
-        # Get extension for requested output type
-        if ftype == 'json':
-            ext = 'json'
-        elif ftype == 'shp':
-            ext = 'shp'
-        else:
-            raise TypeError('Only json and shp output types are supported.')
+        metadata = {} if metadata is None else dict(metadata)
+
+        ext = get_extension_for_format(ftype)
 
         # Prepare list of desired exports
         if export == 'all':
@@ -493,35 +514,46 @@ class rivnetwork:
             if te == 'links':
                 if hasattr(self, 'links') is True:
                     self.paths['links'] = os.path.join(self.paths['basepath'], self.name + '_links.' + ext)
-                    io.links_to_geofile(self.links, self.imshape, self.gt, self.crs, self.paths['links'])
+                    io.links_to_geofile(self.links, self.imshape, self.gt, self.crs, self.paths['links'], nodes=getattr(self, 'nodes', None), reproject=reproject)
                 else:
                     logger.info('Links have not been computed and thus cannot be exported.')
             if te == 'nodes':
                 if hasattr(self, 'nodes') is True:
                     self.paths['nodes'] = os.path.join(self.paths['basepath'], self.name + '_nodes.' + ext)
-                    io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.crs, self.paths['nodes'])
+                    io.nodes_to_geofile(self.nodes, self.imshape, self.gt, self.crs, self.paths['nodes'], reproject=reproject)
                 else:
                     logger.info('Nodes have not been computed and thus cannot be exported.')
             if te == 'mesh':
                 if hasattr(self, 'meshlines') is True and type(self) is river:
                     self.paths['meshlines'] = os.path.join(self.paths['basepath'], self.name + '_meshlines.' + ext)
                     self.paths['meshpolys'] = os.path.join(self.paths['basepath'], self.name + '_meshpolys.' + ext)
-                    io.shapely_list_to_geovectors(self.meshlines, self.crs, self.paths['meshlines'])
-                    io.shapely_list_to_geovectors(self.meshpolys, self.crs, self.paths['meshpolys'])
+                    io.shapely_list_to_geovectors(self.meshlines, self.crs, self.paths['meshlines'], reproject=reproject)
+                    io.shapely_list_to_geovectors(self.meshpolys, self.crs, self.paths['meshpolys'], reproject=reproject)
                 else:
                     logger.info('Mesh has not been computed and thus cannot be exported.')
             if te == 'centerline':
                 if hasattr(self, 'centerline') is True and type(self) is river:
                     self.paths['centerline'] = os.path.join(self.paths['basepath'], self.name + '_centerline.' + ext)
-                    io.centerline_to_geovector(self.centerline, self.crs, self.paths['centerline'])
+                    io.centerline_to_geovector(self.centerline, self.crs, self.paths['centerline'], reproject=reproject)
                 else:
                     logger.info('Centerlines has not been computed and thus cannot be exported.')
             if te == 'centerline_smooth':
                 if hasattr(self, 'centerline_smooth') is True and type(self) is river:
                     self.paths['centerline_smooth'] = os.path.join(self.paths['basepath'], self.name + '_centerline_smooth.' + ext)
-                    io.centerline_to_geovector(self.centerline_smooth, self.crs, self.paths['centerline_smooth'])
+                    io.centerline_to_geovector(self.centerline_smooth, self.crs, self.paths['centerline_smooth'], reproject=reproject)
                 else:
                     logger.info('Smoothed centerline has not been computed and thus cannot be exported.')
+            if te == 'sword':
+                if self.unit == 'degree':
+                    raise TypeError('You are exporting to SWORD format, but this requires a projected CRS (i.e. one with consistent length units). Your units are degrees, so this export will be wrong. Project your mask into a CRS with meters and reanalyze for proper results.')
+                if hasattr(self, 'links') is True and hasattr(self, 'nodes') is True:
+                    self.paths['reaches_sword'] = os.path.join(self.paths['basepath'], self.name + '_SWORD_reaches.' + ext)
+                    self.paths['nodes_sword'] = os.path.join(self.paths['basepath'], self.name + '_SWORD_nodes.' + ext)
+                    io.export_for_sword(self.links, self.nodes, self.imshape, self.gt, self.crs, self.paths, self.unit, metadata=metadata, flux_attr=flux_attr)
+                    if self.verbose:
+                        print(f'SWORD files exported to {self.paths["reaches_sword"]} and {self.paths["nodes_sword"]}.')
+                else:
+                    logger.info('Links/nodes have not been computed and thus cannot be exported to SWORD format.')
 
 
     def to_geotiff(self, export):
@@ -544,19 +576,19 @@ class rivnetwork:
 
         if export == 'directions':
             outpath = self.paths['linkdirs']
-            io.write_linkdirs_geotiff(self.links, self.gdobj, outpath)
+            io.write_linkdirs_geotiff(self.links, self.imshape, self.gt, self.wkt, outpath)
         else:
             if export == 'distance':
                 raster = self.Idist
                 outpath = self.paths['Idist']
-                dtype = gdal.GDT_Float32
+                dtype = 'float32'
                 color_table = None
                 options = None
                 nbands = 1
             elif export == 'skeleton':
                 raster = self.Iskel
                 outpath = self.paths['Iskel']
-                dtype = gdal.GDT_Byte
+                dtype = 'uint8'
                 color_table = io.colortable('skel')
                 options=['COMPRESS=LZW']
                 nbands = 1
@@ -611,14 +643,14 @@ class delta(rivnetwork):
 
         # Load the skeleton if it already exists
         if 'Iskel' in self.paths.keys() and os.path.isfile(self.paths['Iskel']) is True:
-            self.Iskel = gdal.Open(self.paths['Iskel']).ReadAsArray()
+            self.Iskel = rasters.open_raster(self.paths['Iskel']).array
 
         else:
             logger.info('Skeletonizing mask...')
 
             self.Iskel = m2g.skeletonize_mask(self.Imask)
 
-            logger.info('done skeletonization.')
+            logger.info('done with skeletonization.')
 
 
     def prune_network(self, path_shoreline=None, path_inletnodes=None,
@@ -662,7 +694,8 @@ class delta(rivnetwork):
         except AttributeError:
             raise AttributeError('Could not inlet_nodes shapefile which should be at {}.'.format(self.paths['inlet_nodes']))
 
-        self.links, self.nodes = du.prune_delta(self.links, self.nodes, path_shoreline, path_inletnodes, self.gdobj, prune_less)
+        self.links, self.nodes = du.prune_delta(self.links, self.nodes, path_shoreline, path_inletnodes, self.imshape, self.gt, self.wkt, prune_less)
+        self.finalize_ids()
 
 
     def assign_flow_directions(self):
@@ -685,10 +718,45 @@ class delta(rivnetwork):
         self.links, self.nodes = dd.set_link_directions(self.links, self.nodes, self.imshape, manual_set_csv=self.paths['fixlinks_csv'])
 
 
-    def compute_topologic_metrics(self):
+    def plot_fluxes(self, *args, **kwargs):
         """
-        Computes a suite of connectivity and network metrics for a delta channel network.
+        Plot flux-partition results for the delta network.
 
+        Parameters
+        ----------
+        *args, **kwargs
+            Forwarded to :func:`rivgraph.deltas._plot_fluxes.plot_flux_map`.
+
+        Notes
+        -----
+        This requires a computed network with outlet nodes. The default plotting
+        behavior uses ``flux_ss`` for line widths and OpenStreetMap as the
+        basemap. Pass ``show_mask=True`` to draw the input mask beneath the
+        vector layers, and ``outlet_style='color'`` to draw equal-size outlet
+        markers colored by outlet flux instead of scaling the marker sizes.
+        """
+        if hasattr(self, 'links') is False or hasattr(self, 'nodes') is False:
+            raise AttributeError('Network has not yet been computed.')
+        if 'outlets' not in self.nodes:
+            raise AttributeError('Outlet nodes are not available. Run prune_network() first.')
+        from rivgraph.deltas._plot_fluxes import plot_flux_map
+        return plot_flux_map(self.links, self.nodes, self.imshape, self.gt, self.wkt, *args, **kwargs)
+
+    def compute_topologic_metrics(self, **kwargs):
+        """
+        Compute connectivity and network metrics for a delta channel network.
+
+        Parameters
+        ----------
+        **kwargs
+            Forwarded to :func:`rivgraph.deltas.delta_metrics.compute_delta_metrics`.
+            Useful options include ``metrics=``, ``routing=``, ``inlet=``,
+            ``n_random=``, and ``return_intermediates=True``.
+
+        Returns
+        -------
+        dict or tuple[dict, dict]
+            Mirrors :func:`rivgraph.deltas.delta_metrics.compute_delta_metrics`.
         """
         if hasattr(self, 'links') is False:
             raise AttributeError('Network has not yet been computed.')
@@ -696,7 +764,12 @@ class delta(rivnetwork):
         if 'certain' not in self.links.keys():
             raise AttributeError('Link directionality has not been computed.')
 
-        self.topo_metrics = dm.compute_delta_metrics(self.links, self.nodes)
+        result = dm.compute_delta_metrics(self.links, self.nodes, **kwargs)
+        if kwargs.get('return_intermediates', False):
+            self.topo_metrics, self.topo_metric_intermediates = result
+        else:
+            self.topo_metrics = result
+        return result
 
 
 class river(rivnetwork):
@@ -726,20 +799,13 @@ class river(rivnetwork):
     meshpolys : list of shapely.geometry.Polygon
         Polygons comprising the along-channel mesh
 
-    Methods
-    -------
-    skeletonize()
-        Skeletonizes the river binary mask; uses a different method than for deltas.
-    prune_network()
-        Prunes the river channel network by removing spurs.
-    compute_centerline()
-        Computes the centerline of the holes-filled river channel network mask.
-    compute_mesh(grid_spacing=None, smoothing=0.1, bufferdist=None)
-        Computes a mesh that follows the channel centerline; grid_spacing sets the length of each grid cell; bufferdist sets the width of each grid cell.
-    assign_flow_direcions()
-        Computes flow directions for each link in the delta channel network.
-    set_flow_dirs_manually()
-        Reads a user-created .csv file found at `paths['fixlinks_csv']` to set flow directions of specified links.
+    Typical workflow
+    ----------------
+    The most common river workflow is to call ``skeletonize()``,
+    ``compute_network()``, ``prune_network()``, ``compute_centerline()``,
+    ``compute_mesh()``, and then the flow-direction tools as needed. Those
+    methods are documented individually below and do not need to be repeated
+    here.
 
     """
 
@@ -763,7 +829,7 @@ class river(rivnetwork):
 
         # Load the skeleton if it already exists
         if 'Iskel' in self.paths.keys() and os.path.isfile(self.paths['Iskel']) is True:
-            self.Iskel = gdal.Open(self.paths['Iskel']).ReadAsArray()
+            self.Iskel = rasters.open_raster(self.paths['Iskel']).array
 
         else:
             logger.info('Skeletonizing mask...')
@@ -784,7 +850,8 @@ class river(rivnetwork):
         if hasattr(self, 'Iskel') is False:
             self.skeletonize()
 
-        self.links, self.nodes = ru.prune_river(self.links, self.nodes, self.exit_sides, self.Iskel, self.gdobj)
+        self.links, self.nodes = ru.prune_river(self.links, self.nodes, self.exit_sides, self.Iskel)
+        self.finalize_ids()
 
 
     def compute_centerline(self):
