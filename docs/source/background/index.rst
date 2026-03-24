@@ -51,6 +51,6 @@ Is RivGraph only for channel networks?
 --------------------------------------
 
 While RivGraph is designed around channel networks, it contains a smattering of tools that can be useful across a broad range of analyses.
-For instance, :mod:`rivgraph.mask_to_graph` contains tools that convert *any* binary mask to a vectorized skeleton, not just river
-channel networks. There are a number of image-processing tools in :mod:`rivgraph.im_utils` that are broadly useful outside channel-network work, including a Matlab-like
-implementation of *regionprops()* for measuring blob properties of a binary image. One of the most broadly useful utility functions is :obj:`rivgraph.io_utils.write_geotiff()`, which does exactly what it says.
+For instance, the `mask_to_graph.py <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/rivgraph/mask_to_graph.py>`_ script contains tools that will convert *any* binary mask to a vectorized skeleton, not just river
+channel networks. There are a number of image processing tools in `im_utils.py <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/rivgraph/im_utils.py>`_ that I use frequently in other projects, like a Matlab-like
+implementation of *regionprops()* for measuring blob properties of a binary image. I have personally found one of the most broadly useful tools in RivGraph is :obj:`rivgraph.io_utils.write_geotiff()`, which does what it says.

@@ -25,8 +25,16 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
-              'sphinx.ext.napoleon']
+              'sphinx.ext.napoleon',
+              'sphinx_gallery.gen_gallery']
 
+# gallery configuration
+sphinx_gallery_conf = {
+	'examples_dirs': 'gallery_source',  # path to gallery scripts
+	'gallery_dirs': 'gallery',  # pvath to where to save gallery output
+	'remove_config_comments': True,
+	'download_all_examples': False,
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -60,20 +68,18 @@ language = 'en'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'buildtest', 'test', 'gallery/.ipynb_checkpoints']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'default'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = False
+todo_include_todos = True
 
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-
-autodoc_member_order = 'bysource'
 
 html_theme = 'sphinx_rtd_theme'
 
@@ -83,13 +89,13 @@ html_theme = 'sphinx_rtd_theme'
 
 html_theme_options = {
     "logo_only": True,
+    "display_version": True,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_css_files = ['custom.css']
 
 html_logo = "../logos/rg_logo_full.png"
 

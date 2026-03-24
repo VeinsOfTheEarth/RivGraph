@@ -144,9 +144,3 @@ cython_debug/
 
 # MacOS
 *DS_Store
-
-# RivGraph docs build artifacts
-docs/build/
-docs/source/buildtest/
-docs/source/test/
-docs/source/gallery/

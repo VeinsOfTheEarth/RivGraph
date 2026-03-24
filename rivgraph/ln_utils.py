@@ -22,103 +22,6 @@ import rivgraph.geo_utils as gu
 from rivgraph.ordered_set import OrderedSet
 
 
-
-
-ID_FINALIZED_FLAG = '_ids_finalized'
-ID_FINALIZATION_METHOD = '_ids_finalization_method'
-
-
-def mark_network_ids_provisional(links, nodes, reason='topology not finalized'):
-    """Mark network IDs as provisional after a topology-changing operation."""
-    if links is not None:
-        links[ID_FINALIZED_FLAG] = False
-        links[ID_FINALIZATION_METHOD] = reason
-    if nodes is not None:
-        nodes[ID_FINALIZED_FLAG] = False
-        nodes[ID_FINALIZATION_METHOD] = reason
-    return links, nodes
-
-
-def mark_network_ids_finalized(links, nodes, method='deterministic_postextract_pixelsort_v1'):
-    """Mark network IDs as finalized after deterministic relabeling."""
-    if links is not None:
-        links[ID_FINALIZED_FLAG] = True
-        links[ID_FINALIZATION_METHOD] = method
-    if nodes is not None:
-        nodes[ID_FINALIZED_FLAG] = True
-        nodes[ID_FINALIZATION_METHOD] = method
-    return links, nodes
-
-
-def network_ids_are_finalized(links=None, nodes=None):
-    """Return True only when both links and nodes are explicitly marked finalized."""
-    statuses = []
-    if links is not None:
-        statuses.append(bool(links.get(ID_FINALIZED_FLAG, False)))
-    if nodes is not None:
-        statuses.append(bool(nodes.get(ID_FINALIZED_FLAG, False)))
-    if len(statuses) == 0:
-        return False
-    return all(statuses)
-
-
-def _canonical_node_sort_key(node_idx):
-    return int(node_idx)
-
-
-def _canonical_link_sort_key(link_pixels):
-    return tuple(sorted(int(px) for px in link_pixels))
-
-
-def finalize_network_ids(links, nodes):
-    """
-    Deterministically relabel node and link IDs after topology is finalized.
-
-    IDs are reassigned based on stable, geometry-derived keys rather than the
-    order in which links/nodes were discovered during extraction.
-    """
-    if 'id' not in links or 'id' not in nodes or 'idx' not in links or 'idx' not in nodes:
-        raise KeyError("links/nodes must contain 'id' and 'idx' before IDs can be finalized.")
-
-    old_node_ids = list(nodes['id'])
-    old_link_ids = list(links['id'])
-
-    node_order = sorted(range(len(old_node_ids)), key=lambda i: (_canonical_node_sort_key(nodes['idx'][i]), int(old_node_ids[i])))
-    link_order = sorted(range(len(old_link_ids)), key=lambda i: (_canonical_link_sort_key(links['idx'][i]), int(old_link_ids[i])))
-
-    node_id_map = {old_node_ids[i]: new_id for new_id, i in enumerate(node_order)}
-    link_id_map = {old_link_ids[i]: new_id for new_id, i in enumerate(link_order)}
-
-    nodes['id'] = [node_id_map[old_id] for old_id in old_node_ids]
-    links['id'] = [link_id_map[old_id] for old_id in old_link_ids]
-
-    if 'conn' in nodes:
-        nodes['conn'] = [[link_id_map[lid] for lid in conn] for conn in nodes['conn']]
-    if 'conn' in links:
-        links['conn'] = [[node_id_map[nid] for nid in conn] for conn in links['conn']]
-
-    for key in ('inlets', 'outlets', 'arts'):
-        if key in nodes:
-            nodes[key] = [node_id_map[nid] for nid in nodes[key]]
-    if 'super_apex' in nodes:
-        nodes['super_apex'] = node_id_map[nodes['super_apex']]
-
-    if 'parallels' in links:
-        links['parallels'] = [[link_id_map[lid] for lid in pair] for pair in links['parallels']]
-    if 'arts' in links:
-        links['arts'] = [[link_id_map[lid] for lid in triad] for triad in links['arts']]
-    if 'link_conn' in links:
-        links['link_conn'] = [[link_id_map[lid] for lid in conn] for conn in links['link_conn']]
-    if 'guess' in links:
-        remapped_guess = []
-        for guesses in links['guess']:
-            remapped_guess.append([node_id_map[g] if g in node_id_map else g for g in guesses])
-        links['guess'] = remapped_guess
-
-    links, nodes = mark_network_ids_finalized(links, nodes)
-    return links, nodes
-
-
 def add_node(nodes, idx, linkconn):
     """
     Add a new node to the network.
@@ -156,7 +59,6 @@ def add_node(nodes, idx, linkconn):
     nodes['idx'].append(idx)
     nodes['conn'].append(linkconn)
 
-    _, nodes = mark_network_ids_provisional(None, nodes)
     return nodes
 
 
@@ -212,7 +114,6 @@ def add_link(links, nodes, idcs):
     links['id'].append(new_id)
     links['idx'].append(idcs)
 
-    links, nodes = mark_network_ids_provisional(links, nodes)
     return links, nodes
 
 
@@ -303,23 +204,6 @@ def link_updater(links, linkid, idx=-1, conn=-1):
     return links
 
 
-
-
-def _network_record_keys(container, id_key='id'):
-    """Return keys whose values are per-record sequences aligned with ``container[id_key]``."""
-    n = len(container[id_key])
-    keys = []
-    for key, value in container.items():
-        if isinstance(value, (str, bytes)) or np.isscalar(value):
-            continue
-        try:
-            if len(value) == n:
-                keys.append(key)
-        except TypeError:
-            continue
-    return keys
-
-
 def delete_node(nodes, nodeid, warn=True):
     """
     Delete a node from the network.
@@ -344,7 +228,7 @@ def delete_node(nodes, nodeid, warn=True):
 
     """
     # Get keys that have removable elements
-    nodekeys = _network_record_keys(nodes, 'id')
+    nodekeys = [nk for nk in nodes.keys() if type(nodes[nk]) is not int and len(nodes[nk]) == len(nodes['id'])]
 
     # Check that the node has no connectivity
     nodeidx = nodes['id'].index(nodeid)
@@ -384,7 +268,7 @@ def delete_link(links, nodes, linkid):
         Network nodes with node updated.
 
     """
-    linkkeys = _network_record_keys(links, 'id')
+    linkkeys = [lk for lk in links.keys() if type(links[lk]) is not int and len(links[lk]) == len(links['id'])]
     lidx = links['id'].index(linkid)
 
     # Save the connecting nodes so we can update their connectivity ([:] makes a copy, not a view)
@@ -407,11 +291,6 @@ def delete_link(links, nodes, linkid):
         if len(nodes['conn'][cnodeidx]) == 0:  # If there are no connections to the node, remove it
             nodes = delete_node(nodes, cni)
 
-    # Remove the link from link_conn if it has been computed
-    if 'link_conn' in links.keys():
-        links['link_conn'] = [[item for item in sublist if item != linkid] for sublist in links['link_conn']]
-
-    links, nodes = mark_network_ids_provisional(links, nodes)
     return links, nodes
 
 
@@ -574,22 +453,6 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
         links['len_adj'][-1] = max(pixlen, links['len_adj'][-1])
 
     return links
-
-
-def add_link_conn(links, nodes):
-    """
-    Adds a field to the links dictionary called 'link_conn' that
-    contains the link ids of all links connected to the given link.
-
-    This functionality was added for incorporation of RivGraph'ed 
-    networks into SWOT, which requires this field. May, 2025.
-    """
-    conn_links = []
-    for cnodes, link_id in zip(links['conn'], links['id']):
-        conn_links.append(list(set([lid for cn in cnodes for lid in nodes['conn'][nodes['id'].index(cn)] if lid != link_id])))
-    links['link_conn'] = conn_links
-    return links
-
 
 
 def junction_angles(links, nodes, imshape, pixlen, weight=None):
@@ -786,7 +649,7 @@ def junction_angles(links, nodes, imshape, pixlen, weight=None):
     return nodes
 
 
-def conn_links_endpixels(nodes, links, node_idx):
+def conn_links(nodes, links, node_idx):
     """
     Find first and last pixels of all links connected to a node.
 
@@ -1027,10 +890,9 @@ def remove_all_spurs(links, nodes, dontremove=[]):
         # Remove self-looping links (a link that starts and ends at the same node)
         for nid, con in zip(nodes['id'], nodes['conn']):
             m = mode(con)
-            m_count = np.atleast_1d(m.count)[0]
-            if m_count > 1:
+            if m.count[0] > 1:
                 # Get link
-                looplink = np.atleast_1d(m.mode)[0]
+                looplink = m.mode[0]
                 # Delete link
                 links, nodes = delete_link(links, nodes, looplink)
                 ct = ct + 1
@@ -1069,7 +931,7 @@ def remove_two_link_nodes(links, nodes, dontremove):
         Network nodes with superfluous nodes removed.
 
     """
-    linkkeys = _network_record_keys(links, 'id')
+    linkkeys = [lk for lk in links.keys() if type(links[lk]) is not int and len(links[lk]) == len(links['id'])]
 
     ct = 1
     while ct > 0:
@@ -1133,7 +995,7 @@ def remove_two_link_nodes(links, nodes, dontremove):
                     if lk == 'id':  # have to treat orderedset differently
                         links[lk].remove(lid_go)
                     elif type(links[lk]) is np.ndarray:  # have to treat numpy arrays differently
-                        links[lk] = np.delete(links[lk], lidx_go)
+                        links[lk] = np.delete(links[lk], lid_go)
                     else:
                         links[lk].pop(lidx_go)
 
@@ -1182,7 +1044,7 @@ def remove_single_pixel_links(links, nodes):
     return links, nodes
 
 
-def append_link_lengths(links, imshape, gt):
+def append_link_lengths(links, gdobj):
     """
     Append link lengths to each link.
 
@@ -1198,10 +1060,8 @@ def append_link_lengths(links, imshape, gt):
     ----------
     links : dict
         Network links and associated properties.
-    imshape : tuple
-        Shape of the source mask raster.
-    gt : tuple
-        Geotransform tuple of the source mask raster.
+    gdobj : osgeo.gdal.Dataset
+        GDAL dataset of the original mask, created via gdal.Open().
 
     Returns
     -------
@@ -1211,7 +1071,7 @@ def append_link_lengths(links, imshape, gt):
     """
     links['len'] = []
     for idcs in links['idx']:
-        link_coords = gu.idx_to_coords(idcs, imshape, gt)
+        link_coords = gu.idx_to_coords(idcs, gdobj)
         dists = np.sqrt(np.diff(link_coords[0])**2 + np.diff(link_coords[1])**2)
         links['len'].append(np.sum(dists))
 
@@ -1263,7 +1123,7 @@ def find_parallel_links(links, nodes):
     return links, nodes
 
 
-def add_artificial_nodes(links, nodes, imshape, gt):
+def add_artificial_nodes(links, nodes, gd_obj):
     """
     Add artificial nodes.
 
@@ -1292,10 +1152,8 @@ def add_artificial_nodes(links, nodes, imshape, gt):
         Network links and associated properties.
     nodes : dict
         Network nodes and associated properties.
-    imshape : tuple
-        Shape of the source mask raster.
-    gt : tuple
-        Geotransform tuple of the source mask raster.
+    gdobj : osgeo.gdal.Dataset
+        GDAL dataset of the original mask, created via gdal.Open().
 
     Returns
     -------
@@ -1315,7 +1173,7 @@ def add_artificial_nodes(links, nodes, imshape, gt):
 
     # Append lengths if not already
     if 'len' not in links.keys():
-        links = append_link_lengths(links, imshape, gt)
+        links = append_link_lengths(links, gd_obj)
 
     arts = []
     # Add the aritifical node to the proper links
@@ -1333,7 +1191,7 @@ def add_artificial_nodes(links, nodes, imshape, gt):
             idx = links['idx'][lidx]
 
             # Break link halfway; must find halfway first
-            coords = gu.idx_to_coords(idx, imshape, gt)
+            coords = gu.idx_to_coords(idx, gd_obj)
             dists = np.cumsum(np.sqrt(np.diff(coords[0])**2 + np.diff(coords[1])**2))
             dists = np.insert(dists, 0, 0)
             halfdist = dists[-1]/2
@@ -1669,7 +1527,7 @@ def plot_network(links, nodes, Imask, name=None, label_links=True, label_nodes=T
     return
 
 
-def links_to_gpd(links, imshape, gt, wkt):
+def links_to_gpd(links, gdobj):
     """
     Convert the links dictionary to a GeoPandas GeoDataFrame.
 
@@ -1677,30 +1535,32 @@ def links_to_gpd(links, imshape, gt, wkt):
     ----------
     links : dict
         Network links and associated properties.
-    imshape : tuple
-        Shape of the source mask raster.
-    gt : tuple
-        Geotransform tuple of the source mask raster.
-    wkt : str
-        WKT representation of the source mask CRS.
+    gdobj : osgeo.gdal.Dataset
+        DESCRIPTION.
 
     Returns
     -------
     links_gpd : TYPE
-        GeoDataFrame of the link geometries.
+        GDAL dataset of the original mask, created via gdal.Open().
 
     """
+    # Create geodataframe
+    links_gpd = gpd.GeoDataFrame()
+
     # Append geometries
     geoms = []
     for i, lidx in enumerate(links['idx']):
-        coords = gu.idx_to_coords(lidx, imshape, gt)
+        coords = gu.idx_to_coords(lidx, gdobj)
         geoms.append(shapely.geometry.LineString(zip(coords[0], coords[1])))
-
-    links_gpd = gpd.GeoDataFrame(geometry=geoms, crs=CRS(wkt))
+    links_gpd['geometry'] = geoms
 
     # Append ids and connectivity
     links_gpd['id'] = links['id']
     links_gpd['us node'] = [c[0] for c in links['conn']]
     links_gpd['ds node'] = [c[1] for c in links['conn']]
+
+    # Assign CRS - done last to avoid DeprecationWarning - need geometry
+    # to exist before assigning CRS.
+    links_gpd.crs = CRS(gdobj.GetProjection())
 
     return links_gpd

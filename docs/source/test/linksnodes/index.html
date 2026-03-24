@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Link and Node Dictionaries &mdash; RivGraph 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Known issues" href="../issues/index.html" />
+    <link rel="prev" title="Shoreline creation" href="../shoreline/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../background/index.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/index.html">Installation Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../maskmaking/index.html">Maskmaking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../shoreline/index.html">Shoreline creation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Link and Node Dictionaries</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-links-dictionary">The Links Dictionary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#links-key-values">Links Key Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accessing-link-values">Accessing Link Values</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#the-nodes-dictionary">The Nodes Dictionary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nodes-key-values">Nodes Key Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accessing-node-values">Accessing Node Values</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../issues/index.html">Known issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../featuredevelopment/index.html">Feature Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gallery/index.html">RivGraph in the wild</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apiref/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RivGraph</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Link and Node Dictionaries</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/linksnodes/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="link-and-node-dictionaries">
+<span id="linksnodes"></span><h1>Link and Node Dictionaries<a class="headerlink" href="#link-and-node-dictionaries" title="Permalink to this headline"></a></h1>
+<p>After defining a network in <em>RivGraph</em> with <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.classes.rivnetwork.compute_network()</span></code>, two dictionaries will be created:
+<strong>links</strong> and <strong>nodes</strong>.
+This page of the documentation will describe the <em>keys</em> present in these dictionaries.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not all dictionary key:value pairs are the same length as the number of links or nodes. Some dictionary key:value pairs contain meta-information about the network, or information that only applies to a subset of links/nodes. When the number of key:value pairs matches the number of links or nodes, then they are aligned such that the i’th index of any key:value pair refers to the same link or node.</p>
+</div>
+<ul class="simple">
+<li><p><a class="reference internal" href="#links"><span class="std std-ref">The Links Dictionary</span></a></p></li>
+<li><p><a class="reference internal" href="#nodes"><span class="std std-ref">The Nodes Dictionary</span></a></p></li>
+</ul>
+<div class="section" id="the-links-dictionary">
+<span id="links"></span><h2>The Links Dictionary<a class="headerlink" href="#the-links-dictionary" title="Permalink to this headline"></a></h2>
+<div class="section" id="links-key-values">
+<h3>Links Key Values<a class="headerlink" href="#links-key-values" title="Permalink to this headline"></a></h3>
+<p><strong>N</strong> represents the number of links.</p>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Generic Link Keys</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>key</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>length</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>id</p></td>
+<td><p>orderedSet</p></td>
+<td><p>N</p></td>
+<td><p>unique link id assigned to each link not in a particular order and not guaranteed to skip some id’s</p></td>
+</tr>
+<tr class="row-odd"><td><p>conn</p></td>
+<td><p>list of 2-element lists</p></td>
+<td><p>N</p></td>
+<td><p>node ids at link endpoints. After running directionality these are in order i.e. [us_nodeid ds_nodeid]</p></td>
+</tr>
+<tr class="row-even"><td><p>idx</p></td>
+<td><p>list of lists of ints</p></td>
+<td><p>N</p></td>
+<td><p>list of the pixel coordinates in index format (via np.ravel_index using the shape of the input binary image)</p></td>
+</tr>
+<tr class="row-odd"><td><p>n_networks</p></td>
+<td><p>int</p></td>
+<td><p>1</p></td>
+<td><p>number of networks identified</p></td>
+</tr>
+<tr class="row-even"><td><p>parallels</p></td>
+<td><p>list of lists</p></td>
+<td><p>varies</p></td>
+<td><p>each sublist contains all link ids of links forming a parallel set; i.e. links that start and end at the same node.</p></td>
+</tr>
+<tr class="row-odd"><td><p>wid_pix</p></td>
+<td><p>list of np.arrays</p></td>
+<td><p>N</p></td>
+<td><p>width at each pixel of each link (pixels defined by idx)</p></td>
+</tr>
+<tr class="row-even"><td><p>len</p></td>
+<td><p>list</p></td>
+<td><p>N</p></td>
+<td><p>length of each link</p></td>
+</tr>
+<tr class="row-odd"><td><p>wid</p></td>
+<td><p>list</p></td>
+<td><p>N</p></td>
+<td><p>average width of each link</p></td>
+</tr>
+<tr class="row-even"><td><p>len_adj</p></td>
+<td><p>list</p></td>
+<td><p>N</p></td>
+<td><p>length of each link adjusted for accuracy</p></td>
+</tr>
+<tr class="row-odd"><td><p>wid_adj</p></td>
+<td><p>list</p></td>
+<td><p>N</p></td>
+<td><p>width of each link adjusted for accuracy</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Directionality-specific Keys</span><a class="headerlink" href="#id2" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>key</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>length</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>certain</p></td>
+<td><p>np.array</p></td>
+<td><p>N</p></td>
+<td><p>1 if the link’s direction has been set else 0</p></td>
+</tr>
+<tr class="row-odd"><td><p>certain_order</p></td>
+<td><p>np.array</p></td>
+<td><p>N</p></td>
+<td><p>describes the order in which links were set. Lower certain_order corresponds to earlier-set links.</p></td>
+</tr>
+<tr class="row-even"><td><p>certain_alg</p></td>
+<td><p>np.array</p></td>
+<td><p>N</p></td>
+<td><p>algorithm id of the algorithm ultimately used to set the link direction</p></td>
+</tr>
+<tr class="row-odd"><td><p>guess</p></td>
+<td><p>list of lists</p></td>
+<td><p>N</p></td>
+<td><p>guesses of the upstream node id for each link; corresponds to guess_alg</p></td>
+</tr>
+<tr class="row-even"><td><p>guess_alg</p></td>
+<td><p>list of lists</p></td>
+<td><p>N</p></td>
+<td><p>algorithm id used to compute guess; corresponds to guess</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">Braided River Exclusive Keys</span><a class="headerlink" href="#id3" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>key</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>length</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>maxang</p></td>
+<td><p>np.array</p></td>
+<td><p>N</p></td>
+<td><p>???</p></td>
+</tr>
+<tr class="row-odd"><td><p>cldists</p></td>
+<td><p>np.array</p></td>
+<td><p>N</p></td>
+<td><p>number of mesh-generated transects each link intersects</p></td>
+</tr>
+<tr class="row-even"><td><p>clangs</p></td>
+<td><p>np.array</p></td>
+<td><p>N</p></td>
+<td><p>angle of the link with respect to the valley centerline in radians</p></td>
+</tr>
+<tr class="row-odd"><td><p>wid_pctdiff</p></td>
+<td><p>np.array</p></td>
+<td><p>N</p></td>
+<td><p>percent difference between the widest and narrowest pixels in a link</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-text">Delta Exclusive Keys</span><a class="headerlink" href="#id4" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>key</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>length</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>slope</p></td>
+<td><p>list</p></td>
+<td><p>N</p></td>
+<td><p>slope computed from synthetic DEM; note that this has no physical basis and should not be interpreted as actual link slope</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="accessing-link-values">
+<h3>Accessing Link Values<a class="headerlink" href="#accessing-link-values" title="Permalink to this headline"></a></h3>
+<p>For example, if you know the <em>link_id</em> of the link you are interested in, you can get its index with <code class="code docutils literal notranslate"><span class="pre">links['id'].index(link_id)</span></code>.</p>
+</div>
+</div>
+<div class="section" id="the-nodes-dictionary">
+<span id="nodes"></span><h2>The Nodes Dictionary<a class="headerlink" href="#the-nodes-dictionary" title="Permalink to this headline"></a></h2>
+<div class="section" id="nodes-key-values">
+<h3>Nodes Key Values<a class="headerlink" href="#nodes-key-values" title="Permalink to this headline"></a></h3>
+<p><strong>M</strong> represents the number of nodes.</p>
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-text">Generic Node Keys</span><a class="headerlink" href="#id5" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>key</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>length</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>id</p></td>
+<td><p>orderedSet</p></td>
+<td><p>M</p></td>
+<td><p>unique node id assigned to each node not in a particular order and not guaranteed to skip some id’s</p></td>
+</tr>
+<tr class="row-odd"><td><p>conn</p></td>
+<td><p>list of lists</p></td>
+<td><p>M</p></td>
+<td><p>link ids of all links connected to this node</p></td>
+</tr>
+<tr class="row-even"><td><p>idx</p></td>
+<td><p>list of lists of ints</p></td>
+<td><p>M</p></td>
+<td><p>list of the pixel coordinates in index format (via np.ravel_index using the shape of the input binary image)</p></td>
+</tr>
+<tr class="row-odd"><td><p>inlets</p></td>
+<td><p>list of ints</p></td>
+<td><p>varies</p></td>
+<td><p>node ids of all nodes identified as inlets</p></td>
+</tr>
+<tr class="row-even"><td><p>outlets</p></td>
+<td><p>list of ints</p></td>
+<td><p>varies</p></td>
+<td><p>node ids of all nodes identified as outlets</p></td>
+</tr>
+<tr class="row-odd"><td><p>int_angle</p></td>
+<td><p>np.array</p></td>
+<td><p>M</p></td>
+<td><p>most interior angle of links connected to each node in degrees; computed via <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.ln_utils.junction_angles()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>jtype</p></td>
+<td><p>np.array</p></td>
+<td><p>M</p></td>
+<td><p>junction type; either ‘c’ (confluence) or ‘b’ (bifurcation); computed via <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.ln_utils.junction_angles()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>width_ratio</p></td>
+<td><p>np.array</p></td>
+<td><p>M</p></td>
+<td><p>ratio of wider link/narrower link for the two links used to compute int_angle; computed via <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.ln_utils.junction_angles()</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="accessing-node-values">
+<h3>Accessing Node Values<a class="headerlink" href="#accessing-node-values" title="Permalink to this headline"></a></h3>
+<p>For example, if you wish to find the links connected to <code class="code docutils literal notranslate"><span class="pre">node_id</span> <span class="pre">==</span> <span class="pre">66</span></code>, you can use <code class="code docutils literal notranslate"><span class="pre">nodes['conn'][nodes['id'].index(66)]</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../shoreline/index.html" class="btn btn-neutral float-left" title="Shoreline creation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../issues/index.html" class="btn btn-neutral float-right" title="Known issues" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, J. Schwenk &amp; J. Hariharan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
