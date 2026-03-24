@@ -4,35 +4,15 @@
 Examples
 ========
 
-The notebooks in the repository's ``examples/`` directory are the canonical examples for RivGraph.
-Use the pages below as lightweight guides to the example datasets, required inputs, and major workflow steps,
-but rely on the notebooks themselves for the full runnable workflows.
+RivGraph's canonical examples are the three notebooks in the repository's ``examples/`` directory.
+This documentation section is intentionally minimal: use the links below to open or download the notebooks,
+and run them from the repository root so the relative paths resolve correctly.
 
-Notebook-first workflow
------------------------
+Example notebooks
+-----------------
 
-1. Install RivGraph using :doc:`../install/index`.
-2. Open the notebook you want from the repository root:
+- :download:`Delta example notebook <../../../examples/delta_example.ipynb>`
+- :download:`Braided river example notebook <../../../examples/braided_river_example.ipynb>`
+- :download:`Mouse brain example notebook <../../../examples/mouse_brain.ipynb>`
 
-   - ``examples/delta_example.ipynb``
-   - ``examples/braided_river_example.ipynb``
-   - ``examples/mouse_brain.ipynb``
-
-3. Run the notebook from the repository root so the relative example-data paths resolve cleanly.
-4. Use the example pages below when you want a quick reminder of the expected inputs and outputs.
-
-Delta example overview
-----------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   delta_example/delta_example
-
-River example overview
-----------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   braided_river_example/braided_river_example
+Each notebook lives in the repository-level ``examples/`` directory alongside its example data and supporting images.

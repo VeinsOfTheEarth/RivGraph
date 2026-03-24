@@ -1,87 +1,120 @@
 RivGraph in the wild
 ====================
 
-This page highlights a few published studies that used RivGraph in different ways: extracting river centerlines and widths, estimating discharge partitioning, quantifying delta topology, and modeling nutrient transport.
+Selected publications that have used RivGraph to answer scientific questions with river and delta channel networks.
 
-If you have a publication that used RivGraph and would like it featured here, please open an `issue <https://github.com/VeinsOfTheEarth/RivGraph/issues>`_.
+If your paper uses RivGraph and you want it featured here, `open an issue on GitHub <https://github.com/VeinsOfTheEarth/RivGraph/issues>`_.
 
-River planform and multithreadedness
-------------------------------------
+.. raw:: html
 
-Quantitative relationships between river and channel-belt planform patterns
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-*Tian Dong and Timothy Goudge*
+    <div class="rg-gallery">
 
-`Read the publication <https://pubs.geoscienceworld.org/gsa/geology/article/doi/10.1130/G49935.1/614344/Quantitative-relationships-between-river-and>`_
+.. raw:: html
 
-RivGraph was used to extract channel centerlines, widths, and channel counts in support of new relationships between river planform and channel-belt geometry.
+    <div class="rg-card">
+      <a href="dong2022.html">
+        <div class="rg-card-imgwrap">
+          <img src="../_static/gallery/thumb/sphx_glr_dong2022_thumb.png" alt="Quantitative relationships between river and channel-belt planform patterns">
+        </div>
+        <div class="rg-card-body">
+          <div class="rg-card-title">Quantitative relationships between river and channel-belt planform patterns</div>
+          <div class="rg-card-meta">Geology (2022)</div>
+          <p class="rg-card-summary">RivGraph was used to extract centerlines, widths, and channel counts to connect river planform geometry with channel-belt structure.</p>
+        </div>
+      </a>
+    </div>
 
-.. image:: images/dong_et_al_2022.PNG
-   :alt: Figure from Dong and Goudge (2022) showing RivGraph-derived river centerline and planform metrics.
-   :width: 700
 
-The Entropic Braiding Index (eBI): a robust metric to account for the diversity of channel scales in multi-thread rivers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-*Alejandro Tejedor, Jon Schwenk, Maarten Kleinhans, Ajay B. Limaye, Lawrence Vulis, Paul Carling, Holger Kantz, and Efi Foufoula-Georgiou*
+.. raw:: html
 
-`Read the publication <https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2022GL099681>`_
+    <div class="rg-card">
+      <a href="tejedor2022.html">
+        <div class="rg-card-imgwrap">
+          <img src="../_static/gallery/thumb/sphx_glr_tejedor2022_thumb.png" alt="The Entropic Braiding Index (eBI): a robust metric to account for the diversity of channel scales in multi-thread rivers">
+        </div>
+        <div class="rg-card-body">
+          <div class="rg-card-title">The Entropic Braiding Index (eBI): a robust metric to account for the diversity of channel scales in multi-thread rivers</div>
+          <div class="rg-card-meta">Geophysical Research Letters (2022)</div>
+          <p class="rg-card-summary">RivGraph was used to measure channel counts and widths in support of the Entropic Braiding Index, a multiscale metric for braided rivers.</p>
+        </div>
+      </a>
+    </div>
 
-RivGraph was used to extract channel counts and widths along the Indus River in support of the Entropic Braiding Index.
 
-.. image:: images/tejedor_et_al_2022.PNG
-   :alt: Figure from Tejedor et al. (2022) illustrating RivGraph-derived braiding metrics for the Indus River.
-   :width: 700
+.. raw:: html
 
-Delta hydraulics and topology
------------------------------
+    <div class="rg-card">
+      <a href="hariharan2022.html">
+        <div class="rg-card-imgwrap">
+          <img src="../_static/gallery/thumb/sphx_glr_hariharan2022_thumb.png" alt="Width-Based Discharge Partitioning in Distributary Networks: How Right We Are">
+        </div>
+        <div class="rg-card-body">
+          <div class="rg-card-title">Width-Based Discharge Partitioning in Distributary Networks: How Right We Are</div>
+          <div class="rg-card-meta">Geophysical Research Letters (2022)</div>
+          <p class="rg-card-summary">RivGraph was used to test width-based discharge partitioning schemes at channel bifurcations in distributary networks.</p>
+        </div>
+      </a>
+    </div>
 
-Width-Based Discharge Partitioning in Distributary Networks: How Right We Are
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-*Jay Hariharan, Anastasia Piliouras, Jon Schwenk, and Paola Passalacqua*
 
-`Read the publication <https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2022GL097897>`_
+.. raw:: html
 
-RivGraph was used to test width-based discharge partitioning schemes at distributary bifurcations.
+    <div class="rg-card">
+      <a href="konkol2022.html">
+        <div class="rg-card-imgwrap">
+          <img src="../_static/gallery/thumb/sphx_glr_konkol2022_thumb.png" alt="Interplay of river and tidal forcings promotes loops in coastal channel networks">
+        </div>
+        <div class="rg-card-body">
+          <div class="rg-card-title">Interplay of river and tidal forcings promotes loops in coastal channel networks</div>
+          <div class="rg-card-meta">Geophysical Research Letters (2022)</div>
+          <p class="rg-card-summary">RivGraph was used to quantify the loopiness of 21 natural coastal channel networks and identify islands enclosed by loops.</p>
+        </div>
+      </a>
+    </div>
 
-.. image:: images/hariharan_et_al_2022.PNG
-   :alt: Figure from Hariharan et al. (2022) comparing RivGraph-derived discharge partitioning against observations.
-   :width: 700
 
-Interplay of river and tidal forcings promotes loops in coastal channel networks
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-*Adam Konkol, Jon Schwenk, Eleni Katifori, and John Shaw*
+.. raw:: html
 
-`Read the publication <https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2022GL098284>`_
+    <div class="rg-card">
+      <a href="knights2020.html">
+        <div class="rg-card-imgwrap">
+          <img src="../_static/gallery/thumb/sphx_glr_knights2020_thumb.png" alt="Nitrate Removal Across Ecogeomorphic Zones in Wax Lake Delta, Louisiana (USA)">
+        </div>
+        <div class="rg-card-body">
+          <div class="rg-card-title">Nitrate Removal Across Ecogeomorphic Zones in Wax Lake Delta, Louisiana (USA)</div>
+          <div class="rg-card-meta">Water Resources Research (2020)</div>
+          <p class="rg-card-summary">RivGraph flux modeling was used to estimate nitrate uptake rates in channels across the Wax Lake Delta.</p>
+        </div>
+      </a>
+    </div>
 
-RivGraph was used to identify loops in 21 natural delta channel networks and relate loopiness to competing river and tidal forcings.
 
-.. image:: images/konkol_et_al_2022.PNG
-   :alt: Figure from Konkol et al. (2022) showing loops identified in natural delta networks using RivGraph.
-   :width: 700
+.. raw:: html
 
-Biogeochemistry and flux modeling
----------------------------------
+    <div class="rg-card">
+      <a href="knights2023.html">
+        <div class="rg-card-imgwrap">
+          <img src="../_static/gallery/thumb/sphx_glr_knights2023_thumb.jpg" alt="Seasonal and Morphological Controls on Nitrate Retention in Arctic Deltas">
+        </div>
+        <div class="rg-card-body">
+          <div class="rg-card-title">Seasonal and Morphological Controls on Nitrate Retention in Arctic Deltas</div>
+          <div class="rg-card-meta">Geophysical Research Letters (2023)</div>
+          <p class="rg-card-summary">RivGraph flux modeling was used to estimate nitrate retention in Arctic river deltas and compare seasonal and morphological controls.</p>
+        </div>
+      </a>
+    </div>
 
-Nitrate Removal Across Ecogeomorphic Zones in Wax Lake Delta, Louisiana (USA)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-*Deon Knights, Audrey H. Sawyer, Rebecca T. Barnes, Anastasia Piliouras, Jon Schwenk, Douglas A. Edmonds, and Alexander M. Brown*
 
-`Read the publication <https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019WR026867>`_
+.. raw:: html
 
-RivGraph's steady-state flux modeling was used to estimate nitrate uptake rates across the Wax Lake Delta network.
+    </div>
 
-.. image:: images/knights_et_al_2020.PNG
-   :alt: Figure from Knights et al. (2020) showing RivGraph-based estimates of nitrate removal in Wax Lake Delta.
-   :width: 700
+.. toctree::
+   :hidden:
 
-Seasonal and Morphological Controls on Nitrate Retention in Arctic Deltas
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-*Deon Knights, Anastasia Piliouras, Jon Schwenk, Jayaram Hariharan, and Christopher Russoniello*
-
-`Read the publication <https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2022GL102201>`_
-
-RivGraph's flux modeling was used to estimate nitrate retention across several Arctic river deltas.
-
-.. image:: images/knights_et_al_2023.jpg
-   :alt: Figure from Knights et al. (2023) showing modeled nitrate retention patterns across Arctic deltas.
-   :width: 700
+   dong2022
+   tejedor2022
+   hariharan2022
+   konkol2022
+   knights2020
+   knights2023
