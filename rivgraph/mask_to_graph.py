@@ -148,14 +148,38 @@ def skel_to_graph(Iskel):
     links['conn'] = [[]]
     links['id'] = OrderedSet([])
 
-    # Initialize first links emanting from all starting points
+    # Initialize first links emanating from all starting points.
+    # Some skeletons are fully looped and therefore have no endpoints; in that
+    # case, seed each connected component with an arbitrary non-branchpoint
+    # pixel if available, otherwise the first pixel in the component.
+    if len(startpoints) == 0:
+        rp, _ = imu.regionprops(Iskel, ['coords'])
+        for ni in rp['coords']:
+            idcs = np.ravel_multi_index((ni[:, 0], ni[:, 1]), Iskel.shape)
+            seed = None
+            for pid in idcs:
+                if check_startpoint(pid, Iskel):
+                    seed = pid
+                    break
+            if seed is None and len(idcs) > 0:
+                seed = int(idcs[0])
+            if seed is not None:
+                startpoints.append(seed)
+
+    if len(startpoints) == 0:
+        raise RuntimeError('Skeleton contains no walkable pixels; cannot resolve graph.')
+
     for i, sp in enumerate(startpoints):
         links = lnu.link_updater(links, len(links['id']), sp, i)
         nodes = lnu.node_updater(nodes, sp, i)
         first_step = walk.walkable_neighbors(links['idx'][i], Iskel)
-        links = lnu.link_updater(links, i, first_step.pop())
+        if len(first_step) == 0:
+            # Degenerate one-pixel component: register the endpoint and move on.
+            nodes = lnu.node_updater(nodes, sp, i)
+        else:
+            links = lnu.link_updater(links, i, first_step.pop())
 
-    links['n_networks'] = i+1
+    links['n_networks'] = len(startpoints)
 
     # Initialize set of links to be resolved
     links2do = OrderedSet(links['id'])

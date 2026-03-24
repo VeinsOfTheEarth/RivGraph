@@ -208,7 +208,7 @@ def clip_by_shoreline(links, nodes, shoreline_shp, imshape, gt, wkt):
             max_idx = min_idx
         elif int_points.geom_type == 'MultiPoint':  # Handle multiple intersections by finding the first and last one so we can remove that section of the link
             cutidcs = []
-            for pt in int_points:
+            for pt in int_points.geoms:
                 # Find index of closest pixel
                 dists = np.sqrt((coords[0] - pt.xy[0][0])**2 + (coords[1] - pt.xy[1][0])**2)
                 cutidcs.append(np.argmin(dists))

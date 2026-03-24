@@ -5,7 +5,6 @@ import warnings
 import matplotlib.pyplot as plt
 import geopandas as gpd
 from shapely.geometry import Point
-import contextily as cx
 
 from rivgraph import ln_utils as lnu
 from rivgraph import geo_utils as gu
@@ -74,6 +73,7 @@ def plot_flux_map(links, nodes, imshape, gt, wkt, *, line_attr="flux_ss", basema
 
     if basemap:
         try:
+            import contextily as cx
             cx.add_basemap(ax, source=cx.providers.CartoDB.Positron)
         except Exception as exc:
             warnings.warn(
