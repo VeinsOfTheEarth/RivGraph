@@ -26,7 +26,7 @@
 # 7. Compute and plot steady-state flux partitioning.
 # 8. Compute some topologic metrics.
 #
-# Along the way, we'll export some geotiffs and GeoPackages (or GeoJSON/shapefiles if you prefer) for inspection in QGIS. RivGraph requires a **binary mask of the channel network**, preferably georeferenced (i.e., a GeoTiff). For deltas, you will also need to create two shapefiles/GeoJSONs: one of the **shoreline**, and one of the **inlet nodes**. See section 4 for guidance on how to create these required geovector files.
+# Along the way, we'll export some geotiffs and GeoPackages (or shapefiles, if you prefer) for inspection in QGIS. RivGraph requires a **binary mask of the channel network**, preferably georeferenced (i.e., a GeoTiff). For deltas, you will also need to create two vector files: one of the **shoreline**, and one of the **inlet nodes**. See section 4 for guidance on how to create these required geovector files.
 
 # %% [markdown]
 # ### 1. Instantiate delta class
@@ -211,7 +211,7 @@ colville.assign_flow_directions()
 # %% [markdown]
 # If RivGraph has any problems assigning link directions, it will let us know. Here, we see no error messages, and a message indicating no cycles were found in the graph. Great! 
 #
-# We also notice that RivGraph mentiones that a .csv file was created for us to manually set flow directions. If we inspect the flow directions and find some that are incorrect, these can be fixed by entering the link ID and the appropriate upstream node in this .csv, and running ```assign_flow_directions()``` again. See the [braided river example](https://github.com/jonschwenk/RivGraph/blob/master/examples/braided_river_example.ipynb), section 7 for more details. Note that any links entered into this .csv will be forced to have the upstream node as indicated. RivGraph sets links' directions iteratively, so if you find a problematic area in the link directions (i.e. a number of links whose directions are wrong), you can usually fix it by setting a few key links without needing to flip all of them manually.
+# We also notice that RivGraph mentiones that a .csv file was created for us to manually set flow directions. If we inspect the flow directions and find some that are incorrect, these can be fixed by entering the link ID and the appropriate upstream node in this .csv, and running ```assign_flow_directions()``` again. See the [braided river example](./braided_river_example.ipynb), section 7 for more details. Note that any links entered into this .csv will be forced to have the upstream node as indicated. RivGraph sets links' directions iteratively, so if you find a problematic area in the link directions (i.e. a number of links whose directions are wrong), you can usually fix it by setting a few key links without needing to flip all of them manually.
 #
 # Let's look at some plots.
 #

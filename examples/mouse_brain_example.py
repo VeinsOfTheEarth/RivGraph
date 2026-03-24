@@ -14,7 +14,7 @@
 # ---
 
 # %% [markdown]
-# ## Let's demo RivGraph on a mouse brain!
+# ## Let's demo RivGraph on a mouse brain example!
 # This demo walks through some steps for using RivGraph on non-river masks. This particular example is a scan of a mouse brain provided by the authors of [this paper](https://rdcu.be/ccn0Y). However, any binary mask can be transformed into its graphical representation with RivGraph.
 #
 # The main difference in our approach here is that we can no longer use the convenient `delta` or `river` classes to manage our processing. Instead of applying the methods of those classes, we will directly call the functions we need. This demo will cover the following:

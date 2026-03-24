@@ -26,7 +26,7 @@
 # 7. Assign flow directions for each link
 # 8. A note on topologic metrics
 #
-# Along the way, we'll export some geotiffs and GeoPackages (or GeoJSON/shapefiles if you prefer) for inspection in QGIS. RivGraph requires a **binary mask of the channel network**, preferably georeferenced (i.e., a GeoTiff) in a projected coordinate reference system.
+# Along the way, we'll export some geotiffs and GeoPackages (or shapefiles, if you prefer) for inspection in QGIS. RivGraph requires a **binary mask of the channel network**, preferably georeferenced (i.e., a GeoTiff) in a projected coordinate reference system.
 
 # %% [markdown]
 # ### 1. Instantiate river class
@@ -196,7 +196,7 @@ print(brahma.centerline)
 brahma.to_geovectors('centerline', ftype='gpkg')
 
 # %% [markdown]
-# The centerline is exported as a shapefile or GeoJSON, depending on the filetype you specify. (GeoJSON is default.) Let's take a look at this centerline in QGIS:
+# The centerline is exported here as a GeoPackage. Let's take a look at this centerline in QGIS:
 #
 # ![brahma_qgis_centerline.png](images/brahma_qgis_centerline.png)
 #
@@ -216,7 +216,7 @@ print(brahma.paths['meshlines'])
 print(brahma.paths['meshpolys'])
 
 # %% [markdown]
-# Let's see what the mesh looks like by dragging these GeoJSONs into QGIS:
+# Let's see what the mesh looks like by dragging these exported vector layers into QGIS:
 #
 # ![brahma_qgis_initial_meshlines.png](images/brahma_qgis_initial_meshlines.png)
 #
@@ -294,11 +294,11 @@ brahma.to_geotiff('directions')
 #
 # I've circled two short links in yellow, and noted that their flow direction was set as going right-to-left. Ideally, this junction would be comprised of a single node replacing these links, but RivGraph does not have the capability yet to simplify the network ([a feature request has been made for this)](https://github.com/jonschwenk/RivGraph/issues/11). From cursory inspection, we could make the argument that flow should instead go left-to-right for these two links. Let's force flow the opposite direction as an example of how to manually set links.
 #
-# First, we need to identify the link ID's of each of these links, as well as the desired upstream nodes. Using the Identify tool in QGIS with the links and nodes GeoJSON layers turned on, this is easy:
+# First, we need to identify the link ID's of each of these links, as well as the desired upstream nodes. Using the Identify tool in QGIS with the exported links and nodes layers turned on, this is easy:
 #
 # ![brahma_qgis_identify_links_for_reversal.png](images/brahma_qgis_identify_links_for_reversal.png)
 #
-# We see that the red-highlighted link's ID is ```2280```, and its (upstream, downstream) nodes are ```1631, 1650```. We want to reverse this order so that the upstream node ID is ```1650```. Open the ```Brahma_fixlinks``` csv and enter this information. I have also done this for the link to the right of this one.
+# We see that the red-highlighted link's ID is ```2280```, and its (upstream, downstream) nodes are ```1631, 1650```. We want to reverse this order so that the upstream node ID is ```1650```. Open the ```Brahma_fixlinks``` CSV in the results folder and enter this information. I have also done this for the link to the right of this one.
 #
 # ![brahma_fixlinks_csv.png](images/brahma_fixlinks_csv.png)
 #
@@ -320,4 +320,4 @@ brahma.assign_flow_directions()
 
 # %% [markdown]
 # ### 8. A note on topologic metrics
-# If you've looked through the [delta example](https://github.com/jonschwenk/RivGraph/blob/master/examples/delta_example.ipynb), you'll see the final section covers computing topolgic metrics. In order to compute these metrics, some additional finagling of the network is required. We have not yet implemented the required pre-processing for braided rivers. However, many of the functions in the [delta metrics script](https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/deltas/delta_metrics.py) can be used on braided rivers, provided you first pre-process your braided river network properly.
+# If you've looked through the [delta example](./delta_example.ipynb), you'll see the final section covers computing topolgic metrics. In order to compute these metrics, some additional finagling of the network is required. We have not yet implemented the required pre-processing for braided rivers. However, many of the functions in the [delta metrics script](../rivgraph/deltas/delta_metrics.py) can be used on braided rivers, provided you first pre-process your braided river network properly.
