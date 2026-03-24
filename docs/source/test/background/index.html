@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Background &mdash; RivGraph 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Installation Instructions" href="../install/index.html" />
+    <link rel="prev" title="Quickstart" href="../quickstart/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/index.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Background</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-birth-of-rivgraph">The Birth of RivGraph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-different-about-rivgraph">What’s different about RivGraph?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#is-rivgraph-only-for-channel-networks">Is RivGraph only for channel networks?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../install/index.html">Installation Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../maskmaking/index.html">Maskmaking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../shoreline/index.html">Shoreline creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../linksnodes/index.html">Link and Node Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../issues/index.html">Known issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../featuredevelopment/index.html">Feature Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gallery/index.html">RivGraph in the wild</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apiref/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RivGraph</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Background</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/background/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="background">
+<span id="id1"></span><h1>Background<a class="headerlink" href="#background" title="Permalink to this headline"></a></h1>
+<div class="section" id="the-birth-of-rivgraph">
+<h2>The Birth of RivGraph<a class="headerlink" href="#the-birth-of-rivgraph" title="Permalink to this headline"></a></h2>
+<p>In 2016, I walked into the postdoc office at the Saint Anthony Falls Laboratory to see deltas on display as 8.5 x 11 sheets of paper
+taped together with hand-drawn markings all over. My colleagues Alejandro Tejedor and Anthony Longjas were trying to whip these deltas
+into shape for a series of papers (<a class="reference external" href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016577%4010.1002/%28ISSN%291944-7973.CONART1">1</a>, <a class="reference external" href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016604">2</a>) introducing a new way to think about deltas: through the lens of their channel networks. As I
+looked at their handiwork, I couldn’t help thinking that there must be a better way. My own research at the time had led me to develop
+<a class="reference external" href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2016EA000196">RivMAP</a>, a Matlab toolbox for analyzing the morphodynamics of meandering rivers using binary masks. And so RivGraph was born as a small set of Matlab scripts with very limited functionality.</p>
+<p>I finished my PhD with RivGraph in a barely-formed state, and followed my adviser, <a class="reference external" href="http://efi.eng.uci.edu/">Efi</a>, to UC-Irvine for a short postdoc. Alex and Anthony were pushing the deltas work even further, and I kept adding scripts to RivGraph. The inevitable idea was hatched to analyze dozens of deltas worldwide, and eventually became a <a class="reference external" href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1812019">successful proposal</a>. In the meantime, I took a postdoc position at Los Alamos
+National Laboratory with an eye toward global river morphodynamics. My arrival at LANL marked the beginning of my Python journey, and
+soon I had converted all the RivGraph scripts to Python. My research needs led to a fuller development of RivGraph and brought braided
+rivers into the mix, and sometime in 2017, RivGraph officially became RivGraph.</p>
+<p>I cut my Python teeth while developing RivGraph, so there is a degree of inherited clunkiness and inefficiency baked in. Initially, there
+were also some implements (such as automatically adding artificial nodes to parallel edges) that were tailored to somewhat particular use
+cases. However, as the user base continues to grow, improvements and upgrades have been implemented to meet their needs. Please add your requests
+to the mix and report any bugs you find using Github’s <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/issues">issue tracker</a>.</p>
+</div>
+<div class="section" id="what-s-different-about-rivgraph">
+<h2>What’s different about RivGraph?<a class="headerlink" href="#what-s-different-about-rivgraph" title="Permalink to this headline"></a></h2>
+<p>RivGraph fills a void in coding space by providing a full-featured package for working with masks of river channels.
+In my opinion, most of RivGraph is just a convenient collection of already-existing functionality like CRS handling, path management,
+etc. That said, there are three somewhat novel components of RivGraph that are not available elsewhere, or at least not available in
+Python.</p>
+<p>The first of these is the walking algorithm that breaks a skeleton into its constituent links and nodes. While there is similar
+functionality available in GIS packages, RivGraph ensures that the resulting skeleton is parsimonious–i.e. contains as few nodes as possible
+while fully preserving the topology of the mask. This is achieved with help from a double-convolution, where the first convolution identifies possible
+branchpoints and the second reduces branchpoint clusters to a minimum-required set.</p>
+<p>The second novelty RivGraph offers is its ability
+to automatically set flow directions. This is trivial for some networks (like Wax Lake Delta), but many channel networks are wild beasts. RivGraph’s
+solution is correspondingly complicated, but does a pretty good job. We <a class="reference external" href="https://esurf.copernicus.org/articles/8/87/2020/esurf-8-87-2020.html">published</a> the method, its validation, and its implications.</p>
+<p>The third novel component of RivGraph is its abilty to generate an along-channel mesh that approximately follows a river’s centerline
+while transecting the centerline approximately perpendicularly. This was a surprisingly tricky function to get right, and I’m not even
+sure it’s <em>there</em> yet. The first iteration of this appeared in RivMAP, and there have probably been 3-4 method changes before settling on the current version, which uses Dynamic Time Warping (thanks <a class="reference external" href="https://pubs.geoscienceworld.org/gsa/geology/article/47/3/263/568705/High-curvatures-drive-river-meandering">Zoltan et. al</a> for introducing this to me, although I still contend that it’s inappropriate to use for measuring channel migration rates) to iteratively map vertices on buffered centerlines away from the original.</p>
+</div>
+<div class="section" id="is-rivgraph-only-for-channel-networks">
+<h2>Is RivGraph only for channel networks?<a class="headerlink" href="#is-rivgraph-only-for-channel-networks" title="Permalink to this headline"></a></h2>
+<p>While RivGraph is designed around channel networks, it contains a smattering of tools that can be useful across a broad range of analyses.
+For instance, the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/blob/master/rivgraph/mask_to_graph.py">mask_to_graph.py</a> script contains tools that will convert <em>any</em> binary mask to a vectorized skeleton, not just river
+channel networks. There are a number of image processing tools in <a class="reference external" href="https://github.com/jonschwenk/RivGraph/blob/master/rivgraph/im_utils.py">im_utils.py</a> that I use frequently in other projects, like a Matlab-like
+implementation of <em>regionprops()</em> for measuring blob properties of a binary image. I have personally found one of the most broadly useful tools in RivGraph is <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.io_utils.write_geotiff()</span></code>, which does what it says.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../quickstart/index.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../install/index.html" class="btn btn-neutral float-right" title="Installation Instructions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, J. Schwenk &amp; J. Hariharan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

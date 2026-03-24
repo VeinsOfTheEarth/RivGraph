@@ -106,7 +106,7 @@ Here are some resources that either provide masks or tools for you to make your 
   - `Arctic deltas <https://data.ess-dive.lbl.gov/view/doi:10.15485/1505624>`_, made with eCognition and Landsat imagery.
   - `Indus and Brahmaputra Rivers <https://esurf.copernicus.org/articles/8/87/2020/#section6>`_, clipped from GRWL dataset.
   - `Global mask <https://zenodo.org/record/1297434>`_ of Landsat-derived rivers at "mean annual discharge." Has some issues at tile boundaries, and can be "feathery" along braided rivers, but not a bad global mask.
-  - `Global Surface Water Dataset <https://global-surface-water.appspot.com/>`_ - provides all water pixels in the Landsat archive as monthly global images and as integrated-through-time images. For example, you can threshold on the "Occurrence" product to make a mask. Use `Google Earth Engine surface-water dataset docs <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater>`_ to access and create your masks. You can also access individual monthly water masks `here <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_MonthlyHistory>`_.
+  - `Global Surface Water Dataset <https://global-surface-water.appspot.com/>`_ - provides all water pixels in the Landsat archive as monthly global images and as integrated-through-time images. For example, you can threshold on the "Occurrence" product to make a mask. Use `Google Earth Engine <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_GlobalSurfaceWater>`_ to access and create your masks. You can also access individual monthly water masks `here <https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_4_MonthlyHistory>`_.
   - If you know of more, please mention them in the `Issue Tracker <https://github.com/VeinsOfTheEarth/RivGraph/issues>`_!
 
 .. image:: ../../images/jrc_mackenzie.PNG
@@ -116,7 +116,7 @@ Here are some resources that either provide masks or tools for you to make your 
   The Global Surface Water's *Occurrence* map shows the fraction of time an observable Landsat pixel was water.
 
 
-- You can relatively quickly train and apply ML models using the `Google Earth Engine platform <https://earthengine.google.com/>`_, although the learning curve may be a little steep if you haven't used it before.
+- You can relatively quickly train and apply ML models using `Google Earth Engine <https://earthengine.google.com/>`_, although the learning curve may be a little steep if you haven't used it before.
 
 - `DeepWaterMap  <https://github.com/isikdogan/deepwatermap>`_ is a trained deep convolutional neural network that you can apply to Landsat/Sentinel multispectral imagery to create your own masks. You can also improve DeepWaterMap's base model by adding more training data. Requires some knowledge of Tensorflow.
 
@@ -157,7 +157,7 @@ Does my mask need to be georeferenced?
 
 Most masks are already produced in a GIS context and are already geographically referenced. However, *RivGraph* does not require that your mask image be georeferenced (e.g. a GeoTIFF). If you provide a mask without any georeference information, *RivGraph* will assign it a "dummy" projection in order to proceed. This has no effect on the network extraction. However, it is strongly advised that you provide a georeferenced mask. There are three primary reasons for this:
 
-1) The coordinate reference system (CRS) of your mask will be carried through all your analysis, meaning that geovectors and GeoTIFFs you export using *RivGraph* will align perfectly with your mask. Additionally, your results will be easily importable into a GIS for further analysis or fusion with other geospatial data.
+1) The coordinate reference system (CRS) of your mask will be carried through all your analysis, meaning that shapefiles and GeoTIFFs you export using *RivGraph* will align perfectly with your mask. Additionally, your results will be easily importable into a GIS for further analysis or fusion with other geospatial data.
 
 2) *RivGraph* computes morphologic metrics (length and width) using pixel coordinates. A georeferenced mask contains information about the units of the mask, and thus any metrics of physical distance will inherit these units. If your CRS is meters-based, your results will be in meters.
 
@@ -180,4 +180,4 @@ Perhaps you'd like to vectorize a road network or a vascular system. This is pos
 What filetypes are supported for my mask?
 -----------------------------------------
 
-Any raster format that rasterio can read should generally be fine. GeoTIFF is the most common and recommended choice when possible.
+Any `gdal-readable filetype <https://gdal.org/drivers/raster/index.html>`_ should be fine. GeoTIFF is most common and recommended if possible.

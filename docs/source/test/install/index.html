@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation Instructions &mdash; RivGraph 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Examples" href="../examples/index.html" />
+    <link rel="prev" title="Background" href="../background/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../background/index.html">Background</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation Instructions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation-via-conda">Installation via <em>conda</em></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-from-source">Installation from source</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../maskmaking/index.html">Maskmaking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../shoreline/index.html">Shoreline creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../linksnodes/index.html">Link and Node Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../issues/index.html">Known issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../featuredevelopment/index.html">Feature Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gallery/index.html">RivGraph in the wild</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apiref/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RivGraph</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Installation Instructions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/install/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="installation-instructions">
+<span id="install"></span><h1>Installation Instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this headline"></a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><em>RivGraph</em> requires the installation of common geospatial Python packages such as <a class="reference external" href="https://gdal.org/">GDAL</a>.
+These packages can be difficult to install properly and often create dependency errors.
+Because of this, we recommend using <a class="reference external" href="https://www.anaconda.com/products/individual">Anaconda</a> to create a virtual environment for <em>RivGraph</em>, and to manage the installation of Python libraries as it will handle package versions and dependencies for you.</p>
+</div>
+<div class="section" id="installation-via-conda">
+<h2>Installation via <em>conda</em><a class="headerlink" href="#installation-via-conda" title="Permalink to this headline"></a></h2>
+<p>The latest ‘stable’ version of <em>RivGraph</em> can be installed via <cite>conda</cite>.
+We recommend installing <em>RivGraph</em> into a fresh conda environment to minimize the risk of dependency clashes.
+The easiest way to do this is by opening Terminal (Mac/Unix) or Anaconda Prompt (Windows) and typing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ conda create -n rivgraph_env rivgraph -c conda-forge
+</pre></div>
+</div>
+<p>If you would rather install <em>RivGraph</em> into a pre-existing environment “myenv”, you can use the following commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">myenv</span>
+<span class="n">conda</span> <span class="n">install</span> <span class="n">rivgraph</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><em>RivGraph</em> dependencies may be pinned to specific versions of packages (e.g. geopandas 0.7) that may not mesh with your existing environment.
+Check the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml">environment file</a> for these cases.</p>
+</div>
+</div>
+<div class="section" id="installation-from-source">
+<h2>Installation from source<a class="headerlink" href="#installation-from-source" title="Permalink to this headline"></a></h2>
+<p>If you would prefer to install the <em>RivGraph</em> package from source, then follow these steps:</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><em>Rivgraph</em> uses many geospatial dependencies (e.g. GDAL) that can be
+difficult to install. Note that so long as the continuous integration
+workflows on GitHub are working (denoted by a green check next to the latest
+commit message on the source repository home page), the latest version of
+the source code is stable and installation from source will work if the
+dependencies are correctly installed.</p>
+</div>
+<p>1. Clone the repository</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/jonschwenk/RivGraph.git
+</pre></div>
+</div>
+<p>2. Install dependencies; note these can be installed via conda from the
+<a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/blob/master/environment.yml">environment.yml</a> file, however a list is also
+provided below with links to the homepage for each dependency.</p>
+<dl class="simple">
+<dt><strong>RivGraph Dependencies:</strong></dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://www.python.org/">python</a> (tested on v3.6)</p></li>
+<li><p><a class="reference external" href="https://gdal.org/">GDAL</a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/">NumPy</a></p></li>
+<li><p><a class="reference external" href="https://geopandas.org/">GeoPandas</a> (v0.7.0)</p></li>
+<li><p><a class="reference external" href="https://scikit-image.org/">scikit-image</a></p></li>
+<li><p><a class="reference external" href="https://github.com/skvark/opencv-python">OpenCV</a></p></li>
+<li><p><a class="reference external" href="https://networkx.org/">NetworkX</a></p></li>
+<li><p><a class="reference external" href="https://matplotlib.org/">Matplotlib</a></p></li>
+<li><p><a class="reference external" href="https://pyproj4.github.io/pyproj/stable/">pyproj</a></p></li>
+<li><p><a class="reference external" href="https://shapely.readthedocs.io/en/latest/">Shapely</a></p></li>
+<li><p><a class="reference external" href="https://fiona.readthedocs.io/en/latest/">Fiona</a></p></li>
+<li><p><a class="reference external" href="https://github.com/slaypni/fastdtw">FastDTW</a></p></li>
+</ul>
+</dd>
+</dl>
+<ol class="arabic" start="3">
+<li><p>From the cloned folder, run the following in the command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install -e .
+</pre></div>
+</div>
+</li>
+</ol>
+<p>to install the <em>RivGraph</em> package.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you run into issues installing <em>RivGraph</em> at this stage, please check
+to see whether you’ve installed all of the required dependencies.</p>
+</div>
+<ol class="arabic" start="4">
+<li><p>To test your installation, you need to install the <a class="reference external" href="https://docs.pytest.org/en/stable/index.html">pytest</a> package.
+Then from the cloned folder you can run the unit tests with the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pytest
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../background/index.html" class="btn btn-neutral float-left" title="Background" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../examples/index.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, J. Schwenk &amp; J. Hariharan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

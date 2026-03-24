@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maskmaking &mdash; RivGraph 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Shoreline creation" href="../shoreline/index.html" />
+    <link rel="prev" title="Let’s demo RivGraph on the Brahmaputra River!" href="../examples/braided_river_example/braided_river_example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/rg_logo_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../background/index.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/index.html">Installation Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Maskmaking</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#maskmaker-maskmaker-make-me-a-mask">Maskmaker, Maskmaker Make Me a Mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-a-mask">What is a mask?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-does-rivgraph-expect-my-mask-to-look-like">What does RivGraph expect my mask to look like?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-should-a-mask-capture">What should a mask capture?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#where-do-i-get-a-mask">Where do I get a mask?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-do-i-edit-my-mask">How do I edit my mask?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#does-my-mask-need-to-be-georeferenced">Does my mask need to be georeferenced?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#can-my-mask-represent-something-that-isn-t-a-river">Can my mask represent something that isn’t a river?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-filetypes-are-supported-for-my-mask">What filetypes are supported for my mask?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../shoreline/index.html">Shoreline creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../linksnodes/index.html">Link and Node Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../issues/index.html">Known issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../featuredevelopment/index.html">Feature Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gallery/index.html">RivGraph in the wild</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apiref/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RivGraph</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Maskmaking</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/maskmaking/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="maskmaking">
+<span id="id1"></span><h1>Maskmaking<a class="headerlink" href="#maskmaking" title="Permalink to this headline"></a></h1>
+<img alt="The Lena River Delta" class="align-center" src="../_images/lena_mask.PNG" />
+<p class="centered">
+<strong>The Lena River Delta as seen by Bing Virtual Earth and its mask. Note that this mask is Landsat-derived so it does not correspond perfectly with the image on the left.</strong></p><div class="section" id="maskmaker-maskmaker-make-me-a-mask">
+<h2>Maskmaker, Maskmaker Make Me a Mask<a class="headerlink" href="#maskmaker-maskmaker-make-me-a-mask" title="Permalink to this headline"></a></h2>
+<p><em>RivGraph</em> requires that you provide a mask of your channel network. In this document, we’ll cover the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#whatismask"><span class="std std-ref">What is a mask?</span></a></p></li>
+<li><p><a class="reference internal" href="#maskconstraints"><span class="std std-ref">What does RivGraph expect my mask to look like?</span></a></p></li>
+<li><p><a class="reference internal" href="#maskcapture"><span class="std std-ref">What should a mask capture?</span></a></p></li>
+<li><p><a class="reference internal" href="#wheretoget"><span class="std std-ref">Where do I get a mask?</span></a></p></li>
+<li><p><a class="reference internal" href="#howtoprep"><span class="std std-ref">How do I edit my mask?</span></a></p></li>
+<li><p><a class="reference internal" href="#georef"><span class="std std-ref">Does my mask need to be georeferenced?</span></a></p></li>
+<li><p><a class="reference internal" href="#nonriver"><span class="std std-ref">Can my mask represent something that isn’t a river?</span></a></p></li>
+<li><p><a class="reference internal" href="#supportedfiletypes"><span class="std std-ref">What filetypes are supported for my mask?</span></a></p></li>
+</ul>
+</div></blockquote>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>One thing to keep in mind: although <em>RivGraph</em> contains functions for pruning and otherwise modifying your channel network, it will always honor the mask you provide. You may need to iterate between altering your mask and <em>RivGraph</em>-ing it to achieve your desired results.
+“Garbage in, garbage out.”</p>
+</div>
+</div>
+<div class="section" id="what-is-a-mask">
+<span id="whatismask"></span><h2>What is a mask?<a class="headerlink" href="#what-is-a-mask" title="Permalink to this headline"></a></h2>
+<p>A mask is simply a binary image (only ones and zeros) where pixels belonging to the channel network are ones, like the right panel of the Lena Delta above. Before processing your mask with <em>RivGraph</em>, you should ensure that your mask contains <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/issues/34">no no-data</a>. One way to ensure this is to convert your mask to a boolean datatype, using for example numpy:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">Mask_binary</span> <span class="pre">=</span> <span class="pre">np.array(Mask,</span> <span class="pre">dtype=np.bool)</span></code></p>
+<p>The mask is the cornerstone for using <em>RivGraph</em>. You should always ensure that it contains the features you want and none of the ones you don’t.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Make sure to remove all the objects (connected “on” pixels) in your mask that you do not want to analyze. Leaving in other objects can cause unexpected behavior or <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/issues/32">errors</a>. Often, a quick way to achieve this is via the <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.largest_blobs()</span></code> function, which will keep only the largest connected component.</p>
+</div>
+</div>
+<div class="section" id="what-does-rivgraph-expect-my-mask-to-look-like">
+<span id="maskconstraints"></span><h2>What does RivGraph expect my mask to look like?<a class="headerlink" href="#what-does-rivgraph-expect-my-mask-to-look-like" title="Permalink to this headline"></a></h2>
+<p><em>RivGraph</em> can handle two types of masks: deltas and braided (or single-threaded) rivers.</p>
+<p><strong>All masks should contain a single connected component</strong> (or blob). Before doing your analysis, use the <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.largest_blobs()</span></code> to ensure you have only one connected component. This will remove any isolated portions of the mask. For example,</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rivgraph</span> <span class="kn">import</span> <span class="n">im_utils</span>
+<span class="n">Mask_one_blob</span> <span class="o">=</span> <span class="n">im_utils</span><span class="o">.</span><span class="n">largest_blobs</span><span class="p">(</span><span class="n">Mask</span><span class="p">,</span> <span class="n">nlargest</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;keep&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will create an image wherein only the largest connected component remains (hopefully your channel network).</p>
+<p>Delta masks often have a large waterbody (ocean or lake) connecting all the outlets. This is completely fine, as the waterbody will be removed in the pruning stage.</p>
+</div>
+<div class="section" id="what-should-a-mask-capture">
+<span id="maskcapture"></span><h2>What should a mask capture?<a class="headerlink" href="#what-should-a-mask-capture" title="Permalink to this headline"></a></h2>
+<p>Above, we defined a mask as all the pixels “belonging to the channel network.” But which pixels are part of the channel network? The obvious starting point is to consider all <em>surface water</em> pixels as defining the channel network. Is it important that your mask shows bankfull channels or includes small streams that may only be active during flood conditions?</p>
+<img alt="../_images/brahma_masks_2004.PNG" class="align-center" src="../_images/brahma_masks_2004.PNG" />
+<p>As an example, four masks are shown above of a portion of the Brahmaputra River at four different days of 2004. The hydrograph of the river is shown in the left panel. As expected, you can see that the mask changes as the river floods and recedes. You can also see that the river channel network has been rearranged in some places by the flooding. For example, <strong>A</strong> and <strong>D</strong> show the river at roughly the same discharge, but the network in <strong>D</strong> is a result of reworking by the flood.</p>
+<p>The bottom line here is that your mask should reflect your analysis goals. For example, if you’re only interested in counting the number of loops in a delta channel network, then you might only care about ensuring all the channels are represented. If you want to route fluxes through your extracted network, then you probably should try to obtain a mask that captures the full width of the channels at some representative discharge.</p>
+</div>
+<div class="section" id="where-do-i-get-a-mask">
+<span id="wheretoget"></span><h2>Where do I get a mask?<a class="headerlink" href="#where-do-i-get-a-mask" title="Permalink to this headline"></a></h2>
+<p>Masks can come from a variety of sources, but in my experience there are three primary methods for mask generation:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>automatically generated from satellite imagery</p></li>
+<li><p>manually drawn by hand</p></li>
+<li><p>model/simulation outputs</p></li>
+</ul>
+</div></blockquote>
+<p>There are <em>many</em> methods available for creating masks automatically from remotely-sensed imagery. We won’t get into the details of those here, but note that machine learning has proved a very valuable tool for maskmaking. There are also simple, proven techniques available as well. The Brahmaputra masks above were created by thresholding the Landsat-derived NDVI (<a class="reference external" href="https://www.usgs.gov/core-science-systems/nli/landsat/landsat-normalized-difference-vegetation-index">Normalized Difference Vegetation Index</a>
+), which is a simple ratio of band values.</p>
+<p>Drawing a mask by hand is often not an ideal choice, but might be the most efficient way to move forward. In these cases, I would typically use QGIS to draw polygons that cover the channel network, then use the <a class="reference external" href="https://docs.qgis.org/2.8/en/docs/user_manual/processing_algs/gdalogr/gdal_conversion/rasterize.html">Rasterize</a>
+tool to convert the polygons to a binary raster (image). If you go this route, be sure to specify an appropriate coordinate reference system for your polygons in order to preserve the georeferencing information (don’t use EPSG:4326). You will also need to specify a pixel resolution for your mask upon conversion.</p>
+<p>If you’re analyzing the output of a simulation, it is unlikely that the simulation will provide binary channel masks as an output. In these cases, you will need to develop a way to identify the channel network from the available simulation results. For example, while developing the entropic Braided Index (<a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2019AGUFMEP51E2163T/abstract">eBI</a>
+), we used Delft3D simulations to test hypotheses about how the eBI changes under various sedimentation schemes. To make masks, we developed a combined depth + discharge threshold to identify which pixels were part of the “active river channel.”</p>
+<p>Here are some resources that either provide masks or tools for you to make your own.</p>
+<ul class="simple">
+<li><p>Published masks:</p>
+<ul>
+<li><p><a class="reference external" href="https://data.ess-dive.lbl.gov/view/doi:10.15485/1505624">Arctic deltas</a>, made with eCognition and Landsat imagery.</p></li>
+<li><p><a class="reference external" href="https://esurf.copernicus.org/articles/8/87/2020/#section6">Indus and Brahmaputra Rivers</a>, clipped from GRWL dataset.</p></li>
+<li><p><a class="reference external" href="https://zenodo.org/record/1297434">Global mask</a> of Landsat-derived rivers at “mean annual discharge.” Has some issues at tile boundaries, and can be “feathery” along braided rivers, but not a bad global mask.</p></li>
+<li><p><a class="reference external" href="https://global-surface-water.appspot.com/">Global Surface Water Dataset</a> - provides all water pixels in the Landsat archive as monthly global images and as integrated-through-time images. For example, can threshold on the “Occurrence” product to make a mask. Use <a class="reference external" href="https://developers.google.com/earth-engine/datasets/catalog/JRC_GSW1_2_GlobalSurfaceWater">Google Earth Engine</a> to access and create your masks.</p></li>
+<li><p>If you know of more, please mention them in the <a class="reference external" href="https://github.com/VeinsOfTheEarth/RivGraph/issues">Issue Tracker</a>!</p></li>
+</ul>
+</li>
+</ul>
+<img alt="../_images/jrc_mackenzie.PNG" class="align-center" src="../_images/jrc_mackenzie.PNG" />
+<p class="centered">
+<strong>The Global Surface Water’s <em>Occurrence</em> map shows the fraction of time an observable Landsat pixel was water.</strong></p><ul class="simple">
+<li><p>You can relatively quickly train and apply ML models using <a class="reference external" href="https://earthengine.google.com/">Google Earth Engine</a>, although the learning curve may be a little steep if you haven’t used it before.</p></li>
+<li><p><a class="reference external" href="https://github.com/isikdogan/deepwatermap">DeepWaterMap</a> is a trained deep convolutional neural network that you can apply to Landsat/Sentinel multispectral imagery to create your own masks. You can also improve DeepWaterMap’s base model by adding more training data. Requires some knowledge of Tensorflow.</p></li>
+</ul>
+</div>
+<div class="section" id="how-do-i-edit-my-mask">
+<span id="howtoprep"></span><h2>How do I edit my mask?<a class="headerlink" href="#how-do-i-edit-my-mask" title="Permalink to this headline"></a></h2>
+<p>As a mask is simply a single-band image, any pixel-based image editing software can be used for hand-editing (Photoshop, GIMP, MSPaint, etc.). However, there are a few issues with using these tools:</p>
+<ul class="simple">
+<li><p>These softwares will generally not preserve georeferencing information of your source image. You will have to add it back to the edited image.</p></li>
+<li><p>The softwares may have difficulty opening/editing a single-band image as opposed to the more standard RGB (3 band).</p></li>
+<li><p>Filetypes are sometimes not compatible between Python-exported images and these softwares and will thus require extra attention.</p></li>
+</ul>
+<p>I have found three effective ways to edit georeferenced masks. The one you choose depends on the quantity and quality of editing you need to achieve.</p>
+<ol class="arabic simple">
+<li><p>Edit your mask directly in QGIS.</p>
+<ol class="loweralpha simple">
+<li><p><a class="reference external" href="https://plugins.qgis.org/plugins/Serval/">Serval</a> plugin for QGIS allows for single-pixel manipulations. Good if you only need to edit a handful of pixels.</p></li>
+<li><p><a class="reference external" href="https://plugins.qgis.org/plugins/ThRasE/">ThRaSe</a> plugin for QGIS appears to have more sophisticated raster-editing capabilities, but I haven’t used it.</p></li>
+</ol>
+</li>
+<li><p><a class="reference external" href="https://www.getpaint.net/download.html">Paint.NET</a> is an image-editing software that preserves georeferencing information. It’s fairly basic and easy to use. If you have a significant amount of hand-editing to do, look into it.</p></li>
+<li><p>Use image processing tools in <em>RivGraph</em> to edit your mask. There are morphological operators like <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.dilate()</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.erode()</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.regionprops()</span></code> for filtering objects based on their properties (areas, lengths, perimeters, etc.), and <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.largest_blobs()</span></code> for keeping/removing the largest connected components in the mask. There is also a <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.im_utils.hand_clean()</span></code> utility that allows you to draw polygons one-at-a-time and specify their pixel values. I usually find these tools sufficient for cleaning a mask, regardless of the amount of editing required.</p></li>
+</ol>
+</div>
+<div class="section" id="does-my-mask-need-to-be-georeferenced">
+<span id="georef"></span><h2>Does my mask need to be georeferenced?<a class="headerlink" href="#does-my-mask-need-to-be-georeferenced" title="Permalink to this headline"></a></h2>
+<p>Most masks are already produced in a GIS context and are already geographically referenced. However, <em>RivGraph</em> does not require that your mask image be georeferenced (e.g. a GeoTIFF). If you provide a mask without any georeference information, <em>RivGraph</em> will assign it a “dummy” projection in order to proceed. This has no effect on the network extraction. However, it is strongly advised that you provide a georeferenced mask. There are three primary reasons for this:</p>
+<ol class="arabic simple">
+<li><p>The coordinate reference system (CRS) of your mask will be carried through all your analysis, meaning that shapefiles and GeoTIFFs you export using <em>RivGraph</em> will align perfectly with your mask. Additionally, your results will be easily importable into a GIS for further analysis or fusion with other geospatial data.</p></li>
+<li><p><em>RivGraph</em> computes morphologic metrics (length and width) using pixel coordinates. A georeferenced mask contains information about the units of the mask, and thus any metrics of physical distance will inherit these units. If your CRS is meters-based, your results will be in meters.</p></li>
+<li><p>Some of <em>RivGraph</em>’s functionality under the hood requires some heuristic thresholds or parameters. While these were designed to be as CRS-agnostic as possible, these functions will undoubtedly perform better when pixels have known units. As an example, generating a mesh along a braided river corridor requires some parameters defining the size and smoothness of the mesh. Having a mask with physically-meaningful units makes this parameterization much simpler and more intuitive.</p></li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>You should <strong>avoid</strong> degree-based CRSs (like EPSG:4326). This is because the length of a degree is not uniform, but varies with latitude. For example, at the equator, a degree of longitude is roughly 111 km. In Anchorage, Alaska, a degree of longitude is approximately 55 km. Effectively, degrees are meaningless units of physical measurements. A more prudent approach would be to first project your mask into a meters-based CRS (e.g. the appropriate <a class="reference external" href="https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system">UTM zone</a>) before analysis with <em>RivGraph</em>.</p>
+</div>
+</div>
+<div class="section" id="can-my-mask-represent-something-that-isn-t-a-river">
+<span id="nonriver"></span><h2>Can my mask represent something that isn’t a river?<a class="headerlink" href="#can-my-mask-represent-something-that-isn-t-a-river" title="Permalink to this headline"></a></h2>
+<p>Perhaps you’d like to vectorize a road network or a vascular system. This is possible to do with <em>RivGraph</em>. However, you will not be able to instantiate the convenient <em>delta</em> or <em>river</em> classes as they are designed only for river channel networks. Instead, you will need to poke around the API to figure out which functions will work for you. A good starting point is to skeletonize your mask with <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.mask_to_graph.skeletonize_mask()</span></code> then run <code class="xref py py-obj docutils literal notranslate"><span class="pre">rivgraph.mask_to_graph.skel_to_graph()</span></code> to convert the skeleton to a set of links and nodes. If you have an interesting non-river use-case, please send an email to j……..k&#64;gmail.com and we can add it as an example.</p>
+</div>
+<div class="section" id="what-filetypes-are-supported-for-my-mask">
+<span id="supportedfiletypes"></span><h2>What filetypes are supported for my mask?<a class="headerlink" href="#what-filetypes-are-supported-for-my-mask" title="Permalink to this headline"></a></h2>
+<p>Any <a class="reference external" href="https://gdal.org/drivers/raster/index.html">gdal-readable filetype</a> should be fine. GeoTIFF is most common and recommended if possible.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../examples/braided_river_example/braided_river_example.html" class="btn btn-neutral float-left" title="Let’s demo RivGraph on the Brahmaputra River!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../shoreline/index.html" class="btn btn-neutral float-right" title="Shoreline creation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, J. Schwenk &amp; J. Hariharan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

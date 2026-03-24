@@ -86,7 +86,7 @@ def set_link_directions(links, nodes, imshape, manual_set_csv=None):
     # if os.path.isfile(manual_set_csv) is False:
     #     if len(cont_violators) > 0 or allcyclesfixed == 0:
     #         io.create_manual_dir_csv(manual_set_csv)
-    #         print('A .csv file for manual fixes to link directions was created at {}.'.format(manual_set_csv))
+    #         print('A .csv file for manual fixes to link directions at {}.'.format(manual_set_csv))
 
     if allcyclesfixed == 2:
         logger.info('No cycles were found in network.')
@@ -245,9 +245,8 @@ def set_initial_directionality(links, nodes, imshape):
         linkidx = links['id'].index(lid)
         # Set all the links with 3 or more guesses that agree
         m = mode(lg)
-        m_count = np.atleast_1d(m.count)[0]
-        if m_count > 2:
-            links, nodes = dy.set_link(links, nodes, linkidx, np.atleast_1d(m.mode)[0], alg)
+        if m.count[0] > 2:
+            links, nodes = dy.set_link(links, nodes, linkidx, m.mode[0], alg)
 
     # Set again by angles, but reduce the lenthresh
     # (shorter links will be set that were not previously)

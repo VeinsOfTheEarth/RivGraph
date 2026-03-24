@@ -1,0 +1,262 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Maskmaker, Maskmaker Make Me a Mask &mdash; RivGraph 0.3 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../background/index.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/index.html">Installation Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Maskmaking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apiref/index.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RivGraph</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Maskmaker, Maskmaker Make Me a Mask</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/maskmaking/maskmaking.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <p>.. _maskmaking:</p>
+<div class="section" id="maskmaker-maskmaker-make-me-a-mask">
+<h1>Maskmaker, Maskmaker Make Me a Mask<a class="headerlink" href="#maskmaker-maskmaker-make-me-a-mask" title="Permalink to this headline">¶</a></h1>
+<p><img alt="C:%5CUsers%5CJon%5CDocuments%5CGitHub%5CRivGraph%5Cexamples%5Cimages%5Clena_mask.PNG" src="C:%5CUsers%5CJon%5CDocuments%5CGitHub%5CRivGraph%5Cexamples%5Cimages%5Clena_mask.PNG" /></p>
+<p><em>RivGraph</em> requires that you provide a mask of your channel network. A mask is simply a binary image (only ones and zeros) where pixels belonging to the channel network are “on”, like the right panel of the Lena Delta above. In this document, we’ll cover the following:</p>
+<ul class="simple">
+<li><p>What should a mask capture?</p></li>
+<li><p>Where do I get a mask?</p></li>
+<li><p>How can I prepare my mask?</p></li>
+<li><p>Does my mask need to be georeferenced?</p></li>
+<li><p>Can my mask represent something that isn’t a river?</p></li>
+<li><p>What filetypes are supported for my mask?</p></li>
+</ul>
+<p>One thing to keep in mind: although <em>RivGraph</em> contains functions for pruning and otherwise modifying your channel network, it will always honor the mask you provide. You may need to iterate between altering your mask and <em>RivGraph</em>ing it to achieve your desired results.</p>
+<div class="section" id="what-should-a-mask-capture">
+<h2>What should a mask capture?<a class="headerlink" href="#what-should-a-mask-capture" title="Permalink to this headline">¶</a></h2>
+<p>Above, we defined a mask as all the pixels “belonging to the channel network.” But which pixels are part of the channel network? The obvious starting point is to consider all <em>surface water</em> pixels as defining the channel network. Is it important that your mask shows bankfull channels or includes small streams that may only be active during flood conditions?</p>
+<p>The bottom line here is that your mask should reflect your analysis goals. For example, if you’re only interested in counting the number of loops in a delta channel network, then you might only care about ensuring all the channels are represented. If you want to route fluxes through your extracted network, then you probably should try to obtain a mask that captures the full width of the channels during a representative stage.</p>
+</div>
+<div class="section" id="where-do-i-get-a-mask">
+<h2>Where do I get a mask?<a class="headerlink" href="#where-do-i-get-a-mask" title="Permalink to this headline">¶</a></h2>
+<p>Masks</p>
+<p>Masks from satellite imagery, also from modeling outputs.</p>
+<p>In order of complexity:</p>
+<p>Published masks. If you know of more, please mention them in the Issue Tracker!</p>
+<p>Global Extent of Rivers and Streams mask at mean annual discharge. Tile boundary problems, feathery along braided rivers.</p>
+<p>Using Google Earth Engine to export Global Surface Water masks.</p>
+<p>Using Google Earth Engine to train your own classifier.</p>
+<p>DeepWaterMap</p>
+</div>
+<div class="section" id="how-should-i-prepare-my-mask">
+<h2>How should I prepare my mask?<a class="headerlink" href="#how-should-i-prepare-my-mask" title="Permalink to this headline">¶</a></h2>
+<p>The quality of your mask directly translates to the quality of your channel network.</p>
+</div>
+<div class="section" id="does-my-mask-need-to-be-georeferenced">
+<h2>Does my mask need to be georeferenced?<a class="headerlink" href="#does-my-mask-need-to-be-georeferenced" title="Permalink to this headline">¶</a></h2>
+<p>Most masks are already produced in a GIS context and are already geographically referenced. However,<em>RivGraph</em> does not require that your mask image be georeferenced (e.g. a GeoTIFF). If you provide a mask without any georeference information, <em>RivGraph</em> will assign it a “dummy” projection in order to proceed. This has no effect on the network extraction. However, it is strongly advised that you provide a georeferenced mask. There are three primary reasons for this:</p>
+<ol class="simple">
+<li><p>The coordinate reference system (CRS) of your mask will be carried through all your analysis, meaning that shapefiles and GeoTIFFs you export using <em>RivGraph</em> will align perfectly with your mask. Additionally, your results will be easily importable into a GIS for further analysis or fusion with other geospatial data.</p></li>
+<li><p><em>RivGraph</em> computes morphologic metrics (length and width) using pixel coordinates. A georeferenced mask contains information about the units of the mask, and thus any metrics of physical distance will inherit these units. If your CRS is meters-based, your results will be in meters.</p></li>
+<li><p>Some of <em>RivGraph</em>’s functionality under the hood requires some heuristic thresholds or parameters. While these were designed to be as CRS-agnostic as possible, these functions will undoubtedly perform better when pixels have known units. As an example, generating a mesh along a braided river corridor requires some parameters defining the size and smoothness of the mesh. Having a mask with physically-meaningful units makes this parameterization much simpler and more intuitive.</p></li>
+</ol>
+<p>It is also highly advisable that you <strong>avoid</strong> degree-based CRSs (like EPSG:4326). This is because the length of a degree is not uniform, but varies with latitude. For example, at the equator, a degree of longitude is roughly 111 km. In Anchorage, Alaska, a degree of longitude is approximately 55 km. Effectively, degrees are meaningless units of physical measurements. A more prudent approach would be to first project your mask into a meters-based CRS (e.g. the appropriate <a class="reference external" href="https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system">UTM zone</a>) before analysis with <em>RivGraph</em>.</p>
+</div>
+<div class="section" id="can-my-mask-represent-something-that-isn-t-a-river">
+<h2>Can my mask represent something that isn’t a river?<a class="headerlink" href="#can-my-mask-represent-something-that-isn-t-a-river" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="what-filetypes-are-supported-for-my-mask">
+<h2>What filetypes are supported for my mask?<a class="headerlink" href="#what-filetypes-are-supported-for-my-mask" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, J. Schwenk &amp; J. Hariharan
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
