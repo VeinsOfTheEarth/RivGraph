@@ -353,7 +353,7 @@ def neighbor_vals(I, c, r):
 
     """
     vals = np.empty((8, 1))
-    vals[:] = np.NaN
+    vals[:] = np.nan
 
     if c == 0:
 

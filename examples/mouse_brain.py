@@ -8,9 +8,9 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.19.1
 #   kernelspec:
-#     display_name: Python [conda env:rg04] *
+#     display_name: Python 3 (ipykernel)
 #     language: python
-#     name: conda-env-rg04-py
+#     name: python3
 # ---
 
 # %% [markdown]
@@ -117,7 +117,7 @@ plt.ylim(ylims)
 # %%
 # Load the hand-cleaned mask
 path_handcleaned = "./data/Mouse_Brain/brain_scan_handcleaned.png"
-Ic = io.imread(path_handcleaned, as_gray=True)
+Ic = io.imread(path_handcleaned, as_gray=True) > 0.5
 Ic = iu.largest_blobs(Ic, action='keep')
 
 # Plot to ensure we've loaded the image correctly
@@ -141,7 +141,7 @@ lnu.plot_network(links, nodes, Ic, name='Mouse brain network', label_links=False
 # Now that we have the links and nodes dictionaries, let's compute the lengths and widths of each link. We'll need to first compute the distance transform, which is used to calculate widths.
 
 # %%
-from scipy.ndimage.morphology import distance_transform_edt
+from scipy.ndimage import distance_transform_edt
 Idt = distance_transform_edt(Ic)
 links = lnu.link_widths_and_lengths(links, Idt)
 print(links.keys())

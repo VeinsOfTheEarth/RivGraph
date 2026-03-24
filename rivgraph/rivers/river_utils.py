@@ -9,7 +9,42 @@ Created on Tue Nov  6 14:29:10 2018
 """
 import numpy as np
 import networkx as nx
-from fastdtw import fastdtw
+try:
+    from fastdtw import fastdtw
+except ImportError:  # pragma: no cover - exercised only when fastdtw is absent
+    def fastdtw(x, y, dist):
+        """Fallback dynamic time warping returning (distance, path).
+
+        This is a simple O(NM) implementation used only when the optional
+        fastdtw dependency is unavailable.
+        """
+        x = [np.asarray(v) for v in x]
+        y = [np.asarray(v) for v in y]
+        n, m = len(x), len(y)
+        D = np.full((n + 1, m + 1), np.inf)
+        D[0, 0] = 0.0
+        for i in range(1, n + 1):
+            for j in range(1, m + 1):
+                cost = float(dist(x[i - 1], y[j - 1]))
+                D[i, j] = cost + min(D[i - 1, j], D[i, j - 1], D[i - 1, j - 1])
+        i, j = n, m
+        path = []
+        while i > 0 and j > 0:
+            path.append((i - 1, j - 1))
+            steps = [D[i - 1, j - 1], D[i - 1, j], D[i, j - 1]]
+            step = int(np.argmin(steps))
+            if step == 0:
+                i -= 1; j -= 1
+            elif step == 1:
+                i -= 1
+            else:
+                j -= 1
+        while i > 0:
+            i -= 1; path.append((i, 0))
+        while j > 0:
+            j -= 1; path.append((0, j))
+        path.reverse()
+        return float(D[n, m]), path
 from scipy.ndimage import distance_transform_edt
 import shapely
 from shapely.geometry import LineString, Polygon

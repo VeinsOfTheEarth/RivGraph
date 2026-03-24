@@ -8,9 +8,9 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.19.1
 #   kernelspec:
-#     display_name: rglatest
+#     display_name: Python 3 (ipykernel)
 #     language: python
-#     name: rglatest
+#     name: python3
 # ---
 
 # %% [markdown]
@@ -23,15 +23,17 @@
 # 4. Prune the network (requires user-created shoreline and input nodes for deltas) 
 # 5. Compute morphologic metrics (lengths, widths) 
 # 6. Assign flow directions for each link.
-# 7. Compute some topologic metrics.
+# 7. Compute and plot steady-state flux partitioning.
+# 8. Compute some topologic metrics.
 #
-# Along the way, we'll export some geotiffs and GeoJSONs (or shapefiles if you prefer) for inspection in QGIS. RivGraph requires a **binary mask of the channel network**, preferably georeferenced (i.e., a GeoTiff). For deltas, you will also need to create two shapefiles/GeoJSONs: one of the **shoreline**, and one of the **inlet nodes**. See section 4 for guidance on how to create these required geovector files.
+# Along the way, we'll export some geotiffs and GeoPackages (or GeoJSON/shapefiles if you prefer) for inspection in QGIS. RivGraph requires a **binary mask of the channel network**, preferably georeferenced (i.e., a GeoTiff). For deltas, you will also need to create two shapefiles/GeoJSONs: one of the **shoreline**, and one of the **inlet nodes**. See section 4 for guidance on how to create these required geovector files.
 
 # %% [markdown]
 # ### 1. Instantiate delta class
 
 # %%
 from rivgraph.classes import delta
+from rivgraph.deltas.delta_metrics import compute_steady_state_link_fluxes
 import matplotlib.pyplot as plt
 
 # Define the path to the georeferenced binary image.
@@ -111,7 +113,7 @@ colville.plot('network')
 # Nodes and links are labeled with their ids. Kind of hard to see, so we can zoom in OR we can export the network to geovectors and pull 'em into QGIS:
 
 # %%
-colville.to_geovectors('network', ftype='json') # ftype can be either 'shp' or 'json'
+colville.to_geovectors('network', ftype='gpkg')  # use GeoPackage by default; GeoJSON requires EPSG:4326 or reproject=True
 
 # Let's see where the network geovector files were written:
 print(colville.paths['links'])
@@ -120,6 +122,7 @@ print(colville.paths['nodes'])
 # %% [markdown]
 # And dragging these into QGIS:
 # ![colville_network_unpruned.PNG](images/colville_network_unpruned.png)
+#
 # You can query different links and nodes using the Identify tool. Note that their properties ('conn' and 'id') are appended.
 
 # %% [markdown]
@@ -146,11 +149,12 @@ print(colville.paths['nodes'])
 # colville.prune_network()
 
 # However, our files are one directory up, so we need to point to them.
-colville.prune_network(path_shoreline='data/Colville_delta/Colville_shoreline.shp', path_inletnodes='data/Colville_delta/Colville_inlet_nodes.shp')
+colville.prune_network(path_shoreline='data/Colville_Delta/Colville_shoreline.shp', path_inletnodes='data/Colville_Delta/Colville_inlet_nodes.shp')
 
 # Now that we've pruned, we should re-export the network:
-colville.to_geovectors()
-# Note that this time we didn't specify the arguments; by default 'network' will be exported as type 'json'.
+colville.to_geovectors(ftype='gpkg')
+# Note that this time we did not specify the export target; by default 'network' will be exported.
+# We use GeoPackage here because GeoJSON export now requires EPSG:4326 or reproject=True.
 
 
 # %% [markdown]
@@ -242,12 +246,49 @@ colville.compute_junction_angles(weight=None) # See XXX for a description and me
 print(colville.nodes.keys())
 
 # %% [markdown]
-# ### 7. Compute topologic metrics
+# ### 7. Compute and plot steady-state flux partitioning
+#
+# Once link directions are assigned, we can compute how a unit flux introduced at the inlet(s) partitions through the network under steady-state conditions.
+# For the Colville network there are multiple inlets, so we pass ``inlet='equal'`` to partition the unit source flux equally among them.
+#
+# The resulting link fluxes are stored in ``colville.links['flux_ss']`` and can be exported like any other link attribute.
+
+# %%
+colville.links = compute_steady_state_link_fluxes(
+    None,
+    colville.links,
+    colville.nodes,
+    weight_name='flux_ss',
+    routing='width',
+    inlet='equal',
+)
+
+# Check that the total outlet flux sums to one.
+outlet_flux = 0.0
+for conn, flux in zip(colville.links['conn'], colville.links['flux_ss']):
+    if conn[1] in colville.nodes['outlets']:
+        outlet_flux += flux
+print(f"Total outlet flux: {outlet_flux:.6f}")
+
+# %%
+# Plot the steady-state flux partitioning.
+# We disable the basemap here so the example does not require web tiles or contextily.
+fig, ax, links_plot, outlets_plot = colville.plot_fluxes(basemap=False)
+
+# %%
+outlets_plot[['node_id', 'outlet_flux']].sort_values('outlet_flux', ascending=False).head()
+
+# %% [markdown]
+# Thicker blue lines indicate links carrying more of the steady-state flux, while the outlet markers summarize how much of the unit inlet flux exits at each outlet.
+# Because ``flux_ss`` is now attached to ``colville.links``, it will also be included if we export the network geovectors again.
+
+# %% [markdown]
+# ### 8. Compute topologic metrics
 #
 # RivGraph will compute a number of topologic metrics for your delta channel network. These metrics are explained and demonstrated in Tejedor et. al 2015a (doi.org/10.1002/2014WR016577) and 2015b (doi.org/10.1002/2014WR016604). Note that some pre-processing is done to the topology to compute these metrics; it is highly recommended that you understand these preprocessing steps and/or compute the metrics yourself.
 
 # %%
-colville.compute_topologic_metrics() # You may get an overflow warning
+colville.compute_topologic_metrics(inlet='equal') # You may get an overflow warning
 
 # The metrics are stored in an attribute dictionary:
 print(colville.topo_metrics.keys())

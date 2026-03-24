@@ -1229,13 +1229,13 @@ class centerline():
         self.mr_tm_sm_nan = self.mr_tm_sm.copy()
         if hasattr(self, 'cut_ids'):
             for c in self.cut_ids:
-                self.mr_tm_nan[self.infs_os[c]:self.infs_os[c+1]] = np.NaN
-                self.mr_tm_sm_nan[self.infs_os[c]:self.infs_os[c+1]] = np.NaN
+                self.mr_tm_nan[self.infs_os[c]:self.infs_os[c+1]] = np.nan
+                self.mr_tm_sm_nan[self.infs_os[c]:self.infs_os[c+1]] = np.nan
 
         if hasattr(self, 'erode_ids'):
             for e in self.erode_ids:
-                self.mr_tm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
-                self.mr_tm_sm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
+                self.mr_tm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.nan
+                self.mr_tm_sm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.nan
 
 
     def mig_rate_zs(self, x2, y2, dt_years, x1=None, y1=None, window=None):
@@ -1273,13 +1273,13 @@ class centerline():
         self.mr_zs_sm_nan = self.mr_zs_sm.copy()
         if hasattr(self, 'cut_ids'):
             for c in self.cut_ids:
-                self.mr_zs_nan[self.infs_os[c]:self.infs_os[c+1]] = np.NaN
-                self.mr_zs_sm_nan[self.infs_os[c]:self.infs_os[c+1]] = np.NaN
+                self.mr_zs_nan[self.infs_os[c]:self.infs_os[c+1]] = np.nan
+                self.mr_zs_sm_nan[self.infs_os[c]:self.infs_os[c+1]] = np.nan
 
         if hasattr(self, 'erode_ids'):
             for e in self.erode_ids:
-                self.mr_zs_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
-                self.mr_zs_sm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.NaN
+                self.mr_zs_nan[self.infs_os[e]:self.infs_os[e+1]] = np.nan
+                self.mr_zs_sm_nan[self.infs_os[e]:self.infs_os[e+1]] = np.nan
 
 
     def plot(self, x=None, y=None):

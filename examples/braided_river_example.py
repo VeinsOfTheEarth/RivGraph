@@ -26,7 +26,7 @@
 # 7. Assign flow directions for each link
 # 8. A note on topologic metrics
 #
-# Along the way, we'll export some geotiffs and GeoJSONs (or shapefiles if you prefer) for inspection in QGIS. RivGraph requires a **binary mask of the channel network**, preferably georeferenced (i.e., a GeoTiff) in a projected coordinate reference system.
+# Along the way, we'll export some geotiffs and GeoPackages (or GeoJSON/shapefiles if you prefer) for inspection in QGIS. RivGraph requires a **binary mask of the channel network**, preferably georeferenced (i.e., a GeoTiff) in a projected coordinate reference system.
 
 # %% [markdown]
 # ### 1. Instantiate river class
@@ -43,7 +43,7 @@ mask_path = './data/Brahmaputra_Braided_River/Brahmaputra_mask.tif'
 name = 'Brahma' 
 
 # Where to store RivGraph-generated geotiff and geovector files.
-results_folder = './data/Brahmaputra_Braided_River/Results' 
+results_folder = './data/Brahmaputra_Braided_River/Results_notebook' 
 
 # Set the exit sides of the river relative to the image. In this case, the
 # Brahmaputra is "entering" the image from the North and "exiting" the 
@@ -51,6 +51,14 @@ results_folder = './data/Brahmaputra_Braided_River/Results'
 es = 'NS' # The first character is the upstream side
 
 # Boot up the river class! We set verbose=True to see progress of processing.
+# Use a notebook-specific results directory so stale artifacts such as old
+# fixlinks CSVs do not interfere with the example.
+os.makedirs(results_folder, exist_ok=True)
+for stale in ['Brahma_fixlinks.csv', 'fixlinks.csv']:
+    stale_path = os.path.join(results_folder, stale)
+    if os.path.exists(stale_path):
+        os.remove(stale_path)
+
 brahma = river(name, mask_path, results_folder, exit_sides=es, verbose=True) 
 
 # The mask has been re-binarized and stored as an attribute of brahma:
@@ -115,7 +123,7 @@ brahma.plot('network')
 # Nodes and links are labeled with their ids. We can zoom in if plotting in an interactive matplotlib window, *or* we can export the network links and nodes as geovector files and pull 'em into QGIS:
 
 # %%
-brahma.to_geovectors('network', ftype='json')
+brahma.to_geovectors('network', ftype='gpkg')
 
 # Let's see where the network geovector files were written:
 print(brahma.paths['links'])
@@ -185,7 +193,7 @@ print(brahma.centerline)
 # We get a numpy array of two arrays of columns, rows of the centerline. This isn't very interpretable as-is, but we can export the centerline as a geovector file:
 
 # %%
-brahma.to_geovectors('centerline', ftype='json')
+brahma.to_geovectors('centerline', ftype='gpkg')
 
 # %% [markdown]
 # The centerline is exported as a shapefile or GeoJSON, depending on the filetype you specify. (GeoJSON is default.) Let's take a look at this centerline in QGIS:
@@ -198,7 +206,7 @@ brahma.to_geovectors('centerline', ftype='json')
 #
 
 # %%
-brahma.to_geovectors('mesh', ftype='json')
+brahma.to_geovectors('mesh', ftype='gpkg')
 
 # %% [markdown]
 # The mesh consists of two files: ```meshlines```, or transects, and ```meshpolys```. If we want to see where these files were generated, we can check the paths dictionary:
