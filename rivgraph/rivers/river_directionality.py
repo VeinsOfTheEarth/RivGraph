@@ -85,7 +85,6 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
 
     # Set the directions of the links that are more certain via centerline
     # distance method
-    # alg = 22
     alg = dy.algmap('cl_dist_set')
     cl_distthresh = np.percentile(links['cldists'], 85)
     for lid, cld, lg, lga, cert in zip(links['id'],  links['cldists'],
@@ -101,7 +100,6 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
 
     # Set the directions of the links that are more certain via centerline
     # angle method
-    # alg = 23
     alg = dy.algmap('cl_ang_set')
     cl_angthresh = np.percentile(links['clangs'][np.isnan(links['clangs'])==0], 25)
     for lid, cla, lg, lga, cert in zip(links['id'],  links['clangs'],
@@ -119,7 +117,6 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
 
     # Set the directions of the links that are more certain via centerline
     # distance AND centerline angle methods
-    # alg = 24
     alg = dy.algmap('cl_dist_and_ang')
     cl_distthresh = np.percentile(links['cldists'], 70)
     ang_thresh = np.percentile(links['clangs'][np.isnan(links['clangs']) == 0],
@@ -178,12 +175,7 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
         manual_fix = 1
 
     # # Create a csv to store manual edits to directionality if does not exist
-    # if manual_fix == 1:
-    #     if os.path.isfile(manual_set_csv) is False:
     #         io.create_manual_dir_csv(manual_set_csv)
-    #         print('A .csv file for manual fixes to link directions was created at {}.'.format(manual_set_csv))
-    #     else:
-    #         print('Use the csv file at {} to manually fix link directions.'.format(manual_set_csv))
 
     return links, nodes
 
@@ -350,7 +342,6 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
 
     """
 
-    # dont_reset_algs = [20, 21, 22, 23, 0, 5]
     dont_reset_algs = [dy.algmap(key) for key in ['manual_set',
                                                   'cl_dist_guess',
                                                   'cl_ang_guess',
@@ -476,7 +467,6 @@ def re_set_linkdirs(links, nodes, imshape):
     links, nodes = dy.set_continuity(links, nodes)
 
     # Set the directions of the links that are more certain via centerline angle method
-    # alg = 23.1
     alg = dy.algmap('cl_ang_rs')
     cl_angthresh = np.percentile(links['clangs'][np.isnan(links['clangs']) == 0], 40)
     for lid, cla, lg, lga, cert in zip(links['id'],  links['clangs'],
@@ -541,7 +531,6 @@ def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
         attributes appended.
 
     """
-    # alg = 20
     
     alg = dy.algmap('cl_dist_guess')
 
@@ -579,7 +568,6 @@ def dir_centerline(links, nodes, meshpolys, meshlines, Imask, gt, pixlen):
 
     # Compute guesses based on how the link aligns with the local centerline
     # direction
-    # alg = 21
     alg = dy.algmap('cl_ang_guess')
     clangs = np.ones((len(links['id']), 1)) * np.nan
     for i, (lconn, lidx) in enumerate(zip(links['conn'], links['idx'])):
@@ -654,7 +642,6 @@ def dir_link_widths(links):
         appended.
 
     """
-    # alg = 26
     alg = dy.algmap('wid_pctdiff')
 
     widpcts = np.zeros((len(links['id']), 1))

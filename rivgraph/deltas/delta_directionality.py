@@ -83,10 +83,7 @@ def set_link_directions(links, nodes, imshape, manual_set_csv=None):
 
     # The following is done automatically now, regardless of if cycles or sinks exist
     # # Create a csv to store manual edits to directionality if does not exist
-    # if os.path.isfile(manual_set_csv) is False:
-    #     if len(cont_violators) > 0 or allcyclesfixed == 0:
     #         io.create_manual_dir_csv(manual_set_csv)
-    #         print('A .csv file for manual fixes to link directions was created at {}.'.format(manual_set_csv))
 
     if allcyclesfixed == 2:
         logger.info('No cycles were found in network.')
@@ -137,7 +134,6 @@ def set_initial_directionality(links, nodes, imshape):
     links, nodes = dy.set_inletoutlet(links, nodes)
 
     # Use bridges to set links as they are always 100% accurate
-    # alg = 5
     alg = dy.algmap('bridges')
     for lid, idcs, lg, lga, cert in zip(links['id'], links['idx'],
                                         links['guess'], links['guess_alg'],
@@ -152,7 +148,6 @@ def set_initial_directionality(links, nodes, imshape):
                                        lg[lga.index(alg)], alg)
 
     # Use main channels (4) to set links
-    # alg = 4
     alg = dy.algmap('main_chans')
     for lid, idcs, lg, lga, cert in zip(links['id'], links['idx'],
                                         links['guess'], links['guess_alg'],
@@ -168,7 +163,6 @@ def set_initial_directionality(links, nodes, imshape):
 
     # Set the longest, steepest links according to io_surface
     # (these are those we are most certain of)
-    # alg = 13
     alg = dy.algmap('longest_steepest')
     len75 = np.percentile(links['len_adj'], 75)
     slope50 = np.percentile(np.abs(links['slope']), 50)
@@ -234,7 +228,6 @@ def set_initial_directionality(links, nodes, imshape):
                                                        lenthresh=0)
 
     # If any three methods agree, set that link to whatever they agree on
-    # alg = 15
     alg = dy.algmap('three_agree')
     for lid, idcs, lg, lga, cert in zip(links['id'], links['idx'],
                                         links['guess'], links['guess_alg'],
@@ -259,7 +252,6 @@ def set_initial_directionality(links, nodes, imshape):
 
     # If artificial DEM and at least one shortest path method agree,
     # set link to be their agreement
-    # alg = 16
     alg = dy.algmap('syn_dem_and_sp')
     for lid, idcs, lg, lga, cert in zip(links['id'], links['idx'],
                                         links['guess'], links['guess_alg'],
@@ -285,7 +277,6 @@ def set_initial_directionality(links, nodes, imshape):
     uncertain = [l for l, lc in zip(links['id'], links['certain']) if lc != 1]
 
     # Set remaining uncertains according to io_surface (3)
-    # alg = 10 # change this one!
     alg = dy.algmap('syn_dem')
     for lid in uncertain:
         linkidx = links['id'].index(lid)
@@ -419,7 +410,6 @@ def fix_delta_cycle(links, nodes, cyc_links, imshape):
 
     # List of algorithm ids that should not be reset if previously used to
     # determine direction
-    # dont_reset_algs = [-1, 0, 4, 5, 13]
     dont_reset_algs = [dy.algmap(key) for key in ['manual_set', 'inletoutlet',
                                                   'main_chans', 'bridges',
                                                   'longest_steepest']]

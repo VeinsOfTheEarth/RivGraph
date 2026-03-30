@@ -76,7 +76,6 @@ def prune_river(links, nodes, exit_sides, Iskel):
     links, nodes = lnu.find_parallel_links(links, nodes)
 
     # Remove sets of links that are disconnected from inlets/outlets except
-    # for a single bridge link (effectively re-pruning the network)
     links, nodes = lnu.remove_disconnected_bridge_links(links, nodes)
 
     # Remove one-pixel links
@@ -160,7 +159,6 @@ def find_inlet_outlet_nodes(links, nodes, exit_sides, Iskel):
     if len(nodes['outlets']) == 0:
         print('No outlet nodes found.')
 
-    # TODO: handle special cases where the link intersects the edge of the
     # image but the node does not because the link is a loop. This might be
     # "fixable" by adjusting the padding multiplier; I don't have any test
     # cases to work on currently so leaving this unimplemented for now.
@@ -437,11 +435,6 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
     cl_smooth : shapely.LineString
         the smoothed centerline used to compute transects
     """
-    # coords = alaska.centerline
-    # width_chan = alaska.avg_chan_width
-    # meshwidth = alaska.max_valley_width_pixels * alaska.pixlen * 1.1
-    # grid_spacing = meshwidth/2
-    # smoothing_param = 1
 
     if np.shape(coords)[0] == 2 and np.size(coords) != 4:
         coords = np.transpose(coords)
@@ -466,10 +459,6 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
     ys_sm = signal.savgol_filter(ys_m, window_length=window_len, polyorder=3,
                                  mode='interp')
 
-    # plt.close('all')
-    # plt.plot(xs_sm, ys_sm)
-    # plt.plot(xs_m, ys_m)
-    # plt.axis('equal')
 
     # Re-sample centerline to even spacing
     s, _ = cu.s_ds(xs_sm, ys_sm)
@@ -524,12 +513,6 @@ def centerline_mesh(coords, width_chan, meshwidth, grid_spacing, smoothing_param
         else:
             perp_aligned.append((p1, p0))
 
-    # plt.close('all')
-    # plt.plot(xs_rs, ys_rs,'.')
-    # plt.axis('equal')
-    # for p in perp_aligned:
-    #     plt.plot(p[0][0], p[0][1], 'k.')
-    #     plt.plot(p[1][0], p[1][1], 'r.')
 
     # Trim the centerline to remove the mirrored portions
     start_idx = np.argmin(np.sqrt((coords[0, 0]-xs_rs)**2+(coords[0, 1]-ys_rs)**2)) - 1
@@ -604,7 +587,6 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
         the centerline to the first and last transect intersections.
 
         """
-        # int_pts = []
         dist_to_int = []
         for ie, eps in enumerate(endpts):
             tsect = LineString(eps)
@@ -699,8 +681,6 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
             for m in mapper:
                 m = np.array(m)
                 m_idx = (np.where(m[:, 0] == idx))  # Get the most-downstrea
-                if len(m_idx) > 1:
-                    print(m_idx)
                 m_idx = np.max(m_idx)  # Chooses the most downstream if multiple are available
                 idx = m[m_idx, 1]
                 idxlist.append(idx)
@@ -752,14 +732,6 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
                     en_idx = min(en_idx, p)
             offset = LineString(offset.coords[st_idx:en_idx])
 
-        # elif len(possibles) == 1: # Determine if it's the upstream or downstream that's barbed
-        #     if possibles[0] > len(A)/2: # Downstream
-        #         offset = LineString(zip(offset.coords.xy[0][:possibles[0]], offset.coords.xy[1][:possibles[0]]))
-        #     else: # Upstream
-        #         offset = LineString(zip(offset.coords.xy[0][possibles[0]:], offset.coords.xy[1][possibles[0]:]))
-        # elif len(possibles) == 2:
-        #     offset = LineString(zip(offset.coords.xy[0][possibles[0]:possibles[1]], offset.coords.xy[1][possibles[0]:possibles[1]]))
-        # else:
         #     # import pdb; pdb.set_trace()
         #     raise Warning('Barbs could not be removed from centerline offset: dist={}, side={}.'.format(dist,side))
 
@@ -783,12 +755,6 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
         return(xs_o2, ys_o2)
 
     """ Main function code begins here """
-    # obj = test_river
-    # coords = obj.centerline
-    # avg_chan_width = obj.avg_chan_width
-    # buf_halfwidth = obj.max_valley_width_pixels * obj.pixlen * 1.1
-    # grid_spacing = avg_chan_width
-    # smoothing = 0.1
 
     if np.shape(coords)[0] == 2 and np.size(coords) != 4:
         coords = np.transpose(coords)
@@ -814,10 +780,6 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
     ys_sm = signal.savgol_filter(ys_o2, window_length=window_len, polyorder=3,
                                  mode='interp')
 
-    # plt.close('all')
-    # plt.plot(xs_o, ys_o)
-    # plt.plot(xs_sm, ys_sm)
-    # plt.axis('equal')
 
     # Create shapely LineString centerline
     cl = LineString([(x, y) for x, y in zip(xs_sm, ys_sm)])
@@ -866,11 +828,6 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
     y_right = np.interp(dists_to_interpolate, dists, yp_r)
 
     # # Plot the grid
-    # plt.close('all')
-    # plt.plot(cl.coords.xy[0], cl.coords.xy[1], '--k')
-    # plt.axis('equal')
-    # for xl, yl, xr, yr in zip(x_left, y_left, x_right, y_right):
-    #     plt.plot((xr, xl), (yr,yl))
 
     # Mesh is generated; export transects and polygons as shapely geometries
     transects = []
@@ -951,9 +908,6 @@ def compute_eBI(path_meshlines, path_links, method='local'):
     eBI = [] # entropic braided index
     BI = [] # braided index
     for mi in mesh_index: #1585
-        print(mi)
-        # if mi == 1584:
-        #     import pdb; pdb.set_trace()
         # First see if the mesh intersects the centerline
         try:
             int_links = np.array(inter['index_right'].values[inter.index.get_loc(mi)])
@@ -982,7 +936,6 @@ def compute_eBI(path_meshlines, path_links, method='local'):
             # Method 2: use the local channel width
             ws = []
             for il in int_links:
-                # print(links_gdf.id.values[il])
                 meshline = meshline_gdf.geometry.values[mi]
                 rivline = links_gdf.geometry.values[il]
                 int_pt = rivline.intersection(meshline)

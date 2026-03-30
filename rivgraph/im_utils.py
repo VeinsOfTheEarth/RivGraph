@@ -15,7 +15,6 @@ import numpy as np
 from scipy import ndimage as nd
 from skimage import morphology, measure, util
 
-# TODO: add checks for inputs to ensure proper types
 
 
 def get_array(idx, I, size):
@@ -44,7 +43,6 @@ def get_array(idx, I, size):
         The first column within I that the sub-image is drawn from.
 
     """
-    # TODO: Should add check for border cases so we don't query to raster
     # beyond its bounds. Or add error handling for those cases.
 
     try:
@@ -1216,16 +1214,10 @@ def skel_branchpoints(Iskel):
                     Ibps[p[0], p[1]] = 0
 
 #    # This dangerously assumes that coordinates are returned in order...was the case for all tests run. If there are problems, revisit this!
-#    idcs = np.where(rp['area']==3)[0]
-#    for idx in idcs:
-#        c = rp['coords'][idx] # coordinates of both 4-connected branchpoint pixels
 #        Ibps[c[1,0], c[1,1]] = 0
 #
 #    # Finally, handle the cases where there are five branchpoints in a row/column,
 #    # same method as for three in a row/column
-#    idcs = np.where(rp['area']==5)[0]
-#    for idx in idcs:
-#        c = rp['coords'][idx] # coordinates of both 4-connected branchpoint pixels
 #        Ibps[c[1,0], c[1,1]] = 0
 #        Ibps[c[3,0], c[3,1]] = 0
 
@@ -1349,7 +1341,6 @@ def skel_pixel_curvature(Iskel, nwalk=4):
 
     """
 
-    # TODO: Pad the image to avoid boundary problems
 
     # Get coordinates of skeleton pixels
     skelpix = np.argwhere(Iskel == 1)

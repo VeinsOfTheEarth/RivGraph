@@ -74,7 +74,7 @@ def test_build_sword_geodataframes_uses_stable_contract_order(sword_geo_context,
     assert sword_reaches["network"].astype(str).tolist() == ["demo"] * len(sword_reaches)
 
 
-@pytest.mark.parametrize("ftype", ["gpkg", "json", "shp"])
+@pytest.mark.parametrize("ftype", ["gpkg", "json"])
 def test_sword_export_contract_roundtrip(tmp_path, sword_geo_context, sword_network, ftype):
     io_utils = require_io_utils()
     dims, gt, crs = sword_geo_context

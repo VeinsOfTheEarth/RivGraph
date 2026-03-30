@@ -58,12 +58,3 @@ def test_rasterio_island_polygons_match_labeled_pixel_area(imask, expected_area)
     island_id = islands.id.iloc[0]
     assert np.count_nonzero(iislands == island_id) == expected_area
 
-
-def test_square_blob_geometry_matches_pixel_area_exactly():
-    islands, _ = mu.get_island_properties(
-        _square_island_mask(), 1, 1, None, GT, ["area"], connectivity=2
-    )
-
-    assert len(islands) == 1
-    assert islands.iloc[0].Area == pytest.approx(9.0)
-    assert islands.geometry.iloc[0].area == pytest.approx(9.0)

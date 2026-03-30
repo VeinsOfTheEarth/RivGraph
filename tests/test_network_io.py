@@ -2,52 +2,43 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
-
 import numpy as np
 
 from tests._helpers import require_io_utils
 
 
-class TestColortable:
-    def test_binary(self):
-        io_utils = require_io_utils()
-        color_table = io_utils.colortable("binary")
-        assert np.all(color_table.GetColorEntry(0) == (0, 0, 0, 0))
-        assert np.all(color_table.GetColorEntry(1) == (255, 255, 255, 100))
+import pytest
 
-    def test_mask(self):
-        io_utils = require_io_utils()
-        color_table = io_utils.colortable("mask")
-        assert np.all(color_table.GetColorEntry(0) == (0, 0, 0, 0))
-        assert np.all(color_table.GetColorEntry(1) == (0, 128, 0, 100))
 
-    def test_tile(self):
-        io_utils = require_io_utils()
-        color_table = io_utils.colortable("tile")
-        assert np.all(color_table.GetColorEntry(0) == (0, 0, 0, 0))
-        assert np.all(color_table.GetColorEntry(1) == (0, 0, 255, 100))
+@pytest.mark.parametrize(
+    ("kind", "expected_entries"),
+    [
+        ("binary", {0: (0, 0, 0, 0), 1: (255, 255, 255, 100)}),
+        ("mask", {0: (0, 0, 0, 0), 1: (0, 128, 0, 100)}),
+        ("tile", {0: (0, 0, 0, 0), 1: (0, 0, 255, 100)}),
+        ("GSW", {0: (0, 0, 0, 0), 1: (0, 0, 0, 0), 2: (176, 224, 230, 100)}),
+    ],
+)
+def test_colortable_entries(kind, expected_entries):
+    io_utils = require_io_utils()
+    color_table = io_utils.colortable(kind)
 
-    def test_gsw(self):
-        io_utils = require_io_utils()
-        color_table = io_utils.colortable("GSW")
-        assert np.all(color_table.GetColorEntry(0) == (0, 0, 0, 0))
-        assert np.all(color_table.GetColorEntry(1) == (0, 0, 0, 0))
-        assert np.all(color_table.GetColorEntry(2) == (176, 224, 230, 100))
+    for idx, rgba in expected_entries.items():
+        assert np.all(color_table.GetColorEntry(idx) == rgba)
 
 
 def test_create_manual_dir_csv(tmp_path):
     io_utils = require_io_utils()
-    csvpath = os.path.join(tmp_path, "csvtest.csv")
-    io_utils.create_manual_dir_csv(csvpath)
-    assert os.path.isfile(csvpath) is True
+    csvpath = tmp_path / "csvtest.csv"
+    io_utils.create_manual_dir_csv(str(csvpath))
+    assert csvpath.is_file()
 
 
 def test_prep_paths(tmp_path):
     io_utils = require_io_utils()
     resultsfolder = tmp_path
     name = "new"
-    basetiff = Path(tmp_path) / "dummy_mask.tif"
+    basetiff = tmp_path / "dummy_mask.tif"
     paths = io_utils.prepare_paths(resultsfolder, name, str(basetiff))
     assert isinstance(paths, dict)
     assert paths["basepath"] == os.path.normpath(resultsfolder)

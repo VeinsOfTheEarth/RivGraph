@@ -312,7 +312,7 @@ class rivnetwork:
         logger.info('got island properties.')
 
         if do_surr is True:
-            if hasattr(self.links, 'wid_adj') is False:
+            if 'wid_adj' not in self.links:
                 self.compute_link_width_and_length()
 
             logger.info('Computing surrounding links for each island...')
@@ -339,7 +339,6 @@ class rivnetwork:
             'directions': links are plotted with their directionality indicated
 
         """
-        ## TODO: add error handling for wrong plotting commands
 
         plt_directions, plt_network = False, False
         if len(kwargs) == 0:
@@ -906,10 +905,9 @@ class river(rivnetwork):
         if hasattr(self, 'avg_chan_width') is False:
             if hasattr(self, 'links') is False:
                 self.compute_network()
-            if hasattr(self.links, 'wid_adj') is False:
+            if 'wid_adj' not in self.links:
                 self.compute_link_width_and_length()
 
-            # self.avg_chan_width = np.mean(self.links['wid_a1dj'])
             self.avg_chan_width = np.sum(self.Imask) * self.pixarea / np.sum(self.links['len_adj'])
 
         # If not specified, grid spacing is set to one channel width
@@ -1104,7 +1102,6 @@ class centerline():
         Cs = self.C()
         Cs = signal.savgol_filter(Cs, window_length=window, polyorder=3,
                                   mode='interp')
-#            Cs = signal.medfilt(Cs,kernel_size=5)
         return Cs
 
     def infs(self, N, x=None, y=None):
@@ -1153,7 +1150,6 @@ class centerline():
             # Compute the average bend length from the inflection points
             ints = []
             s = self.s()
-#            abl = (s[self.infs_os[-1]] - s[self.infs_os[0]])/(len(self.infs_os)-1)
 
             for i in range(len(self.infs_os)):
 
@@ -1327,8 +1323,6 @@ class centerline():
         if hasattr(self, 'mr_zs_nan') is False:
             logger.info('Must compute migration rates first.')
             return
-#            elif hasattr(self, 'mr_zs_sm_nan'):
-#                migr_rate = self.mr_zs_sm_nan
         else:
             migr_rate = self.mr_zs_nan
 
@@ -1356,7 +1350,6 @@ class centerline():
         W = self.W
 
         fig, ax1 = plt.subplots(figsize=(18,4))
-#            plt.tight_layout()
 
         y1 = 0.7
         y2 = 0.0
