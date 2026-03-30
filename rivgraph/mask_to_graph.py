@@ -5,8 +5,8 @@ Mask to Graph Utilities (mask_to_graph.py)
 Functions for converting a binary channel mask to a graphical representation.
 """
 from loguru import logger
-import cv2
 import numpy as np
+from scipy import ndimage as nd
 from skimage import morphology, measure
 from rivgraph import walk
 import rivgraph.ln_utils as lnu
@@ -447,7 +447,7 @@ def simplify_skel(Iskel):
     # We simplify the network if we actually add pixels to the centers of
     # "+" cases, so let's do that.
     kern = np.array([[1, 10, 1], [10, 1, 10], [1, 10, 1]], dtype=np.uint8)
-    Iconv = cv2.filter2D(Iskel, -1, kern)
+    Iconv = nd.correlate(Iskel.astype(np.int32), kern.astype(np.int32), mode='mirror')
     Iskel[Iconv==40] = 1
 
     return Iskel

@@ -32,7 +32,7 @@ Then install RivGraph in editable mode:
 
    pip install -e . --no-deps
 
-``environment.yml`` is the canonical source/development environment. ``environment-modern.yml`` is kept as a transition alias and should match it. The editable install uses ``--no-deps`` intentionally so that pip does not try to re-resolve compiled geospatial dependencies that are already pinned in the conda environment.
+``environment.yml`` is the canonical source/development environment. ``environment-modern.yml`` is kept as a transition alias and should match it. Neither environment includes OpenCV; RivGraph now uses SciPy and scikit-image for the remaining image-processing kernels. The editable install uses ``--no-deps`` intentionally so that pip does not try to re-resolve compiled geospatial dependencies that are already pinned in the conda environment.
 
 Verify a source install
 -----------------------
