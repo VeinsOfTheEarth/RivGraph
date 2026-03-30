@@ -1,11 +1,8 @@
-# Canonical development/source environment for modern RivGraph.
-# For editable installs, create this environment first and then run:
-#   pip install -e . --no-deps
-name: rivgraph-modern
+name: rivgraph
 channels:
   - conda-forge
 dependencies:
-  - python=3.11
+  - python=3.12
   - setuptools>=64
   - pip
 
