@@ -1241,8 +1241,6 @@ def find_parallel_links(links, nodes):
         Network nodes and associated properties.
 
     """
-    # TODO: test this implementation against triplet-parallel links.
-    # TODO: nodes do not need to be returned
 
     # Find parallel edge pairs/triplets/etc that require aritifical nodes
     G = nx.MultiGraph()

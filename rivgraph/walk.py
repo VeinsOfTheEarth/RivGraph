@@ -435,7 +435,6 @@ def delete_link(linkid, links, nodes):
         Network nodes and associated properties with the link deleted.
 
     """
-    #TODO: Replace this function with the one in ln_utils.
 
     # Get index of link within links dict
     lid = links['id'].index(linkid)
@@ -540,7 +539,6 @@ def is_bp(idx, Iskel):
         1 if idx is a branchpoint, else 0.
 
     """
-    # TODO: change to return True/False rather than 1/0.
     # Trivial case, only one or two neighbors is not bp
     neighs = get_neighbors(idx, Iskel)
     if len(neighs) < 3:
@@ -831,69 +829,3 @@ def naxes_connectivity(I):
     Inax = np.reshape(Inax, I.shape)
 
     return Inax
-
-
-""" Graveyard """
-
-# def adjacent_bps(bp, Iskel, bps):
-
-#     # Find branchpoint neighbors that are also branchpoints
-#     bpneighs = walkable_neighbors([bp], Iskel)
-#     bpneighs = [bpn for bpn in bpneighs if bpn not in bps]
-
-#     bps_recheck = []
-#     for bpcheck in bpneighs:
-#         if is_bp(bpcheck, Iskel):
-#             bps.append(bpcheck)
-
-#     for bpcheck in bps_recheck:
-#             bps = bps + adjacent_bps(bpcheck, Iskel, bps)
-
-#     return bps
-
-
-# def pattern_vals(basepattern):
-#    """
-#    Given an input pattern (3x3 or 2x2 numpy array), this function
-#    (1) returns a convolution kernel of the same shape and
-#    (2) the values of all rotations and mirrorings of the patterns convolved
-#        with the kernel.
-#    """
-#
-#    if basepattern[0].shape == (3,3):
-#        kern = np.array([[256, 32, 4],[128, 16, 2], [64, 8, 1]], dtype=np.uint16)
-#    elif basepattern[0].shape == (2,2):
-#        kern = np.array([[8, 2], [4, 1]], dtype=np.uint16)
-#    else:
-#        raise RuntimeError('Input pattern is not 2x2 or 3x3.')
-#
-#    # Find the values of the convolution that match the pattern
-#    convals = set()
-#    for bp in basepattern:
-#        for i in range(0,4):
-#            convals.update([int(np.sum(kern[bp==1]))])
-#            bp = np.rot90(bp, 1)
-#        bp = np.flipud(bp)
-#        for i in range(0,4):
-#            convals.update([int(np.sum(kern[bp==1]))])
-#            bp = np.rot90(bp, 1)
-#        bp = np.fliplr(bp)
-#        for i in range(0,4):
-#            convals.update([int(np.sum(kern[bp==1]))])
-#            bp = np.rot90(bp, 1)
-#
-#    return kern, convals
-
-# def naxes_conn(idcs, I):
-#    """
-#    Counts the number of connected axes for a given flat index in I.
-#    idcs must be a list, even if a single value.
-#    """
-#
-#    Inax = np.ravel(naxes_connectivity(I))
-#
-#    naxesconn = []
-#    for i in idcs:
-#        naxesconn.append(int(Inax[i]))
-#
-#    return naxesconn

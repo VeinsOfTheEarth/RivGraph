@@ -7,16 +7,13 @@ Image Utilities (im_utils.py)
     Almost all the functions that manipulate images within this file require that the images be binary.
 
 
-Many of these functions are wrappers around functionality found in skimage or
-opencv that either add additonal functionality or provide convenience.
+Many of these functions are wrappers around functionality found in
+scikit-image or SciPy that either add additonal functionality or provide
+convenience.
 """
-import cv2
 import numpy as np
 from scipy import ndimage as nd
 from skimage import morphology, measure, util
-
-# TODO: add checks for inputs to ensure proper types
-
 
 def get_array(idx, I, size):
     """
@@ -44,7 +41,6 @@ def get_array(idx, I, size):
         The first column within I that the sub-image is drawn from.
 
     """
-    # TODO: Should add check for border cases so we don't query to raster
     # beyond its bounds. Or add error handling for those cases.
 
     try:
@@ -620,7 +616,8 @@ def regionprops(I, props, connectivity=2):
         ``'perimeter'``, ``'axis_major_length'``, etc.).
 
         RivGraph also provides a custom ``'boundary_coords'`` property that
-        returns ordered contour coordinates for each blob.
+        returns ordered contour coordinates for each blob, computed with
+        ``skimage.measure.find_contours``.
 
         Legacy aliases are still accepted:
         ``'mean'`` -> ``'intensity_mean'``
@@ -653,8 +650,6 @@ def regionprops(I, props, connectivity=2):
         'minor_axis_length': 'axis_minor_length',
         'equivalent_diameter': 'equivalent_diameter_area',
     }
-    custom_props = {'boundary_coords'}
-
     Ilabeled = measure.label(I, background=0, connectivity=connectivity)
     properties = measure.regionprops(Ilabeled, intensity_image=I)
 
@@ -667,26 +662,25 @@ def regionprops(I, props, connectivity=2):
         if prop == 'boundary_coords':
             perim = []
             for blob in coords:
-                # Crop to blob to reduce cv2 computation time and save memory
-                Ip, cropped = crop_binary_coords(blob)
+                Ib, cropped = crop_binary_coords(blob)
+                Ib = np.pad(Ib.astype(float), 1, mode='constant')
 
-                # Pad cropped image to avoid edge effects
-                Ip = np.pad(Ip, 1, mode='constant')
+                contours = measure.find_contours(Ib, 0.5)
+                if len(contours) == 0:
+                    perim.append(np.empty((0, 2), dtype=int))
+                    continue
 
-                # Convert to cv2-ingestable data type
-                Ip = np.array(Ip, dtype='uint8')
-                contours, _ = cv2.findContours(Ip, cv2.RETR_TREE,
-                                               cv2.CHAIN_APPROX_NONE)
-                # IMPORTANT: findContours returns points as (x,y) rather than
-                # (row, col)
-                contours = contours[0]
-                crows = []
-                ccols = []
-                for c in contours:
-                    crows.append(c[0][1] + cropped[1] - 1)
-                    ccols.append(c[0][0] + cropped[0] - 1)
-                cont_np = np.transpose(np.array((crows, ccols)))
-                perim.append(cont_np)
+                contour = max(contours, key=len)
+                contour = np.rint(contour).astype(int)
+                contour[:, 0] += cropped[1] - 1
+                contour[:, 1] += cropped[0] - 1
+
+                if len(contour) > 1:
+                    keep = np.ones(len(contour), dtype=bool)
+                    keep[1:] = np.any(np.diff(contour, axis=0) != 0, axis=1)
+                    contour = contour[keep]
+
+                perim.append(contour)
             out[prop] = perim
             continue
 
@@ -957,8 +951,7 @@ def im_connectivity(I):
                        [1, 10, 1],
                        [1,  1, 1]])
 
-    src_depth = -1
-    filtered = cv2.filter2D(I, src_depth, kernel)
+    filtered = nd.correlate(I.astype(np.int32), kernel.astype(np.int32), mode='mirror')
     Iret = np.zeros(np.shape(filtered), dtype='uint8')
     Iret[filtered > 10] = filtered[filtered > 10]-10
     return Iret
@@ -1099,8 +1092,7 @@ def skel_branchpoints(Iskel):
     rmvals.update([27, 54, 432, 283, 433, 118])
 
     # Convolve
-    src_depth = -1
-    Iconv = cv2.filter2D(Ibps, src_depth, kern)
+    Iconv = nd.correlate(Ibps.astype(np.int32), kern.astype(np.int32), mode='mirror')
 
     # Remove unwanted branchpoints based on patterns
     Irm_flat = np.in1d(Iconv, list(rmvals))
@@ -1216,22 +1208,16 @@ def skel_branchpoints(Iskel):
                     Ibps[p[0], p[1]] = 0
 
 #    # This dangerously assumes that coordinates are returned in order...was the case for all tests run. If there are problems, revisit this!
-#    idcs = np.where(rp['area']==3)[0]
-#    for idx in idcs:
-#        c = rp['coords'][idx] # coordinates of both 4-connected branchpoint pixels
 #        Ibps[c[1,0], c[1,1]] = 0
 #
 #    # Finally, handle the cases where there are five branchpoints in a row/column,
 #    # same method as for three in a row/column
-#    idcs = np.where(rp['area']==5)[0]
-#    for idx in idcs:
-#        c = rp['coords'][idx] # coordinates of both 4-connected branchpoint pixels
 #        Ibps[c[1,0], c[1,1]] = 0
 #        Ibps[c[3,0], c[3,1]] = 0
 
     # To wrap up, reconvolve with the updated branchpoint image to filter
     # branchpoints made removable by the previous filtering
-    Iconv = cv2.filter2D(Ibps, src_depth, kern)
+    Iconv = nd.correlate(Ibps.astype(np.int32), kern.astype(np.int32), mode='mirror')
     # Remove unwanted branchpoints based on patterns
     Irm_flat = np.in1d(Iconv, list(rmvals))
     rmy, rmx = np.unravel_index(np.where(Irm_flat == 1), Iconv.shape)
@@ -1349,7 +1335,6 @@ def skel_pixel_curvature(Iskel, nwalk=4):
 
     """
 
-    # TODO: Pad the image to avoid boundary problems
 
     # Get coordinates of skeleton pixels
     skelpix = np.argwhere(Iskel == 1)

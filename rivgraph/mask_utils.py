@@ -160,15 +160,6 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
         DESCRIPTION.
 
     """
-    # obj = d
-    # links = obj.links
-    # nodes = obj.nodes
-    # Imask = obj.Imask
-    # pixlen = obj.pixlen
-    # pixarea = obj.pixarea
-    # gt = obj.gt
-    # crs = obj.crs
-    # props=['area', 'maxwidth', 'major_axis_length', 'minor_axis_length']
     # islands, Iislands = get_island_properties(obj.Imask, pixlen, pixarea, obj.crs, obj.gt, props)
     # islands.to_file(r"C:\Users\Jon\Desktop\Research\John Shaw\Deltas\GBM\GBM_islands.shp")
     # np.save(r'C:\Users\Jon\Desktop\Research\John Shaw\Deltas\GBM\GBM_Iislands.npy', Iislands)
@@ -214,11 +205,9 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
     islands['sur_link_ids'] = ['' for r in range(len(islands))]
 
     # # Can speed up the calculation by skipping huge regions
-    # max_area = np.mean(links['wid_adj'])**2 * 20
 
     imshape = Ireg.shape
     for idx in range(len(islands)):
-        print(idx)
 
         # Identify the region associated with the island
         i_id = islands.id.values[idx]
@@ -236,8 +225,6 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
         ra = regions['area'][r_idx]
         rc = regions['coords'][r_idx]
 
-        # if ra > max_area:
-        #     continue
 
         # Make region blob
         Irblob, cropped = im.crop_binary_coords(rc)
@@ -307,12 +294,7 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
                                 break
 
         # # Check if links are at outlet or inlet
-        # if len(surrounding_nodes) == 0:
-        #     poss_nodes = np.array([links['conn'][links['id'].index(lid)] for lid in lids]).flatten()
-        #     if any(np.in1d(poss_nodes, nodes['inlets'])) or any(np.in1d(poss_nodes, nodes['outlets'])):
         #         # Only keep link ids that have 3 or more occurrences
-        #         surrounding_nodes = [[lid for lid, ct in zip(cts[0], cts[1]) if ct > 2]]
-        #         print('io:{}'.format(ic))
 
         if len(surrounding_nodes) == 0:
             Warning('Cant find surrounding links for region {}.'.format(idx))
@@ -328,9 +310,6 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
             surrounding_nodes = [surrounding_nodes[fracs.index(max(fracs))]]
 
         # At this point, only one loop should be present
-        # if len(surrounding_nodes) != 1:
-        #     import pdb
-        #     pdb.set_trace()
         assert(len(surrounding_nodes)==1)
         surrounding_nodes = surrounding_nodes[0]
         surrounding_nodes.append(surrounding_nodes[0])

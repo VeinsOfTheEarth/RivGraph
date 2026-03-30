@@ -1,8 +1,6 @@
 """Contract tests for canonical RivGraph vector exports."""
 from __future__ import annotations
 
-import copy
-
 import geopandas as gpd
 import numpy as np
 import pytest

@@ -185,7 +185,6 @@ def inflection_pts_oversmooth(xs, ys, n_infs):
         s_windows = generate_smoothing_windows(prev, post, 25, polyorder=3)
         prev, post = smoothing_iterator(xs, ys, s_windows, n_infs, polyorder)
 
-        ## TODO: should add a counter/tracker to ensure n_infs can actually be
         # obtained and avoid an infinite loop
 
     # Use the optimized smoothing window to smooth the signal
@@ -210,11 +209,6 @@ def inflection_pts_oversmooth(xs, ys, n_infs):
         idx.append(np.argmin(np.sqrt((ic[0]-xs)**2+(ic[1]-ys)**2)))
     idx = np.sort(idx)
 
-#    plt.close('all')
-#    plt.plot(xs_sm,ys_sm)
-#    plt.plot(xs,ys)
-#    plt.plot(xs[idx], ys[idx], '.')
-#    plt.axis('equal')
 
     # Package oversmoothed coordinates for export
     smoothline = np.array([xs_sm, ys_sm])
@@ -237,7 +231,6 @@ def curvars(xs, ys, unwrap=True):
     yAi1 = ys[1:]
 
     # Compute angles between x,y nodes
-#    A = np.arctan(np.divide(yAi1-yAi0,xAi1-xAi0))
     A = np.arctan2(yAi1-yAi0, xAi1-xAi0)
 
     if unwrap is not True:
@@ -389,8 +382,6 @@ def cl_migration_transect_matching(path_matchers, x1, y1, x2, y2, dt, mig_spacin
 
         return splits
 
-#    import pdb
-#    pdb.set_trace()
 
     # Convert centerlines to LineStrings
     clls1 = LineString([Point(x,y) for x,y in zip(x1, y1)])

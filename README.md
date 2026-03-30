@@ -44,7 +44,7 @@ conda activate rivgraph-modern
 pip install -e . --no-deps
 ```
 
-`environment.yml` is the canonical source/development environment. `environment-modern.yml` is kept as a transition alias and should match it.
+`environment.yml` is the canonical source/development environment. `environment-modern.yml` is kept as a transition alias and should match it. Neither environment includes OpenCV; RivGraph now relies on SciPy and scikit-image for the remaining image-processing kernels.
 
 Using `--no-deps` is intentional here: the geospatial stack is managed by the conda environment file, which avoids pip trying to re-resolve compiled dependencies that are already pinned in conda.
 

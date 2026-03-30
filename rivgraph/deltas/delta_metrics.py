@@ -459,7 +459,6 @@ def add_super_apex_to_network(links, nodes, imshape):
         links['len_adj'].append(0)
 
     # Add the super apex node field to the nodes dictionary
-    # nodes = ln_utils.add_node(nodes, apex_idx, sa_lids)
     nodes['super_apex'] = nodes['id'][-1]
 
     return links, nodes

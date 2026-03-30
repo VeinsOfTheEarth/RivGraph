@@ -139,7 +139,6 @@ def set_by_nearest_main_channel(links, nodes, imshape, nodethresh=0):
         according to this algorithm.
     """
 
-    # alg = 3 # identifier for diagnostics
     alg = algmap('parallels')
 
     # Find widest inlet node
@@ -304,7 +303,6 @@ def dir_main_channel(links, nodes):
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
     """
-    # alg = 4 # identifier for diagnostics
     alg = algmap('main_chans')
 
     inlet_idx = widest_inlet_index(links, nodes)
@@ -365,7 +363,6 @@ def dir_shortest_paths_nodes(links, nodes):
         according to this algorithm.
     """
 
-    # alg = 12 # identifier for diagnostics
     alg = algmap('sp_nodes')
 
     # Create networkX graph, adding weighted edges
@@ -445,7 +442,6 @@ def dir_shortest_paths_links(links, nodes, difthresh=0):
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
     """
-    # alg = 11 # identifier for diagnostics
     alg = algmap('sp_links')
 
     # Create networkX graph, adding weighted edges
@@ -532,7 +528,6 @@ def dir_known_link_angles(links, nodes, dims, checklinks='all'):
 
         return np.rad2deg((ang1 - ang2) % (2 * np.pi))
 
-    # alg = 10 # identifier for diagnostics
     alg = algmap('syn_dem')
 
     if checklinks == 'all':
@@ -618,7 +613,6 @@ def dir_bridges(links, nodes):
         Network nodes and associated properties updated to set directionality
         according to this algorithm.
     """
-    # alg = 5 # identifier for diagnostic
     alg = algmap('bridges')
 
     # Create networkX graph object
@@ -1319,7 +1313,6 @@ def dir_set_manually(links, nodes, manual_set_csv):
         manually.
 
     """
-    # alg = -1
     alg = algmap('manual_set')
 
     # Read the csv file for fixing link directions.
@@ -1367,7 +1360,6 @@ def set_inletoutlet(links, nodes):
         according to this algorithm.
 
     """
-    # alg = 0
     alg = algmap('inletoutlet')
 
     # Set directionality of inlet links
@@ -1427,7 +1419,6 @@ def set_continuity(links, nodes, checknodes='all'):
         according to this algorithm.
 
     """
-    # alg = 1
     alg = algmap('continuity')
 
     if checknodes == 'all':
@@ -1507,7 +1498,6 @@ def set_parallel_links(links, nodes, knownlink):
         according to this algorithm.
 
     """
-    # alg = 2
     alg = algmap('parallels')
 
     if 'parallels' not in links.keys():

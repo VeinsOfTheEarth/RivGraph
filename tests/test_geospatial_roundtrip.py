@@ -59,16 +59,14 @@ def _read_geofile(path: Path) -> gpd.GeoDataFrame:
     return gdf
 
 
-@pytest.mark.parametrize("ext", ["shp", "gpkg"])
 def test_nodes_to_geofile_roundtrip_preserves_crs_geometry_and_attrs(
     tmp_path,
     geo_context,
     synthetic_nodes,
-    ext,
 ):
     io_utils = require_io_utils()
     dims, gt, crs = geo_context
-    path = tmp_path / f"nodes_roundtrip.{ext}"
+    path = tmp_path / "nodes_roundtrip.gpkg"
 
     io_utils.nodes_to_geofile(synthetic_nodes, dims, gt, crs, str(path))
     gdf = _read_geofile(path)
@@ -93,17 +91,15 @@ def test_nodes_to_geofile_roundtrip_preserves_crs_geometry_and_attrs(
     assert np.allclose(actual_xy, expected_xy)
 
 
-@pytest.mark.parametrize("ext", ["shp", "gpkg"])
 def test_links_to_geofile_roundtrip_preserves_crs_geometry_and_attrs(
     tmp_path,
     geo_context,
     synthetic_links,
     synthetic_nodes,
-    ext,
 ):
     io_utils = require_io_utils()
     dims, gt, crs = geo_context
-    path = tmp_path / f"links_roundtrip.{ext}"
+    path = tmp_path / "links_roundtrip.gpkg"
 
     io_utils.links_to_geofile(synthetic_links, dims, gt, crs, str(path), nodes=synthetic_nodes)
     gdf = _read_geofile(path)

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import importlib
 from pathlib import Path
 from typing import Any
 
 import pytest
+
 
 TESTS_ROOT = Path(__file__).resolve().parent
 REGRESSION_DATA_ROOT = TESTS_ROOT / "regression" / "data"
@@ -31,7 +31,6 @@ def require_io_utils():
 
 def require_rasters():
     """Import RivGraph's raster backend module."""
-    import pytest
     return pytest.importorskip(
         'rivgraph.rasters',
         reason='rivgraph.rasters is unavailable',
