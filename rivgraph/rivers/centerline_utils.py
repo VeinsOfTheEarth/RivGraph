@@ -7,6 +7,7 @@ Created on Mon Oct 26 16:41:28 2020
 import numpy as np
 import geopandas as gpd
 import shapely
+from loguru import logger
 from shapely.geometry import LineString, Point
 from shapely.ops import split
 import scipy.interpolate as si
@@ -94,7 +95,7 @@ def offset_linestring(linestring, distance, side):
     if type(offset) is shapely.geometry.multilinestring.MultiLineString:
         ls_lengths = [ls.length for ls in offset]
         offset = offset[ls_lengths.index(max(ls_lengths))]
-        print('Multilinestring returned in offset_linestring; clipped to longest but check output.')
+        logger.warning('Multilinestring returned in offset_linestring; clipped to longest segment.')
 
     # Ensure offset linestring is oriented the same as the input linestring
     xy_orig_start = (linestring.coords.xy[0][0], linestring.coords.xy[1][0])
@@ -303,7 +304,7 @@ def smooth_curvatures(C, cvtarget, tolerance=10):
             window = window + 1
 
         if window > len(C)/2:
-            print('Could not find solution.')
+            logger.warning('Could not find a smoothing solution within the search range.')
             return Cs
 
     return Cs

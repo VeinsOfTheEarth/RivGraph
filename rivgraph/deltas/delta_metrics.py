@@ -535,7 +535,7 @@ def graphiphy(links, nodes, weight=None, inletweights=None, *, split_parallel_li
 
     # Check weights
     if np.sum(weights <= 0) > 0:
-        raise Warning('One or more of your weights is =< 0. This could cause problems later.')
+        raise ValueError('All weights must be positive.')
 
     if inletweights is not None:
         if 'super_apex' not in nodes.keys():

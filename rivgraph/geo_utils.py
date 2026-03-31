@@ -58,7 +58,7 @@ def get_unit(crs):
             unit = p4units[unitstr]
         else:
             unit = unitstr
-            raise Warning('Unit type {} not understood.'.format(unitstr))
+            raise ValueError('Unit type {} not understood.'.format(unitstr))
 
     return unit
 

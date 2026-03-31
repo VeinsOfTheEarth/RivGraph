@@ -8,10 +8,11 @@ Image Utilities (im_utils.py)
 
 
 Many of these functions are wrappers around functionality found in
-scikit-image or SciPy that either add additonal functionality or provide
+scikit-image or SciPy that either add additional functionality or provide
 convenience.
 """
 import numpy as np
+from loguru import logger
 from scipy import ndimage as nd
 from skimage import morphology, measure, util
 
@@ -41,7 +42,8 @@ def get_array(idx, I, size):
         The first column within I that the sub-image is drawn from.
 
     """
-    # beyond its bounds. Or add error handling for those cases.
+    # Border cases are not handled explicitly here; callers should avoid
+    # requesting windows that extend beyond the image bounds.
 
     try:
         lidx = len(idx)
@@ -561,8 +563,7 @@ def largest_blobs(I, nlargest=1, action='remove', connectivity=2):
         for m in maxidcs:
             Ic[coords[m][:, 0], coords[m][:, 1]] = True
     else:
-        print('Improper action specified: either choose remove or keep')
-        Ic = I
+        raise ValueError("action must be either 'remove' or 'keep'")
 
     return Ic
 

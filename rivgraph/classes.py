@@ -355,7 +355,7 @@ class rivnetwork:
 
         if plt_directions is True:
             if 'certain' not in self.links.keys():
-                print('Must assign link directions before plotting link directions.')
+                logger.info('Must assign link directions before plotting link directions.')
                 return
             else:
                 d = lnu.plot_dirlinks(self.links, self.imshape)
@@ -378,7 +378,7 @@ class rivnetwork:
 
         """
         if path==None and hasattr(self, 'paths') is False:
-            print('No path is available to load the network.')
+            logger.info('No save path is available for the network.')
         elif path is None:
             path = self.paths['network_pickle']
             try:
@@ -550,7 +550,7 @@ class rivnetwork:
                     self.paths['nodes_sword'] = os.path.join(self.paths['basepath'], self.name + '_SWORD_nodes.' + ext)
                     io.export_for_sword(self.links, self.nodes, self.imshape, self.gt, self.crs, self.paths, self.unit, metadata=metadata, flux_attr=flux_attr)
                     if self.verbose:
-                        print(f'SWORD files exported to {self.paths["reaches_sword"]} and {self.paths["nodes_sword"]}.')
+                        logger.info(f'SWORD files exported to {self.paths["reaches_sword"]} and {self.paths["nodes_sword"]}.')
                 else:
                     logger.info('Links/nodes have not been computed and thus cannot be exported to SWORD format.')
 
@@ -812,7 +812,7 @@ class river(rivnetwork):
                  exit_sides=None, verbose=False, single_thread=False):
 
         if exit_sides is None:
-            raise Warning('Must provide exit_sides for river class.')
+            raise ValueError('Must provide exit_sides for river class.')
 
         rivnetwork.__init__(self, name, path_to_mask, results_folder, exit_sides, verbose=verbose)
         self.single_thread = single_thread

@@ -12,6 +12,7 @@ Created on Mon Jul 6 18:29:23 2020
 """
 import numpy as np
 import geopandas as gpd
+from loguru import logger
 import rivgraph.im_utils as iu
 from scipy.ndimage import distance_transform_edt
 from shapely.geometry import shape
@@ -297,7 +298,7 @@ def surrounding_link_properties(links, nodes, Imask, islands, Iislands,
         #         # Only keep link ids that have 3 or more occurrences
 
         if len(surrounding_nodes) == 0:
-            Warning('Cant find surrounding links for region {}.'.format(idx))
+            logger.warning('Cannot find surrounding links for region {}.'.format(idx))
 
         # If multiple loops were found
         if len(surrounding_nodes) > 1:

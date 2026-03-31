@@ -9,6 +9,7 @@ Created on Tue Nov  6 14:29:10 2018
 """
 import numpy as np
 import networkx as nx
+from loguru import logger
 try:
     from fastdtw import fastdtw
 except ImportError:  # pragma: no cover - exercised only when fastdtw is absent
@@ -155,9 +156,9 @@ def find_inlet_outlet_nodes(links, nodes, exit_sides, Iskel):
     nodes['outlets'] = ins_outs[1]
 
     if len(nodes['inlets']) == 0:
-        print('No inlet nodes found.')
+        logger.warning('No inlet nodes found.')
     if len(nodes['outlets']) == 0:
-        print('No outlet nodes found.')
+        logger.warning('No outlet nodes found.')
 
     # image but the node does not because the link is a loop. This might be
     # "fixable" by adjusting the padding multiplier; I don't have any test
@@ -733,7 +734,6 @@ def valleyline_mesh(coords, avg_chan_width, buf_halfwidth, grid_spacing,
             offset = LineString(offset.coords[st_idx:en_idx])
 
         #     # import pdb; pdb.set_trace()
-        #     raise Warning('Barbs could not be removed from centerline offset: dist={}, side={}.'.format(dist,side))
 
         return offset
 

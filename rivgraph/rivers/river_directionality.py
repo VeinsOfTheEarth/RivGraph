@@ -11,6 +11,7 @@ Created on Tue Nov  6 14:31:01 2018
 import os
 import math
 import numpy as np
+from loguru import logger
 import networkx as nx
 import geopandas as gpd
 from shapely.geometry import Polygon, Point
@@ -153,8 +154,8 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
 
     # At this point, if any links remain unset, they are just set randomly
     if np.sum(links['certain']) != len(links['id']):
-        print('{} links were randomly set.'.format(len(links['id']) -
-                                                   np.sum(links['certain'])))
+        logger.warning('{} links were randomly set.'.format(len(links['id']) -
+                                                     np.sum(links['certain'])))
         links['certain'] = np.ones((len(links['id']), 1))
 
     # Check for and try to fix cycles in the graph
@@ -166,12 +167,12 @@ def set_directionality(links, nodes, Imask, exit_sides, gt, meshlines,
     # Summary of problems:
     manual_fix = 0
     if len(cantfix_cyclelinks) > 0:
-        print('Could not fix cycle links: {}.'.format(cantfix_cyclelinks))
+        logger.warning('Could not fix cycle links: {}.'.format(cantfix_cyclelinks))
         manual_fix = 1
     else:
-        print('All cycles were resolved.')
+        logger.info('All cycles were resolved.')
     if len(cont_violators) > 0:
-        print('Continuity violated at nodes {}.'.format(cont_violators))
+        logger.warning('Continuity violated at nodes {}.'.format(cont_violators))
         manual_fix = 1
 
     # # Create a csv to store manual edits to directionality if does not exist
@@ -291,7 +292,7 @@ def fix_river_cycles(links, nodes, imshape):
         cfix_nodes = [cn for icn, cn in enumerate(c_nodes) if np.isnan(isin[icn][0])]
         cfix_links = [cl for icl, cl in enumerate(c_links) if np.isnan(isin[icl][0])]
 
-        print('Attempting to fix {} cycles.'.format(len(cfix_nodes)))
+        logger.info('Attempting to fix {} cycles.'.format(len(cfix_nodes)))
 
         # Try to fix all the cycles
         for cnodes, clinks in zip(cfix_nodes, cfix_links):
@@ -375,7 +376,7 @@ def fix_river_cycle(links, nodes, cyclelinks, cyclenodes, imshape):
             links = lnu.flip_link(links, l)
 
     if len(all_pars) > 1:  # If there are multiple parallel pairs, more code needs to be written for these cases
-        print('Multiple parallel pairs in the same cycle. Not implemented yet.')
+        logger.warning('Multiple parallel pairs in the same cycle. Not implemented yet.')
         return links, nodes, 0
 
     elif len(all_pars) == 0:  # No aritifical node triads; just re-set all the cycle links and see if cycle is resolved
@@ -491,7 +492,7 @@ def re_set_linkdirs(links, nodes, imshape):
 
     if np.sum(links['certain']) != len(links['id']):
         links_notset = links['id'][np.where(links['certain'] == 0)[0][0]]
-        print('Links {} were not set by re_set_linkdirs.'.format(links_notset))
+        logger.warning('Links {} were not set by re_set_linkdirs.'.format(links_notset))
 
     return links, nodes
 
