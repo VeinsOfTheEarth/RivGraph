@@ -32,5 +32,5 @@ def test_inlet_outlet():
 def test_river_noexit():
     _, river, _ = require_rivgraph_classes()
     mask = REGRESSION_DATA_ROOT / "river_brahma_clipped" / "inputs" / "mask.tif"
-    with pytest.raises(Warning):
+    with pytest.raises(ValueError, match="Must provide exit_sides"):
         river("synth_river", str(mask), "tests/results/synthetic_cycles/")
