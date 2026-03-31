@@ -2,7 +2,7 @@
 """
 RivGraph (classes.py)
 =====================
-Classes for running rivgraph commands on your channel network or centerline.
+Classes for running rivgraph commands on your channel networks or centerlines.
 
 """
 import os
