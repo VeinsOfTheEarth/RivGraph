@@ -4,7 +4,7 @@ From the repository root:
 
 ```bash
 conda env create -f environment.yml
-conda activate rivgraph-modern
+conda activate rivgraph
 pip install -e . --no-deps
 pip install -e ".[docs]"
 python -m sphinx -b html docs/source docs/build/html
@@ -20,6 +20,5 @@ Optional convenience commands:
 
 Notes:
 
-- `environment.yml` is the canonical source/development environment.
-- `environment-modern.yml` is a transition alias and should match it.
+- `environment.yml` is the canonical development environment.
 - Generated docs should live under `docs/build/` and should not be committed.

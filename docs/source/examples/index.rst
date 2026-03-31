@@ -13,6 +13,6 @@ Example notebooks
 
 - :download:`Delta example notebook <../../../examples/delta_example.ipynb>`
 - :download:`Braided river example notebook <../../../examples/braided_river_example.ipynb>`
-- :download:`Mouse brain example notebook <../../../examples/mouse_brain.ipynb>`
+- :download:`Mouse brain example notebook <../../../examples/mouse_brain_example.ipynb>`
 
 Each notebook lives in the repository-level ``examples/`` directory alongside its example data and supporting images.

@@ -59,8 +59,8 @@ What happens next
 -----------------
 
 - Delta workflows then need shoreline and inlet-node vectors before pruning and direction setting.
-- River workflows typically proceed to pruning, centerline/mesh generation, and direction setting.
-- Geovector export defaults to GeoPackage in the refactored v1 codebase.
+- River workflows typically proceed to pruning, centerline and mesh generation, and direction setting.
+- Geovector export defaults to GeoPackage.
 
 Next places to go:
 

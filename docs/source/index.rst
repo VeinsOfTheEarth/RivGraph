@@ -1,5 +1,5 @@
-Welcome to RivGraph's documentation!
-====================================
+RivGraph documentation
+======================
 
 RivGraph provides two primary classes for working with binary channel masks: ``delta`` and ``river``.
 These classes expose the main workflows for extracting channel networks, computing metrics, assigning
@@ -9,7 +9,7 @@ If you are new to RivGraph, start with :doc:`installation instructions <install/
 canonical notebooks in ``examples/``. Delta workflows additionally require shoreline and inlet definitions,
 while river workflows require image exit sides.
 
-This site is organized as lightweight documentation around the source code and example notebooks:
+This site is organized around the source code and example notebooks:
 
 - notebooks in ``examples/`` are the canonical runnable examples
 - narrative pages explain inputs, assumptions, and common workflow steps

@@ -37,7 +37,7 @@ What is a mask?
 ---------------
 A mask is simply a binary image (only ones and zeros) where pixels belonging to the channel network are ones, like the right panel of the Lena Delta above. Before processing your mask with *RivGraph*, you should ensure that your mask contains `no no-data <https://github.com/VeinsOfTheEarth/RivGraph/issues/34>`_. One way to ensure this is to convert your mask to a boolean datatype, using for example numpy:
 
-:code:`Mask_binary = np.array(Mask, dtype=np.bool)`
+:code:`Mask_binary = np.array(Mask, dtype=bool)`
 
 The mask is the cornerstone for using *RivGraph*. You should always ensure that it contains the features you want and none of the ones you don't.
 
@@ -120,7 +120,7 @@ Here are some resources that either provide masks or tools for you to make your 
 
 - `DeepWaterMap  <https://github.com/isikdogan/deepwatermap>`_ is a trained deep convolutional neural network that you can apply to Landsat/Sentinel multispectral imagery to create your own masks. You can also improve DeepWaterMap's base model by adding more training data. Requires some knowledge of Tensorflow.
 
-- A recent development as of April 2023 is the release of the *Segment Anything Model* `(SAM) <https://segment-anything.com/>`_ from Meta Research which allows rapid segmentation of any image, including satellite imagery. The SAM model has an API in Python via `segment-geospatial <https://github.com/opengeos/segment-geospatial>`_ that could be used for rapid identification of water from various satellite imagery sources, e.g. Planet or Landsat.
+- Modern segmentation models such as the *Segment Anything Model* `(SAM) <https://segment-anything.com/>`_ can also be useful for rapid water masking. The Python package `segment-geospatial <https://github.com/opengeos/segment-geospatial>`_ provides one route for applying these models to geospatial imagery.
 
 
 
@@ -172,7 +172,7 @@ Most masks are already produced in a GIS context and are already geographically 
 Can my mask represent something that isn't a river?
 ---------------------------------------------------
 
-Perhaps you'd like to vectorize a road network or a vascular system. This is possible to do with *RivGraph*. However, you will not be able to instantiate the convenient *delta* or *river* classes as they are designed only for river channel networks. Instead, you will need to poke around the API to figure out which functions will work for you. A good starting point is to skeletonize your mask with :obj:`rivgraph.mask_to_graph.skeletonize_mask()` then run :obj:`rivgraph.mask_to_graph.skel_to_graph()` to convert the skeleton to a set of links and nodes. If you have an interesting non-river use-case, please send an email to j........k@gmail.com and we can add it as an example.
+Perhaps you'd like to vectorize a road network or a vascular system. This is possible to do with *RivGraph*. However, you will not be able to instantiate the convenient *delta* or *river* classes as they are designed only for river channel networks. Instead, you will need to poke around the API to figure out which functions will work for you. A good starting point is to skeletonize your mask with :obj:`rivgraph.mask_to_graph.skeletonize_mask()` then run :obj:`rivgraph.mask_to_graph.skel_to_graph()` to convert the skeleton to a set of links and nodes. If you have an interesting non-river use-case, consider opening an issue so it can be documented as an example.
 
 .. _supportedfiletypes:
 

@@ -4,7 +4,8 @@
 Installation
 ============
 
-RivGraph can be installed either as a ready-to-use package from conda-forge or from source for development. For source work, the repository environment file is the canonical way to install the geospatial stack.
+RivGraph can be installed either as a ready-to-use package from conda-forge or from source for development.
+For source work, ``environment.yml`` is the canonical environment.
 
 Install from conda-forge
 ------------------------
@@ -19,12 +20,12 @@ If you want to use RivGraph without modifying the code, install the conda-forge 
 Install from source
 -------------------
 
-For development, testing, or documentation work, start from the repository root and create the canonical source environment:
+For development, testing, or documentation work, start from the repository root and create the source environment:
 
 ::
 
    conda env create -f environment.yml
-   conda activate rivgraph-modern
+   conda activate rivgraph
 
 Then install RivGraph in editable mode:
 
@@ -32,7 +33,7 @@ Then install RivGraph in editable mode:
 
    pip install -e . --no-deps
 
-``environment.yml`` is the canonical source/development environment. ``environment-modern.yml`` is kept as a transition alias and should match it. Neither environment includes OpenCV; RivGraph now uses SciPy and scikit-image for the remaining image-processing kernels. The editable install uses ``--no-deps`` intentionally so that pip does not try to re-resolve compiled geospatial dependencies that are already pinned in the conda environment.
+Using ``--no-deps`` is intentional here so that pip does not try to re-resolve compiled geospatial dependencies that are already managed by conda.
 
 Verify a source install
 -----------------------
@@ -43,7 +44,7 @@ From the repository root, run the test suite:
 
    pytest -ra
 
-If you want a faster smoke test focused on the modern geospatial stack and regression coverage, run:
+If you want a faster smoke test focused on geospatial IO and regression coverage, run:
 
 ::
 
