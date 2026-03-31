@@ -1,4 +1,4 @@
-RivGraph in the wild
+RivGraph in the Wild
 ====================
 
 Selected publications that have used RivGraph to answer scientific questions with river and delta channel networks.

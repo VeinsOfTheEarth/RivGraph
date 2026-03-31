@@ -15,7 +15,7 @@ Canonical notebooks
 
 - ``examples/delta_example.ipynb``
 - ``examples/braided_river_example.ipynb``
-- ``examples/mouse_brain.ipynb``
+- ``examples/mouse_brain_example.ipynb``
 
 Minimal usage patterns
 ----------------------
