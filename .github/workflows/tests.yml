@@ -1,4 +1,4 @@
-name: docs
+name: tests
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-docs:
+  pytest:
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -27,20 +27,18 @@ jobs:
           auto-activate-base: false
           use-mamba: true
 
-      - name: Install RivGraph and docs extras
+      - name: Show Python version
+        shell: bash -el {0}
+        run: |
+          python --version
+          which python
+
+      - name: Install RivGraph
         shell: bash -el {0}
         run: |
           pip install -e . --no-deps
-          pip install ".[docs]"
 
-      - name: Build docs
+      - name: Run test suite
         shell: bash -el {0}
         run: |
-          make -C docs html
-
-      - name: Upload built docs artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: rivgraph-docs-html
-          path: docs/build/html
-          if-no-files-found: error
+          python -m pytest -ra
