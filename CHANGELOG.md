@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.0 (unreleased)
+## Version 1.0
 
 RivGraph v1 is a major modernization release focused on a cleaner geospatial stack, stronger testing and export contracts, and a more maintainable codebase.
 
@@ -10,10 +10,11 @@ RivGraph v1 is a major modernization release focused on a cleaner geospatial sta
 - removed the remaining direct GDAL/`osgeo` bindings and the OpenCV dependency from the core codebase
 - standardized Python 3.12 as the supported development and release target
 - restored and refreshed automated testing and documentation builds with GitHub Actions
+- speedups
 
 ### Added
 
-- canonical vector export schema and contract tests for links, nodes, and SWORD-style exports
+- canonical vector export schema and contract tests for links, nodes, and SWORD (SWOT)-style exports
 - deterministic ID support for links and nodes in modern workflows
 - explicit inlet/outlet tagging in geovector exports
 - raster backend contract tests and geospatial round-trip tests
@@ -33,6 +34,7 @@ RivGraph v1 is a major modernization release focused on a cleaner geospatial sta
 - island geometry generation and related export consistency
 - directionality, export, and regression coverage across both river and delta workflows
 - numerous documentation, install, and example inconsistencies accumulated since v0.5
+- other open Issues have been addressed
 
 ### Notes for existing users
 
