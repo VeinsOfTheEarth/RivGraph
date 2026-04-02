@@ -7,16 +7,17 @@ Installation
 RivGraph can be installed either as a ready-to-use package from conda-forge or from source for development.
 For source work, ``environment.yml`` is the canonical environment.
 
-Install from conda-forge
-------------------------
+Install from conda
+------------------
 
-If you want to use RivGraph without modifying the code, install the conda-forge package into a fresh environment:
+If you want to use RivGraph without modifying the code, install it into a fresh environment with conda:
 
 ::
 
-   conda create -n rivgraph_env rivgraph -c conda-forge
+   conda create -n rivgraph_env -c conda-forge "jschwenk::rivgraph"
    conda activate rivgraph_env
 
+   
 Install from source
 -------------------
 
