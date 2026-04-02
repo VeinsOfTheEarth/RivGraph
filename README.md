@@ -8,7 +8,7 @@
 
 RivGraph is a Python package for converting a binary mask of a channel network into a directed, weighted graph of connected links and nodes. It is designed for river and delta channel networks derived from remote sensing imagery and geospatial masks.
 
-![Core functionality of RivGraph](examples/images/rivgraph_overview_v1.PNG)
+![Core functionality of RivGraph](examples/images/rivgraph_overview_v1.png)
 
 ## Core capabilities
 
