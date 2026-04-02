@@ -3,10 +3,10 @@ name: docs
 on:
   push:
     branches:
-      - version_1_dev
+      - master
   pull_request:
     branches:
-      - version_1_dev
+      - master
   workflow_dispatch:
 
 jobs:

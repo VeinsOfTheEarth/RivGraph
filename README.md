@@ -1,6 +1,6 @@
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.02952/status.svg)](https://doi.org/10.21105/joss.02952)
 [![tests](https://github.com/VeinsOfTheEarth/RivGraph/actions/workflows/tests.yml/badge.svg)](https://github.com/VeinsOfTheEarth/RivGraph/actions/workflows/tests.yml)
-[![docs](https://github.com/VeinsOfTheEarth/RivGraph/actions/workflows/docs.yml/badge.svg?branch=version_1_dev)](https://github.com/VeinsOfTheEarth/RivGraph/actions/workflows/docs.yml)
+[![docs](https://github.com/VeinsOfTheEarth/RivGraph/actions/workflows/docs.yml/badge.svg?branch=master)](https://github.com/VeinsOfTheEarth/RivGraph/actions/workflows/docs.yml)
 
 [![RivGraph logo](docs/logos/rg_logo_full.png)](https://VeinsOfTheEarth.github.io/RivGraph/ "Go to documentation.")
 
