@@ -8,14 +8,14 @@ The fastest way to get oriented is:
 
 1. install RivGraph using :doc:`../install/index`
 2. open one of the canonical notebooks in ``examples/``
-3. run it from the repository root so the example-data paths resolve cleanly
+3. if running locally, start Jupyter from the repository's ``examples/`` directory so the example-data paths resolve cleanly
 
 Canonical notebooks
 -------------------
 
-- ``examples/delta_example.ipynb``
-- ``examples/braided_river_example.ipynb``
-- ``examples/mouse_brain_example.ipynb``
+- `examples/delta_example.ipynb <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/delta_example.ipynb>`_
+- `examples/braided_river_example.ipynb <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/braided_river_example.ipynb>`_
+- `examples/mouse_brain_example.ipynb <https://github.com/VeinsOfTheEarth/RivGraph/blob/master/examples/mouse_brain_example.ipynb>`_
 
 Minimal usage patterns
 ----------------------

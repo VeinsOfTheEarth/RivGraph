@@ -30,10 +30,39 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Image Processing",
 ]
 
+dependencies = [
+  "numpy>=1.26,<2",
+  "scipy>=1.11,<1.14",
+  "pandas>=2.2,<2.3",
+  "matplotlib>=3.8,<3.11",
+  "networkx>=2.8,<3.3",
+  "scikit-image>=0.22,<0.25",
+  "shapely>=2.1,<2.2",
+  "geopandas>=1.1,<1.2",
+  "pyproj>=3.6,<3.8",
+  "rasterio>=1.4,<1.5",
+  "pyogrio>=0.11.1,<0.13",
+  "contextily>=1.6,<2",
+  "Pillow",
+  "PyYAML",
+  "loguru",
+  "fastdtw",
+]
+
 [project.optional-dependencies]
 docs = [
   "sphinx>=7,<9",
   "sphinx-rtd-theme>=2,<4",
+]
+notebooks = [
+  "jupyterlab",
+  "ipykernel",
+  "nbconvert",
+  "nbclient",
+  "jupytext",
+]
+test = [
+  "pytest>=8,<9",
 ]
 
 [project.urls]
