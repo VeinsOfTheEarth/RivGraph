@@ -453,9 +453,10 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
     """
     Compute all link widths and lengths.
 
-    Computes link widths and lengths for all links in the network. A
-    distance transform approach is used where the width of a pixel is its
-    distance to the nearest non-max pixel times two.
+    Computes link widths and lengths for all links in the network. Widths are
+    measured along the local cross-section normal to each link pixel by
+    tracing from the pixel center to the channel boundaries in both
+    directions.
 
     There is a slight twist. When a skeleton is computed for a very wide
     channel with a narrow tributary, there is a very straight section of the
@@ -515,13 +516,96 @@ def link_widths_and_lengths(links, Idt, pixlen=1):
     links['sinuosity'] = []  # channel sinuosity for adjusted length
 
     dims = Idt.shape
+    Imask = Idt > 0
 
     width_mult = 1.1  # fraction of endpoint half-width to trim links before computing link width
+
+    def scan_mask(ray_r, ray_c, step_r, step_c):
+        """
+        Trace a ray from a pixel center until it exits the mask.
+
+        Uses an exact grid traversal rather than subpixel stepping so the
+        returned distance is deterministic and inexpensive.
+        """
+        step_sign_r = 0 if np.isclose(step_r, 0.0) else int(np.sign(step_r))
+        step_sign_c = 0 if np.isclose(step_c, 0.0) else int(np.sign(step_c))
+
+        if step_sign_r == 0:
+            t_max_r = np.inf
+            t_delta_r = np.inf
+        else:
+            t_max_r = 0.5 / abs(step_r)
+            t_delta_r = 1.0 / abs(step_r)
+
+        if step_sign_c == 0:
+            t_max_c = np.inf
+            t_delta_c = np.inf
+        else:
+            t_max_c = 0.5 / abs(step_c)
+            t_delta_c = 1.0 / abs(step_c)
+
+        cur_r = int(ray_r)
+        cur_c = int(ray_c)
+
+        while True:
+            if t_max_r < t_max_c:
+                dist = t_max_r
+                cur_r += step_sign_r
+                t_max_r += t_delta_r
+            elif t_max_c < t_max_r:
+                dist = t_max_c
+                cur_c += step_sign_c
+                t_max_c += t_delta_c
+            else:
+                dist = t_max_r
+                cur_r += step_sign_r
+                cur_c += step_sign_c
+                t_max_r += t_delta_r
+                t_max_c += t_delta_c
+
+            if cur_r < 0 or cur_r >= dims[0] or cur_c < 0 or cur_c >= dims[1]:
+                return dist
+            if Imask[cur_r, cur_c] == 0:
+                return dist
+
+    def width_along_normal(rows, cols, pix_i, fallback_width):
+        """Measure local width by scanning along the link's normal."""
+        if len(rows) == 1:
+            return fallback_width
+
+        if pix_i == 0:
+            dr = rows[pix_i + 1] - rows[pix_i]
+            dc = cols[pix_i + 1] - cols[pix_i]
+        elif pix_i == len(rows) - 1:
+            dr = rows[pix_i] - rows[pix_i - 1]
+            dc = cols[pix_i] - cols[pix_i - 1]
+        else:
+            dr = rows[pix_i + 1] - rows[pix_i - 1]
+            dc = cols[pix_i + 1] - cols[pix_i - 1]
+
+        nr = -dc
+        nc = dr
+        norm = np.hypot(nr, nc)
+        if norm == 0:
+            return fallback_width
+
+        nr = nr / norm
+        nc = nc / norm
+
+        left = scan_mask(rows[pix_i], cols[pix_i], nr, nc)
+        right = scan_mask(rows[pix_i], cols[pix_i], -nr, -nc)
+
+        return (left + right) * pixlen
 
     # Get widths at each pixel along each link
     for li in links['idx']:
         xy = np.unravel_index(li, dims)
-        widths = Idt[xy] * 2 * pixlen  # x2 because dt gives half-widths
+        dt_widths = Idt[xy] * 2 * pixlen
+        widths = np.array(
+            [width_along_normal(xy[0], xy[1], i, fallback_width)
+             for i, fallback_width in enumerate(dt_widths)],
+            dtype=float,
+        )
         links['wid_pix'].append(widths)
 
     # Compute trimmed/untrimmed link widths and lengths
